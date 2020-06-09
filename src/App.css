@@ -1,38 +1,61 @@
-.App {
-  text-align: center;
+:root {
+    --nav-height: 35px;
+    --window-tab-height: 30px;
+    --toolbox-height: 30px;
+    --right-panel-width: 300px;
+    --chart-app-border: rgb(200, 200, 200);
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.container {
+    width: 100%;
+    height: 100vh;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.nav {
+    background-color: rgb(0,0,0);
+    width: 100%;
+    height: var(--nav-height);
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.window_tab {
+    position: absolute;
+    box-sizing: border-box;
+    background-color: rgb(250, 250, 250);
+    border-bottom: 1px solid var(--chart-app-border);
+    width: 100%;
+    height: var(--window-tab-height);
 }
 
-.App-link {
-  color: #61dafb;
+.toolbox {
+    position: absolute;
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--chart-app-border);
+    top: calc(var(--window-tab-height) + var(--nav-height));
+    width: calc(100% - var(--right-panel-width));
+    height: var(--toolbox-height);
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.chart_container {
+    position: absolute;
+    top: calc(var(--window-tab-height) + var(--nav-height) + var(--toolbox-height));
+    width: calc(100% - var(--right-panel-width));
+    height: calc(
+        100% - var(--window-tab-height) 
+        - var(--nav-height) 
+        - var(--toolbox-height)
+    );
+}
+
+.right_panel {
+    position: absolute;
+    box-sizing: border-box;
+    background-color: rgb(250, 250, 250);
+    border-left: 1px solid var(--chart-app-border);
+    top: calc(var(--window-tab-height) + var(--nav-height));
+    left: calc(100% - var(--right-panel-width));
+    width: var(--right-panel-width);
+    height: calc(
+        100% - var(--window-tab-height) 
+        - var(--nav-height)
+    );
 }
