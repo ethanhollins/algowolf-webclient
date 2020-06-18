@@ -2,7 +2,7 @@ class Indicators {
     // Overlays
     static sma = (ohlc, properties) => 
     {
-        const period = properties[0];
+        const period = properties.periods[0];
         let result = [];
         for (let i = 0; i < ohlc.length; i++) 
         {
@@ -23,8 +23,8 @@ class Indicators {
     // Studies
     static tr = (ohlc, properties) =>
     {
-        const fast_period = properties[0];
-        const slow_period = properties[1];
+        const fast_period = properties.periods[0];
+        const slow_period = properties.periods[1];
         let result = [];
 
         let start = 0;

@@ -7,7 +7,7 @@ class Candlesticks extends Component
         return <React.Fragment/>;
     }
 
-    draw()
+    async draw()
     {   
         const camera = this.props.getCamera();
         const canvas = this.props.getCanvas();

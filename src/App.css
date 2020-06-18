@@ -2,6 +2,7 @@
     --nav-height: 35px;
     --window-tab-height: 30px;
     --toolbox-height: 30px;
+    --toolbox-shadow-height: 3px;
     --right-panel-width: 300px;
     --chart-app-border: rgb(200, 200, 200);
 }
@@ -12,7 +13,7 @@
 }
 
 .nav {
-    background-color: rgb(0,0,0);
+    background-color: rgb(80,80,80);
     width: 100%;
     height: var(--nav-height);
 }
@@ -20,7 +21,7 @@
 .window_tab {
     position: absolute;
     box-sizing: border-box;
-    background-color: rgb(250, 250, 250);
+    background-color: rgb(240, 240, 240);
     border-bottom: 1px solid var(--chart-app-border);
     width: 100%;
     height: var(--window-tab-height);
@@ -29,16 +30,24 @@
 .toolbox {
     position: absolute;
     box-sizing: border-box;
-    border-bottom: 1px solid var(--chart-app-border);
     top: calc(var(--window-tab-height) + var(--nav-height));
-    width: calc(100% - var(--right-panel-width));
+    width: 100%;
     height: var(--toolbox-height);
 }
 
-.chart_container {
+.toolbox_shadow {
     position: absolute;
+    background-color: rgb(200, 200, 200);
+    width: 100%;
+    height: var(--toolbox-shadow-height);
+
+}
+
+.app_container {
+    position: absolute;
+    background-color: rgb(240, 240, 240);
     top: calc(var(--window-tab-height) + var(--nav-height) + var(--toolbox-height));
-    width: calc(100% - var(--right-panel-width));
+    width: 100%;
     height: calc(
         100% - var(--window-tab-height) 
         - var(--nav-height) 
@@ -46,16 +55,9 @@
     );
 }
 
-.right_panel {
+.window_wrapper {
     position: absolute;
-    box-sizing: border-box;
-    background-color: rgb(250, 250, 250);
-    border-left: 1px solid var(--chart-app-border);
-    top: calc(var(--window-tab-height) + var(--nav-height));
-    left: calc(100% - var(--right-panel-width));
-    width: var(--right-panel-width);
-    height: calc(
-        100% - var(--window-tab-height) 
-        - var(--nav-height)
-    );
+    background-color: #FFF;
+    box-sizing: border-box; 
+    border: 1px solid rgb(80, 80, 80); 
 }

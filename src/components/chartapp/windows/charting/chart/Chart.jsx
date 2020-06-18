@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import Camera from './Camera';
-import Candlesticks from './chart/Candlesticks';
-import Overlay from './chart/Overlay';
-import Study from './chart/Study';
+import Camera from '../../../Camera';
+import Candlesticks from './Candlesticks';
+import Overlay from './Overlay';
+import Study from './Study';
 import _ from 'underscore';
 import moment from "moment-timezone";
 
@@ -20,7 +20,8 @@ class Chart extends Component
         scale: {
             x: 30.0, y:1.0,
         },
-        portions: [0.7, 0.15, 0.15],
+        overlays: [],
+        studies: [],
         is_down: false,
         is_move: false,
         trans_x: 0,
@@ -40,6 +41,9 @@ class Chart extends Component
         this.studies = [];
 
         // Refs Setters
+        this.setContainerRef = elem => {
+            this.container = elem;
+        }
         this.setCanvasRef = elem => {
             this.canvas = elem;
         }
@@ -60,37 +64,73 @@ class Chart extends Component
         }
     }
 
-    componentDidMount() 
+    async componentDidMount() 
     {
         window.addEventListener("mousedown", this.onMouseDown.bind(this));
         window.addEventListener("mousemove", this.onMouseMove.bind(this));
         window.addEventListener("mouseup", this.onMouseUp.bind(this));
-        
+        // window.addEventListener("resize", this.update.bind(this));
+
         const throttled_scroll = _.throttle(this.onScroll.bind(this), 20);
         window.addEventListener(
             "onwheel" in document ? "wheel" : "mousewheel",
             throttled_scroll
         );
 
-        // const ohlc = this.getBids();
+        this.updateCanvas();
+
+        /* Initialize Chart */
+        if (this.getChart() === undefined)
+            await this.addChart();
+
         const padding_x = 5.0;
 
-        const chart_properties = this.getChartProperties(-padding_x);
+        const bids = this.getBids();
+        const chart_properties = this.getChartProperties(bids, -padding_x);
         const pos = chart_properties.pos;
         
         const scale = chart_properties.scale;
         const transition_y = scale.y; 
 
         this.setState({ pos, scale, transition_y });
+
+        /* Initialize Indicators */
+        const properties = this.getProperties();
+        let { overlays, studies } = this.state;
+
+        // Overlays
+        for (let i = 0; i < properties.overlays.length; i++)
+        {
+            const ind = properties.overlays[i];
+            const values = await this.getIndicator(ind);
+            
+            overlays.push({
+                values: values
+            });
+        }
+
+        // Studies
+        for (let i = 0; i < properties.studies.length; i++)
+        {
+            const ind = properties.studies[i];
+            const values = await this.getIndicator(ind);
+
+            studies.push({
+                portion: properties.studies[i].portion,
+                values: values
+            });
+        }
+        this.setState({ overlays, studies });
     }
 
-    componentDidUpdate() 
+    async componentDidUpdate() 
     {
         const { pos, scale, trans_x } = this.state;
 
         if (trans_x === 0)
         {
-            const chart_properties = this.getChartProperties(Math.floor(pos.x));
+            const bids = await this.getBids();
+            const chart_properties = this.getChartProperties(bids, Math.floor(pos.x));
     
             const num_steps = 16;
             const c = scale.y;
@@ -98,20 +138,25 @@ class Chart extends Component
             this.transitionScaleY(num_steps, m, c, 0);
         }
 
-        this.update();
+        this.update(); 
     }
 
     render() {
         return (
-            <React.Fragment>
+            <div
+                className='chart_container'
+                ref={this.setContainerRef}
+                style={{
+                    width: "100%",
+                    height: "100%"
+                }}
+            >
                 <canvas
                     id='chart_canvas'
                     ref={this.setCanvasRef}
                 />
                 <Camera
                     ref={this.setCameraRef}
-                    getCanvas={this.getCanvas}
-                    getScale={this.getScale}
                 />
                 <Candlesticks
                     ref={this.setCandlesticksRef}
@@ -127,7 +172,7 @@ class Chart extends Component
                 />
                 {this.generateOverlays()}
                 {this.generateStudies()}
-            </React.Fragment>
+            </div>
         );
     }
 
@@ -137,19 +182,22 @@ class Chart extends Component
         const mouse_pos = {
             x: e.clientX, y: e.clientY
         }
+        const keys = this.props.getKeys();
         let { is_down, is_move } = this.state;
 
         // Check mouse within main segment bounds
+        const top_offset = this.props.getTopOffset() + this.props.getScreenPos().y;
+
         let start_pos = this.getSegmentStartPos(0);
         let segment_size = this.getSegmentSize(0);
         let rect = {
             x: start_pos.x,
-            y: start_pos.y,
+            y: start_pos.y + top_offset,
             width: segment_size.width,
             height: segment_size.height
         }
 
-        if (this.isWithinBounds(rect, mouse_pos))
+        if (!keys.includes(SPACEBAR) && this.isWithinBounds(rect, mouse_pos))
         {
             e.preventDefault();
             is_down = true;
@@ -167,12 +215,12 @@ class Chart extends Component
             segment_size = this.getSegmentSize(study.getWindowIndex());
             rect = {
                 x: start_pos.x,
-                y: start_pos.y,
+                y: start_pos.y + top_offset,
                 width: segment_size.width,
                 height: segment_size.height
             }
 
-            if (this.isWithinBounds(rect, mouse_pos)) 
+            if (!keys.includes(SPACEBAR) && this.isWithinBounds(rect, mouse_pos)) 
             {
                 e.preventDefault();
                 is_down = true;
@@ -299,7 +347,7 @@ class Chart extends Component
 
     generateOverlays() 
     {
-        const overlays = this.props.getOverlays(this.props.chart_idx);
+        const overlays = this.state.overlays;
         let gen_overlays = [];
         for (let i = 0; i < overlays.length; i++) {
             gen_overlays.push(
@@ -323,7 +371,7 @@ class Chart extends Component
 
     generateStudies()
     {
-        const studies = this.props.getStudies(this.props.chart_idx);
+        const studies = this.state.studies;
         let gen_studies = [];
         for (let i = 0; i < studies.length; i++) 
         {
@@ -357,8 +405,8 @@ class Chart extends Component
     async updateChart()
     {
         let { pos, scale, is_loading } = this.state;
-        const ts = this.getTimestamps();
-        const ohlc = this.getBids();
+        const ts = await this.getTimestamps();
+        const ohlc = await this.getBids();
 
         if (!is_loading && pos.x + scale.x > ohlc.length)
         {
@@ -413,9 +461,8 @@ class Chart extends Component
     {
         const chart_size = this.getChartSize();
         const canvas = this.getCanvas();
-        
-        canvas.setAttribute('width', chart_size.width);
-        canvas.setAttribute('height', chart_size.height);
+        canvas.setAttribute('width', chart_size.width-1);
+        canvas.setAttribute('height', chart_size.height-1);
     }
 
     updateItems()
@@ -956,10 +1003,9 @@ class Chart extends Component
         this.setState({ pos });
     }
 
-    getChartProperties = (idx) =>
+    getChartProperties(ohlc, idx)
     {
         let { pos, scale } = this.state;
-        const ohlc = this.getBids();
         
         let hl = [null,null]; // highest/lowest prices
 
@@ -997,6 +1043,20 @@ class Chart extends Component
         };
     }
 
+    getContainer = () =>
+    {
+        return this.container;
+    }
+
+    getSize = () =>
+    {
+        const container = this.getContainer();
+        return {
+            width: container.clientWidth,
+            height: container.clientHeight
+        };
+    }
+
     getCamera = () => 
     {
         return this.camera;
@@ -1010,7 +1070,7 @@ class Chart extends Component
     getSegmentStartPos = (idx) =>
     {
         const chart_size = this.getChartSize();
-        let { portions } = this.state;
+        const portions = this.getPortions();
         const prev_portion = portions.slice(0,idx).reduce((a,b) => a + b, 0);
         
 
@@ -1023,8 +1083,8 @@ class Chart extends Component
     
     getSegmentSize = (idx) =>
     {
-        const { portions } = this.state;
         const chart_size = this.getChartSize();
+        const portions = this.getPortions();
         const seg_portion = portions[idx];
 
         return {
@@ -1035,12 +1095,11 @@ class Chart extends Component
 
     getChartSize = () =>
     {
-        const chart_portion = this.props.getPortions()[this.props.chart_idx];
-        const container_size = this.props.getSize();
+        const container_size = this.getSize();
 
         return {
-            width: container_size.width * chart_portion.x,
-            height: container_size.height * chart_portion.y
+            width: container_size.width,
+            height: container_size.height
         }
     }
 
@@ -1054,7 +1113,8 @@ class Chart extends Component
         return this.overlays;
     }
 
-    getStudies = () => {
+    getStudies = () => 
+    {
         return this.studies;
     }
 
@@ -1070,7 +1130,13 @@ class Chart extends Component
 
     getPortions = () => 
     {
-        return this.state.portions;
+        const { studies } = this.state;
+        let portions = [this.getMainPortion()];
+        for (let i = 0; i < studies.length; i++)
+        {
+            portions.push(studies[i].portion);
+        }
+         return portions;
     }
 
     getLimit = () =>
@@ -1078,43 +1144,104 @@ class Chart extends Component
         return this.state.limit;
     }
 
+    getProperties = () =>
+    {
+        return this.props.getWindowInfo(this.props.id).properties;
+    }
+
     getProduct = () => 
     {
-        return this.props.getProduct(this.props.chart_idx);
+        return this.getProperties().product;
     }
 
     getPeriod = () => 
     {
-        return this.props.getPeriod(this.props.chart_idx);
+        return this.getProperties().period;
     }
 
-    getTimestamps = () =>
+    getMainPortion = () =>
     {
-        return this.props.getTimestamps(this.props.chart_idx);
+        return this.getProperties().portion;
     }
 
-    getAsks = () =>
+    getPrice = () =>
     {
-        return this.props.getAsks(this.props.chart_idx);
+        return this.getProperties().price;
     }
 
-    getBids = () => {
-        return this.props.getBids(this.props.chart_idx);
+    getOverlaysProperties = () =>
+    {
+        return this.getProperties().overlays;
     }
 
     getOverlayValues = (idx) =>
     {
-        return this.props.getOverlays(this.props.chart_idx)[idx];
+        return this.state.overlays[idx].values;
     }
 
-    getStudyValues = (idx) => 
+    getStudiesProperties = () =>
     {
-        return this.props.getStudies(this.props.chart_idx)[idx];
+        return this.getProperties().studies;
+    }
+
+    getStudyValues = (idx) =>
+    {
+        return this.state.studies[idx].values;
+    }
+
+    getDrawings = () =>
+    {
+        return this.getProperties().drawings;
+    }
+
+    async addChart()
+    {
+        const ohlc_data = await this.props.retrieveChartData(
+            this.getProduct(),
+            this.getPeriod()
+        );
+        this.props.addChart(
+            this.getProduct(),
+            this.getPeriod(),
+            ohlc_data
+        );
+    }
+
+    getChart = () =>
+    {
+        return this.props.getChart(
+            this.getProduct(),
+            this.getPeriod()
+        );
+    }
+
+    getTimestamps = () =>
+    {
+        return this.getChart().timestamps;
+    }
+
+    getAsks = () =>
+    {
+        return this.getChart().asks;
+    }
+
+    getBids = ()  =>
+    {
+        return this.getChart().bids;
+    }
+
+    getIndicator = (ind) =>
+    {
+        return this.props.getIndicator(
+            this.getChart(),
+            this.getPrice(),
+            ind
+        );
     }
 
 }
 
-
+const SPACEBAR = 32;
 
 
 
