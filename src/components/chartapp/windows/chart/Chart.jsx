@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import Camera from '../../../Camera';
+import Camera from '../../Camera';
 import Candlesticks from './Candlesticks';
 import Overlay from './Overlay';
 import Study from './Study';
 import _ from 'underscore';
 import moment from "moment-timezone";
+import Drawings from '../../Drawings';
 
 /**
  * TODO:
@@ -20,6 +21,7 @@ class Chart extends Component
         scale: {
             x: 30.0, y:1.0,
         },
+        future_timestamps: [],
         overlays: [],
         studies: [],
         is_down: false,
@@ -39,6 +41,9 @@ class Chart extends Component
 
         // Studies
         this.studies = [];
+
+        // Drawings
+        this.drawings = [];
 
         // Refs Setters
         this.setContainerRef = elem => {
@@ -62,6 +67,9 @@ class Chart extends Component
         this.addStudyRef = elem => {
             this.studies.push(elem);
         }
+        this.addDrawingRef = elem => {
+            this.drawings.push(elem);
+        }
     }
 
     async componentDidMount() 
@@ -82,6 +90,17 @@ class Chart extends Component
         /* Initialize Chart */
         if (this.getChart() === undefined)
             await this.addChart();
+
+        // **TEST ADD DRAWING
+        this.addDrawing(
+            'arrow', 
+            [this.getTimestamps()[this.getTimestamps().length-10]], 
+            {
+                colors: ['#ff0000'],
+                scale: 2,
+                rotation: 45
+            }
+        );
 
         const padding_x = 5.0;
 
@@ -121,6 +140,8 @@ class Chart extends Component
             });
         }
         this.setState({ overlays, studies });
+
+        this.setFutureTimestamps();
     }
 
     async componentDidUpdate() 
@@ -148,7 +169,8 @@ class Chart extends Component
                 ref={this.setContainerRef}
                 style={{
                     width: "100%",
-                    height: "100%"
+                    height: "100%",
+                    overflow: "hidden",
                 }}
             >
                 <canvas
@@ -172,6 +194,7 @@ class Chart extends Component
                 />
                 {this.generateOverlays()}
                 {this.generateStudies()}
+                {/* {this.generateDrawings()} */}
             </div>
         );
     }
@@ -196,6 +219,9 @@ class Chart extends Component
             width: segment_size.width,
             height: segment_size.height
         }
+        const mouse_x = this.getCamera().convertScreenPosToWorldPos(
+            mouse_pos, this.state.pos, segment_size, this.state.scale
+        );
 
         if (!keys.includes(SPACEBAR) && this.isWithinBounds(rect, mouse_pos))
         {
@@ -234,7 +260,6 @@ class Chart extends Component
     onMouseMove(e)
     {
         const { is_down, is_move } = this.state;
-
         if (is_down)
         {
             let { pos, scale } = this.state;
@@ -272,6 +297,9 @@ class Chart extends Component
             trans_x = 0;
         }
 
+
+        if (this.getChart()) this.setFutureTimestamps();
+        
         // this.limit(
         //     this.getTimestamps()[this.getTimestamps().length-100],
         //     this.getTimestamps()[this.getTimestamps().length-1]
@@ -307,7 +335,7 @@ class Chart extends Component
 
     clampScale = (x) =>
     {
-        const min = 10, max = 1000;
+        const min = 10, max = 500;
         return Math.min(Math.max(x, min), max);
     }
 
@@ -395,6 +423,31 @@ class Chart extends Component
         return gen_studies;
     }
 
+    generateDrawings()
+    {
+        let gen_drawings = [];
+        if (this.getChart() !== undefined)
+        {
+            // Draw Drawings
+            const drawings = this.getDrawingsProperties();
+            for (let i = 0; i < drawings.length; i++)
+            {
+                let d = drawings[i];
+                // let idx = this.getTimestampIdx(d.timestamps[0]);
+                // const screen_pos = this.getCamera().convertWorldPosToScreenPos(
+                //     { x: this.getTimestamps().length - idx, y: 1.13 }, this.state.pos, this.getSegmentSize(0), this.state.scale
+                // )
+                gen_drawings.push(Drawings[d.type](i, this.addDrawingRef, d.properties));
+                // ctx.moveTo(0, 0);
+                // ctx.translate(screen_pos.x, screen_pos.y);
+                // ctx.fill(Drawings[d.type](d.properties));
+                // ctx.translate(-screen_pos.x, -screen_pos.y);
+            }
+        }
+
+        return gen_drawings;
+    }
+
     update()
     {   
         this.updateChart();
@@ -449,7 +502,7 @@ class Chart extends Component
             }
 
             // Update chart with new data
-            this.props.updateChart(this.props.getStrategyId(), this.props.chart_idx, data.ohlc);
+            this.props.updateChart(this.getProduct(), this.getPeriod(), data.ohlc);
 
             // Allow new data loading
             is_loading = false;
@@ -467,12 +520,15 @@ class Chart extends Component
 
     updateItems()
     {
+        if (!this.getChart()) return;
+        
+
         const canvas = this.getCanvas();
         const ctx = canvas.getContext("2d");
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        if (this.getBids().length <= 0) return;
+        // if (this.getBids().length <= 0) return;
 
         let start_pos = this.getSegmentStartPos(0);
         let segment_size = this.getSegmentSize(0);
@@ -492,7 +548,10 @@ class Chart extends Component
         {
             overlays[i].draw();
         }
-    
+
+        // Update Drawing Properties
+        this.handleDrawings(ctx);
+
         const studies = this.getStudies();
         if (studies.length === 0) this.drawTimes(ctx, time_data);
         this.drawPrices(ctx, price_data);
@@ -500,6 +559,10 @@ class Chart extends Component
         // Restore context
         ctx.restore();
 
+
+        // Reset Transform
+        ctx.setTransform(1.0, 0, 0, 1.0, 0, 0);
+        
         for (let i = 0; i < studies.length; i++)
         {
             let study = studies[i];
@@ -927,6 +990,62 @@ class Chart extends Component
         }
     }
 
+    degsToRads(degs) { return degs / (180/Math.PI); }
+    radsToDegs(rads) { return rads * (180/Math.PI); }
+
+    handleDrawings(ctx)
+    {
+        const camera = this.getCamera();
+        const { pos, scale } = this.state;
+        const container_size = this.getSize();
+        const seg_size = this.getSegmentSize(0);
+
+        const drawings = this.getDrawingsProperties();
+
+        for (let i = 0; i < drawings.length; i++)
+        {
+            // if (i === 0) continue;
+
+            let d_props = drawings[i];
+            
+            d_props.properties.scale = 2;
+
+            // Get Position
+            const x = this.getPosFromTimestamp(d_props.timestamps[0]);
+            const screen_pos = camera.convertWorldPosToScreenPos(
+                { x: x+0.5, y: 1.13 }, 
+                pos, 
+                seg_size,
+                scale
+            )
+
+            // Get Rotation and Scale
+            const rotation = this.degsToRads(d_props.properties.rotation);
+            const drawing_scale = (d_props.properties.scale * (1/scale.x));
+
+            const width = 512;
+            const height = 512;
+
+            // Move to position
+            ctx.translate(
+                screen_pos.x - (width*drawing_scale),
+                screen_pos.y - (height*drawing_scale)
+            );
+            ctx.scale(drawing_scale, drawing_scale);
+
+            // Rotate around center
+            ctx.translate(width, height);
+            ctx.rotate(rotation);
+            ctx.translate(-width/2, -height/2);
+            
+            ctx.fillStyle = d_props.properties.colors[0];
+            // Fill Path
+            ctx.fill(Drawings[d_props.type]());
+            // Reset Transform
+            ctx.setTransform(1,0,0,1,0,0);
+        }
+    }
+
     defineClip(ctx, start_pos, segment_size)
     {
         ctx.save(); // Save context
@@ -1001,6 +1120,45 @@ class Chart extends Component
         const idx = this.getTimestampIdx(ts);
         pos.x = this.getTimestamps().length - idx;
         this.setState({ pos });
+    }
+
+    getPosFromTimestamp = (ts) =>
+    {
+        const idx = this.getTimestampIdx(ts);
+        return this.getTimestamps().length - idx;
+    }
+
+    setFutureTimestamps = () =>
+    {
+        let { pos, future_timestamps } = this.state;
+        const timestamps = this.getTimestamps();
+        
+        let last_ts = undefined;
+        if (future_timestamps.length === 0)
+            last_ts = timestamps[timestamps.length-1];
+        else
+            last_ts = future_timestamps[future_timestamps.length-1];
+
+        const off = this.getPeriodOffsetSeconds(this.getPeriod());
+        let ts = moment(last_ts*1000).unix();
+
+        let i = future_timestamps.length;
+        let c_weekend = this.getWeekendDates(ts);
+        while (-(i+1) > pos.x-2)
+        {
+            ts += off;
+
+            if (ts > c_weekend[0].unix())
+            {
+                ts = c_weekend[1].unix();
+                c_weekend = this.getWeekendDates(ts);
+            }
+
+            future_timestamps.push(ts);
+            i += 1;
+        }
+
+        this.setState({ future_timestamps });
     }
 
     getChartProperties(ohlc, idx)
@@ -1118,6 +1276,11 @@ class Chart extends Component
         return this.studies;
     }
 
+    getDrawings = () =>
+    {
+        return this.drawings;
+    }
+
     getPos = () =>
     {
         return this.state.pos;
@@ -1189,7 +1352,14 @@ class Chart extends Component
         return this.state.studies[idx].values;
     }
 
-    getDrawings = () =>
+    addDrawing = (name, timestamps, properties) =>
+    {
+        this.getDrawingsProperties().push(
+            Drawings.create(name, timestamps, properties)
+        );
+    }
+
+    getDrawingsProperties = () =>
     {
         return this.getProperties().drawings;
     }

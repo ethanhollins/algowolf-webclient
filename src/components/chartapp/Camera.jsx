@@ -24,7 +24,7 @@ class Camera extends Component
         };
 
         world_pos.x = (
-            ((screen_pos.x / size.width) * scale.x - scale.x) - pos.x
+            pos.x - ((screen_pos.x / size.width) * scale.x - scale.x)
         );
 
         world_pos.y = (

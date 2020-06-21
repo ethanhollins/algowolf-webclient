@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Indicators from './chartapp/Indicators';
 import io from 'socket.io-client';
 import WindowWrapper from './chartapp/WindowWrapper';
-import Chart from './chartapp/windows/charting/chart/Chart';
+import Chart from './chartapp/windows/chart/Chart';
 
 /**
  * TODO:
@@ -43,7 +43,7 @@ class ChartApp extends Component
         // Retrieve user specific strategy informations
         strategies = await this.retrieveStrategies();
         this.setState({ strategies });
-        // console.log(strategies);
+        console.log(strategies);
 
         // Make chart live connections
         // await this.connectCharts()
@@ -69,17 +69,14 @@ class ChartApp extends Component
 
                 </div>
                 <div className='toolbox'>
+                    <div className='toolbox_shadow'/> 
+
                 </div> 
                 <div 
                     ref={this.setAppContainerRef}
                     className='app_container'
                 >
-                    <div className='toolbox_shadow'/> 
                     {this.generateWindows()}
-                    {/* <WindowWrapper
-                        getAppContainer={this.getAppContainer}
-                        getWindowElement={this.getWindowElement}
-                    /> */}
                 </div>                
             </div>
         );

@@ -38,6 +38,7 @@
 .toolbox_shadow {
     position: absolute;
     background-color: rgb(200, 200, 200);
+    top: var(--toolbox-height); 
     width: 100%;
     height: var(--toolbox-shadow-height);
 
@@ -46,12 +47,16 @@
 .app_container {
     position: absolute;
     background-color: rgb(240, 240, 240);
-    top: calc(var(--window-tab-height) + var(--nav-height) + var(--toolbox-height));
+    top: calc(
+        var(--window-tab-height) + var(--nav-height) + 
+        var(--toolbox-height) + var(--toolbox-shadow-height)
+    );
     width: 100%;
     height: calc(
         100% - var(--window-tab-height) 
         - var(--nav-height) 
         - var(--toolbox-height)
+        - var(--toolbox-shadow-height)
     );
 }
 

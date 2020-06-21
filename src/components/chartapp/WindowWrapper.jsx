@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Camera from './Camera';
+import Drawings from './Drawings';
 // import _ from 'underscore';
 
 class WindowWrapper extends Component 
@@ -55,6 +56,10 @@ class WindowWrapper extends Component
                 ref={this.setWindowWrapperRef}
                 className="window_wrapper"
             >
+                <svg style={CORNER_STYLE} version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
+                    viewBox="0 0 50 50" xmlSpace="preserve">
+                    <path fill="rgb(80, 80, 80)" d="M0,50c0,0,9.3-39.5,50-50H0V50z"/>
+                </svg>
                 <Camera
                     ref={this.setCameraRef}
                 />
@@ -66,6 +71,11 @@ class WindowWrapper extends Component
                 )}
             </div>
         )
+    }
+
+    generateCorner()
+    {
+        return Drawings['window_corner']();
     }
 
     onMouseDown(e)
@@ -250,5 +260,12 @@ class WindowWrapper extends Component
 }
 
 const SPACEBAR = 32;
+const CORNER_STYLE = {
+    position: "absolute",
+    width: "25px",
+    height: "25px",
+    left: "0px",
+    top: "0px",
+}
 
 export default WindowWrapper;
