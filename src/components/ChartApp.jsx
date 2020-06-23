@@ -142,19 +142,23 @@ class ChartApp extends Component
             );
         });
 
-        socket.on('create_position', (data) =>
+        socket.on('create_positions', (data) =>
+        {
+            console.log(data);
+        });
+
+        socket.on('update_positions', (data) =>
         {
             
         });
 
-        socket.on('update_position', (data) =>
+        socket.on('delete_positions', (data) =>
         {
-            
-        });
-
-        socket.on('delete_position', (data) =>
-        {
-            
+            console.log(data);
+            this.deletePositions(
+                data['strategy_id'],
+                data['order_ids']
+            );
         });
 
         return socket;
@@ -335,14 +339,18 @@ class ChartApp extends Component
 
     }
 
-    deletePosition = (strategy_id, order_id) =>
+    deletePositions = (strategy_id, order_ids) =>
     {
         let { strategies } = this.state;
         let strategy = this.getStrategy(strategy_id);
-        for (let i = 0; i < strategy.positions.length; i++)
+        for (let i = 0; i < order_ids.length; i++)
         {
-            if (strategy.positions[i].order_id === order_id)
-                strategy.positions.splice(i);
+            const order_id = order_ids[i];
+            for (let j = 0; j < strategy.positions.length; j++)
+            {
+                if (strategy.positions[j].order_id === order_id)
+                    strategy.positions.splice(j);
+            }
         }
         this.setState({ strategies });
     }

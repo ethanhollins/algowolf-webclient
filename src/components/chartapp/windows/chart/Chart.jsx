@@ -19,7 +19,7 @@ class Chart extends Component
             x: 0, y: 0,
         },
         scale: {
-            x: 30.0, y:1.0,
+            x: 30.0, y:0.2,
         },
         future_timestamps: [],
         overlays: [],
@@ -509,6 +509,9 @@ class Chart extends Component
             overlays[i].draw();
         }
 
+        // Handle Open Positions
+        this.handlePositions(ctx);
+
         // Update Drawing Properties
         this.handleDrawings(ctx);
 
@@ -952,6 +955,111 @@ class Chart extends Component
 
     degsToRads(degs) { return degs / (180/Math.PI); }
     radsToDegs(rads) { return rads * (180/Math.PI); }
+
+    handlePositions(ctx)
+    {
+        const camera = this.getCamera();
+        const { pos, scale } = this.state;
+        const seg_size = this.getSegmentSize(0);
+
+        const positions = this.getPositions();
+
+        for (let i = 0; i < positions.length; i++)
+        {
+            const c_pos = positions[i];
+            if (!(c_pos.product === this.getProduct())) continue;
+
+            // Get Position
+            const x = this.getPosFromTimestamp(c_pos.open_time);
+            const entry_pos = camera.convertWorldPosToScreenPos(
+                { x: x+0.5, y: c_pos.entry_price }, pos, seg_size, scale
+            )
+            const sl_pos = camera.convertWorldPosToScreenPos(
+                { x: x+0.5, y: c_pos.sl }, pos, seg_size, scale
+            )
+            const tp_pos = camera.convertWorldPosToScreenPos(
+                { x: x+0.5, y: c_pos.tp }, pos, seg_size, scale
+            )
+
+            let color = undefined;
+            if (c_pos.direction === 'long')
+            {
+                color = '#3498db';
+            }
+            else
+            {
+                color = '#f39c12';
+            }
+
+            /* Draw Direction Icon */
+
+            // Get Rotation and Scale
+            // const drawing_scale = ((drawing.scale) * (1/scale.x));
+            // console.log((drawing.scale) * (1/scale.x));
+
+            // const width = drawing.size.width;
+            // const height = drawing.size.height;
+
+            // Move to position
+            // ctx.translate(
+            //     entry_pos.x - (width*drawing_scale),
+            //     entry_pos.y - (height*drawing_scale)
+            // );
+            // ctx.scale(drawing_scale, drawing_scale);
+
+            
+
+            
+            /* Draw Entry, SL, TP lines */
+
+            // Entry line
+            ctx.fillStyle = '#FFF';
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1;
+
+            // Dashed line
+            ctx.beginPath();
+            ctx.moveTo(0, entry_pos.y);
+            ctx.lineTo(entry_pos.x, entry_pos.y);
+            ctx.setLineDash([8, 5]);
+            ctx.stroke();
+
+            // Solid line
+            ctx.beginPath();
+            ctx.moveTo(entry_pos.x, entry_pos.y);
+            ctx.lineTo(seg_size.width, entry_pos.y);
+            ctx.setLineDash([0, 0]);
+            ctx.stroke();
+
+            
+
+            // Fill Circle
+            ctx.beginPath();
+            ctx.arc(
+                entry_pos.x, entry_pos.y, 
+                4, 0, 2 * Math.PI
+            );
+            ctx.fill();
+            ctx.stroke();
+            
+            // SL Line
+            ctx.strokeStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.moveTo(0, sl_pos.y);
+            ctx.lineTo(seg_size.width, sl_pos.y);
+            ctx.setLineDash([5, 3]);
+            ctx.stroke();
+
+            // TP Line
+            ctx.strokeStyle = '#2ecc71';
+            ctx.beginPath();
+            ctx.moveTo(0, tp_pos.y);
+            ctx.lineTo(seg_size.width, tp_pos.y);
+            ctx.setLineDash([5, 3]);
+            ctx.stroke();
+            
+        }
+    }
 
     handleDrawings(ctx)
     {
