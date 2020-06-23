@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Camera from './Camera';
-import Drawings from './Drawings';
+import Drawings from './paths/Paths';
 // import _ from 'underscore';
 
 class WindowWrapper extends Component 
@@ -64,7 +64,8 @@ class WindowWrapper extends Component
                     ref={this.setCameraRef}
                 />
                 {this.props.getWindowElement(
-                    this.props.id,
+                    this.props.strategy_id,
+                    this.props.item_id,
                     this.getTopOffset,
                     this.getScreenPos,
                     this.getKeys

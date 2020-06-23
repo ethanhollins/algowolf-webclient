@@ -34,30 +34,15 @@ class ChartApp extends Component
 
     async componentDidMount()
     {
-        let { strategies, strategy, charts } = this.state;
+        let { sio, strategies } = this.state;
 
         // Connect to API socket
-        // sio = this.handleSocket();
-        // this.setState({ sio });
+        sio = this.handleSocket();
+        this.setState({ sio });
         
         // Retrieve user specific strategy informations
         strategies = await this.retrieveStrategies();
         this.setState({ strategies });
-        console.log(strategies);
-
-        // Make chart live connections
-        // await this.connectCharts()
-        
-        // Retrieve chart data
-        // charts = await this.retreiveCharts(c_strategy);
-        // this.setState({ charts });
-
-        // Calculate chart indicators
-        // const layouts = strategy_info[strategy_id].layouts;
-        // for (let i = 0; i < layouts.length; i++)
-        // {
-        //     this.calculateIndicators(strategy_id, i);
-        // }
 
     }
 
@@ -87,6 +72,7 @@ class ChartApp extends Component
         const { strategy, page } = this.state;
         const strategy_info = this.getStrategy(strategy);
         
+        let gen_windows = [];
         if (strategy_info !== undefined)
         {
             const page_info = strategy_info.pages[page];
@@ -95,14 +81,19 @@ class ChartApp extends Component
             {
                 if (k === 'SDE32F')
                 {
-                    return <WindowWrapper
-                        id={k}
-                        getAppContainer={this.getAppContainer}
-                        getWindowElement={this.getWindowElement}
-                    />
+                    gen_windows.push(
+                        <WindowWrapper
+                            key={k}
+                            strategy_id={strategy_info['strategy_id']}
+                            item_id={k}
+                            getAppContainer={this.getAppContainer}
+                            getWindowElement={this.getWindowElement}
+                        />
+                    )
                 }
             }
         }
+        return gen_windows;
     }
 
     handleSocket()
@@ -132,6 +123,38 @@ class ChartApp extends Component
         socket.on('chart', (data) =>
         {
 
+        });
+
+        socket.on('create_drawings', (data) =>
+        {
+            this.addDrawings(
+                data['strategy_id'],
+                data['item_id'],
+                data['drawings']
+            );
+        });
+
+        socket.on('delete_drawings', (data) =>
+        {
+            this.deleteDrawings(
+                data['strategy_id'],
+                data['item_id']
+            );
+        });
+
+        socket.on('create_position', (data) =>
+        {
+            
+        });
+
+        socket.on('update_position', (data) =>
+        {
+            
+        });
+
+        socket.on('delete_position', (data) =>
+        {
+            
         });
 
         return socket;
@@ -214,6 +237,12 @@ class ChartApp extends Component
         return charts[key];
     }
 
+    getChart = (product, period) =>
+    {
+        const { charts } = this.state;
+        return charts[product + ':' + period];
+    }
+
     updateChart = (product, period, ohlc_data) =>
     {
         let { charts } = this.state;
@@ -240,16 +269,20 @@ class ChartApp extends Component
         this.setState({ charts });
     }
 
-    getChart = (product, period) =>
-    {
-        const { charts } = this.state;
-        return charts[product + ':' + period];
-    }
-
     getIndicator = (chart, price, ind) =>
     {
         /**  Retreive indicator data */
         return Indicators[ind.type](chart[price], ind.properties);
+    }
+
+    addPosition = () =>
+    {
+
+    }
+
+    getPosition = () =>
+    {
+
     }
 
     getAppContainer = () =>
@@ -265,28 +298,60 @@ class ChartApp extends Component
     getStrategy = (strategy_id) =>
     {
         const { strategies } = this.state;
-        
         for (let i = 0; i < strategies.length; i++)
         {
             if (strategies[i]['strategy_id'] === strategy_id)
+            {
                 return strategies[i];
+
+            }
         }
         return undefined;
     }
 
-    getWindowInfo = (id) =>
+    addStrategyWindow = (strategy_id, window) =>
     {
-        const { strategy, page } = this.state;
-        const strategy_info = this.getStrategy(strategy);
-        return strategy_info.pages[page][id];
+
     }
 
-    getWindowElement = (id, getTopOffset, getScreenPos, getKeys) => 
+    updateStrategyWindow = (strategy_id, item_id, window) =>
     {
-        // const window_info = this.getWindowInfo(id);
 
+    }
+
+    addDrawings = (strategy_id, item_id, drawings) =>
+    {
+        let { strategies } = this.state;
+        let item = this.getWindowInfo(strategy_id, item_id);
+        item.properties.drawings = item.properties.drawings.concat(drawings);
+        this.setState({ strategies });
+    }
+
+    deleteDrawings = (strategy_id, item_id, drawings) =>
+    {
+        let { strategies } = this.state;
+        let item = this.getWindowInfo(strategy_id, item_id);
+        item.properties.drawings = [];
+        this.setState({ strategies });
+    }
+
+
+    getWindowInfo = (strategy_id, item_id) =>
+    {
+        const strategy = this.getStrategy(strategy_id);
+
+        for (let i = 0; i < strategy.pages.length; i++)
+        {
+            if (item_id in strategy.pages[i]) return strategy.pages[i][item_id];
+        }
+        return;
+    }
+
+    getWindowElement = (strategy_id, id, getTopOffset, getScreenPos, getKeys) => 
+    {
         return (<Chart
-            id={id}
+            strategy_id={strategy_id}
+            item_id={id}
             // Universal Props
             getTopOffset={getTopOffset}
             getScreenPos={getScreenPos}

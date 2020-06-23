@@ -5,7 +5,7 @@ import Overlay from './Overlay';
 import Study from './Study';
 import _ from 'underscore';
 import moment from "moment-timezone";
-import Drawings from '../../Drawings';
+import Drawings from '../../paths/Paths';
 
 /**
  * TODO:
@@ -91,17 +91,6 @@ class Chart extends Component
         if (this.getChart() === undefined)
             await this.addChart();
 
-        // **TEST ADD DRAWING
-        this.addDrawing(
-            'arrow', 
-            [this.getTimestamps()[this.getTimestamps().length-10]], 
-            {
-                colors: ['#ff0000'],
-                scale: 2,
-                rotation: 45
-            }
-        );
-
         const padding_x = 5.0;
 
         const bids = this.getBids();
@@ -148,7 +137,7 @@ class Chart extends Component
     {
         const { pos, scale, trans_x } = this.state;
 
-        if (trans_x === 0)
+        if (trans_x === 0 && this.getChart() !== undefined)
         {
             const bids = await this.getBids();
             const chart_properties = this.getChartProperties(bids, Math.floor(pos.x));
@@ -194,7 +183,6 @@ class Chart extends Component
                 />
                 {this.generateOverlays()}
                 {this.generateStudies()}
-                {/* {this.generateDrawings()} */}
             </div>
         );
     }
@@ -219,9 +207,6 @@ class Chart extends Component
             width: segment_size.width,
             height: segment_size.height
         }
-        const mouse_x = this.getCamera().convertScreenPosToWorldPos(
-            mouse_pos, this.state.pos, segment_size, this.state.scale
-        );
 
         if (!keys.includes(SPACEBAR) && this.isWithinBounds(rect, mouse_pos))
         {
@@ -423,36 +408,14 @@ class Chart extends Component
         return gen_studies;
     }
 
-    generateDrawings()
-    {
-        let gen_drawings = [];
-        if (this.getChart() !== undefined)
-        {
-            // Draw Drawings
-            const drawings = this.getDrawingsProperties();
-            for (let i = 0; i < drawings.length; i++)
-            {
-                let d = drawings[i];
-                // let idx = this.getTimestampIdx(d.timestamps[0]);
-                // const screen_pos = this.getCamera().convertWorldPosToScreenPos(
-                //     { x: this.getTimestamps().length - idx, y: 1.13 }, this.state.pos, this.getSegmentSize(0), this.state.scale
-                // )
-                gen_drawings.push(Drawings[d.type](i, this.addDrawingRef, d.properties));
-                // ctx.moveTo(0, 0);
-                // ctx.translate(screen_pos.x, screen_pos.y);
-                // ctx.fill(Drawings[d.type](d.properties));
-                // ctx.translate(-screen_pos.x, -screen_pos.y);
-            }
-        }
-
-        return gen_drawings;
-    }
-
     update()
     {   
-        this.updateChart();
         this.updateCanvas();
-        this.updateItems();
+        if (this.getChart())
+        {
+            this.updateChart();
+            this.updateItems();
+        }
     }
 
     async updateChart()
@@ -520,9 +483,6 @@ class Chart extends Component
 
     updateItems()
     {
-        if (!this.getChart()) return;
-        
-
         const canvas = this.getCanvas();
         const ctx = canvas.getContext("2d");
 
@@ -997,23 +957,21 @@ class Chart extends Component
     {
         const camera = this.getCamera();
         const { pos, scale } = this.state;
-        const container_size = this.getSize();
         const seg_size = this.getSegmentSize(0);
 
         const drawings = this.getDrawingsProperties();
 
         for (let i = 0; i < drawings.length; i++)
         {
-            // if (i === 0) continue;
-
-            let d_props = drawings[i];
-            
-            d_props.properties.scale = 2;
+            const d_props = drawings[i];
+            if (!(d_props.type in Drawings)) continue;
+            const drawing = Drawings[d_props.type]();
 
             // Get Position
             const x = this.getPosFromTimestamp(d_props.timestamps[0]);
+            const y = d_props.prices[0];
             const screen_pos = camera.convertWorldPosToScreenPos(
-                { x: x+0.5, y: 1.13 }, 
+                { x: x+0.5, y: y }, 
                 pos, 
                 seg_size,
                 scale
@@ -1021,10 +979,10 @@ class Chart extends Component
 
             // Get Rotation and Scale
             const rotation = this.degsToRads(d_props.properties.rotation);
-            const drawing_scale = (d_props.properties.scale * (1/scale.x));
+            const drawing_scale = ((drawing.scale + d_props.properties.scale) * (1/scale.x));
 
-            const width = 512;
-            const height = 512;
+            const width = drawing.size.width;
+            const height = drawing.size.height;
 
             // Move to position
             ctx.translate(
@@ -1040,7 +998,7 @@ class Chart extends Component
             
             ctx.fillStyle = d_props.properties.colors[0];
             // Fill Path
-            ctx.fill(Drawings[d_props.type]());
+            ctx.fill(new Path2D(drawing.path));
             // Reset Transform
             ctx.setTransform(1,0,0,1,0,0);
         }
@@ -1309,7 +1267,9 @@ class Chart extends Component
 
     getProperties = () =>
     {
-        return this.props.getWindowInfo(this.props.id).properties;
+        return this.props.getWindowInfo(
+            this.props.strategy_id, this.props.item_id
+        ).properties;
     }
 
     getProduct = () => 
@@ -1352,10 +1312,10 @@ class Chart extends Component
         return this.state.studies[idx].values;
     }
 
-    addDrawing = (name, timestamps, properties) =>
+    addDrawing = (name, timestamps, prices, properties) =>
     {
         this.getDrawingsProperties().push(
-            Drawings.create(name, timestamps, properties)
+            Drawings.create(name, timestamps, prices, properties)
         );
     }
 
