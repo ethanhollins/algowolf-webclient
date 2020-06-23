@@ -1265,6 +1265,13 @@ class Chart extends Component
         return this.state.limit;
     }
 
+    getStrategy = () =>
+    {
+        return this.props.getStrategy(
+            this.props.strategy_id
+        );
+    }
+
     getProperties = () =>
     {
         return this.props.getWindowInfo(
@@ -1280,6 +1287,16 @@ class Chart extends Component
     getPeriod = () => 
     {
         return this.getProperties().period;
+    }
+
+    getPositions = () =>
+    {
+        return this.getStrategy().positions;
+    }
+
+    getOrders = () =>
+    {
+        return this.getStrategy().orders;
     }
 
     getMainPortion = () =>

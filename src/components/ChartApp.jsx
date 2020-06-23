@@ -275,16 +275,6 @@ class ChartApp extends Component
         return Indicators[ind.type](chart[price], ind.properties);
     }
 
-    addPosition = () =>
-    {
-
-    }
-
-    getPosition = () =>
-    {
-
-    }
-
     getAppContainer = () =>
     {
         return this.appContainer;
@@ -317,6 +307,44 @@ class ChartApp extends Component
     updateStrategyWindow = (strategy_id, item_id, window) =>
     {
 
+    }
+
+    getPositions = (strategy_id) =>
+    {
+        let { strategies } = this.state;
+        let strategy = this.getStrategy(strategy_id);
+
+        // Fetch all positions
+
+        // Match all order_ids and list as tracked or untracked accordingly 
+        for (let i = 0; i < strategy.positions.length; i++)
+        {
+        }
+    }
+
+    addPosition = (strategy_id, position) =>
+    {
+        let { strategies } = this.state;
+        let strategy = this.getStrategy(strategy_id);
+        strategy.positions.push(position);
+        this.setState({ strategies });
+    }
+
+    updatePosition = (strategy_id, position) =>
+    {
+
+    }
+
+    deletePosition = (strategy_id, order_id) =>
+    {
+        let { strategies } = this.state;
+        let strategy = this.getStrategy(strategy_id);
+        for (let i = 0; i < strategy.positions.length; i++)
+        {
+            if (strategy.positions[i].order_id === order_id)
+                strategy.positions.splice(i);
+        }
+        this.setState({ strategies });
     }
 
     addDrawings = (strategy_id, item_id, drawings) =>
@@ -356,6 +384,7 @@ class ChartApp extends Component
             getTopOffset={getTopOffset}
             getScreenPos={getScreenPos}
             getKeys={getKeys}
+            getStrategy={this.getStrategy}
             getWindowInfo={this.getWindowInfo}
 
             // Window Props
