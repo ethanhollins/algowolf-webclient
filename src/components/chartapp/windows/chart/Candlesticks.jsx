@@ -25,7 +25,9 @@ class Candlesticks extends Component
             let x_pos = (ohlc.length - i)+0.5;
             if (limit[0] != null && (i < limit[0] || i > limit[1])) continue;
             if (x_pos > pos.x + scale.x+1 || x_pos < pos.x-1 ) continue;
+            
             let candle = ohlc[i];
+            if (candle.every((x) => x===0)) continue;
 
             // Calc Body
             let body_pos = (candle[0] + candle[3]) / 2
@@ -82,7 +84,7 @@ class Candlesticks extends Component
             }
 
             const c_x = Math.round(body_pos.x - body_size.x / 2);
-            const c_y = Math.round(body_pos.y - body_size.y / 2);
+            const c_y = body_pos.y - body_size.y / 2;
             
             const w_x = Math.round(body_pos.x);
             const w_width = 1.0;
@@ -90,22 +92,22 @@ class Candlesticks extends Component
             // Draw Body
             ctx.fillRect(
                 c_x, c_y,
-                Math.round(body_size.x),
-                Math.round(body_size.y)
+                Math.max(Math.round(body_size.x), 1),
+                Math.max(Math.round(body_size.y), 1)
             );
                 
             // Draw Wick Up
             const w_up_y = Math.round(body_pos.y - body_size.y/2)+1;
             ctx.fillRect(
                 w_x, w_up_y - Math.round(wick_up_size.y),
-                w_width, Math.round(wick_up_size.y)
+                Math.max(w_width, 1), Math.max(Math.round(wick_up_size.y), 1)
             );
 
             // Draw Wick Down
             const w_down_y = Math.round(body_pos.y + body_size.y / 2)-1;
             ctx.fillRect(
                 w_x, w_down_y,
-                w_width, Math.round(wick_down_size.y)
+                Math.max(w_width, 1), Math.max(Math.round(wick_down_size.y), 1)
             );
         }
     }

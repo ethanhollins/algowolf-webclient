@@ -18,6 +18,9 @@ class Chart extends Component
         pos: {
             x: 0, y: 0,
         },
+        mouse_pos: {
+            x: -1, y: -1
+        },
         scale: {
             x: 30.0, y:0.2,
         },
@@ -75,7 +78,12 @@ class Chart extends Component
     async componentDidMount() 
     {
         window.addEventListener("mousedown", this.onMouseDown.bind(this));
-        window.addEventListener("mousemove", this.onMouseMove.bind(this));
+
+        const throttled_mouse_move = _.throttle(this.onMouseMove.bind(this), 1);
+        const throttled_crosshair_move = _.throttle(this.onCrosshairMove.bind(this), 20);
+        window.addEventListener("mousemove", throttled_mouse_move);
+        window.addEventListener("mousemove", throttled_crosshair_move);
+
         window.addEventListener("mouseup", this.onMouseUp.bind(this));
         // window.addEventListener("resize", this.update.bind(this));
 
@@ -244,7 +252,18 @@ class Chart extends Component
 
     onMouseMove(e)
     {
-        const { is_down, is_move } = this.state;
+        let { is_down, is_move } = this.state;
+        
+        // let update_pos = false;
+        // if (Math.abs(mouse_pos.x - e.clientX) >= 2 || 
+        //     Math.abs(mouse_pos.y - e.clientY) >= 2)
+        // {
+        //     update_pos = true;
+        //     mouse_pos = {
+        //         x: e.clientX, y: e.clientY
+        //     }
+        // }
+
         if (is_down)
         {
             let { pos, scale } = this.state;
@@ -256,13 +275,36 @@ class Chart extends Component
             );
             
             pos.x += move.x;
-            // pos.x = this.clampMove(pos.x);
 
             if (is_move)
                 pos.y += move.y;
 
             this.setState({ pos });
         }
+
+        // if (update_pos)
+        //     this.setState({ mouse_pos });
+    }
+
+    onCrosshairMove(e)
+    {
+        const camera = this.getCamera();
+        const { pos, scale } = this.state;
+        let { mouse_pos } = this.state;
+        
+        let update_pos = false;
+        if (Math.abs(mouse_pos.x - e.clientX) >= 2 || 
+            Math.abs(mouse_pos.y - e.clientY) >= 2)
+        {
+            update_pos = true;
+            mouse_pos = camera.convertScreenPosToWorldPos(
+                { x: e.clientX, y: e.clientY }, pos, this.getChartSize(), scale
+            );
+            mouse_pos.x = Math.floor(mouse_pos.x) + 0.5;
+        }
+
+        if (update_pos)
+            this.setState({ mouse_pos });
     }
 
     onMouseUp(e)
@@ -314,6 +356,8 @@ class Chart extends Component
             trans_x = 0;
             this.setState({ trans_x });
         }, 100);
+
+        this.onCrosshairMove(e);
 
         this.setState({ pos, scale, is_scrolling });
     }
@@ -540,6 +584,8 @@ class Chart extends Component
             // Restore context
             ctx.restore(); 
         }
+
+        this.handleCrosshairs(ctx);
     }
 
     getPriceInterval()
@@ -990,25 +1036,6 @@ class Chart extends Component
             {
                 color = '#f39c12';
             }
-
-            /* Draw Direction Icon */
-
-            // Get Rotation and Scale
-            // const drawing_scale = ((drawing.scale) * (1/scale.x));
-            // console.log((drawing.scale) * (1/scale.x));
-
-            // const width = drawing.size.width;
-            // const height = drawing.size.height;
-
-            // Move to position
-            // ctx.translate(
-            //     entry_pos.x - (width*drawing_scale),
-            //     entry_pos.y - (height*drawing_scale)
-            // );
-            // ctx.scale(drawing_scale, drawing_scale);
-
-            
-
             
             /* Draw Entry, SL, TP lines */
 
@@ -1109,6 +1136,45 @@ class Chart extends Component
             ctx.fill(new Path2D(drawing.path));
             // Reset Transform
             ctx.setTransform(1,0,0,1,0,0);
+        }
+    }
+
+    handleCrosshairs(ctx)
+    {
+        const { mouse_pos, pos, scale } = this.state;
+        const chart_size = this.getChartSize();
+        const camera = this.getCamera();
+
+        const mouse_screen_pos = camera.convertWorldPosToScreenPos(
+            mouse_pos, pos, chart_size, scale
+        );
+
+        const screen_pos = this.props.getScreenPos();
+        const top_offset = this.props.getTopOffset() + screen_pos.y;
+        const left_offset = screen_pos.x;
+
+        if (mouse_screen_pos.x < left_offset ||
+            mouse_screen_pos.x > chart_size.width + left_offset ||
+            mouse_screen_pos.y < top_offset ||
+            mouse_screen_pos.y > chart_size.height + top_offset)
+            return
+        
+        ctx.fillStyle = '#787878';
+        let c_x = 0;
+
+        const line_width = 5;
+        const line_space = 4;
+        while (c_x < chart_size.width)
+        {
+            ctx.fillRect(c_x, Math.round(mouse_screen_pos.y - top_offset), line_width, 1);
+            c_x += line_width + line_space;
+        }
+
+        let c_y = 0;
+        while (c_y < chart_size.height)
+        {
+            ctx.fillRect(Math.round(mouse_screen_pos.x - left_offset), c_y, 1, line_width);
+            c_y += line_width + line_space;
         }
     }
 
@@ -1243,6 +1309,7 @@ class Chart extends Component
         {
             let c_x = ohlc.length - i;
             if (ohlc[c_x] === undefined) continue;
+            if (ohlc[c_x].every((x) => x===0)) continue;
             
             let high = ohlc[c_x][1];
             let low = ohlc[c_x][2];
