@@ -3,6 +3,7 @@ import Indicators from './chartapp/Indicators';
 import io from 'socket.io-client';
 import WindowWrapper from './chartapp/WindowWrapper';
 import Chart from './chartapp/windows/chart/Chart';
+import moment from "moment-timezone";
 
 /**
  * TODO:
@@ -34,16 +35,14 @@ class ChartApp extends Component
 
     async componentDidMount()
     {
-        let { sio, strategies, strategy } = this.state;
+        let { sio, strategy } = this.state;
 
         // Connect to API socket
         sio = this.handleSocket();
         this.setState({ sio });
         
         // Retrieve user specific strategy informations
-        strategies[strategy] = await this.retrieveStrategy(strategy);
-        this.setState({ strategies });
-
+        await this.retrieveStrategy(strategy);
     }
 
     render()
@@ -117,7 +116,10 @@ class ChartApp extends Component
 
         socket.on('subscribed', () =>
         {
+            const { strategy } = this.state;
             console.log('subscribed');
+            this.reconnectCharts();
+            this.retrieveStrategy(strategy);
         })
 
         socket.on('chart_update', (data) =>
@@ -171,7 +173,7 @@ class ChartApp extends Component
 
     async retrieveStrategy(strategy)
     {
-        const { username } = this.state;
+        const { username, strategies } = this.state;
 
         /** Retrieve strategy info */
         const reqOptions = {
@@ -182,15 +184,16 @@ class ChartApp extends Component
             }
         }
 
-        const strategies = await fetch(
+        strategies[strategy] = await fetch(
             'http://localhost/v1/strategies/' +
             strategy + '/start',
             reqOptions
         )
             .then(res => res.json());
         
-        return strategies;
+        this.setState({ strategies });
     }
+
 
     async retrieveChartData(product, period, from, to, page_number)
     {
@@ -230,21 +233,63 @@ class ChartApp extends Component
         }
     }
 
-    connectCharts(strategy_id)
+    async reconnectCharts()
     {
-        
+        let { charts } = this.state;
+
+        for (let k in charts)
+        {
+            let chart = charts[k];
+            let last_ts = chart.timestamps[chart.timestamps.length-1];
+            let page_number = 0;
+            let page_amount = 999;
+
+            let timestamps = [];
+            let asks = [];
+            let bids = [];
+
+            while (page_number+1 < page_amount)
+            {
+                let data = await this.retrieveChartData(
+                    chart.product, chart.period, 
+                    moment(last_ts * 1000), undefined, 
+                    page_number
+                )
+                console.log(data);
+                
+                timestamps = timestamps.concat(data.ohlc.timestamps);
+                asks = asks.concat(data.ohlc.asks);
+                bids = bids.concat(data.ohlc.bids);
+
+                page_number += 1;
+                page_amount = data.metadata.page_amount;
+            }
+
+            // Update timestamps
+            chart.timestamps.splice(chart.timestamps.length-1);
+            chart.timestamps = chart.timestamps.concat(timestamps);
+
+            // Update asks
+            chart.asks.splice(chart.asks.length-1);
+            chart.asks = chart.asks.concat(asks);
+
+            // Update bids
+            chart.bids.splice(chart.bids.length-1);
+            chart.bids = chart.bids.concat(bids);
+
+            // Reconnect chart live data
+            this.connectChart(chart.product, chart.period);
+        }
+
+        this.setState({ charts });
     }
 
     addChart = (product, period, ohlc_data) =>
     {
-        let { sio, charts } = this.state;
+        let { charts } = this.state;
 
-        sio.emit('connect_chart', {
-            'broker': 'ig',
-            'product': product,
-            'period': period
-        });
-
+        this.connectChart(product, period);
+        
         const key = product + ':' + period;
         charts[key] = {
             product: product,
@@ -264,17 +309,32 @@ class ChartApp extends Component
         return charts[product + ':' + period];
     }
 
+    connectChart(product, period)
+    {
+        const { sio } = this.state;
+        sio.emit('connect_chart', {
+            'broker': 'ig',
+            'product': product,
+            'period': period
+        });
+    }
+
     handleChartUpdate = (item) =>
     {
         let { charts } = this.state;
         let chart = charts[item['product'] + ':' + item['period']];
         
-        chart.bids[chart.bids.length-1] = item['item']['bid'];
+        if (item['timestamp'] >= chart.timestamps[chart.timestamps.length-1])
+        {
+            chart.timestamps.push(item['timestamp'] + this.getPeriodOffsetSeconds(item['period']));
+        }
+
         chart.asks[chart.asks.length-1] = item['item']['ask'];
+        chart.bids[chart.bids.length-1] = item['item']['bid'];
         if (item['bar_end'])
         {
-            chart.bids.push([0,0,0,0]);
             chart.asks.push([0,0,0,0]);
+            chart.bids.push([0,0,0,0]);
         }
 
         this.setState({ charts });
@@ -306,10 +366,10 @@ class ChartApp extends Component
         this.setState({ charts });
     }
 
-    getIndicator = (chart, price, ind) =>
+    calculateIndicator = (chart, price, ind) =>
     {
         /**  Retreive indicator data */
-        return Indicators[ind.type](chart[price], ind.properties);
+        Indicators[ind.type](chart.timestamps, chart.asks, chart.bids, ind.properties);
     }
 
     getAppContainer = () =>
@@ -437,8 +497,55 @@ class ChartApp extends Component
             addChart={this.addChart}
             getChart={this.getChart}
             updateChart={this.updateChart}
-            getIndicator={this.getIndicator}
+            calculateIndicator={this.calculateIndicator}
+            getPeriodOffsetSeconds={this.getPeriodOffsetSeconds}
         />)
+    }
+
+    getPeriodOffsetSeconds(period)
+    {
+        if (period === "M1" || period === 0) 
+            return 60;
+        else if (period === "M2" || period === 1) 
+            return 60 * 2;
+        else if (period === "M3" || period === 2) 
+            return 60 * 3;
+        else if (period === "M5" || period === 3) 
+            return 60 * 5;
+        else if (period === "M10" || period === 4) 
+            return 60 * 10;
+        else if (period === "M15" || period === 5) 
+            return 60 * 15;
+        else if (period === "M30" || period === 6) 
+            return 60 * 30;
+        else if (period === "H1" || period === 7) 
+            return 60 * 60;
+        else if (period === "H2" || period === 8) 
+            return 60 * 60 * 2;
+        else if (period === "H3" || period === 9) 
+            return 60 * 60 * 3;
+        else if (period === "H4" || period === 10) 
+            return 60 * 60 * 4;
+        else if (period === "H12" || period === 11) 
+            return 60 * 60 * 12;
+        else if (period === "D" || period === 12) 
+            return 60 * 60 * 24;
+        else if (period === "D2" || period === 13) 
+            return 60 * 60 * 24 * 2;
+        else if (period === "W" || period === 14) 
+            return 60 * 60 * 24 * 7;
+        else if (period === "W2" || period === 15) 
+            return 60 * 60 * 24 * 7 * 2;
+        else if (period === "M" || period === 16) 
+            return 60 * 60 * 24 * 7 * 4;
+        else if (period === "Y1" || period === 17) 
+            return 60 * 60 * 24 * 7 * 4 * 12;
+        else if (period === "Y2" || period === 18) 
+            return 60 * 60 * 24 * 7 * 4 * 12 * 2;
+        else if (period === "Y3" || period === 19) 
+            return 60 * 60 * 24 * 7 * 4 * 12 * 2;
+        else
+            return null;
     }
 }
 

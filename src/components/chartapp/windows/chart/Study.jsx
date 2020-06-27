@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import moment from "moment-timezone";
 
 class Study extends Component 
 {
@@ -50,11 +51,10 @@ class Study extends Component
     {
         const values = this.props.getValues(this.props.index);
         let { pos, scale } = this.state;
-
         let hl = [null, null];
         for (let i = 0; i < values.length; i++)
         {
-            for (let j = 0; j < values[0].length; j++)
+            for (let j = 0; j < values[i].length; j++)
             {
                 let val = values[i][j];
 
@@ -121,7 +121,7 @@ class Study extends Component
         if (values.length === 0) return;
 
         // Iterate columns
-        for (let j = 0; j < values[0].length; j++) 
+        for (let j = 0; j < values.length; j++) 
         {
             if (this.props.index === 0) ctx.strokeStyle = `rgb(30, 144, 255)`;
             else if (j === 0) ctx.strokeStyle = `rgb(142, 68, 173)`;
@@ -133,17 +133,17 @@ class Study extends Component
             let first_pos = null;
 
             // Iterate rows
-            for (let i = 0; i < values.length; i++) 
+            for (let i = 0; i < values[j].length; i++) 
             {
-                let x_pos = (values.length - i)+0.5;
+                let x_pos = (values[j].length - i)+0.5;
                 if (limit[0] != null && (i < limit[0] || i > limit[1])) continue;
                 if (first_pos === null)
                 {
-                    if (values[i][j] !== null)
+                    if (values[j][i] !== null)
                     {
                         // Move to first position
                         first_pos = camera.convertWorldPosToScreenPos(
-                            { x: x_pos, y: values[i][j] },
+                            { x: x_pos, y: values[j][i] },
                             pos, size, scale
                         );
                         ctx.moveTo(
@@ -156,7 +156,8 @@ class Study extends Component
 
                 if (x_pos > pos.x + scale.x+1 || x_pos < pos.x-1 ) continue;
                 
-                let i_val = values[i][j];
+                let i_val = values[j][i];
+                if (i_val === null) continue;
 
                 let line_pos = camera.convertWorldPosToScreenPos(
                     { x: x_pos, y: i_val },
@@ -179,11 +180,15 @@ class Study extends Component
 
     drawGrid(ctx, data, draw_times)
     {
+        if (data === undefined) return;
+
         const camera = this.props.getCamera();
         const pos = this.props.getPos();
         const scale = this.props.getScale();
         const start_pos = this.props.getSegmentStartPos(this.getWindowIndex());
         const seg_size = this.props.getSegmentSize(this.getWindowIndex());
+        const timestamps = this.props.getAllTimestamps();
+        const tz = 'Australia/Melbourne';
 
         // Font settings
         const font_size = 10;
@@ -193,8 +198,8 @@ class Study extends Component
         // Draw grid
         for (let i = 0; i < data.length; i++)
         {
-            let c_x = data[i][0];
-            let time = data[i][1];
+            let c_x = data[i];
+            let time = moment(timestamps[data[i]]*1000).tz(tz);
 
             let screen_x = camera.convertWorldPosToScreenPos(
                 { x: c_x+0.5, y: 0 }, pos, seg_size, scale
@@ -219,11 +224,13 @@ class Study extends Component
                 ctx.strokeStyle = 'rgb(255, 255, 255)';
                 ctx.lineWidth = 2.0;
                 ctx.strokeText(
+                    // 'Fri 26',
                     time.format('ddd DD'), 
                     screen_x, 
                     (start_pos.y + seg_size.height) - 4
                 );
                 ctx.fillText(
+                    // 'Fri 26',
                     time.format('ddd DD'), 
                     screen_x, 
                     (start_pos.y + seg_size.height) - 4

@@ -6,6 +6,7 @@ import Study from './Study';
 import _ from 'underscore';
 import moment from "moment-timezone";
 import Drawings from '../../paths/Paths';
+import Indicators from '../../Indicators';
 
 /**
  * TODO:
@@ -23,6 +24,9 @@ class Chart extends Component
         },
         scale: {
             x: 30.0, y:0.2,
+        },
+        intervals: {
+            x: 0, y: 0
         },
         future_timestamps: [],
         overlays: [],
@@ -118,10 +122,9 @@ class Chart extends Component
         for (let i = 0; i < properties.overlays.length; i++)
         {
             const ind = properties.overlays[i];
-            const values = await this.getIndicator(ind);
-            
+            this.calculateIndicator(ind);
             overlays.push({
-                values: values
+                ind: ind
             });
         }
 
@@ -129,16 +132,18 @@ class Chart extends Component
         for (let i = 0; i < properties.studies.length; i++)
         {
             const ind = properties.studies[i];
-            const values = await this.getIndicator(ind);
+            this.calculateIndicator(ind);
 
             studies.push({
                 portion: properties.studies[i].portion,
-                values: values
+                ind: ind
             });
         }
         this.setState({ overlays, studies });
 
         this.setFutureTimestamps();
+        this.setPriceInterval();
+        this.setTimeInterval();
     }
 
     async componentDidUpdate() 
@@ -390,6 +395,8 @@ class Chart extends Component
                         let { scale } = this.state;
                         scale.y = m * Math.pow(trans_x, 2) + c
                         this.setState({ scale });
+                        this.setPriceInterval();
+                        this.setTimeInterval();
                         this.transitionScaleY(num_steps, m, c, i+1);
                     }, 10);
                 }.bind(this)
@@ -438,6 +445,7 @@ class Chart extends Component
                     ref={this.addStudyRef}
                     index={i}
                     getValues={this.getStudyValues}
+                    getAllTimestamps={this.getAllTimestamps}
                     getCamera={this.getCamera}
                     getCanvas={this.getCanvas}
                     getPos={this.getPos}
@@ -531,8 +539,6 @@ class Chart extends Component
         const ctx = canvas.getContext("2d");
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // if (this.getBids().length <= 0) return;
 
         let start_pos = this.getSegmentStartPos(0);
         let segment_size = this.getSegmentSize(0);
@@ -540,8 +546,7 @@ class Chart extends Component
         this.defineClip(ctx, start_pos, segment_size);
         
         // Draw Grid
-        const price_interval = this.getPriceInterval();
-        const price_data = this.drawPriceGrid(ctx, price_interval);
+        const price_data = this.drawPriceGrid(ctx);
         const time_data = this.drawTimeGrid(ctx);
         
         // Draw Candlesticks
@@ -550,6 +555,7 @@ class Chart extends Component
         const overlays = this.getOverlays();
         for (let i = 0; i < overlays.length; i++)
         {
+            this.calculateIndicator(this.state.overlays[i].ind);
             overlays[i].draw();
         }
 
@@ -573,6 +579,8 @@ class Chart extends Component
         for (let i = 0; i < studies.length; i++)
         {
             let study = studies[i];
+            this.calculateIndicator(this.state.studies[i].ind);
+
             start_pos = this.getSegmentStartPos(study.getWindowIndex());
             segment_size = this.getSegmentSize(study.getWindowIndex());
 
@@ -588,35 +596,58 @@ class Chart extends Component
         this.handleCrosshairs(ctx);
     }
 
-    getPriceInterval()
+    getNumZeroDecimals(x)
+    {
+        const decimals = String(x).split('.')[1];
+        for (let i = 0; i < decimals.length; i++)
+        {
+            if (decimals[i] != '0') return i;
+        }
+        return -1;
+    }
+
+    setPriceInterval()
     {
         const camera = this.getCamera();
         const seg_size = this.getSegmentSize(0);
-        const { scale } = this.state;
+        const { scale, intervals } = this.state;
         const min_dist = 100;
-        const intervals = [0.00001, 0.00002, 0.00005];
-        let multi = 1;
+        const possible_intervals = [1, 2, 5, 10];
 
-        while (true)
+        const min_world_dist = camera.convertScreenUnitToWorldUnit(
+            { x: 0, y: min_dist }, seg_size, scale
+        );
+        const decimals = this.getNumZeroDecimals(min_world_dist.y);
+        
+        let start = Math.ceil(min_world_dist.y * Math.pow(10, decimals+1));
+        intervals.y = possible_intervals.filter((x) => x >= start)[0] / Math.pow(10, decimals+1);
+
+        this.setState({ intervals }); 
+    }
+
+    setTimeInterval()
+    {
+        const camera = this.getCamera();
+        const seg_size = this.getSegmentSize(0);
+        const { scale, intervals } = this.state;
+        const timestamps = this.getTimestamps().concat(this.state.future_timestamps);
+
+        const min_dist = 100;
+        const min_world_dist = camera.convertScreenUnitToWorldUnit(
+            { x: min_dist, y: 0 }, seg_size, scale
+        );
+
+        const target_interval = timestamps[Math.ceil(min_world_dist.x)] - timestamps[0];
+        let interval_x = 0;
+        
+        let i = 0;
+        while (interval_x < target_interval)
         {
-            for (let x = 0; x < intervals.length; x++)
-            {
-                let i = intervals[x] * multi;
-                
-                let start_y = camera.convertWorldUnitToScreenUnit(
-                    { x: 0, y: i }, seg_size, scale
-                ).y;
-
-                let end_y = camera.convertWorldUnitToScreenUnit(
-                    { x: 0, y: 0 }, seg_size, scale
-                ).y;
-
-                
-                if (start_y - end_y >= min_dist) return i;
-            }
-
-            multi *= 10;
+            interval_x = this.getPeriodOffsetSeconds(i)
+            i += 1;
         }
+        intervals.x = interval_x;
+        this.setState({ intervals });
     }
 
     getWeekendDates(ts)
@@ -661,48 +692,7 @@ class Chart extends Component
 
     getPeriodOffsetSeconds(period)
     {
-        if (period === "M1" || period === 0) 
-            return 60;
-        else if (period === "M2" || period === 1) 
-            return 60 * 2;
-        else if (period === "M3" || period === 2) 
-            return 60 * 3;
-        else if (period === "M5" || period === 3) 
-            return 60 * 5;
-        else if (period === "M10" || period === 4) 
-            return 60 * 10;
-        else if (period === "M15" || period === 5) 
-            return 60 * 15;
-        else if (period === "M30" || period === 6) 
-            return 60 * 30;
-        else if (period === "H1" || period === 7) 
-            return 60 * 60;
-        else if (period === "H2" || period === 8) 
-            return 60 * 60 * 2;
-        else if (period === "H3" || period === 9) 
-            return 60 * 60 * 3;
-        else if (period === "H4" || period === 10) 
-            return 60 * 60 * 4;
-        else if (period === "H12" || period === 11) 
-            return 60 * 60 * 12;
-        else if (period === "D" || period === 12) 
-            return 60 * 60 * 24;
-        else if (period === "D2" || period === 13) 
-            return 60 * 60 * 24 * 2;
-        else if (period === "W" || period === 14) 
-            return 60 * 60 * 24 * 7;
-        else if (period === "W2" || period === 15) 
-            return 60 * 60 * 24 * 7 * 2;
-        else if (period === "M" || period === 16) 
-            return 60 * 60 * 24 * 7 * 4;
-        else if (period === "Y1" || period === 17) 
-            return 60 * 60 * 24 * 7 * 4 * 12;
-        else if (period === "Y2" || period === 18) 
-            return 60 * 60 * 24 * 7 * 4 * 12 * 2;
-        else if (period === "Y3" || period === 19) 
-            return 60 * 60 * 24 * 7 * 4 * 12 * 2;
-        else
-            return null;
+        return this.props.getPeriodOffsetSeconds(period);
     }
 
     getNumWeeklyBars(period)
@@ -773,12 +763,12 @@ class Chart extends Component
             return null;
     }
 
-    drawPriceGrid(ctx, interval)
+    drawPriceGrid(ctx)
     {
         
         const camera = this.getCamera();
         const seg_size = this.getSegmentSize(0);
-        const { pos, scale } = this.state;
+        const { pos, scale, intervals } = this.state;
 
         const start_pos = camera.convertScreenPosToWorldPos(
             { x: 0, y: -seg_size.height }, pos, seg_size, scale
@@ -786,13 +776,16 @@ class Chart extends Component
         const end_pos = camera.convertScreenPosToWorldPos(
             { x: 0, y: seg_size.height }, pos, seg_size, scale
         );
+
+        if (intervals.y === 0) return;
         let y = start_pos.y;
-        
-        if (interval < 1.0)
+
+        if (intervals.y < 1.0)
         {
-            const decimals = interval.toString().split('.')[1].length;
+            const decimals = intervals.y.toString().split('.')[1].length;
             const multi = Math.pow(10, (decimals-1));
             y = Math.round(y * multi) / multi;
+            
         }
         else
         {
@@ -825,7 +818,7 @@ class Chart extends Component
             ctx.stroke();
 
             data.push(y);
-            y -= interval;
+            y -= intervals.y;
         }
         return data;
     }
@@ -837,9 +830,12 @@ class Chart extends Component
 
         const off = this.getPeriodOffsetSeconds(this.getPeriod());
         const ohlc = this.getBids();
-        const timestamps = this.getTimestamps();
+        const timestamps = this.getTimestamps().concat(this.state.future_timestamps);
 
-        const { pos, scale } = this.state;
+        const { pos, scale, intervals } = this.state;
+
+        if (intervals.x === 0) return;
+
         let ts = 0;
         let x = 0;
 
@@ -859,24 +855,6 @@ class Chart extends Component
             ts = timestamps[ohlc.length - x];
         }
 
-        const min_dist = 100;
-        let interval_off = null;
-        let i = 0;
-        while (true)
-        {
-            interval_off = this.getPeriodOffsetSeconds(i);
-            if (interval_off === null) break;
-            i += 1;
-
-            let x_len = interval_off / off;
-            if (x_len < 1) continue;
-
-            let start_x = camera.convertWorldUnitToScreenUnit(
-                { x: x_len, y: 0 }, seg_size, scale
-            ).x;
-            
-            if (start_x >= min_dist) break;
-        }
 
         const tz = 'Australia/Melbourne';
         let time = this.getWeekendDates(
@@ -886,7 +864,7 @@ class Chart extends Component
         let x_off = Math.ceil((ts - time.unix()) / off);
 
         let data = [];
-        for (let i = x + x_off; i >= pos.x; i-=parseInt(interval_off/off))
+        for (let i = x + x_off; i >= pos.x; i-=parseInt(intervals.x/off))
         {
             if (i <= pos.x + scale.x + 1)
             {
@@ -907,30 +885,7 @@ class Chart extends Component
                     seg_size.height
                 );
                 ctx.stroke();
-            }
-            data.push([i, time]);
-
-            const weekend_times = this.getWeekendDates(time.unix());
-            const weekend = weekend_times[0].unix();
-            const next_time = time.unix() + interval_off;
-
-            if (
-                next_time >= weekend && 
-                interval_off < this.getPeriodOffsetSeconds("W")
-            )
-            {
-                if (interval_off !== off)
-                {
-                    const t_duration = weekend - time.unix();
-                    const x_off = Math.ceil(t_duration / off);
-
-                    i += (parseInt(interval_off/off) - (x_off));
-                }
-                time = weekend_times[1].tz(tz);
-            }
-            else
-            {
-                time = moment((time.unix() + interval_off) * 1000).tz(tz);
+                data.push(i);
             }
         }
         return data;
@@ -938,6 +893,8 @@ class Chart extends Component
 
     drawPrices(ctx, data)
     {
+        if (data === undefined) return;
+
         const camera = this.getCamera();
         const { pos, scale } = this.state;
         const seg_size = this.getSegmentSize(0);
@@ -965,9 +922,13 @@ class Chart extends Component
 
     drawTimes(ctx, data)
     {
+        if (data === undefined) return;
+
         const camera = this.getCamera();
         const { pos, scale } = this.state;
         const seg_size = this.getSegmentSize(0);
+        const timestamps = this.getTimestamps().concat(this.state.future_timestamps);
+        const tz = 'Australia/Melbourne';
 
         // Font settings
         const font_size = 10;
@@ -979,8 +940,8 @@ class Chart extends Component
         // Draw grid
         for (let i = 0; i < data.length; i++)
         {
-            let c_x = data[i][0];
-            let time = data[i][1];
+            let c_x = data[i];
+            let time = moment(timestamps[data[i]]*1000).tz(tz);
 
             let screen_x = camera.convertWorldPosToScreenPos(
                 { x: c_x+0.5, y: 0 }, pos, seg_size, scale
@@ -1491,7 +1452,18 @@ class Chart extends Component
 
     getOverlayValues = (idx) =>
     {
-        return this.state.overlays[idx].values;
+        const { overlays } = this.state;
+        let result = [];
+        for (let i = 0; i < overlays[idx].ind.properties.periods.length; i++)
+        {
+            result.push(
+                Indicators
+                [overlays[idx].ind.type]
+                [this.getPrice()]
+                [overlays[idx].ind.properties.periods[i]]
+            );
+        }
+        return result;
     }
 
     getStudiesProperties = () =>
@@ -1501,7 +1473,18 @@ class Chart extends Component
 
     getStudyValues = (idx) =>
     {
-        return this.state.studies[idx].values;
+        const { studies } = this.state;
+        let result = [];
+        for (let i = 0; i < studies[idx].ind.properties.periods.length; i++)
+        {
+            result.push(
+                Indicators
+                [studies[idx].ind.type]
+                [this.getPrice()]
+                [studies[idx].ind.properties.periods[i]]
+            );
+        }
+        return result;
     }
 
     addDrawing = (name, timestamps, prices, properties) =>
@@ -1542,6 +1525,11 @@ class Chart extends Component
         return this.getChart().timestamps;
     }
 
+    getAllTimestamps = () =>
+    {
+        return this.getTimestamps().concat(this.state.future_timestamps);
+    }
+
     getAsks = () =>
     {
         return this.getChart().asks;
@@ -1552,9 +1540,9 @@ class Chart extends Component
         return this.getChart().bids;
     }
 
-    getIndicator = (ind) =>
+    calculateIndicator = (ind) =>
     {
-        return this.props.getIndicator(
+        this.props.calculateIndicator(
             this.getChart(),
             this.getPrice(),
             ind
