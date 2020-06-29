@@ -38,7 +38,7 @@ class Indicators {
 
         // Re-calculate last value
         start = timestamps.indexOf(cache_ts[cache_ts.length-1]);
-        if (start != -1)
+        if (start !== -1)
         {
             if (!(asks[start].every((x) => x === 0)))
             {

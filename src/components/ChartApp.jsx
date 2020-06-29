@@ -42,7 +42,7 @@ class ChartApp extends Component
         this.setState({ sio });
         
         // Retrieve user specific strategy informations
-        await this.retrieveStrategy(strategy);
+        await this.retrieveStrategies([strategy]);
     }
 
     render()
@@ -97,16 +97,24 @@ class ChartApp extends Component
 
     handleSocket()
     {
-        const endpoint = "http://localhost/user"
+        const endpoint = "http://127.0.0.1/user"
         const socket = io(endpoint, {
-            query: {
-                token: 'TEST_TOKEN'
+            transportOptions: {
+                polling: {
+                    extraHeaders: {
+                        Authorization: 'TEST_TOKEN'
+                    }
+                }
             }
         });
 
         socket.on('connect', () =>
         {
-            socket.emit('subscribe', {'room': 'ethanhollins'});
+            console.log('connected');
+            this.reconnectCharts();
+            this.retrieveStrategies(
+                Object.keys(this.state.strategies)
+            );
         });
 
         socket.on('disconnect', () =>
@@ -114,15 +122,7 @@ class ChartApp extends Component
             console.log('Disconnected.')
         });
 
-        socket.on('subscribed', () =>
-        {
-            const { strategy } = this.state;
-            console.log('subscribed');
-            this.reconnectCharts();
-            this.retrieveStrategy(strategy);
-        })
-
-        socket.on('chart_update', (data) =>
+        socket.on('ontick', (data) =>
         {
             this.handleChartUpdate(data);
         });
@@ -144,34 +144,39 @@ class ChartApp extends Component
             );
         });
 
-        socket.on('create_positions', (data) =>
+        socket.on('ontrade', (data) =>
         {
-            this.addPositions(
-                data['strategy_id'],
-                data['data']
-            );
-        });
-
-        socket.on('update_positions', (data) =>
-        {
-            this.updatePositions(
-                data['strategy_id'],
-                data['data']
-            );
-        });
-
-        socket.on('delete_positions', (data) =>
-        {
-            this.deletePositions(
-                data['strategy_id'],
-                data['data']
-            );
+            if (data.order_type === 'marketentry')
+            {
+                this.addPositions(
+                    data['strategy_id'],
+                    data['items']
+                );
+            }
+            else if (data.order_type === 'modify')
+            {
+                this.updatePositions(
+                    data['strategy_id'],
+                    data['items']
+                );
+            }
+            else if (
+                data.order_type === 'positionclose' ||
+                data.order_type === 'stoploss' ||
+                data.order_type === 'takeprofit'
+            )
+            {
+                this.deletePositions(
+                    data['strategy_id'],
+                    data['items']
+                );
+            }
         });
 
         return socket;
     }
 
-    async retrieveStrategy(strategy)
+    async retrieveStrategies(strategy_ids)
     {
         const { username, strategies } = this.state;
 
@@ -184,16 +189,32 @@ class ChartApp extends Component
             }
         }
 
-        strategies[strategy] = await fetch(
-            'http://localhost/v1/strategies/' +
-            strategy + '/start',
-            reqOptions
-        )
-            .then(res => res.json());
-        
+        for (let i = 0; i < strategy_ids.length; i++)
+        {
+            strategies[strategy_ids[i]] = await fetch(
+                'http://127.0.0.1/v1/strategies/' +
+                strategy_ids[i] + '/start',
+                reqOptions
+            )
+                .then(res => res.json());
+        }
+        this.subscribeStrategies(strategy_ids);
+
         this.setState({ strategies });
     }
 
+    subscribeStrategies(strategies)
+    {
+        const { sio } = this.state;
+        for (let i = 0; i < strategies.length; i++)
+        {
+            console.log(strategies[i])
+            sio.emit(
+                'subscribe_ontrade', 
+                {'strategy_id': strategies[i]}
+            );
+        }
+    }
 
     async retrieveChartData(product, period, from, to, page_number)
     {
@@ -203,7 +224,7 @@ class ChartApp extends Component
         {   
             if (to !== undefined)
             {
-                const uri = `http://localhost/v1/backtest/prices/\
+                const uri = `http://127.0.0.1/v1/backtest/prices/\
                 ${product}/${period}\
                 ?from=${from.format('YYYY-MM-DDTHH:mm:ss')}Z\
                 &to=${to.format('YYYY-MM-DDTHH:mm:ss')}Z\
@@ -214,7 +235,7 @@ class ChartApp extends Component
             }
             else
             {
-                const uri = `http://localhost/v1/backtest/prices/\
+                const uri = `http://127.0.0.1/v1/backtest/prices/\
                 ${product}/${period}\
                 ?from=${from.format('YYYY-MM-DDTHH:mm:ss')}Z\
                 &count=1000&page_number=${page_number}`.replace(/\s/g, '');
@@ -225,7 +246,7 @@ class ChartApp extends Component
         }
         else
         {
-            const uri = `http://localhost/v1/backtest/prices/\
+            const uri = `http://127.0.0.1/v1/backtest/prices/\
                 ${product}/${period}\
                 ?count=1000&page_number=${page_number}`.replace(/\s/g, '');
             return await fetch(uri)
@@ -312,7 +333,7 @@ class ChartApp extends Component
     connectChart(product, period)
     {
         const { sio } = this.state;
-        sio.emit('connect_chart', {
+        sio.emit('subscribe_ontick', {
             'broker': 'ig',
             'product': product,
             'period': period
@@ -432,16 +453,16 @@ class ChartApp extends Component
         }
     }
 
-    deletePositions = (strategy_id, order_ids) =>
+    deletePositions = (strategy_id, positions) =>
     {
         let { strategies } = this.state;
         let strategy = strategies[strategy_id];
 
         if (strategy !== undefined)
         {
-            for (let i = 0; i < order_ids.length; i++)
+            for (let i = 0; i < positions.length; i++)
             {
-                const order_id = order_ids[i];
+                const order_id = positions[i].order_id;
                 for (let j = 0; j < strategy.positions.length; j++)
                 {
                     if (strategy.positions[j].order_id === order_id)

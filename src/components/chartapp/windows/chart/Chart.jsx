@@ -601,7 +601,7 @@ class Chart extends Component
         const decimals = String(x).split('.')[1];
         for (let i = 0; i < decimals.length; i++)
         {
-            if (decimals[i] != '0') return i;
+            if (decimals[i] !== '0') return i;
         }
         return -1;
     }
