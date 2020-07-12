@@ -26,7 +26,7 @@ class Login extends Component
                     <input type="text" id="username" name="username" onChange={this.handleChange} /><br/>
                     <label htmlFor="password">Password:</label><br/>
                     <input type="password" id="password" name="password" onChange={this.handleChange} /><br/><br/>
-                    <input type="submit" value="Submit"/>
+                    <input type="submit" value="Login"/>
                 </form> 
                 <p ref={this.setErrorMsgRef} style={{ 'color': '#F00' }} ></p>
             </div>
