@@ -48,6 +48,10 @@ class ChartApp extends Component
     render()
     {
         return (
+            <React.Fragment>
+
+            <div className='nav'></div>
+
             <div className='chart_app'>
                 <div className='window_tab'>
 
@@ -63,6 +67,8 @@ class ChartApp extends Component
                     {this.generateWindows()}
                 </div>                
             </div>
+
+            </React.Fragment>
         );
     }
 
@@ -182,7 +188,7 @@ class ChartApp extends Component
 
         /** Retrieve strategy info */
         const reqOptions = {
-            method: 'POST',
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 'username': username
@@ -193,7 +199,7 @@ class ChartApp extends Component
         {
             strategies[strategy_ids[i]] = await fetch(
                 'http://127.0.0.1/v1/strategies/' +
-                strategy_ids[i] + '/start',
+                strategy_ids[i] + '/gui',
                 reqOptions
             )
                 .then(res => res.json());

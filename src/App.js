@@ -1,37 +1,97 @@
 import React, { Component } from 'react';
-import ChartApp from './components/ChartApp';
+import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
+import Cookies from 'universal-cookie';
 import './App.css';
-
-// import socketIOClient from 'socket.io-client';
+// Components
+import ChartApp from './components/ChartApp';
+import Login from './components/Login';
 
 class App extends Component 
 {
+    state ={
+        isLoggedIn: undefined
+    }
 
-	callAPI()
-	{
-        // const endpoint = "localhost:8080"
-        // const socket = socketIOClient(endpoint);
+	render() {
+        return this.getComponents();
+    }
 
-        // socket.on('connect', () =>
-        // {
-        //     console.log('connected!');
-        // });
+    async componentDidMount()
+    {
+        let { isLoggedIn } = this.state;
+        isLoggedIn = await this.checkToken();
+        this.setState({ isLoggedIn });
+    }
 
-        // this.setState({ socket: socket })
+    getComponents()
+    {
+        if (this.state.isLoggedIn === undefined)
+            return (<React.Fragment></React.Fragment>);
+        else
+        {
+            return (
+                <div className='container'>
+                    <Router>
+                        <Switch>
+                            <Route exact path="/"> 
+                                <Redirect to="/login"/>
+                            </Route>
+                            <Route path="/login">
+                                {this.getConditionalLoginComponent()}
+                            </Route>
+                            <Route path="/app">
+                                {this.getConditionalAppComponent()}
+                            </Route>
+                            <Route>
+                                404
+                            </Route>
+                        </Switch>
+                    </Router>
+                </div>
+            );
+        }
     }
     
-	render() {
-        return (
-            <div className='container'>
-                <div className='nav'>
+    getConditionalLoginComponent()
+    {
+        if (this.state.isLoggedIn)
+            return <Redirect to="/app"/>;
+        else
+            return <Login/>;
+    }
 
-                </div>
+    getConditionalAppComponent()
+    {
+        if (this.state.isLoggedIn)
+            return <ChartApp/>;
+        else
+            return <Redirect to="/login"/>;   
+    }
 
-                <ChartApp/>
-            </div>
-        );
-	}
-	
+    async checkToken()
+    {
+        const cookies = new Cookies();
+        const token = cookies.get('token');
+
+        if (token !== undefined)
+        {
+            const reqOptions = {
+                method: 'POST'
+            }
+    
+            let res = await fetch(
+                `http://127.0.0.1/login?username=${token.username}&token=${token.token}`,
+                reqOptions
+            );
+
+            if (res.status === 200)
+                // Redirect to App
+                return true;
+            else
+                cookies.remove('token');
+        }
+        return false;
+    }
 }
 
 export default App;
