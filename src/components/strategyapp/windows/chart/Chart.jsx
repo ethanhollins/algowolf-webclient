@@ -35,8 +35,9 @@ class Chart extends Component
         is_move: false,
         trans_x: 0,
         limit: [null,null],
+        first_load: true,
         is_scrolling: null,
-        is_loading: false
+        is_loading: false,
     }
 
     constructor(props)
@@ -102,18 +103,7 @@ class Chart extends Component
         /* Initialize Chart */
         if (this.getChart() === undefined)
             await this.addChart();
-
-        const padding_x = 5.0;
-
-        const bids = this.getBids();
-        const chart_properties = this.getChartProperties(bids, -padding_x);
-        const pos = chart_properties.pos;
         
-        const scale = chart_properties.scale;
-        const transition_y = scale.y; 
-
-        this.setState({ pos, scale, transition_y });
-
         /* Initialize Indicators */
         const properties = this.getProperties();
         let { overlays, studies } = this.state;
@@ -148,17 +138,27 @@ class Chart extends Component
 
     async componentDidUpdate() 
     {
-        const { pos, scale, trans_x } = this.state;
-
-        if (trans_x === 0 && this.getChart() !== undefined)
+        let { pos, scale, first_load, trans_x } = this.state;
+        
+        if (this.getChart() !== undefined)
         {
-            const bids = await this.getBids();
+            const bids = this.getBids();
             const chart_properties = this.getChartProperties(bids, Math.floor(pos.x));
+            if (first_load)
+            {
+                first_load = false;
+                pos = chart_properties.pos;
+                scale = chart_properties.scale;
+                this.setState({ pos, scale, first_load });
+            }
+            else if (trans_x === 0)
+            {
+                const num_steps = 16;
+                const c = scale.y;
+                const m = (chart_properties.scale.y - c) / Math.pow(num_steps, 2);
+                this.transitionScaleY(num_steps, m, c, 0);
+            }
     
-            const num_steps = 16;
-            const c = scale.y;
-            const m = (chart_properties.scale.y - c) / Math.pow(num_steps, 2);
-            this.transitionScaleY(num_steps, m, c, 0);
         }
 
         this.update(); 
@@ -258,16 +258,6 @@ class Chart extends Component
     onMouseMove(e)
     {
         let { is_down, is_move } = this.state;
-        
-        // let update_pos = false;
-        // if (Math.abs(mouse_pos.x - e.clientX) >= 2 || 
-        //     Math.abs(mouse_pos.y - e.clientY) >= 2)
-        // {
-        //     update_pos = true;
-        //     mouse_pos = {
-        //         x: e.clientX, y: e.clientY
-        //     }
-        // }
 
         if (is_down)
         {
@@ -293,19 +283,14 @@ class Chart extends Component
 
     onCrosshairMove(e)
     {
-        const camera = this.getCamera();
-        const { pos, scale } = this.state;
         let { mouse_pos } = this.state;
         
         let update_pos = false;
-        if (Math.abs(mouse_pos.x - e.clientX) >= 2 || 
-            Math.abs(mouse_pos.y - e.clientY) >= 2)
+        if (Math.abs(mouse_pos.x - e.clientX) >= 1 || 
+            Math.abs(mouse_pos.y - e.clientY) >= 1)
         {
             update_pos = true;
-            mouse_pos = camera.convertScreenPosToWorldPos(
-                { x: e.clientX, y: e.clientY }, pos, this.getChartSize(), scale
-            );
-            mouse_pos.x = Math.floor(mouse_pos.x) + 0.5;
+            mouse_pos = { x: e.clientX, y: e.clientY };
         }
 
         if (update_pos)
@@ -420,6 +405,7 @@ class Chart extends Component
                     ref={this.addOverlayRef}
                     index={i}
                     getValues={this.getOverlayValues}
+                    getProperties={this.getOverlayProperties}
                     getCamera={this.getCamera}
                     getCanvas={this.getCanvas}
                     getPos={this.getPos}
@@ -445,7 +431,10 @@ class Chart extends Component
                     ref={this.addStudyRef}
                     index={i}
                     getValues={this.getStudyValues}
+                    getProperties={this.getStudyProperties}
+                    getTimestamps={this.getTimestamps}
                     getAllTimestamps={this.getAllTimestamps}
+                    getNumZeroDecimals={this.getNumZeroDecimals}
                     getCamera={this.getCamera}
                     getCanvas={this.getCanvas}
                     getPos={this.getPos}
@@ -473,8 +462,8 @@ class Chart extends Component
     async updateChart()
     {
         let { pos, scale, is_loading } = this.state;
-        const ts = await this.getTimestamps();
-        const ohlc = await this.getBids();
+        const ts = this.getTimestamps();
+        const ohlc = this.getBids();
 
         if (!is_loading && pos.x + scale.x > ohlc.length)
         {
@@ -492,29 +481,14 @@ class Chart extends Component
 
             // Set time range to 1000 bars before earliest loaded date
             const to_dt = moment(ts[0] * 1000);
-            const from_dt = to_dt.clone().subtract(
-                moment.duration(this.getPeriodOffsetSeconds(this.getPeriod()) * 1000 * count)
+            const from_dt = this.props.getCountDateFromDate(
+                this.getPeriod(), 1000, to_dt.clone(), -1
             );
             
             // Retrieve all available data
             let data = await this.props.retrieveChartData(
                 this.getProduct(), this.getPeriod(), from_dt, to_dt
             );
-            if (data.metadata.page_amount > 1)
-            {
-                while (data.metadata.page_number < data.metadata.page_amount-1)
-                {
-                    const new_data = await this.props.retrieveChartData(
-                        this.getProduct(), this.getPeriod(), 
-                        from_dt, to_dt, 
-                        data.metadata.page_number + 1
-                    );
-                    data.metadata = new_data.metadata;
-                    data.ohlc.timestamps = [...data.ohlc.timestamps, ...new_data.ohlc.timestamps];
-                    data.ohlc.asks = [...data.ohlc.asks, ...new_data.ohlc.asks];
-                    data.ohlc.bids = [...data.ohlc.bids, ...new_data.ohlc.bids];
-                }
-            }
 
             // Update chart with new data
             this.props.updateChart(this.getProduct(), this.getPeriod(), data.ohlc);
@@ -529,8 +503,8 @@ class Chart extends Component
     {
         const chart_size = this.getChartSize();
         const canvas = this.getCanvas();
-        canvas.setAttribute('width', chart_size.width-1);
-        canvas.setAttribute('height', chart_size.height-1);
+        canvas.setAttribute('width', Math.round(chart_size.width-1));
+        canvas.setAttribute('height', Math.round(chart_size.height+this.getBottomOff()-1));
     }
 
     updateItems()
@@ -544,7 +518,7 @@ class Chart extends Component
         let segment_size = this.getSegmentSize(0);
        
         this.defineClip(ctx, start_pos, segment_size);
-        
+
         // Draw Grid
         const price_data = this.drawPriceGrid(ctx);
         const time_data = this.drawTimeGrid(ctx);
@@ -562,16 +536,17 @@ class Chart extends Component
         // Handle Open Positions
         this.handlePositions(ctx);
 
-        // Update Drawing Properties
+        // Handle Price Line
+        this.handlePriceLine(ctx);
+
+        // Handle Drawings
         this.handleDrawings(ctx);
 
         const studies = this.getStudies();
-        if (studies.length === 0) this.drawTimes(ctx, time_data);
         this.drawPrices(ctx, price_data);
 
         // Restore context
         ctx.restore();
-
 
         // Reset Transform
         ctx.setTransform(1.0, 0, 0, 1.0, 0, 0);
@@ -583,16 +558,23 @@ class Chart extends Component
 
             start_pos = this.getSegmentStartPos(study.getWindowIndex());
             segment_size = this.getSegmentSize(study.getWindowIndex());
-
+            
             this.defineClip(ctx, start_pos, segment_size);
             // Draw Study
-            study.drawGrid(ctx, time_data, i === studies.length-1);
-            study.draw(); 
+            study.drawTimeGrid(ctx, time_data);
+            const study_price_data = study.drawPriceGrid(ctx);
+            study.draw();
+            study.drawPrices(ctx, study_price_data); 
+            study.drawSeparator(ctx);
 
             // Restore context
             ctx.restore(); 
         }
 
+        this.drawTimes(ctx, time_data);
+        // Handle Cross Segment Drawings
+        this.handleUniversalDrawings(ctx);
+        // Handle Crosshairs
         this.handleCrosshairs(ctx);
     }
 
@@ -763,6 +745,18 @@ class Chart extends Component
             return null;
     }
 
+    getPriceFormat(offset)
+    {
+        if (offset < this.props.getPeriodOffsetSeconds("D"))
+            return 'HH:mm';
+        else if (offset < this.props.getPeriodOffsetSeconds("W"))
+            return 'ddd d';
+        else if (offset < this.props.getPeriodOffsetSeconds("Y"))
+            return 'MMM';
+        else
+            return 'YYYY';
+    }
+
     drawPriceGrid(ctx)
     {
         
@@ -791,10 +785,6 @@ class Chart extends Component
         {
             
         }
-        
-        const font_size = 10;
-        ctx.font = String(font_size) + 'pt trebuchet ms'; //Consolas
-        ctx.fillStyle = 'rgb(80, 80, 80)';
         
         let data = [];
         while (y > end_pos.y)
@@ -905,6 +895,7 @@ class Chart extends Component
         ctx.fillStyle = 'rgb(80, 80, 80)';
         ctx.strokeStyle = 'rgb(255, 255, 255)';
         ctx.lineWidth = 2.0;
+        ctx.textAlign = 'right';
 
         // Draw grid
         for (let i = 0; i < data.length; i++)
@@ -915,8 +906,8 @@ class Chart extends Component
                 { x: 0, y: c_y }, pos, seg_size, scale
             ).y;
             
-            ctx.strokeText(c_y.toFixed(5), seg_size.width - 50, screen_y + (3/4 * (font_size/2)));
-            ctx.fillText(c_y.toFixed(5), seg_size.width - 50, screen_y + (3/4 * (font_size/2)));
+            ctx.strokeText(c_y.toFixed(5), seg_size.width - 5, screen_y + (3/4 * (font_size/2)));
+            ctx.fillText(c_y.toFixed(5), seg_size.width - 5, screen_y + (3/4 * (font_size/2)));
         }
     }
 
@@ -926,38 +917,64 @@ class Chart extends Component
 
         const camera = this.getCamera();
         const { pos, scale } = this.state;
-        const seg_size = this.getSegmentSize(0);
-        const timestamps = this.getTimestamps().concat(this.state.future_timestamps);
+        const timestamps = this.getTimestamps();
+        const all_timestamps = this.getAllTimestamps();
         const tz = 'Australia/Melbourne';
+
+        const chart_size = this.getChartSize();
+        const start_pos = { x: 0, y: chart_size.height }
+        const seg_size = { width: chart_size.width, height: this.getBottomOff()}
 
         // Font settings
         const font_size = 10;
         ctx.font = String(font_size) + 'pt trebuchet ms'; //Consolas
         ctx.fillStyle = 'rgb(80, 80, 80)';
-        ctx.strokeStyle = 'rgb(255, 255, 255)';
-        ctx.lineWidth = 2.0;
+        ctx.textAlign = 'left';
 
+
+        const num_extra = all_timestamps.length - timestamps.length;
         // Draw grid
+
         for (let i = 0; i < data.length; i++)
         {
-            let c_x = data[i];
-            let time = moment(timestamps[data[i]]*1000).tz(tz);
+            const c_x = data[i];
+            const idx = (all_timestamps.length) - (c_x + num_extra);
+            let time = undefined;
+            if (c_x >= -num_extra)
+            {
+                time = moment(all_timestamps[idx]*1000).tz(tz);
+            }
 
             let screen_x = camera.convertWorldPosToScreenPos(
                 { x: c_x+0.5, y: 0 }, pos, seg_size, scale
             ).x;
 
-            ctx.strokeText(
-                time.format('ddd DD'), 
-                screen_x, 
-                seg_size.height - 4
-            );
-            ctx.fillText(
-                time.format('ddd DD'), 
-                screen_x, 
-                seg_size.height - 4
-            );
+            ctx.strokeStyle = `rgb(240, 240, 240)`;
+            ctx.lineWidth = 0.9;
+
+            ctx.beginPath();
+            ctx.moveTo(screen_x, start_pos.y); 
+            ctx.lineTo(screen_x, start_pos.y + seg_size.height);
+            ctx.stroke();
+
+            if (time !== undefined)
+            {
+                ctx.strokeStyle = 'rgb(255, 255, 255)';
+                ctx.lineWidth = 2.0;
+                ctx.strokeText(
+                    time.format(this.getCurrentPriceFormat()), 
+                    screen_x, 
+                    start_pos.y + seg_size.height - 4
+                );
+                ctx.fillText(
+                    time.format(this.getCurrentPriceFormat()), 
+                    screen_x, 
+                    start_pos.y + seg_size.height - 4
+                );
+            }
         }
+
+        ctx.fillRect(0, start_pos.y, seg_size.width, 1); 
     }
 
     degsToRads(degs) { return degs / (180/Math.PI); }
@@ -978,6 +995,9 @@ class Chart extends Component
 
             // Get Position
             const x = this.getPosFromTimestamp(c_pos.open_time);
+            // Skip if x doesn't exist
+            if (x === undefined) continue;
+
             const entry_pos = camera.convertWorldPosToScreenPos(
                 { x: x+0.5, y: c_pos.entry_price }, pos, seg_size, scale
             )
@@ -1049,6 +1069,24 @@ class Chart extends Component
         }
     }
 
+    drawVerticalLine(ctx, pos, properties)
+    {
+        const chart_size = this.getChartSize();
+
+        // Handle properties
+        ctx.fillStyle = properties.colors[0];
+        ctx.fillRect(Math.round(pos.x - properties.scale/2), 0, properties.scale, chart_size.height);
+    }
+
+    drawHorizontalLine(ctx, pos, properties)
+    {
+        const chart_size = this.getChartSize();
+
+        // Handle properties
+        ctx.fillStyle = properties.colors[0];
+        ctx.fillRect(0, Math.round(pos.y - properties.scale/2), chart_size.width, properties.scale);
+    }
+
     handleDrawings(ctx)
     {
         const camera = this.getCamera();
@@ -1060,11 +1098,12 @@ class Chart extends Component
         for (let i = 0; i < drawings.length; i++)
         {
             const d_props = drawings[i];
-            if (!(d_props.type in Drawings)) continue;
-            const drawing = Drawings[d_props.type]();
 
             // Get Position
-            const x = this.getPosFromTimestamp(d_props.timestamps[0]);
+            const x = this.getPosFromAllTimestamps(d_props.timestamps[0]);
+            // Skip if x doesn't exist
+            if (x === undefined) continue
+
             const y = d_props.prices[0];
             const screen_pos = camera.convertWorldPosToScreenPos(
                 { x: x+0.5, y: y }, 
@@ -1072,71 +1111,206 @@ class Chart extends Component
                 seg_size,
                 scale
             )
-
-            // Get Rotation and Scale
-            const rotation = this.degsToRads(d_props.properties.rotation);
-            const drawing_scale = ((drawing.scale + d_props.properties.scale) * (1/scale.x));
-
-            const width = drawing.size.width;
-            const height = drawing.size.height;
-
-            // Move to position
-            ctx.translate(
-                screen_pos.x - (width*drawing_scale),
-                screen_pos.y - (height*drawing_scale)
-            );
-            ctx.scale(drawing_scale, drawing_scale);
-
-            // Rotate around center
-            ctx.translate(width, height);
-            ctx.rotate(rotation);
-            ctx.translate(-width/2, -height/2);
             
-            ctx.fillStyle = d_props.properties.colors[0];
-            // Fill Path
-            ctx.fill(new Path2D(drawing.path));
-            // Reset Transform
-            ctx.setTransform(1,0,0,1,0,0);
+            // Handle Vertical Line
+            if (d_props.type === 'verticalLine')
+                continue
+            // Handle Horizontal Line
+            else if (d_props.type === 'horizontalLine')
+                this.drawHorizontalLine(ctx, screen_pos, d_props.properties);
+            // Handle Misc Drawings
+            else
+            {
+                if (!(d_props.type in Drawings)) continue;
+                const drawing = Drawings[d_props.type]();
+
+                // Get Rotation and Scale
+                const rotation = this.degsToRads(d_props.properties.rotation);
+                const drawing_scale = ((drawing.scale + d_props.properties.scale) * (1/scale.x));
+    
+                const width = drawing.size.width;
+                const height = drawing.size.height;
+    
+                // Move to position
+                ctx.translate(
+                    screen_pos.x - (width*drawing_scale),
+                    screen_pos.y - (height*drawing_scale)
+                );
+                ctx.scale(drawing_scale, drawing_scale);
+    
+                // Rotate around center
+                ctx.translate(width, height);
+                ctx.rotate(rotation);
+                ctx.translate(-width/2, -height/2);
+                
+                ctx.fillStyle = d_props.properties.colors[0];
+                // Fill Path
+                ctx.fill(new Path2D(drawing.path));
+                // Reset Transform
+                ctx.setTransform(1,0,0,1,0,0);
+            }
         }
+    }
+
+    handleUniversalDrawings(ctx)
+    {
+        const camera = this.getCamera();
+        const { pos, scale } = this.state;
+        const seg_size = this.getSegmentSize(0);
+
+        const drawings = this.getDrawingsProperties();
+
+        for (let i = 0; i < drawings.length; i++)
+        {
+            const d_props = drawings[i];
+
+            // Get Position
+            const x = this.getPosFromAllTimestamps(d_props.timestamps[0]);
+            // Skip if x doesn't exist
+            if (x === undefined) continue
+
+            const y = d_props.prices[0];
+            const screen_pos = camera.convertWorldPosToScreenPos(
+                { x: x+0.5, y: y }, 
+                pos, 
+                seg_size,
+                scale
+            )
+            
+            // Handle Vertical Line
+            if (d_props.type === 'verticalLine')
+                this.drawVerticalLine(ctx, screen_pos, d_props.properties);
+        }
+    }
+
+    handlePriceLine(ctx)
+    {
+        const { pos, scale } = this.state;
+        const seg_size = this.getSegmentSize(0);
+        const camera = this.getCamera();
+        const bids = this.getBids();
+
+        let c_bid = 0;
+        for (let i = bids.length-1; i >= 0; i--)
+        {
+            c_bid = bids[i][3];
+            if (c_bid !== 0) break;
+        }
+
+        const screen_pos = camera.convertWorldPosToScreenPos(
+            { x: 0, y: c_bid }, pos, seg_size, scale
+        );
+
+        // Box Settings
+        ctx.fillStyle = '#3498db';
+        ctx.fillRect(0, Math.round(screen_pos.y), seg_size.width, 1);
+
+        // Font settings
+        const font_size = 10;
+        ctx.font = String(font_size) + 'pt trebuchet ms'; //Consolas
+        ctx.textAlign = 'right';
+
+        const text_size = ctx.measureText(String(c_bid.toFixed(5)));
+        const box_height = Math.round(3/4 * (font_size) + 12);
+        const box_width = Math.round(text_size.width + 12);
+        ctx.fillRect(
+            Math.round(seg_size.width - box_width), 
+            Math.round(screen_pos.y - box_height/2),
+            seg_size.width,
+            box_height
+        );
+
+        ctx.fillStyle = 'rgb(255, 255, 255)';
+
+        ctx.fillText(
+            c_bid.toFixed(5), 
+            seg_size.width - 7, 
+            Math.round(screen_pos.y + (3/4 * (font_size/2)))
+        );
     }
 
     handleCrosshairs(ctx)
     {
-        const { mouse_pos, pos, scale } = this.state;
-        const chart_size = this.getChartSize();
+        let { mouse_pos } = this.state;
         const camera = this.getCamera();
+        const chart_size = this.getChartSize();
+        const seg_idx = this.getSegment(mouse_pos);
+        const seg_size = this.getSegmentSize(seg_idx);
+        const seg_start = this.getSegmentStartPos(seg_idx);
 
-        const mouse_screen_pos = camera.convertWorldPosToScreenPos(
-            mouse_pos, pos, chart_size, scale
-        );
-
+        let pos, scale = undefined;
+        if (seg_idx > 0)
+        {
+            const study = this.getStudies()[seg_idx-1];
+            pos = { x: this.state.pos.x, y: study.getPos().y};
+            scale = { x: this.state.scale.x, y: study.getScale().y};
+        }
+        else
+        {
+            pos = this.state.pos;
+            scale = this.state.scale;
+        }
+        
         const screen_pos = this.props.getScreenPos();
         const top_offset = this.props.getTopOffset() + screen_pos.y;
+        const mouse_world_pos = camera.convertScreenPosToWorldPos(
+            { x: mouse_pos.x, y: mouse_pos.y - seg_start.y - top_offset }, pos, seg_size, scale
+        );
+            
         const left_offset = screen_pos.x;
-
-        if (mouse_screen_pos.x < left_offset ||
-            mouse_screen_pos.x > chart_size.width + left_offset ||
-            mouse_screen_pos.y < top_offset ||
-            mouse_screen_pos.y > chart_size.height + top_offset)
+        if (mouse_pos.x < left_offset ||
+            mouse_pos.x > chart_size.width + left_offset ||
+            mouse_pos.y < top_offset ||
+            mouse_pos.y > chart_size.height + top_offset)
             return
         
         ctx.fillStyle = '#787878';
         let c_x = 0;
 
+        const snap_x = camera.convertWorldPosToScreenPos(
+            { x: Math.floor(mouse_world_pos.x)+0.5, y:0 }, pos, seg_size, scale
+        ).x;
+
         const line_width = 5;
         const line_space = 4;
         while (c_x < chart_size.width)
         {
-            ctx.fillRect(c_x, Math.round(mouse_screen_pos.y - top_offset), line_width, 1);
+            ctx.fillRect(c_x, Math.round(mouse_pos.y - top_offset), line_width, 1);
             c_x += line_width + line_space;
         }
 
         let c_y = 0;
-        while (c_y < chart_size.height)
+        while (c_y < chart_size.height + this.getBottomOff())
         {
-            ctx.fillRect(Math.round(mouse_screen_pos.x - left_offset), c_y, 1, line_width);
+            ctx.fillRect(Math.round(snap_x - left_offset), c_y, 1, line_width);
             c_y += line_width + line_space;
         }
+
+        // Box Settings
+        ctx.fillStyle = 'rgb(80,80,80)';
+
+        // Font settings
+        const font_size = 10;
+        ctx.font = String(font_size) + 'pt trebuchet ms'; //Consolas
+        ctx.textAlign = 'right';
+
+        const text_size = ctx.measureText(String(mouse_world_pos.y.toFixed(5)));
+        const box_height = Math.round(3/4 * (font_size) + 12);
+        const box_width = Math.round(text_size.width + 12);
+        ctx.fillRect(
+            Math.round(chart_size.width - box_width), 
+            Math.round(mouse_pos.y - top_offset - box_height/2),
+            chart_size.width,
+            box_height
+        );
+
+        ctx.fillStyle = 'rgb(255, 255, 255)';
+
+        ctx.fillText(
+            mouse_world_pos.y.toFixed(5), 
+            chart_size.width - 7, 
+            Math.round(mouse_pos.y - top_offset + (3/4 * (font_size/2)))
+        );
     }
 
     defineClip(ctx, start_pos, segment_size)
@@ -1179,8 +1353,28 @@ class Chart extends Component
     getTimestampIdx = (ts) =>
     {
         const timestamps = this.getTimestamps();
-        const indicies = [...Array(timestamps.length).keys()]
+        // Return undefined if timestamp is greater than latest existing timestamp
+        if (ts > timestamps[timestamps.length-1])
+            return undefined
 
+        const indicies = [...Array(timestamps.length).keys()]
+        const idx = indicies.reduce(function(prev, curr) {
+            return (
+                Math.abs(timestamps[curr] - ts) < Math.abs(timestamps[prev] - ts) ? curr : prev
+            );
+        });
+
+        return idx;
+    }
+
+    getAllTimestampsIdx = (ts) =>
+    {
+        const timestamps = this.getAllTimestamps();
+        // Return undefined if timestamp is greater than latest existing timestamp
+        if (ts > timestamps[timestamps.length-1])
+            return undefined
+
+        const indicies = [...Array(timestamps.length).keys()]
         const idx = indicies.reduce(function(prev, curr) {
             return (
                 Math.abs(timestamps[curr] - ts) < Math.abs(timestamps[prev] - ts) ? curr : prev
@@ -1218,7 +1412,16 @@ class Chart extends Component
     getPosFromTimestamp = (ts) =>
     {
         const idx = this.getTimestampIdx(ts);
-        return this.getTimestamps().length - idx;
+        if (idx !== undefined) return this.getTimestamps().length - idx;
+        else return undefined;
+    }
+
+    getPosFromAllTimestamps = (ts) =>
+    {
+        const idx = this.getAllTimestampsIdx(ts);
+        if (idx !== undefined) return this.getTimestamps().length - idx;
+        else return undefined;
+        
     }
 
     setFutureTimestamps = () =>
@@ -1241,7 +1444,7 @@ class Chart extends Component
         {
             ts += off;
 
-            if (ts > c_weekend[0].unix())
+            if (ts >= c_weekend[0].unix())
             {
                 ts = c_weekend[1].unix();
                 c_weekend = this.getWeekendDates(ts);
@@ -1345,13 +1548,34 @@ class Chart extends Component
         }
     }
 
+    getSegment = (pos) =>
+    {
+        const portions = this.getPortions();
+
+        for (let i=0; i < portions.length; i++)
+        {
+            const seg_size = this.getSegmentSize(i);
+            const seg_start = this.getSegmentStartPos(i);
+            if (pos.y >= seg_start.y + this.props.getTopOffset() && 
+                    pos.y < seg_start.y + this.props.getTopOffset() + seg_size.height)
+                return i;
+        }
+
+        return null;
+    }
+
+    getBottomOff = () =>
+    {
+        return 20;
+    }
+
     getChartSize = () =>
     {
         const container_size = this.getSize();
 
         return {
             width: container_size.width,
-            height: container_size.height
+            height: container_size.height - this.getBottomOff()
         }
     }
 
@@ -1373,6 +1597,11 @@ class Chart extends Component
     getDrawings = () =>
     {
         return this.drawings;
+    }
+
+    getCurrentPriceFormat = () =>
+    {
+        return this.getPriceFormat(this.state.intervals.x);
     }
 
     getPos = () =>
@@ -1445,9 +1674,9 @@ class Chart extends Component
         return this.getProperties().price;
     }
 
-    getOverlaysProperties = () =>
+    getOverlayProperties = (idx) =>
     {
-        return this.getProperties().overlays;
+        return this.getProperties().overlays[idx].properties;
     }
 
     getOverlayValues = (idx) =>
@@ -1466,9 +1695,9 @@ class Chart extends Component
         return result;
     }
 
-    getStudiesProperties = () =>
+    getStudyProperties = (idx) =>
     {
-        return this.getProperties().studies;
+        return this.getProperties().studies[idx].properties;
     }
 
     getStudyValues = (idx) =>
@@ -1503,7 +1732,9 @@ class Chart extends Component
     {
         const ohlc_data = await this.props.retrieveChartData(
             this.getProduct(),
-            this.getPeriod()
+            this.getPeriod(),
+            this.props.getCountDateFromDate(this.getPeriod(), 1000, moment(), -1),
+            moment()
         );
         this.props.addChart(
             this.getProduct(),

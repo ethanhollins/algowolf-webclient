@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Cookies from 'universal-cookie';
+import '../Login.css';
 
 class Login extends Component
 {
@@ -20,15 +21,28 @@ class Login extends Component
     render()
     {
         return (
-            <div>
-                <form style={{padding: "10px"}} onSubmit={this.handleSubmit.bind(this)}>
-                    <label htmlFor="username">Username:</label><br/>
-                    <input type="text" id="username" name="username" onChange={this.handleChange} /><br/>
-                    <label htmlFor="password">Password:</label><br/>
-                    <input type="password" id="password" name="password" onChange={this.handleChange} /><br/><br/>
-                    <input type="submit" value="Login"/>
-                </form> 
-                <p ref={this.setErrorMsgRef} style={{ 'color': '#F00' }} ></p>
+            <div className="login-ui">
+                <form className="login-form" onSubmit={this.handleSubmit.bind(this)}>
+                    <div className="login-field login-logo">
+                        <img id="logo_head" alt="" src={'./brokerlib_logo_brown.png'}/>
+                        {/* <h3 id="logo_head_text">Brokerlib</h3> */}
+                    </div>
+
+                    <div className="login-field">
+                        <label htmlFor="username" className='login-label'>Username</label>
+                        <input type="text" className="login-input" name="username" id="username" autoComplete="off" required onChange={this.handleChange} />
+                    </div>
+
+                    <div className="login-field">
+                        <label htmlFor="password" className='login-label'>Password</label>
+                        <input type="password" className="login-input" name="password" id="password" required onChange={this.handleChange} />
+                    </div>
+
+                    <div className="login-field">
+                        <input type="submit" className="login-input" value="Login"/>
+                        <p ref={this.setErrorMsgRef} className="login-msg" ></p>
+                    </div>
+                </form>
             </div>
         )
     }
@@ -38,7 +52,7 @@ class Login extends Component
         let { username, password } = this.state;
         if (event.target.name === 'username')
         {
-            username = event.target.value;
+            username = event.target.value.toLowerCase();
         }
         else if (event.target.name === 'password')
         {
@@ -51,11 +65,14 @@ class Login extends Component
     {
         event.preventDefault();
         const reqOptions = {
-            method: 'POST'
+            method: 'POST',
+            body: JSON.stringify({
+                'username': this.state.username,
+                'password': this.state.password
+            })
         }
-
         let res = await fetch(
-            `http://127.0.0.1/login?username=${this.state.username}&password=${this.state.password}`,
+            `${URI}/login`,
             reqOptions
         );
         
@@ -81,5 +98,7 @@ class Login extends Component
         
     }
 }
+
+const URI = 'http://127.0.0.1:3000';
 
 export default Login;

@@ -1,38 +1,31 @@
 class Indicators {
     /* Overlays */
 
-    static calc = (ind, period, timestamps, asks, bids, get_value) =>
+    static calc = (ind, period, min_bars, timestamps, asks, bids, get_value) =>
     {
         let cache_ts = ind.timestamps[period];
         let cache_asks = ind.asks[period];
-        cache_asks.splice(0, period-1);
+        cache_asks.splice(0, min_bars-1);
         let cache_bids = ind.bids[period];
-        cache_bids.splice(0, period-1);
+        cache_bids.splice(0, min_bars-1);
 
         // Calculate new values before
         let start = undefined;
+        let ask, bid = undefined;
         if (cache_ts.length > 0)
         {
             start = timestamps.filter((x) => x < cache_ts[0]).length;
             for (let i = start-1; i > 0; i--)
             {
-                if (period !== undefined && i < period)
-                {
-                    cache_asks.unshift(null);
-                    cache_bids.unshift(null);
-                } 
-                else if (asks[i].every((x) => x === 0))
+                ask = get_value(i, asks);
+                bid = get_value(i, bids);
+
+                if (ask[0] !== null || asks[i].every((x) => x === 0))
                 {
                     cache_ts.unshift(timestamps[i]);
-                    cache_asks.unshift(null);
-                    cache_bids.unshift(null);
                 }
-                else
-                {
-                    cache_ts.unshift(timestamps[i]);
-                    cache_asks.unshift(get_value(i, asks));
-                    cache_bids.unshift(get_value(i, bids));
-                }
+                cache_asks.unshift(ask);
+                cache_bids.unshift(bid);
             }
         }
 
@@ -56,23 +49,14 @@ class Indicators {
 
         for (let i = start; i < timestamps.length; i++) 
         {
-            if (period !== undefined && i < period)
-            {
-                cache_asks.push(null);
-                cache_bids.push(null);
-            }
-            else if (asks[i].every((x) => x === 0))
+            ask = get_value(i, asks);
+            bid = get_value(i, bids);
+            if (ask[0] !== null || asks[i].every((x) => x === 0))
             {
                 cache_ts.push(timestamps[i]);
-                cache_asks.push(null);
-                cache_bids.push(null);
             }
-            else
-            {
-                cache_ts.push(timestamps[i]);
-                cache_asks.push(get_value(i, asks));
-                cache_bids.push(get_value(i, bids));
-            }
+            cache_asks.push(ask);
+            cache_bids.push(bid);
         }
     }
 
@@ -80,6 +64,7 @@ class Indicators {
     static sma = (timestamps, asks, bids, properties) => 
     {
         const period = properties.periods[0];
+        const min_bars = period;
 
         if (!(period in Indicators.sma.timestamps))
         {
@@ -90,17 +75,54 @@ class Indicators {
 
         function get_value(i, ohlc)
         {
+            // Validation Check
+            if (i < min_bars || ohlc[i].every((x) => x === 0))
+                return [null]
+                
             let ma = 0
             for (let j = 0; j < period; j++)
             {
                 ma = ma + ohlc[i - j][3];
             }
-            return Math.round((
+            return [Math.round((
                 ma / period
-            ) * 100000) / 100000;
+            ) * 100000) / 100000];
         }
 
-        Indicators.calc(Indicators.sma, period, timestamps, asks, bids, get_value);
+        Indicators.calc(Indicators.sma, period, min_bars, timestamps, asks, bids, get_value);
+    }
+
+    // Donchian Channel
+    static donch = (timestamps, asks, bids, properties) => 
+    {
+        const period = properties.periods[0];
+        const min_bars = period+1;
+
+        if (!(period in Indicators.donch.timestamps))
+        {
+            Indicators.donch.timestamps[period] = [];
+            Indicators.donch.asks[period] = [];
+            Indicators.donch.bids[period] = [];
+        }
+
+        function get_value(i, ohlc)
+        {
+            // Validation Check
+            if (i < min_bars || ohlc[i].every((x) => x === 0))
+                return [null, null]
+
+            let high_low = [0,0]
+            for (let j = 0; j < period; j++)
+            {
+                if (high_low[0] === 0 || ohlc[i-j-1][1] > high_low[0])
+                    high_low[0] = ohlc[i-j-1][1]
+                if (high_low[1] === 0 || ohlc[i-j-1][2] < high_low[1])
+                    high_low[1] = ohlc[i-j-1][2]
+            }
+            return high_low;
+        }
+
+        Indicators.calc(Indicators.donch, period, min_bars, timestamps, asks, bids, get_value);
     }
 
     /* Studies */
@@ -111,6 +133,7 @@ class Indicators {
         for (let i = 0; i < properties.periods.length; i++)
         {
             const period = properties.periods[i];
+            const min_bars = period;
 
             if (!(period in Indicators.tr.timestamps))
             {
@@ -121,14 +144,18 @@ class Indicators {
     
             function get_value(i, ohlc)
             {
+                // Validation Check
+                if (i < min_bars || ohlc[i].every((x) => x === 0))
+                    return [null]
+
                 let ma = 0
                 for (let j = 0; j < period; j++)
                 {
                     ma = Math.abs(ohlc[i - j][0] - ohlc[i - j][3]);
                 }
-                return ma / period;
+                return [ma / period];
             }
-            Indicators.calc(Indicators.tr, period, timestamps, asks, bids, get_value);
+            Indicators.calc(Indicators.tr, period, min_bars, timestamps, asks, bids, get_value);
         }
     }
     

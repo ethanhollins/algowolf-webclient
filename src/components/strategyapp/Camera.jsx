@@ -81,6 +81,38 @@ class Camera extends Component
 
         return screen_unit;
     }
+
+    convertScaledScreenUnitToWorldUnit = (screen_unit, size, scale) => 
+    {
+        let world_unit = {
+            x: 0, y: 0
+        };
+
+        world_unit.x = (
+            (screen_unit.x / size.width) * scale.x
+        ) / window.devicePixelRatio;
+        world_unit.y = (
+            (screen_unit.y / size.height) * scale.y
+        ) / window.devicePixelRatio;
+
+        return world_unit;
+    }
+
+    convertScaledWorldUnitToScreenUnit = (world_unit, size, scale) => 
+    {
+        let screen_unit = {
+            x: 0, y: 0
+        };
+
+        screen_unit.x = (
+            (world_unit.x / scale.x) * size.width
+        ) * window.devicePixelRatio;
+        screen_unit.y = (
+            (world_unit.y / scale.y) * size.height
+        ) * window.devicePixelRatio;
+
+        return screen_unit;
+    }
     
 
 }

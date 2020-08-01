@@ -84,7 +84,7 @@ class Candlesticks extends Component
             }
 
             const c_x = Math.round(body_pos.x - body_size.x / 2);
-            const c_y = body_pos.y - body_size.y / 2;
+            const c_y = Math.max(body_pos.y - body_size.y / 2);
             
             const w_x = Math.round(body_pos.x);
             const w_width = 1.0;

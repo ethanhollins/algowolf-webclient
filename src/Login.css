@@ -1,0 +1,89 @@
+
+label, input {
+    display: block;
+}
+
+.login-ui {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    margin-left: 40px;
+    margin-right: 40px
+}
+
+.login-form {
+    position: relative;
+    flex-shrink: 0;
+    width: 100%;
+}
+
+.login-field {
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+}
+
+.login-input {
+    box-sizing: border-box;
+    width: 100%;
+    height: 50px;
+    border: 1px solid rgb(200,200,200);
+    border-radius: 0%;
+    margin-top: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.login-input[type=submit] {
+    font-weight: 400;
+    font-size: 1.3em;
+    color: #FFF;
+    background-color: #e67e22;
+    border-color: #d35400;
+    border-radius: 3px;
+}
+
+.login-input:focus:not([type=submit]) {
+    outline: none;
+    border: 1px solid rgb(80,80,80);
+    border-bottom-width: 2px;
+}
+
+.login-input:focus {
+    outline: none;
+    border: 1px solid rgb(80,80,80);
+}
+.login-input:active[type=submit] {
+    background-color: #d35400;
+}
+
+.login-label {
+    font-size: 0.8em;
+    font-weight: 500;
+    margin: 0 auto;
+}
+
+.login-logo {
+    text-align: center;
+}
+
+.login-msg {
+    color: #e74c3c;
+    text-align: center;
+    font-size: 0.85em;
+}
+
+#logo_head {
+    margin: 0;
+    width: 150px;
+}
+
+#logo_head_text {
+    font-size: 1.8em;
+    font-family: Helvetica, Arial, sans-serif;
+    margin: 0;
+}

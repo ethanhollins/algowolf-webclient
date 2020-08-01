@@ -7,8 +7,7 @@ class WindowWrapper extends Component
 {
     state = {
         pos: { x: 0, y: 0 },
-        scale: { x: 250, y: 250 },
-        size: { width: 200, height: 200 },
+        size: { width: 100, height: 100 },
         is_move: false,
         keys: []
     }
@@ -56,10 +55,6 @@ class WindowWrapper extends Component
                 ref={this.setWindowWrapperRef}
                 className="window_wrapper"
             >
-                <svg style={CORNER_STYLE} version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
-                    viewBox="0 0 50 50" xmlSpace="preserve">
-                    <path fill="rgb(80, 80, 80)" d="M0,50c0,0,9.3-39.5,50-50H0V50z"/>
-                </svg>
                 <Camera
                     ref={this.setCameraRef}
                 />
@@ -84,7 +79,8 @@ class WindowWrapper extends Component
         const mouse_pos = {
             x: e.clientX, y: e.clientY-this.getTopOffset()
         }
-        const { pos, size, scale, keys } = this.state;
+        const { pos, size, keys } = this.state;
+        const scale = this.props.getScale();
         const camera = this.getCamera();
         const container_size = this.getContainerSize();
         let { is_move } = this.state;
@@ -117,7 +113,8 @@ class WindowWrapper extends Component
 
         if (is_move)
         {
-            let { pos, size, scale } = this.state;
+            let { pos, size } = this.state;
+            const scale = this.props.getScale();
             const camera = this.getCamera();
             const container_size = this.getContainerSize();
 
@@ -192,20 +189,21 @@ class WindowWrapper extends Component
     update()
     {
         const camera = this.getCamera();
-        const { pos, size, scale } = this.state;
+        const { pos, size } = this.state;
+        const scale = this.props.getScale();
         const container_size = this.getContainerSize();
-        const screen_pos = camera.convertWorldUnitToScreenUnit(
+        const screen_pos = camera.convertScaledWorldUnitToScreenUnit(
             {x: Math.round(pos.x), y: Math.round(pos.y) }, container_size, scale
         );
-        const screen_size = camera.convertWorldUnitToScreenUnit(
+        const screen_size = camera.convertScaledWorldUnitToScreenUnit(
             { x: size.width, y: size.height }, container_size, scale
         );
-        //{x: Math.round(pos.x), y: Math.round(pos.y) }
+
         let window_wrapper = this.getWindowWrapper();
         window_wrapper.style.left = screen_pos.x + "px";
         window_wrapper.style.top = screen_pos.y + "px";
-        window_wrapper.style.width = screen_size.x + "px"
-        window_wrapper.style.height = screen_size.y + "px"
+        window_wrapper.style.width = screen_size.x + "px";
+        window_wrapper.style.height = screen_size.y + "px";
     }
 
     // convertWorldUnitToScreenUnit = (world_unit) =>
@@ -230,7 +228,8 @@ class WindowWrapper extends Component
 
     getScreenPos = () =>
     {
-        const { pos, scale } = this.state;
+        const { pos } = this.state;
+        const scale = this.props.getScale();
         const camera = this.getCamera();
         const container_size = this.getContainerSize();
         return camera.convertWorldUnitToScreenUnit(
@@ -261,12 +260,5 @@ class WindowWrapper extends Component
 }
 
 const SPACEBAR = 32;
-const CORNER_STYLE = {
-    position: "absolute",
-    width: "25px",
-    height: "25px",
-    left: "0px",
-    top: "0px",
-}
 
 export default WindowWrapper;
