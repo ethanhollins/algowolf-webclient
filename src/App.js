@@ -1,118 +1,160 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
-import Cookies from 'universal-cookie';
 import './App.css';
 // Components
 import StrategyApp from './components/StrategyApp';
 import Login from './components/Login';
+import Logout from './components/Logout';
+import Home from './components/Home';
+import { config } from '@fortawesome/fontawesome-svg-core'
 
 class App extends Component 
 {
     state ={
-        username: null,
-        isLoggedIn: undefined
+        user_id: null
     }
 
-	render() {
-        return this.getComponents();
-    }
-
-    async componentDidMount()
+    constructor(props)
     {
-        let { isLoggedIn } = this.state;
-        isLoggedIn = await this.checkToken();
-        this.setState({ isLoggedIn });
+        super(props);
+        config.autoAddCss = false
     }
 
-    getComponents()
-    {
-        if (this.state.isLoggedIn === undefined)
-            return (<React.Fragment></React.Fragment>);
-        else
-        {
-            return (
-                <Router>
-                    <Switch>
-                        <Route exact path="/"> 
-                            <Redirect to="/login"/>
-                        </Route>
-                        <Route path="/login">
-                            {this.getConditionalLoginComponent()}
-                        </Route>
-                        <Route path="/app">
-                            {this.getConditionalAppComponent()}
-                        </Route>
-                        <Route>
-                            404
-                        </Route>
-                    </Switch>
-                </Router>
-            );
-        }
+    render() {
+        return (
+            <Router>
+                <Switch>
+                    <Route path="/login">
+                        {this.getConditionalLoginComponent()}
+                    </Route>
+                    <Route path="/logout">
+                        <Logout 
+                            setUserId={this.setUserId}
+                        />
+                    </Route>
+                    <Route path="/app">
+                        {this.getConditionalAppComponent()}
+                    </Route>
+                        {this.getConditionalHomeComponent()}
+                    <Route>
+                        404
+                    </Route>
+                </Switch>
+            </Router>
+        )
     }
-    
+
     getConditionalLoginComponent()
     {
-        if (this.state.isLoggedIn && this.state.username !== null)
-            return <Redirect to="/app"/>;
+        if (this.state.user_id !== null)
+            return <Redirect to="/"/>;
         else
-            return <Login/>;
+            return <Login
+                getUserId={this.getUserId}
+                setUserId={this.setUserId}
+                checkAuthorization={this.checkAuthorization}
+            />;
     }
 
     getConditionalAppComponent()
     {
-        if (this.state.isLoggedIn)
+        if (this.state.user_id !== null)
             return <StrategyApp
-                getUsername={this.getUsername}
+                getUserId={this.getUserId}
             />;
         else
             return <Redirect to="/login"/>;   
     }
 
-    async checkToken()
+    getConditionalHomeComponent()
     {
-        const cookies = new Cookies();
-        const token = cookies.get('token');
-        let { username } = this.state;
+        return (
+            <React.Fragment>
 
-        if (token !== undefined)
-        {
-            const reqOptions = {
-                method: 'POST',
-                body: JSON.stringify({
-                    'username': token.username,
-                    'token': token.token
-                })
-            }
-    
-            let res = await fetch(
-                `${URI}/login`,
-                reqOptions
-            );
+            <Route exact path='/'>
+                <Home
+                    ept='home'
+                    getUserId={this.getUserId}
+                    setUserId={this.setUserId}
+                    checkAuthorization={this.checkAuthorization}
+                />
+            </Route>
+            <Route exact path='/alerts'>
+                <Home
+                    ept='alerts'
+                    getUserId={this.getUserId}
+                    setUserId={this.setUserId}
+                    checkAuthorization={this.checkAuthorization}
+                />
+            </Route>
+            <Route exact path='/learn'>
+                <Home
+                    ept='learn'
+                    getUserId={this.getUserId}
+                    setUserId={this.setUserId}
+                    checkAuthorization={this.checkAuthorization}
+                />
+            </Route>
+            <Route exact path='/hire'>
+                <Home
+                    ept='hire'
+                    getUserId={this.getUserId}
+                    setUserId={this.setUserId}
+                    checkAuthorization={this.checkAuthorization}
+                />
+            </Route>
+            <Route exact path='/brokers'>
+                <Home
+                    ept='brokers'
+                    getUserId={this.getUserId}
+                    setUserId={this.setUserId}
+                    checkAuthorization={this.checkAuthorization}
+                />
+            </Route>
 
-            if (res.status === 200)
-            {
-                // Redirect to App
-                username = token.username;
-                this.setState({ username });
-                return true;
-            }
-            else
-            {
-                cookies.remove('token');
-                username = null;
-                this.setState({ username });
-            }
-        }
-        return false;
+            </React.Fragment>
+        );
     }
 
-    getUsername = () =>
+    async checkAuthorization()
     {
-        return this.state.username;
+        const reqOptions = {
+            method: 'POST',
+            credentials: 'include'
+        }
+
+        let res = await fetch(
+            `${URI}/authorize`,
+            reqOptions
+        );
+            
+        let user_id = null;
+        if (res.status === 200)
+        {
+            // Redirect to App
+            res = await res.json();
+            user_id = res.user_id;
+        }
+        else
+        {
+            user_id = null;
+        }
+        return user_id;
+    }
+
+    getUserId = () =>
+    {
+        return this.state.user_id;
+    }
+
+    setUserId = (new_id) =>
+    {
+        let { user_id } = this.state;
+        user_id = new_id;
+        this.setState({ user_id });
     }
 }
 
-const URI = 'http://127.0.0.1:3000'
+const URI = 'http://127.0.0.1:5000'
 
 export default App;

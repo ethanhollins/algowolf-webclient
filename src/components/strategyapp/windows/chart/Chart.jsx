@@ -471,14 +471,6 @@ class Chart extends Component
             is_loading = true;
             this.setState({ is_loading });
 
-            let count = 1000;
-            // Account for weekend
-            count += (
-                Math.floor(count 
-                / this.getNumWeeklyBars(this.getPeriod()))
-                * this.getNumWeekendBars(this.getPeriod())
-            );
-
             // Set time range to 1000 bars before earliest loaded date
             const to_dt = moment(ts[0] * 1000);
             const from_dt = this.props.getCountDateFromDate(

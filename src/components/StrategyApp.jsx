@@ -5,11 +5,9 @@ import WindowWrapper from './strategyapp/WindowWrapper';
 import Chart from './strategyapp/windows/chart/Chart';
 import moment from "moment-timezone";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faStopCircle } from '@fortawesome/free-solid-svg-icons'
-import { faCircle } from '@fortawesome/free-solid-svg-icons'
-import { faHandshake } from '@fortawesome/free-solid-svg-icons'
-import { faHandshakeSlash } from '@fortawesome/free-solid-svg-icons'
-import { config } from '@fortawesome/fontawesome-svg-core'
+import { 
+    faStopCircle, faCircle, faHandshake, faHandshakeSlash 
+} from '@fortawesome/free-solid-svg-icons'
 
 import '../StrategyApp.css';
 
@@ -29,7 +27,6 @@ class StrategyApp extends Component
     constructor(props)
     {
         super(props);
-        config.autoAddCss = false
 
         this.setAppContainerRef = elem => {
             this.appContainer = elem;
@@ -55,11 +52,7 @@ class StrategyApp extends Component
     render()
     {
         return (
-            <div className='container'>
-
-            <div className='nav'>
-                {/* <img id="logo_nav" alt="" src={'./brokerlib_logo_enlarge_white_192.png'}/> */}
-            </div>
+            <div className='main container'>
 
             <div className='chart_app'>
                 <div className='window_tab' onDragStart={this.onDragStart}></div>

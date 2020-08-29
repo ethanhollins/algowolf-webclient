@@ -1,6 +1,10 @@
 import React, { Component } from 'react';
-import Cookies from 'universal-cookie';
 import '../Login.css';
+import { ReactSVG } from 'react-svg';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+    faUser, faLock
+} from '@fortawesome/pro-solid-svg-icons';
 
 class Login extends Component
 {
@@ -21,30 +25,58 @@ class Login extends Component
     render()
     {
         return (
-            <div className="login-ui">
-                <form className="login-form" onSubmit={this.handleSubmit.bind(this)}>
-                    <div className="login-field login-logo">
-                        <img id="logo_head" alt="" src={'./brokerlib_logo_brown.png'}/>
-                        {/* <h3 id="logo_head_text">Brokerlib</h3> */}
+            <div className="login container">
+                <form className="login form" onSubmit={this.handleSubmit.bind(this)}>
+                    <a className='login logo' href='/'>
+                        <ReactSVG src="./algowolf.svg" />
+                    </a>
+
+                    <div className="login field">
+                        <input 
+                            type="text" className="login input" 
+                            name="username" id="username" 
+                            placeholder="Username"
+                            autoComplete="username" required 
+                            onChange={this.handleChange} 
+                        />
+                        <span className='login icon'>
+                            <FontAwesomeIcon icon={faUser} />
+                        </span>
                     </div>
 
-                    <div className="login-field">
-                        <label htmlFor="username" className='login-label'>Username</label>
-                        <input type="text" className="login-input" name="username" id="username" autoComplete="off" required onChange={this.handleChange} />
+                    <div className="login field">
+                        <input 
+                            type="password" className="login input" 
+                            name="password" id="password" 
+                            placeholder="Password"
+                            required onChange={this.handleChange} 
+                        />
+                        <span className='login icon'>
+                            <FontAwesomeIcon icon={faLock} />
+                        </span>
                     </div>
 
-                    <div className="login-field">
-                        <label htmlFor="password" className='login-label'>Password</label>
-                        <input type="password" className="login-input" name="password" id="password" required onChange={this.handleChange} />
+                    <div className="login field">
+                        <input type="submit" id="submit" className="login input" value="LOGIN"/>
                     </div>
 
-                    <div className="login-field">
-                        <input type="submit" className="login-input" value="Login"/>
-                        <p ref={this.setErrorMsgRef} className="login-msg" ></p>
+                    <div className="login field center">
+                        <span>Forgot <a href='/login#'>Username/Password</a>?</span>
+                    </div>
+
+                    <div className="login field center">
+                        <span className='error' ref={this.setErrorMsgRef}></span>
                     </div>
                 </form>
+                {/* <span>Create an Account</span> */}
             </div>
         )
+    }
+
+    async componentDidMount()
+    {
+        const user_id = await this.props.checkAuthorization();
+        this.props.setUserId(user_id);
     }
 
     handleChange = (event) =>
@@ -66,6 +98,7 @@ class Login extends Component
         event.preventDefault();
         const reqOptions = {
             method: 'POST',
+            credentials: 'include',
             body: JSON.stringify({
                 'username': this.state.username,
                 'password': this.state.password
@@ -81,24 +114,15 @@ class Login extends Component
 
         if (status === 200)
         {
-            let token = res.token;
-            console.log(token);
-            const cookies = new Cookies();
-            cookies.set('token', {
-                'username': this.state.username,
-                'token': token
-            }, {path: '/'});
-
-            window.location.href = '/app';
+            this.props.setUserId(res.user_id);
         }
         else
         {
-            this.errorMsg.textContent = res.error;
+            this.errorMsg.textContent = res.message;
         }
-        
     }
 }
 
-const URI = 'http://127.0.0.1:3000';
+const URI = 'http://127.0.0.1:5000';
 
 export default Login;
