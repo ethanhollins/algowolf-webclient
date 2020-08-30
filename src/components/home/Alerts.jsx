@@ -1,15 +1,12 @@
 import React, { Component } from 'react';
+import UnderConstruction from './UnderConstruction';
 
 class Alerts extends Component
 {
     render()
     {
         return (
-            <div className='alerts'>
-                <article className='alerts post'>
-                    <header></header>
-                </article>
-            </div>
+            <UnderConstruction />
         );
     }
 }

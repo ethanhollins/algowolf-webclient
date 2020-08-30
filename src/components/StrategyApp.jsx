@@ -9,8 +9,6 @@ import {
     faStopCircle, faCircle, faHandshake, faHandshakeSlash 
 } from '@fortawesome/free-solid-svg-icons'
 
-import '../StrategyApp.css';
-
 class StrategyApp extends Component
 {
     state = {

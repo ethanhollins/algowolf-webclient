@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Post from './Post';
 
 class Feed extends Component
 {
@@ -6,9 +7,8 @@ class Feed extends Component
     {
         return (
             <div className='feed'>
-                <article className='feed post'>
-                    <header></header>
-                </article>
+                <Post />
+                <Post />
             </div>
         );
     }

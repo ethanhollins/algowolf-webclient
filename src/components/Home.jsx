@@ -1,15 +1,17 @@
 import React, { Component } from 'react';
-import '../Home.css';
 import Alerts from './home/Alerts';
 import Brokers from './home/Brokers';
 import Feed from './home/Feed';
 import Hire from './home/Hire';
 import Learn from './home/Learn';
+import Profile from './home/Profile';
+import ProfileIcon from './home/ProfileIcon'
+import { withRouter } from 'react-router-dom';
 import { ReactSVG } from 'react-svg';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faCode, faShapes, faTools, faHandshakeAlt, faArrowCircleRight, 
-    faSquare, faSortDown, faBell, faSignIn, faSignOut, faUserPlus
+    faSortDown, faBell, faSignIn, faSignOut, faUserPlus
 } from '@fortawesome/pro-solid-svg-icons';
 import {
     faArrowCircleRight as faArrowCircleRightRegular,
@@ -22,6 +24,7 @@ import {
 class Home extends Component
 {
     state = {
+        isLoaded: false,
         isHovered: {
             home: false,
             alerts: false,
@@ -32,42 +35,56 @@ class Home extends Component
             login: false,
             register: false
         }
-    }    
+    }
 
     render()
     {
-        return (
-            <div className='main container'>
-                <div className='home container'>
-                    <aside className='home side-panel left'>
-                        <div className='panel-group'>
-                            <a href="/">
-                                <ReactSVG className='home logo' src="./algowolf.svg" />
-                            </a>
-                            {this.getConditionalNavBtn('home')}
-                            {this.getConditionalNavBtn('alerts')}
-                            {this.getConditionalNavBtn('learn')}
-                            {this.getConditionalNavBtn('hire')}
-                            {this.getConditionalNavBtn('brokers')}
-                            
-                            {this.getConditionalUserComponent()}
-                        </div>
-                    </aside>
-                    <section className='home main'>
-                        {this.getConditionalMainComponent()}
-                    </section>
-                    <aside className='home side-panel right'>
-                        <div></div>
-                    </aside>
+        const { isLoaded } = this.state;
+        if (isLoaded)
+        {
+            return (
+                <div className='main container'>
+                    <div className='home container'>
+                        <aside className='home side-panel left'>
+                            <div className='panel-group'>
+                                <a href="/">
+                                    <ReactSVG 
+                                        className='home logo' 
+                                        src={process.env.PUBLIC_URL + "/algowolf.svg"} 
+                                    />
+                                </a>
+                                {this.getConditionalNavBtn('/')}
+                                {this.getConditionalNavBtn('/alerts')}
+                                {this.getConditionalNavBtn('/learn')}
+                                {this.getConditionalNavBtn('/hire')}
+                                {this.getConditionalNavBtn('/brokers')}
+                                
+                                {this.getConditionalUserComponent()}
+                            </div>
+                        </aside>
+                        <section className='home main'>
+                            {this.getConditionalMainComponent()}
+                        </section>
+                        <aside className='home side-panel right'>
+                            <div></div>
+                        </aside>
+                    </div>
                 </div>
-            </div>
-        )
+            )
+        }
+        else
+        {
+            return (<React.Fragment></React.Fragment>);
+        }
     }
 
     async componentDidMount()
     {
+        let { isLoaded } = this.state;
         const user_id = await this.props.checkAuthorization();
         this.props.setUserId(user_id);
+        isLoaded = true;
+        this.setState({ isLoaded });
     }
 
     getConditionalUserComponent = () =>
@@ -77,13 +94,13 @@ class Home extends Component
             return (
                 <React.Fragment>
 
-                {this.getConditionalPanelItem('app')}
+                {this.getConditionalPanelItem('/app')}
                 <div className='panel-item center-group header'>
-                    <FontAwesomeIcon id='profile-icon' icon={faSquare} />
+                    <ProfileIcon />
                     <FontAwesomeIcon id='profile-drop-icon' icon={faSortDown} size='1x' />
                     <span id='profile-balance'>$0.00</span>
                 </div>
-                {this.getConditionalPanelItem('logout')}
+                {this.getConditionalPanelItem('/logout')}
 
                 </React.Fragment>
             );
@@ -93,9 +110,9 @@ class Home extends Component
             return (
                 <React.Fragment>
                 
-                {this.getConditionalPanelItem('app')}
-                {this.getConditionalPanelItem('login')}
-                {this.getConditionalPanelItem('register')}
+                {this.getConditionalPanelItem('/app')}
+                {this.getConditionalPanelItem('/login')}
+                {this.getConditionalPanelItem('/register')}
 
                 </React.Fragment>
             );
@@ -104,28 +121,32 @@ class Home extends Component
 
     getConditionalMainComponent()
     {
-        if (this.props.ept === 'home')
+        if (this.props.match.path === '/')
             return <Feed />;
-        else if (this.props.ept === 'alerts')
+        else if (this.props.match.path === '/alerts')
             return <Alerts />;
-        else if (this.props.ept === 'learn')
+        else if (this.props.match.path === '/learn')
             return <Learn />;
-        else if (this.props.ept === 'hire')
+        else if (this.props.match.path === '/hire')
             return <Hire />;
-        else if (this.props.ept === 'brokers')
+        else if (this.props.match.path === '/brokers')
             return <Brokers />;
+        else if (this.props.match.path === '/u/:username')
+            return <Profile 
+                username={this.props.match.params.username}    
+            />
     }
 
     getConditionalPanelItem(name)
     {
         const { isHovered } = this.state;
         let result = undefined;
-        if (name === 'app')
+        if (name === '/app')
         {
             if (isHovered[name])
                 result = (
                     <a 
-                        href={'/app'} name={name}
+                        href={name} name={name}
                         onMouseEnter={this.setHover} onMouseLeave={this.unsetHover}
                     >
                         <div className='panel-item large center-group header'>
@@ -136,7 +157,7 @@ class Home extends Component
             else
                 result = (
                     <a 
-                        href={'/app'} name={name}
+                        href={name} name={name}
                         onMouseEnter={this.setHover} onMouseLeave={this.unsetHover}
                     >
                         <div className='panel-item large center-group header'>
@@ -147,12 +168,12 @@ class Home extends Component
 
             return result;
         }
-        else if (name === 'login')
+        else if (name === '/login')
         {
             if (isHovered[name])
                 result = (
                     <a 
-                        href="/login" name='login'
+                        href={name} name={name}
                         onMouseEnter={this.setHover} onMouseLeave={this.unsetHover}
                     >
                         <div className='small-item page center-group'>
@@ -163,7 +184,7 @@ class Home extends Component
             else
                 result = (
                     <a 
-                        href="/login" name='login'
+                        href={name} name={name}
                         onMouseEnter={this.setHover} onMouseLeave={this.unsetHover}
                     >
                         <div className='small-item page center-group'>
@@ -174,12 +195,12 @@ class Home extends Component
 
             return result;
         }
-        else if (name === 'register')
+        else if (name === '/register')
         {
             if (isHovered[name])
                 result = (
                     <a 
-                        href="/register" name='register'
+                        href={name} name={name}
                         onMouseEnter={this.setHover} onMouseLeave={this.unsetHover}
                     >
                         <div className='small-item page center-group'>
@@ -190,7 +211,7 @@ class Home extends Component
             else
                 result = (
                     <a 
-                        href="/register" name='register'
+                        href={name} name={name}
                         onMouseEnter={this.setHover} onMouseLeave={this.unsetHover}
                     >
                         <div className='small-item page center-group'>
@@ -201,12 +222,12 @@ class Home extends Component
 
             return result;
         }
-        else if (name === 'logout')
+        else if (name === '/logout')
         {
             if (isHovered[name])
                 result = (
                     <a 
-                        href="/logout" name='logout'
+                        href={name} name={name}
                         onMouseEnter={this.setHover} onMouseLeave={this.unsetHover}
                     >
                         <div className='small-item page center-group'>
@@ -217,7 +238,7 @@ class Home extends Component
             else
                 result = (
                     <a 
-                        href="/logout" name='logout'
+                        href={name} name={name}
                         onMouseEnter={this.setHover} onMouseLeave={this.unsetHover}
                     >
                         <div className='small-item page center-group'>
@@ -232,7 +253,7 @@ class Home extends Component
 
     getConditionalNavBtn(name)
     {
-        if (this.props.ept === name)
+        if (this.props.match.path === name)
         {
             return (
                 <a 
@@ -247,15 +268,9 @@ class Home extends Component
         }
         else
         {
-            let link = undefined;
-            if (name === 'home')
-                link = '/';
-            else
-                link = '/' + name;
-
             return (
                 <a 
-                    href={link} className='panel-item' name={name}
+                    href={name} className='panel-item' name={name}
                     onMouseEnter={this.setHover} onMouseLeave={this.unsetHover}
                 >
                     <div className='page center-group'>
@@ -270,7 +285,7 @@ class Home extends Component
     {
         const { isHovered } = this.state;
         let result = undefined;
-        if (name === 'home')
+        if (name === '/')
         {
             if (isSelected || isHovered[name]) 
                 result = (
@@ -288,7 +303,7 @@ class Home extends Component
 
             return result;
         }
-        else if (name === 'alerts')
+        else if (name === '/alerts')
         {
             if (isSelected || isHovered[name]) 
                 result = (
@@ -309,7 +324,7 @@ class Home extends Component
 
             return result
         }
-        else if (name === 'learn')
+        else if (name === '/learn')
         {
             if (isSelected || isHovered[name]) 
                 result = (
@@ -328,7 +343,7 @@ class Home extends Component
 
             return result;
         }
-        else if (name === 'hire')
+        else if (name === '/hire')
         {
             if (isSelected || isHovered[name]) 
                 result = (
@@ -347,7 +362,7 @@ class Home extends Component
 
             return result;
         }
-        else if (name === 'brokers')
+        else if (name === '/brokers')
         {
             if (isSelected || isHovered[name]) 
                 result = (
@@ -386,4 +401,4 @@ class Home extends Component
 
 }
 
-export default Home;
+export default withRouter(Home);

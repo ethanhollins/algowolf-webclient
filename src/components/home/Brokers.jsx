@@ -1,15 +1,12 @@
 import React, { Component } from 'react';
+import UnderConstruction from './UnderConstruction';
 
 class Brokers extends Component
 {
     render()
     {
         return (
-            <div className='brokers'>
-                <article className='brokers post'>
-                    <header></header>
-                </article>
-            </div>
+            <UnderConstruction />
         );
     }
 }

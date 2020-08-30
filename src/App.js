@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route, Redirect, Switch } from 'react-router-dom';
-import './App.css';
+import { 
+    BrowserRouter as Router, 
+    Route, Redirect, Switch
+} from 'react-router-dom';
 // Components
 import StrategyApp from './components/StrategyApp';
 import Login from './components/Login';
@@ -22,7 +24,7 @@ class App extends Component
 
     render() {
         return (
-            <Router>
+            <Router >
                 <Switch>
                     <Route path="/login">
                         {this.getConditionalLoginComponent()}
@@ -35,7 +37,15 @@ class App extends Component
                     <Route path="/app">
                         {this.getConditionalAppComponent()}
                     </Route>
-                        {this.getConditionalHomeComponent()}
+
+                    <Route exact path={["/", "/alerts", "/learn", "/hire", "/brokers", "/u/:username"]}>
+                        <Home
+                            getUserId={this.getUserId}
+                            setUserId={this.setUserId}
+                            checkAuthorization={this.checkAuthorization}
+                        />
+                    </Route>
+
                     <Route>
                         404
                     </Route>
@@ -64,56 +74,6 @@ class App extends Component
             />;
         else
             return <Redirect to="/login"/>;   
-    }
-
-    getConditionalHomeComponent()
-    {
-        return (
-            <React.Fragment>
-
-            <Route exact path='/'>
-                <Home
-                    ept='home'
-                    getUserId={this.getUserId}
-                    setUserId={this.setUserId}
-                    checkAuthorization={this.checkAuthorization}
-                />
-            </Route>
-            <Route exact path='/alerts'>
-                <Home
-                    ept='alerts'
-                    getUserId={this.getUserId}
-                    setUserId={this.setUserId}
-                    checkAuthorization={this.checkAuthorization}
-                />
-            </Route>
-            <Route exact path='/learn'>
-                <Home
-                    ept='learn'
-                    getUserId={this.getUserId}
-                    setUserId={this.setUserId}
-                    checkAuthorization={this.checkAuthorization}
-                />
-            </Route>
-            <Route exact path='/hire'>
-                <Home
-                    ept='hire'
-                    getUserId={this.getUserId}
-                    setUserId={this.setUserId}
-                    checkAuthorization={this.checkAuthorization}
-                />
-            </Route>
-            <Route exact path='/brokers'>
-                <Home
-                    ept='brokers'
-                    getUserId={this.getUserId}
-                    setUserId={this.setUserId}
-                    checkAuthorization={this.checkAuthorization}
-                />
-            </Route>
-
-            </React.Fragment>
-        );
     }
 
     async checkAuthorization()
