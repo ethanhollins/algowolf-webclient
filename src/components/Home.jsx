@@ -83,7 +83,7 @@ class Home extends Component
     async componentDidMount()
     {
         let { isLoaded } = this.state;
-        const user_id = await this.props.checkAuthorization(this.props.getAxiosObj());
+        const user_id = await this.props.checkAuthorization();
         this.props.setUserId(user_id);
         isLoaded = true;
         this.setState({ isLoaded });

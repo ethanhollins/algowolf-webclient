@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { ReactSVG } from 'react-svg';
-import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faUser, faLock
@@ -24,7 +23,7 @@ class Login extends Component
 
     async componentDidMount()
     {
-        const user_id = await this.props.checkAuthorization(this.props.getAxiosObj());
+        const user_id = await this.props.checkAuthorization();
         this.props.setUserId(user_id);
     }
 
@@ -96,31 +95,31 @@ class Login extends Component
     async handleSubmit(event)
     {
         event.preventDefault();
-        const body = JSON.stringify({
+        const raw = JSON.stringify({
             'username': this.state.username,
             'password': this.state.password
         });
-        const options = {
+        var requestOptions = {
+            method: 'POST',
+            credentials: 'include',
             headers: {
-                'Content-Type': 'application/json',
-                'Accept': '*/*',
+                "Content-Type": "application/json"
             },
-            withCredentials: true
-        }
+            body: raw
+        };
 
-        let res = await axios.post(
-            `${URI}/login`, body, options
-        );
+        const res = await fetch(`${URI}/login`, requestOptions);
 
         const status = res.status;
+        const data = await res.json();
 
         if (status === 200)
         {
-            this.props.setUserId(res.data.user_id);
+            this.props.setUserId(data.user_id);
         }
         else
         {
-            this.errorMsg.textContent = res.data.message;
+            this.errorMsg.textContent = data.message;
         }
     }
 }

@@ -21,14 +21,6 @@ class App extends Component
     {
         super(props);
         config.autoAddCss = false
-
-        this.axios_obj = axios.create({
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': '*/*'
-            },
-            withCredentials: true
-        });
     }
 
     componentDidMount()
@@ -86,16 +78,14 @@ class App extends Component
             />;
     }
 
-    async checkAuthorization(axios_obj)
+    async checkAuthorization()
     {
-        let headers = new Headers();
-        headers.append("Content-Type", "application/json");
-        headers.append("Cookie", "session=eyJ1c2VyX2lkIjoiOXNYRnNIREs3b0FFRmFhRGFaeThYTCJ9.X1L7aQ.qnAHdhMwlhHpQIDFOTPYlNJdxYw");
-
         var requestOptions = {
             method: 'POST',
-            headers: headers,
-            redirect: 'follow'
+            credentials: 'include',
+            headers: {
+                "Content-Type": "application/json"
+            }
         };
 
         const res = await fetch(`${URI}/authorize`, requestOptions);
@@ -125,13 +115,8 @@ class App extends Component
         user_id = new_id;
         this.setState({ user_id });
     }
-
-    getAxiosObj = () =>
-    {
-        return this.axios_obj;
-    }
 }
 
-const URI = 'http://127.0.0.1'
+const URI = 'http://127.0.0.1:5000';
 
 export default App;
