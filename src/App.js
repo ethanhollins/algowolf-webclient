@@ -9,7 +9,6 @@ import Login from './components/Login';
 import Logout from './components/Logout';
 import Home from './components/Home';
 import { config } from '@fortawesome/fontawesome-svg-core'
-import axios from 'axios';
 
 class App extends Component 
 {
@@ -21,11 +20,6 @@ class App extends Component
     {
         super(props);
         config.autoAddCss = false
-    }
-
-    componentDidMount()
-    {
-        
     }
 
     render() {
