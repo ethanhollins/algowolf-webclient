@@ -21,6 +21,12 @@ class Login extends Component
         'password': '',
     }
 
+    async componentDidMount()
+    {
+        const user_id = await this.props.checkAuthorization();
+        this.props.setUserId(user_id);
+    }
+
     render()
     {
         return (
@@ -70,12 +76,6 @@ class Login extends Component
                 {/* <span>Create an Account</span> */}
             </div>
         )
-    }
-
-    async componentDidMount()
-    {
-        const user_id = await this.props.checkAuthorization();
-        this.props.setUserId(user_id);
     }
 
     handleChange = (event) =>

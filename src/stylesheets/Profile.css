@@ -75,3 +75,33 @@
     background-color: #ffa801;
 }
 
+.profile.sub-nav {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    border-top: 1px solid rgb(240,240,240);
+    border-bottom: 1px solid rgb(240,240,240);
+}
+
+.profile.sub-nav > a {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding-left: 15px;
+    padding-right: 15px;
+    text-decoration: none;
+    font-weight: 600;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: rgb(80,80,80);
+    background-color: transparent;
+    transition: background-color 0.1s linear;
+}
+
+.profile.sub-nav > a.selected {
+    background-color: rgb(240,240,240);
+}
+
+.profile.sub-nav > a:hover {
+    transition: background-color 0.2s linear;
+    background-color: rgb(240,240,240);
+}

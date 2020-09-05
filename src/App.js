@@ -35,7 +35,11 @@ class App extends Component
                         />
                     </Route>
                     <Route path="/app">
-                        {this.getConditionalAppComponent()}
+                        <StrategyApp
+                            getUserId={this.getUserId}
+                            setUserId={this.setUserId}
+                            checkAuthorization={this.checkAuthorization}
+                        />;
                     </Route>
 
                     <Route exact path={["/", "/alerts", "/learn", "/hire", "/brokers", "/u/:username"]}>
@@ -64,16 +68,6 @@ class App extends Component
                 setUserId={this.setUserId}
                 checkAuthorization={this.checkAuthorization}
             />;
-    }
-
-    getConditionalAppComponent()
-    {
-        if (this.state.user_id !== null)
-            return <StrategyApp
-                getUserId={this.getUserId}
-            />;
-        else
-            return <Redirect to="/login"/>;   
     }
 
     async checkAuthorization()

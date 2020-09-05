@@ -8,10 +8,6 @@ import moment from "moment-timezone";
 import Drawings from '../../paths/Paths';
 import Indicators from '../../Indicators';
 
-/**
- * TODO:
- *  - draw drawings
- */
 
 class Chart extends Component 
 {
@@ -37,7 +33,7 @@ class Chart extends Component
         limit: [null,null],
         first_load: true,
         is_scrolling: null,
-        is_loading: false,
+        is_loading: false
     }
 
     constructor(props)
@@ -78,24 +74,28 @@ class Chart extends Component
         this.addDrawingRef = elem => {
             this.drawings.push(elem);
         }
+
+        this._ismounted = true;
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = _.throttle(this.onMouseMove.bind(this), 1);
+        this.onCrosshairMove = _.throttle(this.onCrosshairMove.bind(this), 20);
+        this.onMouseUp = this.onMouseUp.bind(this);
+        this.onScroll = _.throttle(this.onScroll.bind(this), 20);
     }
 
     async componentDidMount() 
     {
-        window.addEventListener("mousedown", this.onMouseDown.bind(this));
+        window.addEventListener("mousedown", this.onMouseDown);
+        window.addEventListener("mousemove", this.onMouseMove);
+        window.addEventListener("mousemove", this.onCrosshairMove);
 
-        const throttled_mouse_move = _.throttle(this.onMouseMove.bind(this), 1);
-        const throttled_crosshair_move = _.throttle(this.onCrosshairMove.bind(this), 20);
-        window.addEventListener("mousemove", throttled_mouse_move);
-        window.addEventListener("mousemove", throttled_crosshair_move);
-
-        window.addEventListener("mouseup", this.onMouseUp.bind(this));
+        window.addEventListener("mouseup", this.onMouseUp);
         // window.addEventListener("resize", this.update.bind(this));
 
-        const throttled_scroll = _.throttle(this.onScroll.bind(this), 20);
         window.addEventListener(
             "onwheel" in document ? "wheel" : "mousewheel",
-            throttled_scroll
+            this.onScroll
         );
 
         this.updateCanvas();
@@ -139,7 +139,7 @@ class Chart extends Component
     async componentDidUpdate() 
     {
         let { pos, scale, first_load, trans_x } = this.state;
-        
+
         if (this.getChart() !== undefined)
         {
             const bids = this.getBids();
@@ -162,6 +162,22 @@ class Chart extends Component
         }
 
         this.update(); 
+    }
+
+    componentWillUnmount()
+    {
+        this._ismounted = false;
+        window.removeEventListener("mousedown", this.onMouseDown);
+        window.removeEventListener("mousemove", this.onMouseMove);
+        window.removeEventListener("mousemove", this.onCrosshairMove);
+
+        window.removeEventListener("mouseup", this.onMouseUp);
+        // window.addEventListener("resize", this.update.bind(this));
+
+        window.removeEventListener(
+            "onwheel" in document ? "wheel" : "mousewheel",
+            this.onScroll
+        );
     }
 
     render() {
@@ -377,12 +393,15 @@ class Chart extends Component
                 {
                     setTimeout(() => 
                     {
-                        let { scale } = this.state;
-                        scale.y = m * Math.pow(trans_x, 2) + c
-                        this.setState({ scale });
-                        this.setPriceInterval();
-                        this.setTimeInterval();
-                        this.transitionScaleY(num_steps, m, c, i+1);
+                        if (this._ismounted)
+                        {
+                            let { scale } = this.state;
+                            scale.y = m * Math.pow(trans_x, 2) + c
+                            this.setState({ scale });
+                            this.setPriceInterval();
+                            this.setTimeInterval();
+                            this.transitionScaleY(num_steps, m, c, i+1);
+                        }
                     }, 10);
                 }.bind(this)
             );
@@ -391,6 +410,7 @@ class Chart extends Component
     
     async transitionScaleY(num_steps, m, c, i)
     {
+
         await this.runTransition(num_steps, m, c, i);
     }
 
@@ -526,13 +546,13 @@ class Chart extends Component
         }
 
         // Handle Open Positions
-        this.handlePositions(ctx);
+        // this.handlePositions(ctx);
 
         // Handle Price Line
         this.handlePriceLine(ctx);
 
         // Handle Drawings
-        this.handleDrawings(ctx);
+        // this.handleDrawings(ctx);
 
         const studies = this.getStudies();
         this.drawPrices(ctx, price_data);
@@ -565,7 +585,7 @@ class Chart extends Component
 
         this.drawTimes(ctx, time_data);
         // Handle Cross Segment Drawings
-        this.handleUniversalDrawings(ctx);
+        // this.handleUniversalDrawings(ctx);
         // Handle Crosshairs
         this.handleCrosshairs(ctx);
     }
@@ -1627,6 +1647,16 @@ class Chart extends Component
         return this.props.getStrategy(
             this.props.strategy_id
         );
+    }
+
+    getWindowInfo = () =>
+    {
+        return this.props.getWindowInfo();
+    }
+
+    windowExists = () =>
+    {
+        return this.props.windowExists(this.props.strategy_id, this.props.item_id);
     }
 
     getProperties = () =>

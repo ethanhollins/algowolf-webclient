@@ -9,6 +9,8 @@ class Feed extends Component
             <div className='feed'>
                 <Post />
                 <Post />
+                <Post />
+                <Post />
             </div>
         );
     }

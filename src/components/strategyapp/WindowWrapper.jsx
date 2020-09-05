@@ -1,13 +1,22 @@
 import React, { Component } from 'react';
 import Camera from './Camera';
 import Drawings from './paths/Paths';
-// import _ from 'underscore';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+    faWindowMaximize
+} from '@fortawesome/pro-regular-svg-icons';
+import { 
+    faSquare, faMinus, faTimes
+} from '@fortawesome/pro-light-svg-icons';
 
 class WindowWrapper extends Component 
 {
     state = {
         pos: { x: 0, y: 0 },
-        size: { width: 100, height: 100 },
+        size: { width: 60, height: 70 },
+        last_pos: { x: 0, y: 0},
+        last_size: { width: 60, height: 70 },
+        maximised: false,
         is_move: false,
         keys: []
     }
@@ -16,6 +25,10 @@ class WindowWrapper extends Component
     {
         super(props);
 
+        this.setWindowBtnsRef = elem => {
+            this.windowBtns = elem;
+        };
+
         this.setWindowWrapperRef = elem => {
             this.windowWrapper = elem;
         };
@@ -23,17 +36,25 @@ class WindowWrapper extends Component
         this.setCameraRef = elem => {
             this.camera = elem;
         };
+        
+        // Bind functions
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+        this.onResize = this.onResize.bind(this);
+        this.onKeyDown = this.onKeyDown.bind(this);
+        this.onKeyUp = this.onKeyUp.bind(this);
     }
 
     componentDidMount()
     {
-        window.addEventListener("mousedown", this.onMouseDown.bind(this));
-        window.addEventListener("mousemove", this.onMouseMove.bind(this));
-        window.addEventListener("mouseup", this.onMouseUp.bind(this));
-        window.addEventListener("resize", this.onResize.bind(this));
+        window.addEventListener("mousedown", this.onMouseDown);
+        window.addEventListener("mousemove", this.onMouseMove);
+        window.addEventListener("mouseup", this.onMouseUp);
+        window.addEventListener("resize", this.onResize);
         
-        window.addEventListener("keydown", this.onKeyDown.bind(this));
-        window.addEventListener("keyup", this.onKeyUp.bind(this));
+        window.addEventListener("keydown", this.onKeyDown);
+        window.addEventListener("keyup", this.onKeyUp);
         
         // const throttled_scroll = _.throttle(this.onScroll.bind(this), 20);
         // window.addEventListener(
@@ -49,29 +70,54 @@ class WindowWrapper extends Component
         this.update();
     }
 
+    componentWillUnmount()
+    {
+        window.removeEventListener("mousedown", this.onMouseDown);
+        window.removeEventListener("mousemove", this.onMouseMove);
+        window.removeEventListener("mouseup", this.onMouseUp);
+        window.removeEventListener("resize", this.onResize);
+        
+        window.removeEventListener("keydown", this.onKeyDown);
+        window.removeEventListener("keyup", this.onKeyUp);
+    }
+
     render() {
         return (
             <div
                 ref={this.setWindowWrapperRef}
-                className="window_wrapper"
+                className="window wrapper"
             >
+                <div ref={this.setWindowBtnsRef} className='window btns'>
+                    <div>
+                        <FontAwesomeIcon className='window item small' icon={faSquare} onClick={this.onMaximise} />
+                        <FontAwesomeIcon className='window item small' icon={faWindowMaximize} onClick={this.onPopout} />
+                        <FontAwesomeIcon className='window item' icon={faMinus} onClick={this.onMinimize} />
+                        <FontAwesomeIcon className='window item' icon={faTimes} onClick={this.onClose} />
+                    </div>
+                </div>
                 <Camera
                     ref={this.setCameraRef}
                 />
-                {this.props.getWindowElement(
-                    this.props.strategy_id,
-                    this.props.item_id,
-                    this.getTopOffset,
-                    this.getScreenPos,
-                    this.getKeys
-                )}
+                {this.getWindowElement()}
             </div>
         )
     }
 
-    generateCorner()
+    getWindowElement = () =>
     {
-        return Drawings['window_corner']();
+        if (this.props.info.type === 'chart')
+        {
+            return this.props.getChartElement(
+                this.props.strategy_id,
+                this.props.info.id,
+                this.getTopOffset,
+                this.getScreenPos,
+                this.getWindowInfo,
+                this.getKeys
+            );
+        }
+
+        return <React.Fragment/>
     }
 
     onMouseDown(e)
@@ -107,7 +153,41 @@ class WindowWrapper extends Component
         }
     }
 
-    onMouseMove(e)
+    showWindowBtns(e)
+    {
+        const mouse_pos = {
+            x: e.clientX, y: e.clientY-this.getTopOffset()
+        }
+        const { pos, size } = this.state;
+        const scale = this.props.getScale();
+        const camera = this.getCamera();
+        const container_size = this.getContainerSize();
+
+        const screen_pos = camera.convertWorldUnitToScreenUnit(
+            pos, container_size, scale
+        );
+        const screen_size = camera.convertWorldUnitToScreenUnit(
+            { x: size.width, y: size.height }, container_size, scale
+        );
+
+        let rect = {
+            x: screen_pos.x,
+            y: screen_pos.y,
+            width: screen_size.x,
+            height: screen_size.y
+        }
+
+        if (this.isWithinBounds(rect, mouse_pos))
+        {
+            this.windowBtns.style.display = '';
+        }
+        else
+        {
+            this.windowBtns.style.display = 'none';
+        }
+    }
+
+    moveWindow(e)
     {
         const { is_move } = this.state;
 
@@ -128,6 +208,12 @@ class WindowWrapper extends Component
             
             this.setState({ pos });
         }
+    }
+
+    onMouseMove(e)
+    {
+        this.showWindowBtns(e);
+        this.moveWindow(e);
     }
 
     onMouseUp(e)
@@ -161,6 +247,47 @@ class WindowWrapper extends Component
     {
         this.update();
         this.forceUpdate();
+    }
+
+    onClose = () =>
+    {
+        this.props.closeWindow(this.getStrategyId(), this.getItemId());
+    }
+
+    onMinimize()
+    {
+        console.log('minimize');
+    }
+
+    onPopout()
+    {
+        console.log('popout');
+    }
+
+    onMaximise = () =>
+    {
+        let { pos, size, last_pos, last_size, maximised } = this.state;
+        if (maximised)
+        {
+            pos.x = last_pos.x;
+            pos.y = last_pos.y;
+            size.width = last_size.width;
+            size.height = last_size.height;
+            maximised = false;
+        }
+        else
+        {
+            last_pos.x = pos.x;
+            last_pos.y = pos.y;
+            last_size.width = size.width;
+            last_size.height = size.height;
+            pos.x = 0;
+            pos.y = 0;
+            size.width = 100;
+            size.height = 100;
+            maximised = true;
+        }
+        this.setState({ pos, size, last_pos, last_size, maximised });
     }
 
     isWithinBounds(rect, mouse_pos)
@@ -240,6 +367,21 @@ class WindowWrapper extends Component
     getTopOffset = () =>
     {
         return this.props.getAppContainer().offsetTop;
+    }
+
+    getWindowInfo = () =>
+    {
+        return this.props.info;
+    }
+
+    getStrategyId = () =>
+    {
+        return this.props.strategy_id;
+    }
+
+    getItemId = () =>
+    {
+        return this.props.info.id;
     }
 
     getWindowWrapper = () =>

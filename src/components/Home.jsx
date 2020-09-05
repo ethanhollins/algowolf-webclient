@@ -47,19 +47,21 @@ class Home extends Component
                     <div className='home container'>
                         <aside className='home side-panel left'>
                             <div className='panel-group'>
-                                <a href="/">
-                                    <ReactSVG 
-                                        className='home logo' 
-                                        src={process.env.PUBLIC_URL + "/algowolf.svg"} 
-                                    />
-                                </a>
-                                {this.getConditionalNavBtn('/')}
-                                {this.getConditionalNavBtn('/alerts')}
-                                {this.getConditionalNavBtn('/learn')}
-                                {this.getConditionalNavBtn('/hire')}
-                                {this.getConditionalNavBtn('/brokers')}
-                                
-                                {this.getConditionalUserComponent()}
+                                <div className='panel-group fixed'>
+                                    <a href="/">
+                                        <ReactSVG 
+                                            className='home logo' 
+                                            src={process.env.PUBLIC_URL + "/algowolf.svg"} 
+                                        />
+                                    </a>
+                                    {this.getConditionalNavBtn('/')}
+                                    {this.getConditionalNavBtn('/alerts')}
+                                    {this.getConditionalNavBtn('/learn')}
+                                    {this.getConditionalNavBtn('/hire')}
+                                    {this.getConditionalNavBtn('/brokers')}
+                                    
+                                    {this.getConditionalUserComponent()}
+                                </div>
                             </div>
                         </aside>
                         <section className='home main'>
@@ -95,7 +97,7 @@ class Home extends Component
                 <React.Fragment>
 
                 {this.getConditionalPanelItem('/app')}
-                <div className='panel-item center-group header'>
+                <div className='panel-item center-group'>
                     <ProfileIcon />
                     <FontAwesomeIcon id='profile-drop-icon' icon={faSortDown} size='1x' />
                     <span id='profile-balance'>$0.00</span>
@@ -149,7 +151,7 @@ class Home extends Component
                         href={name} name={name}
                         onMouseEnter={this.setHover} onMouseLeave={this.unsetHover}
                     >
-                        <div className='panel-item large center-group header'>
+                        <div className='panel-item large center-group'>
                             <strong>Goto App</strong><FontAwesomeIcon id='arrow-icon' icon={faArrowCircleRight} />
                         </div>
                     </a>
@@ -160,7 +162,7 @@ class Home extends Component
                         href={name} name={name}
                         onMouseEnter={this.setHover} onMouseLeave={this.unsetHover}
                     >
-                        <div className='panel-item large center-group header'>
+                        <div className='panel-item large center-group'>
                             Goto App <FontAwesomeIcon id='arrow-icon' icon={faArrowCircleRightRegular} />
                         </div>
                     </a>

@@ -41,6 +41,8 @@ nav {
     border-right: 1px solid rgb(230,230,230);
     margin-top: 75px;
     padding-top: 20px;
+    height: 100%;
+    min-height: calc(100vh - 75px - 20px);
 }
 
 .feed.post {
@@ -86,13 +88,50 @@ nav {
     text-align: right;
 }
 
-.panel-group {
+.list-item.info {
+    margin-top: 5px;
+    margin-left: 10px;
+}
+
+.list-item.name {
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.list-item.btn {
+    margin-left: 10px;
+    width: 25px;
+    max-height: 25px;
+    color: rgb(80,80,80);
+}
+
+.list-item.date {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    font-size: 0.75em;
+    margin-top: 5px;
+    text-align: right;
     float: right;
+    color: rgb(80,80,80);
+}
+
+.list-item.date > .list-item.btn {
+    width: 15px;
+    max-height: 15px;
+    margin-right: 5px;
+}
+
+.side-panel > .panel-group {
     padding-left: 25px;
     padding-right: 5px;
     width: 180px;
+    float: right;
+}
+
+.panel-group.fixed {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
 }
 
 .panel-item {
@@ -111,13 +150,14 @@ nav {
 
 .page {
     font-size: 1.3em;
-    color: rgb(80,80,80);
+    color: #2f3542;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
 .panel-item.large {
     font-size: 1.5em;
-    color: rgb(80,80,80);
+    color: #2f3542;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
 .small-item {
@@ -125,7 +165,7 @@ nav {
     margin-bottom: 10px;
     margin-right: 10px;
     text-align: right;
-    color: rgb(80,80,80);
+    color: #2f3542;
 }
 
 .small-item > #page-icon {
@@ -164,13 +204,14 @@ nav {
 }
 
 #profile-group > .arrow {
-    color: rgb(80,80,80) !important;
+    color: #2f3542 !important;
     margin-left: 10px;
 }
 
 #profile-balance {
-    color: rgb(80,80,80);
+    color: #2f3542;
     font-size: 1.0em;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
 #bubble {
@@ -192,20 +233,24 @@ nav {
 }
 
 #under-construction {
-    color: rgb(80,80,80);
+    color: #2f3542;
     text-align: center;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-#hammer {
+#hammer-icon {
     width: 100px;
     margin-bottom: 20px;
+}
+
+#trash-icon {
+    color: #e74c3c;
 }
 
 #profile-icon {
     width: 50px;
     height: 50px;
-    background-color: rgb(80,80,80);
+    background-color: #2f3542;
     border-radius: 5px;
 }
 

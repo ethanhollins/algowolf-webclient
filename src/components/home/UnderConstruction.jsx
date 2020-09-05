@@ -10,7 +10,7 @@ class UnderConstruction extends Component
     {
         return (
             <div id='under-construction'>
-                <FontAwesomeIcon id='hammer' icon={faHammer} /><br/>
+                <FontAwesomeIcon id='hammer-icon' icon={faHammer} /><br/>
                 <strong>Sorry this page is under construction. Come back later!</strong>
             </div>
         );

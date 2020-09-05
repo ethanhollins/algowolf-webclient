@@ -38,7 +38,6 @@ class Profile extends Component
                         {this.getConditionalNavBtn('#strategies')}
                         {this.getConditionalNavBtn('#settings')}
                     </div>
-                    <div id='separator'></div>
                     {this.getOpenTab()}
                 </div>
             );
