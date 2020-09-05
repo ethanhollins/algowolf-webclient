@@ -9,6 +9,7 @@ import Login from './components/Login';
 import Logout from './components/Logout';
 import Home from './components/Home';
 import { config } from '@fortawesome/fontawesome-svg-core'
+import axios from 'axios';
 
 class App extends Component 
 {
@@ -20,6 +21,19 @@ class App extends Component
     {
         super(props);
         config.autoAddCss = false
+
+        this.axios_obj = axios.create({
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': '*/*'
+            },
+            withCredentials: true
+        });
+    }
+
+    componentDidMount()
+    {
+        
     }
 
     render() {
@@ -47,6 +61,7 @@ class App extends Component
                             getUserId={this.getUserId}
                             setUserId={this.setUserId}
                             checkAuthorization={this.checkAuthorization}
+                            getAxiosObj={this.getAxiosObj}
                         />
                     </Route>
 
@@ -67,27 +82,30 @@ class App extends Component
                 getUserId={this.getUserId}
                 setUserId={this.setUserId}
                 checkAuthorization={this.checkAuthorization}
+                getAxiosObj={this.getAxiosObj}
             />;
     }
 
-    async checkAuthorization()
+    async checkAuthorization(axios_obj)
     {
-        const reqOptions = {
-            method: 'POST',
-            credentials: 'include'
-        }
+        let headers = new Headers();
+        headers.append("Content-Type", "application/json");
+        headers.append("Cookie", "session=eyJ1c2VyX2lkIjoiOXNYRnNIREs3b0FFRmFhRGFaeThYTCJ9.X1L7aQ.qnAHdhMwlhHpQIDFOTPYlNJdxYw");
 
-        let res = await fetch(
-            `${URI}/authorize`,
-            reqOptions
-        );
-            
+        var requestOptions = {
+            method: 'POST',
+            headers: headers,
+            redirect: 'follow'
+        };
+
+        const res = await fetch(`${URI}/authorize`, requestOptions);
+
         let user_id = null;
         if (res.status === 200)
         {
             // Redirect to App
-            res = await res.json();
-            user_id = res.user_id;
+            const data = await res.json();
+            user_id = data.user_id;
         }
         else
         {
@@ -107,8 +125,13 @@ class App extends Component
         user_id = new_id;
         this.setState({ user_id });
     }
+
+    getAxiosObj = () =>
+    {
+        return this.axios_obj;
+    }
 }
 
-const URI = 'http://127.0.0.1:5000'
+const URI = 'http://127.0.0.1'
 
 export default App;
