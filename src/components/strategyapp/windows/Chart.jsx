@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import Camera from '../../Camera';
-import Candlesticks from './Candlesticks';
-import Overlay from './Overlay';
-import Study from './Study';
+import Camera from '../Camera';
+import Candlesticks from './chart/Candlesticks';
+import Overlay from './chart/Overlay';
+import Study from './chart/Study';
 import _ from 'underscore';
 import moment from "moment-timezone";
-import Drawings from '../../paths/Paths';
-import Indicators from '../../Indicators';
+import Drawings from '../paths/Paths';
+import Indicators from '../Indicators';
 
 
 class Chart extends Component 
@@ -81,6 +81,7 @@ class Chart extends Component
         this.onMouseMove = _.throttle(this.onMouseMove.bind(this), 1);
         this.onCrosshairMove = _.throttle(this.onCrosshairMove.bind(this), 20);
         this.onMouseUp = this.onMouseUp.bind(this);
+        this.update = this.update.bind(this);
         this.onScroll = _.throttle(this.onScroll.bind(this), 20);
     }
 
@@ -91,7 +92,7 @@ class Chart extends Component
         window.addEventListener("mousemove", this.onCrosshairMove);
 
         window.addEventListener("mouseup", this.onMouseUp);
-        // window.addEventListener("resize", this.update.bind(this));
+        window.addEventListener("resize", this.update);
 
         window.addEventListener(
             "onwheel" in document ? "wheel" : "mousewheel",
@@ -172,7 +173,7 @@ class Chart extends Component
         window.removeEventListener("mousemove", this.onCrosshairMove);
 
         window.removeEventListener("mouseup", this.onMouseUp);
-        // window.addEventListener("resize", this.update.bind(this));
+        window.removeEventListener("resize", this.update);
 
         window.removeEventListener(
             "onwheel" in document ? "wheel" : "mousewheel",
@@ -496,7 +497,7 @@ class Chart extends Component
             const from_dt = this.props.getCountDateFromDate(
                 this.getPeriod(), 1000, to_dt.clone(), -1
             );
-            
+
             // Retrieve all available data
             let data = await this.props.retrieveChartData(
                 this.getProduct(), this.getPeriod(), from_dt, to_dt

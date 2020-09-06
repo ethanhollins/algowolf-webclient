@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Indicators from './strategyapp/Indicators';
 import io from 'socket.io-client';
-import Chart from './strategyapp/windows/chart/Chart';
+import Chart from './strategyapp/windows/Chart';
 import moment from "moment-timezone";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
@@ -15,8 +15,9 @@ import {
     faTimes, faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
     faFileInvoice, faChartBar, faTools, faTicketAlt, faLayerGroup, faHandshakeAltSlash,
     faHandPaper, faQuestionCircle, faHandshakeAlt as faHandshakeAltLight
-} from '@fortawesome/pro-light-svg-icons'
+} from '@fortawesome/pro-light-svg-icons';
 import Strategy from './strategyapp/Strategy';
+import Popup from './strategyapp/Popup';
 
 class StrategyApp extends Component
 {
@@ -26,14 +27,27 @@ class StrategyApp extends Component
         strategy_info: {},
         page: 0,
         charts: {},
+        size: {
+            width: 0, height: 0
+        },
         scale: { x: 100, y: 100 },
         statusMsg: undefined,
-        lastTimestamp: 0
+        lastTimestamp: 0,
+        popup: {
+            type: 'windows-charts',
+            size: {
+                width: 50,
+                height: 75
+            }
+        }
     }
 
     constructor(props)
     {
         super(props);
+
+        this.update = this.update.bind(this);
+        this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
 
         this.setAppContainerRef = elem => {
             this.appContainer = elem;
@@ -41,7 +55,6 @@ class StrategyApp extends Component
         this.setStatusIndicator = elem => {
             this.statusIndicator = elem;
         }
-
         this.setActivationElem = elem => {
             this.activationElem = elem;
         }
@@ -77,6 +90,9 @@ class StrategyApp extends Component
 
     async componentDidMount()
     {
+        this.updateWindowDimensions();
+        window.addEventListener("resize", this.update);
+
         const user_id = await this.props.checkAuthorization();
         this.props.setUserId(user_id);
 
@@ -92,6 +108,11 @@ class StrategyApp extends Component
             const account = await this.retrieveGuiInfo();
             await this.retrieveStrategies(account.metadata.open_strategies);
         }
+    }
+
+    componentWillUnmount()
+    {
+        window.removeEventListener("resize", this.update);
     }
 
     render()
@@ -280,9 +301,10 @@ class StrategyApp extends Component
                                 </div>
                             </div>
                         </div>
-                        {/* {this.generateActivationButtons()} */}
                     </div> 
                     <div className='toolbox_shadow'/> 
+
+                    {this.generatePopup()}
                 </div>
     
                 </div>
@@ -293,6 +315,14 @@ class StrategyApp extends Component
             return <React.Fragment />;
         }
         
+    }
+
+    updateWindowDimensions()
+    {
+        let { size } = this.state;
+        size.width = window.innerWidth;
+        size.height = window.innerHeight;
+        this.setState({ size });
     }
 
     onDragStart(e)
@@ -325,6 +355,23 @@ class StrategyApp extends Component
         }
 
         return tabs;
+    }
+
+    generatePopup()
+    {
+        const { popup } = this.state;
+
+        if (popup !== null)
+        {
+            return <Popup
+                getPopup={this.getPopup}
+                getSize={this.getSize}
+            />;
+        }
+        else
+        {
+            return <React.Fragment />;
+        }
     }
 
     // generateActivationButtons()
@@ -552,6 +599,11 @@ class StrategyApp extends Component
         {
             this.backtestDropdown.style.display = 'none';
         }
+    }
+
+    update()
+    {
+        this.updateWindowDimensions();
     }
 
     handleSocket()
@@ -1146,9 +1198,24 @@ class StrategyApp extends Component
         />)
     }
 
+    getSize = () =>
+    {
+        return this.state.size;
+    }
+
     getScale = () =>
     {
         return this.state.scale;
+    }
+
+    getPopup = () =>
+    {
+        return this.state.popup;
+    }
+
+    setPopup = (popup) =>
+    {
+        this.setState({ popup });
     }
 
     getPeriodOffsetSeconds(period)
@@ -1218,8 +1285,12 @@ class StrategyApp extends Component
 
     isWeekend = (ts) =>
     {
-        const weekend_dates = this.getWeekendDates(ts);
-        return ts >= weekend_dates[0].unix() && ts < weekend_dates[1].unix();
+        const dt = moment.utc(ts*1000);
+        return (
+            (dt.format('ddd') === 'Fri' && parseInt(dt.format('H')) >= 17) ||
+            (dt.format('ddd') === 'Sat') ||
+            (dt.format('ddd') === 'Sun' && parseInt(dt.format('H')) < 17)
+        );
     }
 
     getCountDate = (period, count) =>
