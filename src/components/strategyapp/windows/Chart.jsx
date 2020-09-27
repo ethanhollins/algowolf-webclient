@@ -124,6 +124,12 @@ class Chart extends Component
 
         this.updateCanvas();
 
+        if (this.isBacktest())
+        {
+            const properties = this.getStrategy().properties;
+            this.limit(properties.start, properties.end);
+        }
+
         /* Initialize Chart */
         if (this.getChart() === undefined)
             await this.addChart();
@@ -833,21 +839,27 @@ class Chart extends Component
 
             // Set time range to 1000 bars before earliest loaded date
             const to_dt = moment(ts[0] * 1000);
-            const from_dt = this.props.getCountDateFromDate(
+            let from_dt = this.props.getCountDateFromDate(
                 this.getPeriod(), 1000, to_dt.clone(), -1
             );
 
-            // Retrieve all available data
-            let data = await this.props.retrieveChartData(
-                this.getProduct(), this.getPeriod(), from_dt, to_dt
-            );
+            // Clamp time
+            from_dt = moment(this.clampLimit(from_dt.unix()) * 1000);
 
-            // Update chart with new data
-            this.props.updateChart(this.getProduct(), this.getPeriod(), data.ohlc);
-
-            // Allow new data loading
-            is_loading = false;
-            this.setState({ is_loading });
+            if (from_dt !== to_dt && from_dt < to_dt)
+            {
+                // Retrieve all available data
+                let data = await this.props.retrieveChartData(
+                    this.getProduct(), this.getPeriod(), from_dt, to_dt
+                );
+    
+                // Update chart with new data
+                this.props.updateChart(this.getProduct(), this.getPeriod(), data.ohlc);
+    
+                // Allow new data loading
+                is_loading = false;
+                this.setState({ is_loading });
+            }
         }
     }
 
@@ -2039,10 +2051,7 @@ class Chart extends Component
     limit = (start, end) =>
     {
         let { limit } = this.state;
-        limit = [
-            this.getTimestampIdx(start),
-            this.getTimestampIdx(end)
-        ];
+        limit = [start, end];
         this.setState({ limit });
     }
 
@@ -2051,6 +2060,24 @@ class Chart extends Component
         let { limit } = this.state;
         limit = [null,null];
         this.setState({ limit });
+    }
+
+    clampLimit = (ts) =>
+    {
+        const { limit } = this.state;
+        console.log(ts)
+        console.log(limit)
+        if (limit[0] !== null && ts < limit[0])
+        {
+            ts = limit[0];
+        }
+        else if (limit[1] !== null && ts > limit[1])
+        {
+            ts = limit[0];
+        }
+        console.log(ts)
+
+        return ts;
     }
 
     goto = (ts) =>
@@ -2521,11 +2548,10 @@ class Chart extends Component
         if (this.isBacktest())
         {
             const properties = this.getStrategy().properties;
-            start = this.props.getCountDateFromDate(
-                this.getPeriod(), 1000, 
-                moment(parseFloat(properties.start) * 1000), -1
-            );
-            end = moment(parseFloat(properties.end) * 1000);
+            start = moment.utc(parseFloat(
+                properties.start-this.getPeriodOffsetSeconds(this.getPeriod())
+            ) * 1000);
+            end = moment.utc(parseFloat(properties.end) * 1000);
         }
         else
         {

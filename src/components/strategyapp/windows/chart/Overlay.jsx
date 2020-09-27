@@ -44,7 +44,7 @@ class Overlay extends Component
                     if (x === 0) c_x = 0;
 
                     let x_pos = (ohlc.length - x)+0.5;
-                    if (limit[0] != null && (x < limit[0] || x > limit[1])) continue;
+                    // if (limit[0] != null && (x < limit[0] || x > limit[1])) continue;
                     if (x_pos > pos.x + scale.x+1 || first_pos === null)
                     {
                         if (ohlc[x][0] !== null && values[i][c_x][y] !== null) 
