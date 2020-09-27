@@ -39,7 +39,7 @@ class App extends Component
                             getUserId={this.getUserId}
                             setUserId={this.setUserId}
                             checkAuthorization={this.checkAuthorization}
-                        />;
+                        />
                     </Route>
 
                     <Route exact path={["/", "/alerts", "/learn", "/hire", "/brokers", "/u/:username"]}>

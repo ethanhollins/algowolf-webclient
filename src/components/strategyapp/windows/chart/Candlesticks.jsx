@@ -19,6 +19,7 @@ class Candlesticks extends Component
         
         const ohlc = this.props.getBids();
         const limit = this.props.getLimit();
+        const info = this.props.getWindowInfo();
 
         for (let i = 0; i < ohlc.length; i++) 
         {
@@ -45,10 +46,15 @@ class Candlesticks extends Component
             let wick_up_size;
             let wick_down_size;
             
+            let body_color;
+            let outline_color;
+            let wick_color;
+
             if (candle[0] > candle[3]) 
             {
-                ctx.fillStyle = "rgb(235, 59, 90)";
-                ctx.strokeStyle = "rgb(235, 59, 90)";
+                body_color = info.properties.bars.bodyShort;
+                outline_color = info.properties.bars.outlineShort;
+                wick_color = info.properties.bars.wickShort;
                 ctx.lineWidth = 0.5;
 
                 wick_up_size = candle[1] - candle[0];
@@ -62,12 +68,12 @@ class Candlesticks extends Component
                     { x: 0, y: wick_down_size },
                     size, scale
                 );
-
             }
             else 
             {
-                ctx.fillStyle = "rgb(32, 191, 107)";
-                ctx.strokeStyle = "rgb(32, 191, 107)";
+                body_color = info.properties.bars.bodyLong;
+                outline_color = info.properties.bars.outlineLong;
+                wick_color = info.properties.bars.wickLong;
                 ctx.lineWidth = 0.5;
 
                 wick_up_size = candle[1] - candle[3];
@@ -89,26 +95,42 @@ class Candlesticks extends Component
             const w_x = Math.round(body_pos.x);
             const w_width = 1.0;
             
+            ctx.fillStyle = wick_color;
+            // Draw Wick Up
+            if (scale.x < 500)
+            {
+                const w_up_y = Math.round(body_pos.y - body_size.y/2)+1;
+                ctx.fillRect(
+                    w_x, w_up_y - Math.round(wick_up_size.y),
+                    Math.max(w_width, 1), Math.max(Math.round(wick_up_size.y), 1)
+                );
+    
+                // Draw Wick Down
+                const w_down_y = Math.round(body_pos.y + body_size.y / 2)-1;
+                ctx.fillRect(
+                    w_x, w_down_y,
+                    Math.max(w_width, 1), Math.max(Math.round(wick_down_size.y), 1)
+                );
+            }
+
+            ctx.fillStyle = body_color;
+            ctx.strokeStyle = outline_color;
             // Draw Body
             ctx.fillRect(
-                c_x, c_y,
+                Math.round(c_x), Math.round(c_y),
                 Math.max(Math.round(body_size.x), 1),
                 Math.max(Math.round(body_size.y), 1)
             );
-                
-            // Draw Wick Up
-            const w_up_y = Math.round(body_pos.y - body_size.y/2)+1;
-            ctx.fillRect(
-                w_x, w_up_y - Math.round(wick_up_size.y),
-                Math.max(w_width, 1), Math.max(Math.round(wick_up_size.y), 1)
-            );
 
-            // Draw Wick Down
-            const w_down_y = Math.round(body_pos.y + body_size.y / 2)-1;
-            ctx.fillRect(
-                w_x, w_down_y,
-                Math.max(w_width, 1), Math.max(Math.round(wick_down_size.y), 1)
-            );
+            if (scale.x < 500)
+            {
+                ctx.strokeRect(
+                    Math.round(c_x)+0.5, Math.round(c_y)-0.5,
+                    Math.max(Math.round(body_size.x), 1),
+                    Math.max(Math.round(body_size.y), 1)
+                );
+            }
+
         }
     }
 }

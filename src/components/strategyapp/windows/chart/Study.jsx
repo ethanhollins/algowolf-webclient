@@ -10,19 +10,35 @@ class Study extends Component
             x:0, y:0
         },
         interval: 0,
-        is_move: false
+        trans_x: 0,
+        is_move: false,
+        is_resize: false
+    }
+
+    constructor(props)
+    {
+        super(props);
+
+        this.onMouseMove = this.onMouseMove.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
     }
 
     componentDidMount()
     {
-        window.addEventListener("mousemove", this.onMouseMove.bind(this));
+        window.addEventListener("mousemove", this.onMouseMove);
+        window.addEventListener("mouseup", this.onMouseUp);
 
-        this.setStudyProperties();
+        let { pos, scale } = this.state;
+        const study_properties = this.getStudyProperties();
+        pos = study_properties.pos;
+        scale = study_properties.scale;
+        this.setState({ pos, scale });
     }
 
-    componentDidUpdate()
+    componentWillUnmount()
     {
-
+        window.removeEventListener("mousemove", this.onMouseMove);
+        window.removeEventListener("mouseup", this.onMouseUp);
     }
 
     render()
@@ -32,9 +48,16 @@ class Study extends Component
 
     onMouseMove(e)
     {
-        const { is_move } = this.state;
+        const { is_move, is_resize } = this.state;
         const LOCK = true;
-        if (is_move && !LOCK)
+        if (is_resize)
+        {
+            const screen_move = { x: e.movementX, y: e.movementY };
+            const chart_size = this.props.getChartSize();
+            
+            this.props.resizePortion(this.props.index, -screen_move.y / chart_size.height)
+        }
+        else if (is_move && !LOCK)
         {
             const chart_scale = this.props.getScale();
 
@@ -53,16 +76,29 @@ class Study extends Component
         }
     }
 
-    setStudyProperties()
+    onMouseUp(e)
     {
+        let { trans_x, is_resize } = this.state;
+        trans_x = 0;
+        is_resize = false;
+        this.setState({ trans_x, is_resize });
+    }
+
+    getStudyProperties()
+    {
+        const chart_pos = this.props.getPos();
+        const chart_scale = this.props.getScale();
+        let pos = { x: chart_pos.x, y: this.state.pos.y };
+        let scale = { x: chart_scale.x, y: this.state.scale.y };
+
         const values = this.props.getValues(this.props.index);
-        let { pos, scale } = this.state;
         let hl = [null, null];
         for (let i = 0; i < values.length; i++)
         {
-            for (let j = 0; j < values[i].length; j++)
+            for (let j = Math.round(pos.x + parseInt(scale.x)); j >= pos.x - 2; j--)
             {
-                let val = values[i][j];
+                let val = values[i][values[i].length-1-j];
+                if (val === undefined) continue;
 
                 if (hl[0] == null || val > hl[0])
                     hl[0] = val;
@@ -70,13 +106,19 @@ class Study extends Component
                     hl[1] = val;
             }
         }
+        if (hl.every((x) => x !== null))
+        {
+            scale.y = (hl[0] - hl[1]);
+            const scale_off = scale.y * 0.3;
+            scale.y += scale_off;
+            const mid_point = Math.round(parseFloat(hl[0] + hl[1]) / 2 * 100000) / 100000;
+            pos.y = mid_point + scale_off/4;
+        }
 
-        scale.y = (hl[0] - hl[1]);
-        scale.y += scale.y * 0.1;
-        const mid_point = Math.round((hl[0] + hl[1]) / 2 * 100000) / 100000;
-        pos.y = mid_point;
-
-        this.setState({ pos, scale });
+        return {
+            pos: pos,
+            scale: scale
+        }
     }
 
     move = (y) =>
@@ -98,7 +140,6 @@ class Study extends Component
         if (!dy) dy = 0;
 
         pos.y += dy;
-        // console.log(pos);
         this.setState({ pos });
     } 
 
@@ -106,9 +147,9 @@ class Study extends Component
     {
         const camera = this.props.getCamera();
         const seg_size = this.props.getSegmentSize(this.getWindowIndex());
-        let { scale, interval } = this.state;
+        let { interval } = this.state;
         const chart_scale = this.props.getScale();
-        scale.x = chart_scale.x;
+        const scale = { x: chart_scale.x, y: this.state.y };
 
         const min_dist = 100;
         const possible_intervals = [1, 2, 5, 10];
@@ -126,10 +167,6 @@ class Study extends Component
 
     draw() 
     {
-        this.setPriceInterval();
-
-        let { pos, scale } = this.state;
-
         const camera = this.props.getCamera();
         const canvas = this.props.getCanvas();
         const ctx = canvas.getContext("2d");
@@ -138,18 +175,21 @@ class Study extends Component
         
         const chart_pos = this.props.getPos();
         const start_pos = this.props.getSegmentStartPos(this.getWindowIndex());
-        pos.x = chart_pos.x;
+        const pos = { x: chart_pos.x, y: this.state.pos.y };
         
         const chart_scale = this.props.getScale();
-        scale.x = chart_scale.x;
-        
+        const scale = { x: chart_scale.x, y: this.state.scale.y };
+
         const size = this.props.getSegmentSize(this.getWindowIndex());
+        const ohlc = this.props.getOhlcValues();
+        const f_off = this.props.getFilteredOffset();
         const values = this.props.getValues(this.props.index);
         const properties = this.props.getProperties(this.props.index);
         const limit = this.props.getLimit();
 
         // If empty values list, cancel drawing
         if (values.length === 0) return;
+
 
         // Iterate columns
         for (let i = 0; i < values.length; i++) 
@@ -160,19 +200,23 @@ class Study extends Component
             // Iterate rows
             for (let y = 0; y < values[i][0].length; y++)
             {
+                let c_x = -1;
                 ctx.strokeStyle = properties.colors[i][y];
                 ctx.beginPath();
-                for (let x = 0; x < values[i].length; x++) 
+                for (let x = 0; x < ohlc.length; x++) 
                 {
-                    let x_pos = (values[i].length - x)+0.5;
+                    if (ohlc[x][0] !== null) c_x += 1;
+                    if (x === 0) c_x = 0;
+
+                    let x_pos = (ohlc.length - x)+0.5;
                     if (limit[0] != null && (x < limit[0] || x > limit[1])) continue;
-                    if (first_pos === null)
+                    if (x_pos > pos.x + scale.x+1 || first_pos === null)
                     {
-                        if (values[i][x][y] !== null)
+                        if (ohlc[x][0] !== null && values[i][c_x][y] !== null)
                         {
                             // Move to first position
                             first_pos = camera.convertWorldPosToScreenPos(
-                                { x: x_pos, y: values[i][x][y] },
+                                { x: x_pos, y: values[i][c_x][y] },
                                 pos, size, scale
                             );
                             ctx.moveTo(
@@ -183,10 +227,8 @@ class Study extends Component
                         continue
                     }
 
-                    if (x_pos > pos.x + scale.x+1 || x_pos < pos.x-1 ) continue;
-                    
-                    let i_val = values[i][x][y];
-                    if (i_val === null) continue;
+                    let i_val = values[i][c_x][y];
+                    if (i_val === null || ohlc[x][0] === null) continue;
 
                     let line_pos = camera.convertWorldPosToScreenPos(
                         { x: x_pos, y: i_val },
@@ -197,6 +239,7 @@ class Study extends Component
                         line_pos.x + start_pos.x, 
                         line_pos.y + start_pos.y
                     );
+                    if (x_pos < pos.x-1) break;
                 }
                 ctx.stroke();
             }
@@ -285,16 +328,19 @@ class Study extends Component
                 { x: 0, y: c_y }, pos, seg_size, scale
             ).y;
             
-            ctx.strokeText(
-                c_y.toFixed(5), 
-                seg_size.width - 5, 
-                start_pos.y + screen_y + (3/4 * (font_size/2))
-            );
-            ctx.fillText(
-                c_y.toFixed(5), 
-                seg_size.width - 5, 
-                start_pos.y + screen_y + (3/4 * (font_size/2))
-            );
+            if (start_pos.y + screen_y - (3/4 * (font_size)) > start_pos.y)
+            {
+                ctx.strokeText(
+                    c_y.toFixed(5), 
+                    seg_size.width - 5, 
+                    start_pos.y + screen_y + (3/4 * (font_size/2))
+                );
+                ctx.fillText(
+                    c_y.toFixed(5), 
+                    seg_size.width - 5, 
+                    start_pos.y + screen_y + (3/4 * (font_size/2))
+                );
+            }
         }
 
     }
@@ -340,8 +386,7 @@ class Study extends Component
         const start_pos = this.props.getSegmentStartPos(this.getWindowIndex());
 
         // Separator Line
-        ctx.clearRect(0, Math.round(start_pos.y)-1, seg_size.width, 2.0);
-        ctx.fillStyle = `rgba(0, 0, 0,1.0)`;
+        ctx.fillStyle = `rgba(180, 180, 180, 1.0)`;
         ctx.fillRect(0, Math.round(start_pos.y), seg_size.width, 1.0);
     }
 
@@ -355,6 +400,30 @@ class Study extends Component
         return this.state.scale;
     }
 
+    setScaleY = (y) =>
+    {
+        let { scale } = this.state;
+        scale.y = y;
+        this.setState({ scale });
+    }
+
+    setPosY = (y) =>
+    {
+        let { pos } = this.state;
+        pos.y = y;
+        this.setState({ pos });
+    }
+
+    getTransX = () =>
+    {
+        return this.state.trans_x;
+    }
+
+    setTransX = (trans_x) =>
+    {
+        this.setState({ trans_x });
+    }
+
     getIsMove = () =>
     {
         return this.state.is_move;
@@ -365,11 +434,14 @@ class Study extends Component
         return this.props.index + 1;
     }
 
-    setIsMove = (x) =>
+    setIsMove = (is_move) =>
     {
-        let { is_move } = this.state;
-        is_move = x;
         this.setState({ is_move });
+    }
+
+    setIsResize = (is_resize) =>
+    {
+        this.setState({ is_resize });
     }
 
 }

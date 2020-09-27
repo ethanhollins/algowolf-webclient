@@ -6,34 +6,44 @@ import Study from './chart/Study';
 import _ from 'underscore';
 import moment from "moment-timezone";
 import Drawings from '../paths/Paths';
-import Indicators from '../Indicators';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+    faCoin, faEye, faUndo, faDollarSign, faCog
+} from '@fortawesome/pro-light-svg-icons';
 
 
 class Chart extends Component 
 {
     state = {
         pos: {
-            x: 0, y: 0,
+            x: -50, y: 0,
         },
         mouse_pos: {
             x: -1, y: -1
         },
         scale: {
-            x: 30.0, y:0.2,
+            x: 200.0, y:0.2,
         },
         intervals: {
             x: 0, y: 0
         },
+        prices: {
+            ohlc: [],
+            ohlc_color: null,
+            overlays: [],
+            overlay_colors: [],
+            studies: [],
+            study_colors: [],
+        },
         future_timestamps: [],
-        overlays: [],
-        studies: [],
         is_down: false,
         is_move: false,
         trans_x: 0,
         limit: [null,null],
         first_load: true,
         is_scrolling: null,
-        is_loading: false
+        is_loading: false,
+        cursor: null
     }
 
     constructor(props)
@@ -42,9 +52,11 @@ class Chart extends Component
 
         // Overlays
         this.overlays = [];
+        this.overlayPrices = [];
 
         // Studies
         this.studies = [];
+        this.studyPrices = [];
 
         // Drawings
         this.drawings = [];
@@ -52,6 +64,9 @@ class Chart extends Component
         // Refs Setters
         this.setContainerRef = elem => {
             this.container = elem;
+        }
+        this.setContextMenuRef = elem => {
+            this.contextMenu = elem;
         }
         this.setCanvasRef = elem => {
             this.canvas = elem;
@@ -65,6 +80,7 @@ class Chart extends Component
         this.setCandlesticksRef = elem => {
             this.candlesticks = elem;
         };
+
         this.addOverlayRef = elem => {
             this.overlays.push(elem);
         }
@@ -74,12 +90,19 @@ class Chart extends Component
         this.addDrawingRef = elem => {
             this.drawings.push(elem);
         }
+        this.addOverlayPriceRef = elem => {
+            this.overlayPrices.push(elem);
+        }
+        this.addStudyPriceRef = elem => {
+            this.studyPrices.push(elem);
+        }
 
         this._ismounted = true;
+        this._isinitialized = false;
 
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onMouseMove = _.throttle(this.onMouseMove.bind(this), 1);
-        this.onCrosshairMove = _.throttle(this.onCrosshairMove.bind(this), 20);
+        this.onMoveThrottled = _.throttle(this.onMoveThrottled.bind(this), 20);
         this.onMouseUp = this.onMouseUp.bind(this);
         this.update = this.update.bind(this);
         this.onScroll = _.throttle(this.onScroll.bind(this), 20);
@@ -89,7 +112,7 @@ class Chart extends Component
     {
         window.addEventListener("mousedown", this.onMouseDown);
         window.addEventListener("mousemove", this.onMouseMove);
-        window.addEventListener("mousemove", this.onCrosshairMove);
+        window.addEventListener("mousemove", this.onMoveThrottled);
 
         window.addEventListener("mouseup", this.onMouseUp);
         window.addEventListener("resize", this.update);
@@ -104,40 +127,36 @@ class Chart extends Component
         /* Initialize Chart */
         if (this.getChart() === undefined)
             await this.addChart();
-        
+
         /* Initialize Indicators */
-        const properties = this.getProperties();
-        let { overlays, studies } = this.state;
+        const overlays = this.getOverlays();
+        const studies = this.getStudies();
 
         // Overlays
-        for (let i = 0; i < properties.overlays.length; i++)
+        for (let i = 0; i < overlays.length; i++)
         {
-            const ind = properties.overlays[i];
+            const ind = overlays[i];
             this.calculateIndicator(ind);
-            overlays.push({
-                ind: ind
-            });
         }
 
         // Studies
-        for (let i = 0; i < properties.studies.length; i++)
+        for (let i = 0; i < studies.length; i++)
         {
-            const ind = properties.studies[i];
+            const ind = studies[i];
             this.calculateIndicator(ind);
-
-            studies.push({
-                portion: properties.studies[i].portion,
-                ind: ind
-            });
         }
-        this.setState({ overlays, studies });
 
-        this.setFutureTimestamps();
-        this.setPriceInterval();
-        this.setTimeInterval();
+        if (this._ismounted)
+        {
+            this.setFutureTimestamps();
+            this.setPriceInterval();
+            this.setTimeInterval();
+        }
+
+        this._isinitialized = true;
     }
 
-    async componentDidUpdate() 
+    componentDidUpdate() 
     {
         let { pos, scale, first_load, trans_x } = this.state;
 
@@ -154,12 +173,30 @@ class Chart extends Component
             }
             else if (trans_x === 0)
             {
-                const num_steps = 16;
-                const c = scale.y;
-                const m = (chart_properties.scale.y - c) / Math.pow(num_steps, 2);
-                this.transitionScaleY(num_steps, m, c, 0);
+                const num_steps = 5;
+                const c_scale = scale.y;
+                const scale_interval = (chart_properties.scale.y - c_scale) / Math.pow(num_steps, 2);
+                this.transitionScaleY(num_steps, scale_interval, c_scale, null, null, 0, this);
             }
-    
+            
+            for (let i = 0; i < this.studies.length; i++)
+            {
+                const study = this.studies[i];
+                const study_properties = study.getStudyProperties();
+                if (study.getScale().y === 0)
+                {
+                    study.setScaleY(study_properties.scale.y);
+                }
+                else if (study.getTransX() === 0)
+                {
+                    const num_steps = 5;
+                    const c_scale = study.getScale().y;
+                    const scale_interval = (study_properties.scale.y - c_scale) / Math.pow(num_steps, 2);
+                    const c_pos = study.getPos().y;
+                    const pos_interval = (study_properties.pos.y - c_pos) / Math.pow(num_steps, 2);
+                    this.transitionScaleY(num_steps, scale_interval, c_scale, pos_interval, c_pos, 0, study);
+                }
+            }
         }
 
         this.update(); 
@@ -170,7 +207,7 @@ class Chart extends Component
         this._ismounted = false;
         window.removeEventListener("mousedown", this.onMouseDown);
         window.removeEventListener("mousemove", this.onMouseMove);
-        window.removeEventListener("mousemove", this.onCrosshairMove);
+        window.removeEventListener("mousemove", this.onMoveThrottled);
 
         window.removeEventListener("mouseup", this.onMouseUp);
         window.removeEventListener("resize", this.update);
@@ -184,16 +221,44 @@ class Chart extends Component
     render() {
         return (
             <div
-                className='chart_container'
+                className='chart container'
                 ref={this.setContainerRef}
                 style={{
                     width: "100%",
                     height: "100%",
                     overflow: "hidden",
                 }}
+                onContextMenu={this.onContextMenu.bind(this)}
             >
+                <div ref={this.setContextMenuRef} className='context-menu body'>
+                    <div className='context-menu item separator' onClick={this.onContextMenuItem.bind(this)} name={'trade'}>
+                        <FontAwesomeIcon icon={faCoin} />
+                        Trade
+                    </div>
+                    <div className='context-menu item left-space' onClick={this.onContextMenuItem.bind(this)} name={'bar-types'}>Bar Types</div>
+                    <div className='context-menu item' onClick={this.onContextMenuItem.bind(this)} name={'price'}>
+                        <FontAwesomeIcon icon={faDollarSign} />
+                        Price
+                    </div>
+                    <div className='context-menu item' onClick={this.onContextMenuItem.bind(this)} name={'show'}>
+                        <FontAwesomeIcon icon={faEye} />
+                        Show
+                    </div>
+                    <div className='context-menu item left-space separator' onClick={this.onContextMenuItem.bind(this)} name={'layouts'}>Layouts</div>
+                    <div className='context-menu item' onClick={this.onContextMenuItem.bind(this)} name={'reset'}>
+                        <FontAwesomeIcon icon={faUndo} />
+                        Reset
+                    </div>
+                    <div className='context-menu item' onClick={this.onContextMenuItem.bind(this)} name={'settings'}>
+                        <FontAwesomeIcon icon={faCog} />
+                        Settings
+                    </div>
+                </div>
+                <div className='chart info'>
+                    {this.generateInfo()}
+                </div>
                 <canvas
-                    id='chart_canvas'
+                    className='chart canvas'
                     ref={this.setCanvasRef}
                 />
                 <Camera
@@ -210,6 +275,7 @@ class Chart extends Component
                     getSegmentSize={this.getSegmentSize}
                     getPortions={this.getPortions}
                     getLimit={this.getLimit}
+                    getWindowInfo={this.getWindowInfo}
                 />
                 {this.generateOverlays()}
                 {this.generateStudies()}
@@ -219,61 +285,83 @@ class Chart extends Component
 
     onMouseDown(e)
     {
+        const keys = this.props.getKeys();
+        if (keys.includes(SPACEBAR)) return;
 
         const mouse_pos = {
             x: e.clientX, y: e.clientY
         }
-        const keys = this.props.getKeys();
-        let { is_down, is_move } = this.state;
+        const top_offset = this.props.getTopOffset();
 
-        // Check mouse within main segment bounds
-        const top_offset = this.props.getTopOffset() + this.props.getScreenPos().y;
-
-        let start_pos = this.getSegmentStartPos(0);
-        let segment_size = this.getSegmentSize(0);
-        let rect = {
-            x: start_pos.x,
-            y: start_pos.y + top_offset,
-            width: segment_size.width,
-            height: segment_size.height
-        }
-
-        if (!keys.includes(SPACEBAR) && this.isWithinBounds(rect, mouse_pos))
+        if (this.props.isTopWindow(
+            this.getStrategyId(), this.getItemId(), 
+            { x: mouse_pos.x, y: mouse_pos.y - top_offset }
+        ))
         {
-            e.preventDefault();
-            is_down = true;
-            is_move = true;
-            this.setState({ is_down, is_move });
-            return
-        }
-
-        // Check mouse within study bounds
-        const studies = this.getStudies();
-        for (let i = 0; i < studies.length; i++)
-        {
-            let study = studies[i];
-            start_pos = this.getSegmentStartPos(study.getWindowIndex());
-            segment_size = this.getSegmentSize(study.getWindowIndex());
-            rect = {
+            let { is_down, is_move } = this.state;
+    
+            // Check mouse within main segment bounds
+    
+            let start_pos = this.getWindowSegmentStartPos(0);
+            let segment_size = this.getSegmentSize(0);
+            let rect = {
                 x: start_pos.x,
                 y: start_pos.y + top_offset,
                 width: segment_size.width,
                 height: segment_size.height
             }
-
-            if (!keys.includes(SPACEBAR) && this.isWithinBounds(rect, mouse_pos)) 
+    
+            if (!keys.includes(SPACEBAR) && this.isWithinBounds(rect, mouse_pos))
             {
                 e.preventDefault();
                 is_down = true;
-                study.setIsMove(true);
-                this.setState({ is_down });
-                return
+                is_move = true;
             }
+    
+            // Check mouse within study bounds
+            const studies = this.getStudyComponents();
+            for (let i = 0; i < studies.length; i++)
+            {
+                let study = studies[i];
+                start_pos = this.getWindowSegmentStartPos(study.getWindowIndex());
+                segment_size = this.getSegmentSize(study.getWindowIndex());
+                rect = {
+                    x: start_pos.x,
+                    y: start_pos.y + top_offset,
+                    width: segment_size.width,
+                    height: segment_size.height
+                }
+
+                
+                const handle_rect = this.getHandleRect(start_pos, segment_size);
+                handle_rect.y += top_offset
+                if (this.isWithinBounds(handle_rect, mouse_pos))
+                {
+                    is_down = false;
+                    is_move = false;
+                    
+                    study.setIsResize(true);
+                    return
+                }
+                else if (this.isWithinBounds(rect, mouse_pos)) 
+                {
+                    e.preventDefault();
+                    is_down = true;
+                    study.setIsMove(true);
+                    this.setState({ is_down });
+                    return
+                }
+            }
+
+            this.setState({ is_down, is_move });
         }
     }
 
     onMouseMove(e)
     {
+        const keys = this.props.getKeys();
+        if (keys.includes(SPACEBAR)) return;
+
         let { is_down, is_move } = this.state;
 
         if (is_down)
@@ -293,9 +381,14 @@ class Chart extends Component
 
             this.setState({ pos });
         }
+    }
 
-        // if (update_pos)
-        //     this.setState({ mouse_pos });
+    onMoveThrottled(e)
+    {
+        const keys = this.props.getKeys();
+        if (keys.includes(SPACEBAR)) return;
+
+        this.onCrosshairMove(e);
     }
 
     onCrosshairMove(e)
@@ -316,7 +409,10 @@ class Chart extends Component
 
     onMouseUp(e)
     {
-        const studies = this.getStudies();
+        const keys = this.props.getKeys();
+        if (keys.includes(SPACEBAR)) return;
+
+        const studies = this.getStudyComponents();
         for (let i = 0; i < studies.length; i++) 
         {
             studies[i].setIsMove(false);
@@ -329,11 +425,24 @@ class Chart extends Component
         {
             is_move = false;
             trans_x = 0;
+            for (let study of this.studies)
+            {
+                study.setTransX(0);
+            }
         }
 
+        const mouse_pos = {
+            x: e.clientX, y: e.clientY
+        }
 
         if (this.getChart()) this.setFutureTimestamps();
         
+        const rect = this.contextMenu.getBoundingClientRect();
+        if (!this.isWithinBounds(rect, mouse_pos))
+        {
+            this.contextMenu.style.display = 'none';
+        }
+
         // this.limit(
         //     this.getTimestamps()[this.getTimestamps().length-100],
         //     this.getTimestamps()[this.getTimestamps().length-1]
@@ -344,6 +453,9 @@ class Chart extends Component
 
     onScroll(e)
     {
+        const mouse_pos = {
+            x: e.clientX, y: e.clientY
+        };
         let { pos, scale, trans_x, is_scrolling } = this.state;
         const dz = e.deltaY;
         const speed = 0.1;
@@ -354,24 +466,79 @@ class Chart extends Component
             { x: chart_size.width, y: 0 }, chart_size, scale
         ).x;
 
-        scale.x += (num_candles * speed * (dz / 100.0));
-        scale.x = this.clampScale(scale.x);
-        // pos.x = this.clampMove(pos.x);
+        // Check mouse within main segment bounds
+        const top_offset = this.props.getTopOffset();
+
+        let start_pos = this.getWindowSegmentStartPos(0);
+        let rect = {
+            x: start_pos.x,
+            y: start_pos.y + top_offset,
+            width: chart_size.width,
+            height: chart_size.height
+        }
+
+        if (this.isWithinBounds(rect, mouse_pos))
+        {
+            scale.x += (num_candles * speed * (dz / 100.0));
+            scale.x = this.clampScale(scale.x);
+            
+            clearTimeout(is_scrolling);
+            is_scrolling = setTimeout(() => {
+                trans_x = 0;
+                this.setState({ trans_x });
+
+                for (let study of this.studies)
+                {
+                    if (study !== null) study.setTransX(0);
+                }
+            }, 100);
+    
+            this.onCrosshairMove(e);
+    
+            this.setState({ pos, scale, is_scrolling });
+        }
+
+    }
+
+    onContextMenu(e)
+    {
+        e.preventDefault();
+
+        const top_offset = this.props.getTopOffset();
+        const mouse_pos = {
+            x: e.clientX, y: e.clientY - top_offset
+        };
+
+        this.contextMenu.style.display = 'block';
+        this.contextMenu.style.left = mouse_pos.x + 'px';
+        this.contextMenu.style.top = mouse_pos.y + 'px';
+    }
+
+    onContextMenuItem(e)
+    {
+        e.preventDefault();
+
+        this.contextMenu.style.display = 'none';
+
+        const name = e.target.getAttribute('name');
         
-        clearTimeout(is_scrolling);
-        is_scrolling = setTimeout(() => {
-            trans_x = 0;
-            this.setState({ trans_x });
-        }, 100);
-
-        this.onCrosshairMove(e);
-
-        this.setState({ pos, scale, is_scrolling });
+        const popup = {
+            type: 'chart-settings',
+            size: {
+                width: 60,
+                height: 75
+            },
+            opened: undefined,
+            properties: {
+                item_id: this.getItemId()
+            }
+        }
+        this.props.setPopup(popup);
     }
 
     clampScale = (x) =>
     {
-        const min = 10, max = 500;
+        const min = 10, max = 2000;
         return Math.min(Math.max(x, min), max);
     }
 
@@ -381,14 +548,14 @@ class Chart extends Component
         return Math.max(x, scale.x);
     }
 
-    runTransition(num_steps, m, c, i) 
+    runTransition(num_steps, scale_interval, c_scale, pos_interval, c_pos, i, obj)
     {
-        let { trans_x } = this.state;
+        let trans_x = obj.getTransX();
 
         if (trans_x < num_steps && i === trans_x)
         {
             trans_x += 1;
-            this.setState({ trans_x });
+            obj.setTransX(trans_x);
             return new Promise(
                 function (resolve) 
                 {
@@ -396,45 +563,55 @@ class Chart extends Component
                     {
                         if (this._ismounted)
                         {
-                            let { scale } = this.state;
-                            scale.y = m * Math.pow(trans_x, 2) + c
-                            this.setState({ scale });
-                            this.setPriceInterval();
-                            this.setTimeInterval();
-                            this.transitionScaleY(num_steps, m, c, i+1);
+                            if (c_scale !== null) 
+                                obj.setScaleY(scale_interval * Math.pow(trans_x, 2) + c_scale);
+                            if (c_pos !== null) 
+                                obj.setPosY(pos_interval * Math.pow(trans_x, 2) + c_pos);
+                            obj.setPriceInterval();
+                            if (obj.setTimeInterval !== undefined) obj.setTimeInterval();
+                            this.transitionScaleY(num_steps, scale_interval, c_scale, pos_interval, c_pos, i+1, obj);
                         }
-                    }, 10);
+                    }, 25);
                 }.bind(this)
             );
         }
     }
     
-    async transitionScaleY(num_steps, m, c, i)
+    async transitionScaleY(
+        num_steps, scale_interval, c_scale, 
+        pos_interval, c_pos, i, obj
+    )
     {
-
-        await this.runTransition(num_steps, m, c, i);
+        await this.runTransition(num_steps, scale_interval, c_scale, pos_interval, c_pos, i, obj);
+        this.forceUpdate();
     }
 
     generateOverlays() 
     {
-        const overlays = this.state.overlays;
+        const overlays = this.getOverlays();
         let gen_overlays = [];
-        for (let i = 0; i < overlays.length; i++) {
-            gen_overlays.push(
-                <Overlay
-                    key={'overlay_'+i}
-                    ref={this.addOverlayRef}
-                    index={i}
-                    getValues={this.getOverlayValues}
-                    getProperties={this.getOverlayProperties}
-                    getCamera={this.getCamera}
-                    getCanvas={this.getCanvas}
-                    getPos={this.getPos}
-                    getScale={this.getScale}
-                    getSegmentSize={this.getSegmentSize}
-                    getLimit={this.getLimit}
-                />
-            );
+        if (this._isinitialized)
+        {
+            for (let i = 0; i < overlays.length; i++) {
+                gen_overlays.push(
+                    <Overlay
+                        key={'overlay_'+i}
+                        ref={this.addOverlayRef}
+                        index={i}
+                        getValues={this.getOverlayValues}
+                        getOhlcValues={this.getBids}
+                        getFilteredOffset={this.getFilteredOffset}
+                        getProperties={this.getOverlayProperties}
+                        getCamera={this.getCamera}
+                        getCanvas={this.getCanvas}
+                        getPos={this.getPos}
+                        getScale={this.getScale}
+                        getSegmentSize={this.getSegmentSize}
+                        getWindowInfo={this.getWindowInfo}
+                        getLimit={this.getLimit}
+                    />
+                );
+            }
         }
 
         return gen_overlays;
@@ -442,38 +619,200 @@ class Chart extends Component
 
     generateStudies()
     {
-        const studies = this.state.studies;
+        const studies = this.getStudies();
+
         let gen_studies = [];
-        for (let i = 0; i < studies.length; i++) 
+        if (this._isinitialized)
         {
-            gen_studies.push(
-                <Study
-                    key={'study_'+i}
-                    ref={this.addStudyRef}
-                    index={i}
-                    getValues={this.getStudyValues}
-                    getProperties={this.getStudyProperties}
-                    getTimestamps={this.getTimestamps}
-                    getAllTimestamps={this.getAllTimestamps}
-                    getNumZeroDecimals={this.getNumZeroDecimals}
-                    getCamera={this.getCamera}
-                    getCanvas={this.getCanvas}
-                    getPos={this.getPos}
-                    getScale={this.getScale}
-                    getSegmentStartPos={this.getSegmentStartPos}
-                    getSegmentSize={this.getSegmentSize}
-                    getLimit={this.getLimit}
-                />
-            );
+            for (let i = 0; i < studies.length; i++) 
+            {
+                gen_studies.push(
+                    <Study
+                        key={'study_'+i}
+                        ref={this.addStudyRef}
+                        index={i}
+                        getValues={this.getStudyValues}
+                        getOhlcValues={this.getBids}
+                        getFilteredOffset={this.getFilteredOffset}
+                        getProperties={this.getStudyProperties}
+                        getTimestamps={this.getTimestamps}
+                        getAllTimestamps={this.getAllTimestamps}
+                        getNumZeroDecimals={this.getNumZeroDecimals}
+                        getCamera={this.getCamera}
+                        getCanvas={this.getCanvas}
+                        getChartSize={this.getChartSize}
+                        getPos={this.getPos}
+                        getScale={this.getScale}
+                        getSegmentStartPos={this.getChartSegmentStartPos}
+                        getSegmentSize={this.getSegmentSize}
+                        getWindowInfo={this.getWindowInfo}
+                        getLimit={this.getLimit}
+                        resizePortion={this.resizePortion}
+                    />
+                );
+            }
         }
 
         return gen_studies;
     }
 
+    generateInfo()
+    {
+        if (this._isinitialized)
+        {
+            const prices = this.getPriceInfo();
+            const overlays = this.getOverlays();
+            let overlay_info = [];
+            for (let i = 0; i < overlays.length; i++)
+            {
+                const overlay = overlays[i];
+
+                let value_elems = [];
+                for (let x = 0; x < prices.overlays[i].length; x++)
+                {
+                    for (let y = 0; y < prices.overlays[i][x].length; y++)
+                    {
+                        let item = '';
+                        let price = prices.overlays[i][x][y];
+                        if (price === null || price === undefined) 
+                        {
+                            price = '';
+                        }
+                        else
+                        {
+                            price = price.toFixed(5);
+                        }
+
+                        if (y === 0) 
+                        {
+                            item = (
+                                <React.Fragment>
+
+                                <span className='chart values period'>
+                                    {overlay.properties.periods[x]}
+                                </span>
+                                <span className='chart values price'>
+                                    {price}
+                                </span>
+
+                                </React.Fragment>
+                            );
+                        }
+                        else
+                        {
+                            item = (
+                                <span className='chart values price'>
+                                    {price}
+                                </span>
+                            );
+                        }
+
+                        value_elems.push(
+                            <span key={x + '' + y}>{item}</span>
+                        );
+                    }
+                }
+
+                const name = overlay.type.substring(0,1).toUpperCase() + overlay.type.substring(1);
+                overlay_info.push(
+                    <div key={i} className='chart group overlay' style={{top: (5 + (i+1) * 20) + 'px', left: '5px'}}>
+                        <span className='chart values type'>{name}</span>
+                        {value_elems}
+                    </div>
+                );
+            }
+
+            const studies = this.getStudies();
+            let study_info = [];
+            for (let i = 0; i < studies.length; i++)
+            {
+                const study = studies[i];
+                const start_pos = this.getChartSegmentStartPos(i+1);
+
+                let value_elems = [];
+                for (let x = 0; x < prices.studies[i].length; x++)
+                {
+                    for (let y = 0; y < prices.studies[i][x].length; y++)
+                    {
+                        let item = '';
+                        let price = prices.studies[i][x][y];
+                        if (price === null || price === undefined) 
+                        {
+                            price = '';
+                        }
+                        else
+                        {
+                            price = price.toFixed(5);
+                        }
+
+                        if (y === 0) 
+                        {
+                            item = (
+                                <React.Fragment>
+
+                                <span className='chart values period'>
+                                    {study.properties.periods[x]}
+                                </span>
+                                <span className='chart values price'>
+                                    {price}
+                                </span>
+
+                                </React.Fragment>
+                            );
+                        }
+                        else
+                        {
+                            item = (
+                                <span className='chart values price'>
+                                    {price}
+                                </span>
+                            );
+                        }
+
+                        value_elems.push(
+                            <span key={x + '' + y}>{item}</span>
+                        );
+                    }
+                }
+
+                const name = study.type.substring(0,1).toUpperCase() + study.type.substring(1);
+                study_info.push(
+                    <div key={i} className='chart group study' style={{top: (start_pos.y + 10) + 'px', left: '5px'}}>
+                        <span className='chart values type'>{name}</span>
+                        {value_elems}
+                    </div>
+                );
+            }
+
+            return (
+                <React.Fragment>
+
+                <div className='chart group' style={{top: '5px', left: '5px'}}>
+                    <div className='chart product-btn'>{this.getProduct().replace('_', '')}</div>
+                    <div className='chart period-btn'>1m</div>
+                    <div>
+                        <span className='chart values type'>O</span>
+                        <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[0].toFixed(5)}</span>
+                        <span className='chart values type'>H</span>
+                        <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[1].toFixed(5)}</span>
+                        <span className='chart values type'>L</span>
+                        <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[2].toFixed(5)}</span>
+                        <span className='chart values type'>C</span>
+                        <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[3].toFixed(5)}</span>
+                    </div>
+                </div>
+                {overlay_info}
+                {study_info}
+
+                </React.Fragment>
+            )
+        }
+    }
+
     update()
     {   
         this.updateCanvas();
-        if (this.getChart())
+        if (this.getChart() && this._isinitialized)
         {
             this.updateChart();
             this.updateItems();
@@ -514,20 +853,22 @@ class Chart extends Component
 
     updateCanvas()
     {
-        const chart_size = this.getChartSize();
+        const chart_size = this.getSize();
         const canvas = this.getCanvas();
         canvas.setAttribute('width', Math.round(chart_size.width-1));
-        canvas.setAttribute('height', Math.round(chart_size.height+this.getBottomOff()-1));
+        canvas.setAttribute('height', Math.round(chart_size.height-1));
     }
 
     updateItems()
     {
+        this.handleFutureTimestamps();
+
         const canvas = this.getCanvas();
         const ctx = canvas.getContext("2d");
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        let start_pos = this.getSegmentStartPos(0);
+        let start_pos = this.getChartSegmentStartPos(0);
         let segment_size = this.getSegmentSize(0);
        
         this.defineClip(ctx, start_pos, segment_size);
@@ -539,39 +880,47 @@ class Chart extends Component
         // Draw Candlesticks
         this.getCandlesticks().draw();
 
-        const overlays = this.getOverlays();
+        const overlays = this.getOverlayComponents();
         for (let i = 0; i < overlays.length; i++)
         {
-            this.calculateIndicator(this.state.overlays[i].ind);
+            this.calculateIndicator(this.getOverlays()[i]);
             overlays[i].draw();
         }
-
-        // Handle Open Positions
-        // this.handlePositions(ctx);
 
         // Handle Price Line
         this.handlePriceLine(ctx);
 
-        // Handle Drawings
-        // this.handleDrawings(ctx);
+        // Handle Positions/Orders
+        if (!this.isBacktest())
+        {
+            this.handleTrades(ctx);
+        }
 
-        const studies = this.getStudies();
+        // Handle Axis prices
         this.drawPrices(ctx, price_data);
+
+        // Handle Price Label
+        this.handlePriceLabel(ctx);
+
+        // Handle Drawings
+        this.handleDrawings(ctx);
+
+        const studies = this.getStudyComponents();
 
         // Restore context
         ctx.restore();
 
         // Reset Transform
         ctx.setTransform(1.0, 0, 0, 1.0, 0, 0);
-        
+
         for (let i = 0; i < studies.length; i++)
         {
             let study = studies[i];
-            this.calculateIndicator(this.state.studies[i].ind);
+            this.calculateIndicator(this.getStudies()[i]);
 
-            start_pos = this.getSegmentStartPos(study.getWindowIndex());
+            start_pos = this.getChartSegmentStartPos(study.getWindowIndex());
             segment_size = this.getSegmentSize(study.getWindowIndex());
-            
+
             this.defineClip(ctx, start_pos, segment_size);
             // Draw Study
             study.drawTimeGrid(ctx, time_data);
@@ -582,6 +931,8 @@ class Chart extends Component
 
             // Restore context
             ctx.restore(); 
+
+            this.handleStudyHandles(ctx, start_pos, segment_size);
         }
 
         this.drawTimes(ctx, time_data);
@@ -591,12 +942,136 @@ class Chart extends Component
         this.handleCrosshairs(ctx);
     }
 
+    handleFutureTimestamps()
+    {
+        const timestamps = this.getTimestamps();
+        const latest_timestamp = timestamps[timestamps.length-1];
+        let { future_timestamps } = this.state;
+        let i = 0;
+        if (future_timestamps[i] <= latest_timestamp)
+        {
+            while (future_timestamps[i] <= latest_timestamp)
+            {
+                future_timestamps.splice(i, 1);
+                i++;
+            }
+    
+            this.setState({ future_timestamps });
+        }
+    }
+
+    getPriceInfo()
+    {
+        const { pos, scale, mouse_pos } = this.state;
+        let prices = {
+            ohlc: [],
+            ohlc_color: null,
+            overlays: [],
+            overlay_colors: [],
+            studies: [],
+            study_colors: [],
+        };
+
+        const camera = this.getCamera();
+        const chart_size = this.getChartSize();
+
+        const screen_pos = this.props.getScreenPos();
+        const top_offset = this.props.getTopOffset() + screen_pos.y;
+
+        const overlays = this.getOverlays();
+        const studies = this.getStudies();
+        let x_pos = 1;
+
+        if (
+            mouse_pos !== null &&
+            this.props.isTopWindow(
+                this.getStrategyId(), this.getItemId(), 
+                {x: mouse_pos.x, y: mouse_pos.y - top_offset}
+            ) && 
+            this.getCursor() === null
+        )
+        {
+            x_pos = Math.floor(camera.convertScreenPosToWorldPos(mouse_pos, pos, chart_size, scale).x);
+            x_pos = Math.max(x_pos, 1);
+        }
+
+        let isNext = true;
+        while (isNext) 
+        {
+            isNext = false;
+            prices.ohlc = this.getOhlcByPos(x_pos);
+            if (prices.ohlc === undefined)
+            {
+                x_pos = 1;
+                isNext = true;
+            }
+            else if (prices.ohlc[0] === 0 || prices.ohlc[0] === null) 
+            {
+                x_pos += 1;
+                isNext = true;
+            }
+
+            let result = [];
+            // Overlays
+            result = [];
+            for (let i = 0; i < overlays.length; i++)
+            {
+                const value = this.getOverlayValueByPos(i, x_pos);
+                for (let j = 0; j < value.length; j++)
+                {
+                    if (value[j] === undefined || value[j].some(x => x === undefined))
+                    {
+                        x_pos = 1;
+                        isNext = true;
+                    }
+                }
+                result.push(value);
+            }
+            prices.overlays = result;
+            // Studies
+            result = [];
+            for (let i = 0; i < studies.length; i++)
+            {
+                const value = this.getStudyValueByPos(i, x_pos);
+                for (let j = 0; j < value.length; j++)
+                {
+                    if (value[j] === undefined || value[j].some(x => x === undefined))
+                    {
+                        x_pos = 1;
+                        isNext = true;
+                    }
+                }
+                result.push(value);
+            }
+            prices.studies = result;
+        }
+
+        if (prices.ohlc[0] > prices.ohlc[3])
+        {
+            prices.ohlc_color = this.getWindowInfo().properties.bars.bodyShort
+        }
+        else
+        {
+            prices.ohlc_color = this.getWindowInfo().properties.bars.bodyLong
+        }
+        if (prices.ohlc_color.toUpperCase() === '#FFF' || 
+                prices.ohlc_color.toUpperCase() === '#FFFFFF')
+        {
+            prices.ohlc_color = '#000';
+        }
+
+        return prices;
+    }
+
     getNumZeroDecimals(x)
     {
         const decimals = String(x).split('.')[1];
-        for (let i = 0; i < decimals.length; i++)
+        if (decimals !== undefined)
         {
-            if (decimals[i] !== '0') return i;
+            for (let i = 0; i < decimals.length; i++)
+            {
+                if (decimals[i] !== '0') return i;
+            }
         }
         return -1;
     }
@@ -987,42 +1462,41 @@ class Chart extends Component
             }
         }
 
+        ctx.fillStyle = 'rgb(180, 180, 180)';
         ctx.fillRect(0, start_pos.y, seg_size.width, 1); 
     }
 
     degsToRads(degs) { return degs / (180/Math.PI); }
     radsToDegs(rads) { return rads * (180/Math.PI); }
 
-    handlePositions(ctx)
+    handleTrades(ctx)
     {
         const camera = this.getCamera();
         const { pos, scale } = this.state;
         const seg_size = this.getSegmentSize(0);
 
-        const positions = this.getPositions();
-
-        for (let i = 0; i < positions.length; i++)
+        const trades = this.getPositions().concat(this.getOrders());
+        for (let i = 0; i < trades.length; i++)
         {
-            const c_pos = positions[i];
-            if (!(c_pos.product === this.getProduct())) continue;
-
+            const c_trade = trades[i];
+            if (!(c_trade.product === this.getProduct())) continue;
             // Get Position
-            const x = this.getPosFromTimestamp(c_pos.open_time);
+            const x = this.getPosFromTimestamp(c_trade.open_time);
             // Skip if x doesn't exist
             if (x === undefined) continue;
 
             const entry_pos = camera.convertWorldPosToScreenPos(
-                { x: x+0.5, y: c_pos.entry_price }, pos, seg_size, scale
+                { x: x+0.5, y: c_trade.entry_price }, pos, seg_size, scale
             )
             const sl_pos = camera.convertWorldPosToScreenPos(
-                { x: x+0.5, y: c_pos.sl }, pos, seg_size, scale
+                { x: x+0.5, y: c_trade.sl }, pos, seg_size, scale
             )
             const tp_pos = camera.convertWorldPosToScreenPos(
-                { x: x+0.5, y: c_pos.tp }, pos, seg_size, scale
+                { x: x+0.5, y: c_trade.tp }, pos, seg_size, scale
             )
 
             let color = undefined;
-            if (c_pos.direction === 'long')
+            if (c_trade.direction === 'long')
             {
                 color = '#3498db';
             }
@@ -1052,16 +1526,32 @@ class Chart extends Component
             ctx.setLineDash([0, 0]);
             ctx.stroke();
 
-            
-
-            // Fill Circle
-            ctx.beginPath();
-            ctx.arc(
-                entry_pos.x, entry_pos.y, 
-                4, 0, 2 * Math.PI
-            );
-            ctx.fill();
-            ctx.stroke();
+            const trade_icon_size = 8;
+            if (c_trade.order_type === 'limitorder' || c_trade.order_type === 'stoporder')
+            {
+                // Fill Rect
+                ctx.fillRect(
+                    Math.round(entry_pos.x - trade_icon_size/2)+0.5, 
+                    Math.round(entry_pos.y - trade_icon_size/2)+0.5, 
+                    trade_icon_size, trade_icon_size,
+                );
+                ctx.strokeRect(
+                    Math.round(entry_pos.x - trade_icon_size/2)+0.5, 
+                    Math.round(entry_pos.y - trade_icon_size/2)+0.5, 
+                    trade_icon_size, trade_icon_size,
+                );
+            }
+            else
+            {
+                // Fill Circle
+                ctx.beginPath();
+                ctx.arc(
+                    Math.round(entry_pos.x)+0.5, Math.round(entry_pos.y)+0.5, 
+                    trade_icon_size/2, 0, 2 * Math.PI
+                );
+                ctx.fill();
+                ctx.stroke();
+            }
             
             // SL Line
             ctx.strokeStyle = '#e74c3c';
@@ -1079,6 +1569,66 @@ class Chart extends Component
             ctx.setLineDash([5, 3]);
             ctx.stroke();
             
+        }
+    }
+
+    getHandleRect(start_pos, segment_size)
+    {
+        // Size Vars
+        const handle_width = Math.min(segment_size.width/10, 21);
+        const handle_height = Math.min(segment_size.height/15, 6);
+        // Position Vars
+        const handle_x = Math.round(segment_size.width/2 - handle_width/2) + 0.5;
+        const handle_y = Math.round(start_pos.y) - (handle_height-1)/2;
+
+        return {
+            x: handle_x, y: handle_y, width: handle_width, height: handle_height
+        }
+    }
+
+    handleStudyHandles(ctx, start_pos, segment_size)
+    {
+        let { mouse_pos } = this.state;
+        const top_offset = this.props.getTopOffset();
+
+        // Draw Handle
+        const rect = this.getHandleRect(start_pos, segment_size);
+        const handle_middle_off = Math.round(rect.width/3);
+
+        if (
+            this.isWithinBounds(rect, { x: mouse_pos.x, y: mouse_pos.y - top_offset }) &&
+            !this.props.getKeys().includes(SPACEBAR)
+        )
+        {
+            ctx.fillStyle = `rgba(180, 180, 180, 1.0)`;
+            ctx.strokeStyle = `rgba(180, 180, 180, 1.0)`;
+
+            ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+            ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+
+            ctx.fillStyle = `rgba(255, 255, 255, 1.0)`;
+            ctx.fillRect(rect.x + handle_middle_off/2, Math.round(start_pos.y), rect.width - handle_middle_off, 1);
+
+            if (this.getCursor() === null)
+            {
+                this.setCursor('ns-resize');
+            }
+        }
+        else
+        {
+            ctx.fillStyle = `rgba(255, 255, 255, 1.0)`;
+            ctx.strokeStyle = `rgba(180, 180, 180, 1.0)`;
+
+            ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+            ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+
+            ctx.fillStyle = `rgba(180, 180, 180, 1.0)`;
+            ctx.fillRect(rect.x + handle_middle_off/2, Math.round(start_pos.y), rect.width - handle_middle_off, 1);
+            
+            if (this.getCursor() === 'ns-resize')
+            {
+                this.setCursor(null);
+            }
         }
     }
 
@@ -1106,61 +1656,68 @@ class Chart extends Component
         const { pos, scale } = this.state;
         const seg_size = this.getSegmentSize(0);
 
+        const chart_drawings_layers = this.getProperties().drawing_layers;
         const drawings = this.getDrawingsProperties();
 
-        for (let i = 0; i < drawings.length; i++)
+        for (let layer of chart_drawings_layers)
         {
-            const d_props = drawings[i];
+            if (!(layer in drawings)) continue;
 
-            // Get Position
-            const x = this.getPosFromAllTimestamps(d_props.timestamps[0]);
-            // Skip if x doesn't exist
-            if (x === undefined) continue
-
-            const y = d_props.prices[0];
-            const screen_pos = camera.convertWorldPosToScreenPos(
-                { x: x+0.5, y: y }, 
-                pos, 
-                seg_size,
-                scale
-            )
-            
-            // Handle Vertical Line
-            if (d_props.type === 'verticalLine')
-                continue
-            // Handle Horizontal Line
-            else if (d_props.type === 'horizontalLine')
-                this.drawHorizontalLine(ctx, screen_pos, d_props.properties);
-            // Handle Misc Drawings
-            else
+            for (let i = 0; i < drawings[layer].length; i++)
             {
-                if (!(d_props.type in Drawings)) continue;
-                const drawing = Drawings[d_props.type]();
-
-                // Get Rotation and Scale
-                const rotation = this.degsToRads(d_props.properties.rotation);
-                const drawing_scale = ((drawing.scale + d_props.properties.scale) * (1/scale.x));
+                const d_props = drawings[layer][i];
+                if (d_props.product !== this.getProduct()) continue;
     
-                const width = drawing.size.width;
-                const height = drawing.size.height;
+                // Get Position
+                const x = this.getPosFromAllTimestamps(d_props.timestamps[0]);
+                // Skip if x doesn't exist
+                if (x === undefined) continue
     
-                // Move to position
-                ctx.translate(
-                    screen_pos.x - (width*drawing_scale),
-                    screen_pos.y - (height*drawing_scale)
-                );
-                ctx.scale(drawing_scale, drawing_scale);
-    
-                // Rotate around center
-                ctx.translate(width, height);
-                ctx.rotate(rotation);
-                ctx.translate(-width/2, -height/2);
+                const y = d_props.prices[0];
+                const screen_pos = camera.convertWorldPosToScreenPos(
+                    { x: x+0.5, y: y }, 
+                    pos, 
+                    seg_size,
+                    scale
+                )
                 
-                ctx.fillStyle = d_props.properties.colors[0];
-                // Fill Path
-                ctx.fill(new Path2D(drawing.path));
-                // Reset Transform
-                ctx.setTransform(1,0,0,1,0,0);
+                // Handle Vertical Line
+                if (d_props.type === 'verticalLine')
+                    continue
+                // Handle Horizontal Line
+                else if (d_props.type === 'horizontalLine')
+                    this.drawHorizontalLine(ctx, screen_pos, d_props.properties);
+                // Handle Misc Drawings
+                else
+                {
+                    if (!(d_props.type in Drawings)) continue;
+                    const drawing = Drawings[d_props.type]();
+    
+                    // Get Rotation and Scale
+                    const rotation = this.degsToRads(d_props.properties.rotation);
+                    const drawing_scale = ((drawing.scale + d_props.properties.scale) * (1/scale.x));
+        
+                    const width = drawing.size.width;
+                    const height = drawing.size.height;
+        
+                    // Move to position
+                    ctx.translate(
+                        screen_pos.x - (width*drawing_scale),
+                        screen_pos.y - (height*drawing_scale)
+                    );
+                    ctx.scale(drawing_scale, drawing_scale);
+        
+                    // Rotate around center
+                    ctx.translate(width, height);
+                    ctx.rotate(rotation);
+                    ctx.translate(-width/2, -height/2);
+                    
+                    ctx.fillStyle = d_props.properties.colors[0];
+                    // Fill Path
+                    ctx.fill(new Path2D(drawing.path));
+                    // Reset Transform
+                    ctx.setTransform(1,0,0,1,0,0);
+                }
             }
         }
     }
@@ -1196,6 +1753,52 @@ class Chart extends Component
         }
     }
 
+    handlePriceLabel(ctx)
+    {
+        const { pos, scale } = this.state;
+        const seg_size = this.getSegmentSize(0);
+        const camera = this.getCamera();
+        const bids = this.getBids();
+
+        let c_bid = 0;
+        for (let i = bids.length-1; i >= 0; i--)
+        {
+            c_bid = bids[i][3];
+            if (c_bid !== 0 && c_bid !== null) break;
+        }
+
+        const screen_pos = camera.convertWorldPosToScreenPos(
+            { x: 0, y: c_bid }, pos, seg_size, scale
+        );
+
+        // Properties
+        ctx.fillStyle = '#3498db';
+
+        // Font settings
+        const font_size = 10;
+        ctx.font = String(font_size) + 'pt trebuchet ms'; //Consolas
+        ctx.textAlign = 'right';
+
+        const text_size = ctx.measureText(String(c_bid.toFixed(5)));
+        const box_height = Math.round(3/4 * (font_size) + 12);
+        const box_width = Math.round(text_size.width + 12);
+
+        ctx.fillRect(
+            Math.round(seg_size.width - box_width), 
+            Math.round(screen_pos.y - box_height/2),
+            seg_size.width,
+            box_height
+        );
+
+        ctx.fillStyle = 'rgb(255, 255, 255)';
+
+        ctx.fillText(
+            c_bid.toFixed(5), 
+            seg_size.width - 7, 
+            Math.round(screen_pos.y + (3/4 * (font_size/2)))
+        );
+    }
+
     handlePriceLine(ctx)
     {
         const { pos, scale } = this.state;
@@ -1214,116 +1817,142 @@ class Chart extends Component
             { x: 0, y: c_bid }, pos, seg_size, scale
         );
 
-        // Box Settings
+        // Properties
         ctx.fillStyle = '#3498db';
+
         ctx.fillRect(0, Math.round(screen_pos.y), seg_size.width, 1);
-
-        // Font settings
-        const font_size = 10;
-        ctx.font = String(font_size) + 'pt trebuchet ms'; //Consolas
-        ctx.textAlign = 'right';
-
-        const text_size = ctx.measureText(String(c_bid.toFixed(5)));
-        const box_height = Math.round(3/4 * (font_size) + 12);
-        const box_width = Math.round(text_size.width + 12);
-        ctx.fillRect(
-            Math.round(seg_size.width - box_width), 
-            Math.round(screen_pos.y - box_height/2),
-            seg_size.width,
-            box_height
-        );
-
-        ctx.fillStyle = 'rgb(255, 255, 255)';
-
-        ctx.fillText(
-            c_bid.toFixed(5), 
-            seg_size.width - 7, 
-            Math.round(screen_pos.y + (3/4 * (font_size/2)))
-        );
     }
 
     handleCrosshairs(ctx)
     {
-        let { mouse_pos } = this.state;
-        const camera = this.getCamera();
-        const chart_size = this.getChartSize();
-        const seg_idx = this.getSegment(mouse_pos);
-        const seg_size = this.getSegmentSize(seg_idx);
-        const seg_start = this.getSegmentStartPos(seg_idx);
+        const keys = this.props.getKeys();
+        if (keys.includes(SPACEBAR)) return;
 
-        let pos, scale = undefined;
-        if (seg_idx > 0)
-        {
-            const study = this.getStudies()[seg_idx-1];
-            pos = { x: this.state.pos.x, y: study.getPos().y};
-            scale = { x: this.state.scale.x, y: study.getScale().y};
-        }
-        else
-        {
-            pos = this.state.pos;
-            scale = this.state.scale;
-        }
-        
+        let { mouse_pos } = this.state;
         const screen_pos = this.props.getScreenPos();
         const top_offset = this.props.getTopOffset() + screen_pos.y;
-        const mouse_world_pos = camera.convertScreenPosToWorldPos(
-            { x: mouse_pos.x, y: mouse_pos.y - seg_start.y - top_offset }, pos, seg_size, scale
-        );
+
+        if (
+            this.props.isTopWindow(
+                this.getStrategyId(), this.getItemId(), 
+                {x: mouse_pos.x, y: mouse_pos.y - top_offset}
+            ) && 
+            this.getCursor() === null
+        )
+        {
+            const camera = this.getCamera();
+            const chart_size = this.getChartSize();
+            const seg_idx = this.getSegment(mouse_pos);
+            const seg_size = this.getSegmentSize(seg_idx);
+            const seg_start = this.getChartSegmentStartPos(seg_idx);
+            const window_seg_start = this.getWindowSegmentStartPos(0);
+    
+            let pos, scale = undefined;
+            if (seg_idx > 0)
+            {
+                const study = this.getStudyComponents()[seg_idx-1];
+                pos = { x: this.state.pos.x, y: study.getPos().y};
+                scale = { x: this.state.scale.x, y: study.getScale().y};
+            }
+            else
+            {
+                pos = this.state.pos;
+                scale = this.state.scale;
+            }
+            const mouse_world_pos = camera.convertScreenPosToWorldPos(
+                { 
+                    x: mouse_pos.x, 
+                    y: mouse_pos.y - seg_start.y - window_seg_start.y - this.props.getTopOffset() 
+                }, pos, seg_size, scale
+            );
+                
+            const left_offset = screen_pos.x;
+            if (mouse_pos.x < left_offset ||
+                mouse_pos.x > chart_size.width + left_offset ||
+                mouse_pos.y < top_offset ||
+                mouse_pos.y > chart_size.height + top_offset - 1)
+                return
             
-        const left_offset = screen_pos.x;
-        if (mouse_pos.x < left_offset ||
-            mouse_pos.x > chart_size.width + left_offset ||
-            mouse_pos.y < top_offset ||
-            mouse_pos.y > chart_size.height + top_offset)
-            return
-        
-        ctx.fillStyle = '#787878';
-        let c_x = 0;
+            ctx.fillStyle = '#787878';
+            let c_x = 0;
+    
+            const snap_x = camera.convertWorldPosToScreenPos(
+                { x: Math.floor(mouse_world_pos.x)+0.5, y:0 }, pos, seg_size, scale
+            ).x;
+    
+            const line_width = 5;
+            const line_space = 4;
+            while (c_x < chart_size.width)
+            {
+                ctx.fillRect(c_x, Math.round(mouse_pos.y - top_offset), line_width, 1);
+                c_x += line_width + line_space;
+            }
+    
+            let c_y = 0;
+            while (c_y < chart_size.height + this.getBottomOff())
+            {
+                ctx.fillRect(Math.round(snap_x - left_offset), c_y, 1, line_width);
+                c_y += line_width + line_space;
+            }
+    
+            // Box Settings
+            ctx.fillStyle = 'rgb(80,80,80)';
+    
+            // Font settings
+            const font_size = 10;
+            ctx.font = String(font_size) + 'pt trebuchet ms'; //Consolas
+            ctx.textAlign = 'right';
+            
+            // Draw Prices Box
+            const box_height = Math.round(3/4 * (font_size) + 12);
+            let text_size = ctx.measureText(String(mouse_world_pos.y.toFixed(5)));
+            let box_width = Math.round((text_size.width + 12)/2)*2+1;
+            ctx.fillRect(
+                Math.round(chart_size.width - box_width), 
+                Math.round(mouse_pos.y - top_offset - box_height/2),
+                box_width,
+                box_height
+            );
+    
+            ctx.fillStyle = 'rgb(255, 255, 255)';
+    
+            ctx.fillText(
+                mouse_world_pos.y.toFixed(5), 
+                chart_size.width - 7, 
+                Math.round(mouse_pos.y - top_offset + (3/4 * (font_size/2)))
+            );
+            
+            // Draw Time Box
 
-        const snap_x = camera.convertWorldPosToScreenPos(
-            { x: Math.floor(mouse_world_pos.x)+0.5, y:0 }, pos, seg_size, scale
-        ).x;
+            // Box Settings
+            ctx.fillStyle = 'rgb(80,80,80)';
 
-        const line_width = 5;
-        const line_space = 4;
-        while (c_x < chart_size.width)
-        {
-            ctx.fillRect(c_x, Math.round(mouse_pos.y - top_offset), line_width, 1);
-            c_x += line_width + line_space;
+            const tz = 'Australia/Melbourne';
+            const time = moment.utc(
+                this.getTimestampByPos(Math.floor(mouse_world_pos.x))*1000
+            ).tz(tz).format(this.getCurrentPriceFormat());
+            text_size = ctx.measureText(time);
+            box_width = Math.round((text_size.width + 12)/2)*2+1;
+
+            // Font settings
+            ctx.textAlign = 'left';
+
+            ctx.fillRect(
+                Math.round(snap_x - box_width/2),
+                Math.round(chart_size.height - box_height + this.getBottomOff()), 
+                box_width,
+                box_height
+            );
+
+            ctx.fillStyle = 'rgb(255, 255, 255)';
+            ctx.fillText(
+                time, 
+                Math.round(snap_x - text_size.width/2), 
+                Math.round(
+                    chart_size.height - box_height/2 + (3/4 * (font_size/2)) + this.getBottomOff()
+                )
+            );
         }
-
-        let c_y = 0;
-        while (c_y < chart_size.height + this.getBottomOff())
-        {
-            ctx.fillRect(Math.round(snap_x - left_offset), c_y, 1, line_width);
-            c_y += line_width + line_space;
-        }
-
-        // Box Settings
-        ctx.fillStyle = 'rgb(80,80,80)';
-
-        // Font settings
-        const font_size = 10;
-        ctx.font = String(font_size) + 'pt trebuchet ms'; //Consolas
-        ctx.textAlign = 'right';
-
-        const text_size = ctx.measureText(String(mouse_world_pos.y.toFixed(5)));
-        const box_height = Math.round(3/4 * (font_size) + 12);
-        const box_width = Math.round(text_size.width + 12);
-        ctx.fillRect(
-            Math.round(chart_size.width - box_width), 
-            Math.round(mouse_pos.y - top_offset - box_height/2),
-            chart_size.width,
-            box_height
-        );
-
-        ctx.fillStyle = 'rgb(255, 255, 255)';
-
-        ctx.fillText(
-            mouse_world_pos.y.toFixed(5), 
-            chart_size.width - 7, 
-            Math.round(mouse_pos.y - top_offset + (3/4 * (font_size/2)))
-        );
     }
 
     defineClip(ctx, start_pos, segment_size)
@@ -1367,7 +1996,7 @@ class Chart extends Component
     {
         const timestamps = this.getTimestamps();
         // Return undefined if timestamp is greater than latest existing timestamp
-        if (ts > timestamps[timestamps.length-1])
+        if (ts >= this.getNextTimestamp())
             return undefined
 
         const indicies = [...Array(timestamps.length).keys()]
@@ -1395,6 +2024,16 @@ class Chart extends Component
         });
 
         return idx;
+    }
+
+    getTimestampByPos = (x) =>
+    {
+        const timestamps = this.getTimestamps();
+        const all_timestamps = this.getAllTimestamps();
+        const idx = timestamps.length - x;
+        if (idx < 0 || idx >= all_timestamps.length) return undefined;
+
+        return all_timestamps[idx];
     }
 
     limit = (start, end) =>
@@ -1437,6 +2076,34 @@ class Chart extends Component
         
     }
 
+    getOhlcByPos = (x) =>
+    {
+        const bids = this.getBids();
+        return bids[bids.length-x];
+    }
+
+    getOverlayValueByPos = (idx, x) =>
+    {
+        const values = this.getOverlayValues(idx);
+        let result = [];
+        for (let i = 0; i < values.length; i++)
+        {
+            result.push(values[i][values[i].length-x]);
+        }
+        return result;
+    }
+
+    getStudyValueByPos = (idx, x) =>
+    {
+        const values = this.getStudyValues(idx);
+        let result = [];
+        for (let i = 0; i < values.length; i++)
+        {
+            result.push(values[i][values[i].length-x]);
+        }
+        return result;
+    }
+
     setFutureTimestamps = () =>
     {
         let { pos, future_timestamps } = this.state;
@@ -1475,18 +2142,23 @@ class Chart extends Component
         let { pos, scale } = this.state;
         
         let hl = [null,null]; // highest/lowest prices
+        const max_len = this.getTimestamps().length;
 
         const camera = this.getCamera();
         const chart_size = this.getChartSize();
-        const num_candles = camera.convertScreenUnitToWorldUnit(
-            { x: chart_size.width, y: 0 }, chart_size, scale
-        ).x;
+        // const num_candles = camera.convertScreenUnitToWorldUnit(
+        //     { x: chart_size.width, y: 0 }, chart_size, scale
+        // ).x;
 
-        for (let i = idx + parseInt(num_candles); i >= idx; i--)
+        let counted = 0;
+        let i = idx;
+        while (counted < Math.max(scale.x, 10) && i < max_len)
         {
             let c_x = ohlc.length - i;
+            i++;
+
             if (ohlc[c_x] === undefined) continue;
-            if (ohlc[c_x].every((x) => x===0)) continue;
+            if (ohlc[c_x][0] === null) continue;
             
             let high = ohlc[c_x][1];
             let low = ohlc[c_x][2];
@@ -1495,6 +2167,8 @@ class Chart extends Component
                 hl[0] = high;
             if (hl[1] == null || low < hl[1])
                 hl[1] = low;
+            
+            counted++;
         }
         
         if (hl.some((elem) => elem === null)) 
@@ -1523,6 +2197,11 @@ class Chart extends Component
             width: container.clientWidth,
             height: container.clientHeight
         };
+        // const canvas = this.getCanvas();
+        // return {
+        //     width: canvas.width,
+        //     height: canvas.height
+        // };
     }
 
     getCamera = () => 
@@ -1535,7 +2214,22 @@ class Chart extends Component
         return this.canvas;
     }
 
-    getSegmentStartPos = (idx) =>
+    getWindowSegmentStartPos = (idx) =>
+    {
+        const window_pos = this.props.getWindowScreenPos();
+        const chart_size = this.getChartSize();
+        const portions = this.getPortions();
+        const prev_portion = portions.slice(0,idx).reduce((a,b) => a + b, 0);
+        
+
+        const start_pos = {
+            x: window_pos.x,
+            y: window_pos.y + (chart_size.height * prev_portion)
+        }
+        return start_pos;
+    }
+
+    getChartSegmentStartPos = (idx) =>
     {
         const chart_size = this.getChartSize();
         const portions = this.getPortions();
@@ -1568,7 +2262,7 @@ class Chart extends Component
         for (let i=0; i < portions.length; i++)
         {
             const seg_size = this.getSegmentSize(i);
-            const seg_start = this.getSegmentStartPos(i);
+            const seg_start = this.getWindowSegmentStartPos(i);
             if (pos.y >= seg_start.y + this.props.getTopOffset() && 
                     pos.y < seg_start.y + this.props.getTopOffset() + seg_size.height)
                 return i;
@@ -1592,19 +2286,39 @@ class Chart extends Component
         }
     }
 
+    getCanvasSize = () =>
+    {
+        const canvas = this.getCanvas();
+
+        return {
+            width: canvas.width,
+            height: canvas.height
+        }
+    }
+
     getCandlesticks = () => 
     {
         return this.candlesticks;
     }
 
-    getOverlays =  () =>
+    getOverlayComponents = () =>
     {
         return this.overlays;
     }
 
-    getStudies = () => 
+    getStudyComponents = () => 
     {
         return this.studies;
+    }
+
+    getOverlays = () =>
+    {
+        return this.getProperties().overlays;
+    }
+
+    getStudies = () =>
+    {
+        return this.getProperties().studies;
     }
 
     getDrawings = () =>
@@ -1629,7 +2343,7 @@ class Chart extends Component
 
     getPortions = () => 
     {
-        const { studies } = this.state;
+        const studies = this.getStudies();
         let portions = [this.getMainPortion()];
         for (let i = 0; i < studies.length; i++)
         {
@@ -1638,21 +2352,51 @@ class Chart extends Component
          return portions;
     }
 
+    resizePortion = (idx, change) =>
+    {
+        const portions = this.getPortions();
+
+        let prev_portion = portions[idx];
+        let c_portion = portions[idx+1];
+        
+        if (
+            prev_portion + -change >= MIN_PORTION_SIZE && 
+            c_portion + change >= MIN_PORTION_SIZE
+        )
+        {
+            // Set portions to new size
+            this.setPortion(idx, prev_portion + -change);
+            this.setPortion(idx+1, c_portion + change);
+            // Update State
+            this.props.updateStrategyInfo();
+        }
+    }
+
     getLimit = () =>
     {
         return this.state.limit;
     }
 
+    getStrategyId = () =>
+    {
+        return this.props.strategy_id;
+    }
+
+    getItemId = () =>
+    {
+        return this.props.item_id;
+    }
+
     getStrategy = () =>
     {
-        return this.props.getStrategy(
+        return this.props.getStrategyInfo(
             this.props.strategy_id
         );
     }
 
     getWindowInfo = () =>
     {
-        return this.props.getWindowInfo();
+        return this.props.getWindowInfo(this.getStrategyId(), this.getItemId());
     }
 
     windowExists = () =>
@@ -1692,6 +2436,23 @@ class Chart extends Component
         return this.getProperties().portion;
     }
 
+    setMainPortion = (x) =>
+    {
+        this.getProperties().portion = x;
+    }
+
+    setPortion = (idx, x) =>
+    {
+        if (idx === 0)
+        {
+            this.setMainPortion(x);
+        }
+        else
+        {
+            this.getProperties().studies[idx-1].portion = x;
+        }
+    }
+
     getPrice = () =>
     {
         return this.getProperties().price;
@@ -1704,15 +2465,16 @@ class Chart extends Component
 
     getOverlayValues = (idx) =>
     {
-        const { overlays } = this.state;
+        const overlays = this.getOverlays();
         let result = [];
-        for (let i = 0; i < overlays[idx].ind.properties.periods.length; i++)
+        for (let i = 0; i < overlays[idx].properties.periods.length; i++)
         {
             result.push(
-                Indicators
-                [overlays[idx].ind.type]
-                [this.getPrice()]
-                [overlays[idx].ind.properties.periods[i]]
+                this.props.getIndicator(
+                    overlays[idx].type, this.getPrice(), 
+                    this.getProduct(), 
+                    overlays[idx].properties.periods[i]
+                )
             );
         }
         return result;
@@ -1725,15 +2487,16 @@ class Chart extends Component
 
     getStudyValues = (idx) =>
     {
-        const { studies } = this.state;
+        const studies = this.getStudies();
         let result = [];
-        for (let i = 0; i < studies[idx].ind.properties.periods.length; i++)
+        for (let i = 0; i < studies[idx].properties.periods.length; i++)
         {
             result.push(
-                Indicators
-                [studies[idx].ind.type]
-                [this.getPrice()]
-                [studies[idx].ind.properties.periods[i]]
+                this.props.getIndicator(
+                    studies[idx].type, this.getPrice(), 
+                    this.getProduct(), 
+                    studies[idx].properties.periods[i]
+                )
             );
         }
         return result;
@@ -1748,26 +2511,38 @@ class Chart extends Component
 
     getDrawingsProperties = () =>
     {
-        return this.getProperties().drawings;
+        return this.getStrategy().drawings;
     }
 
     async addChart()
     {
+        let start;
+        let end;
+        if (this.isBacktest())
+        {
+            const properties = this.getStrategy().properties;
+            start = this.props.getCountDateFromDate(
+                this.getPeriod(), 1000, 
+                moment(parseFloat(properties.start) * 1000), -1
+            );
+            end = moment(parseFloat(properties.end) * 1000);
+        }
+        else
+        {
+            start = this.props.getCountDateFromDate(this.getPeriod(), 1000, moment(), -1);
+            end = moment();
+        }
+
         const ohlc_data = await this.props.retrieveChartData(
-            this.getProduct(),
-            this.getPeriod(),
-            this.props.getCountDateFromDate(this.getPeriod(), 1000, moment(), -1),
-            moment()
+            this.getProduct(), this.getPeriod(), start, end
         );
         this.props.addChart(
-            this.getProduct(),
-            this.getPeriod(),
-            ohlc_data
+            this.getProduct(), this.getPeriod(), ohlc_data
         );
     }
 
     getChart = () =>
-    {
+    {   
         return this.props.getChart(
             this.getProduct(),
             this.getPeriod()
@@ -1784,6 +2559,11 @@ class Chart extends Component
         return this.getTimestamps().concat(this.state.future_timestamps);
     }
 
+    getNextTimestamp = () =>
+    {
+        return this.getChart().next_timestamp;
+    }
+
     getAsks = () =>
     {
         return this.getChart().asks;
@@ -1792,6 +2572,48 @@ class Chart extends Component
     getBids = ()  =>
     {
         return this.getChart().bids;
+    }
+
+    getFilteredOffset = ()  =>
+    {
+        const chart = this.getChart();
+        return chart.timestamps.length - chart.filteredTimestamps.length;
+    }
+
+    getTransX = () =>
+    {
+        return this.state.trans_x;
+    }
+
+    setTransX = (trans_x) =>
+    {
+        this.setState({ trans_x });
+    }
+
+    setScaleY = (y) =>
+    {
+        let { scale } = this.state;
+        scale.y = y;
+        this.setState({ scale });
+    }
+
+    setPosY = (y) =>
+    {
+        let { pos } = this.state;
+        pos.y = y;
+        this.setState({ pos });
+    }
+
+    getCursor = () =>
+    {
+        return this.state.cursor;
+    }
+
+    setCursor = (cursor) =>
+    {
+        this.setState({ cursor });
+        if (cursor === null) cursor = 'auto';
+        this.props.setCursor(cursor);
     }
 
     calculateIndicator = (ind) =>
@@ -1803,10 +2625,15 @@ class Chart extends Component
         );
     }
 
+    isBacktest = () =>
+    {
+        return this.getStrategyId().includes('/backtest/')
+    }
+
 }
 
 const SPACEBAR = 32;
-
+const MIN_PORTION_SIZE = 0.1
 
 
 

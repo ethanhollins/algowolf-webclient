@@ -1,12 +1,12 @@
 class Indicators {
     /* Overlays */
 
-    static calc = (ind, period, min_bars, timestamps, asks, bids, get_value) =>
+    static calc = (ind, product, period, min_bars, timestamps, asks, bids, get_value) =>
     {
-        let cache_ts = ind.timestamps[period];
-        let cache_asks = ind.asks[period];
+        let cache_ts = ind.timestamps[product][period];
+        let cache_asks = ind.asks[product][period];
         cache_asks.splice(0, min_bars-1);
-        let cache_bids = ind.bids[period];
+        let cache_bids = ind.bids[product][period];
         cache_bids.splice(0, min_bars-1);
 
         // Calculate new values before
@@ -20,7 +20,7 @@ class Indicators {
                 ask = get_value(i, asks);
                 bid = get_value(i, bids);
 
-                if (ask[0] !== null || asks[i].every((x) => x === 0))
+                if (ask[0] !== null || asks[i].every((x) => x === null))
                 {
                     cache_ts.unshift(timestamps[i]);
                 }
@@ -33,7 +33,7 @@ class Indicators {
         start = timestamps.indexOf(cache_ts[cache_ts.length-1]);
         if (start !== -1)
         {
-            if (!(asks[start].every((x) => x === 0)))
+            if (!(asks[start].every((x) => x === null)) || asks[start][0] !== null)
             {
                 cache_asks[start] = get_value(start, asks);
                 cache_bids[start] = get_value(start, bids);
@@ -51,7 +51,7 @@ class Indicators {
         {
             ask = get_value(i, asks);
             bid = get_value(i, bids);
-            if (ask[0] !== null || asks[i].every((x) => x === 0))
+            if (ask[0] !== null || asks[i].every((x) => x === null))
             {
                 cache_ts.push(timestamps[i]);
             }
@@ -60,23 +60,35 @@ class Indicators {
         }
     }
 
+    static setIndicator = (ind, product, period) =>
+    {
+        if (!(product in ind.timestamps))
+        {
+            ind.timestamps[product] = {};
+            ind.asks[product] = {};
+            ind.bids[product] = {};
+        }
+
+        if (!(period in ind.timestamps[product]))
+        {
+            ind.timestamps[product][period] = [];
+            ind.asks[product][period] = [];
+            ind.bids[product][period] = [];
+        }
+    }
+
     // Simple Moving Average
-    static sma = (timestamps, asks, bids, properties) => 
+    static sma = (product, timestamps, asks, bids, properties) => 
     {
         const period = properties.periods[0];
         const min_bars = period;
 
-        if (!(period in Indicators.sma.timestamps))
-        {
-            Indicators.sma.timestamps[period] = [];
-            Indicators.sma.asks[period] = [];
-            Indicators.sma.bids[period] = [];
-        }
+        Indicators.setIndicator(Indicators.sma, product, period);
 
         function get_value(i, ohlc)
         {
             // Validation Check
-            if (i < min_bars || ohlc[i].every((x) => x === 0))
+            if (i < min_bars || ohlc[i].every((x) => x === null))
                 return [null]
                 
             let ma = 0
@@ -89,27 +101,24 @@ class Indicators {
             ) * 100000) / 100000];
         }
 
-        Indicators.calc(Indicators.sma, period, min_bars, timestamps, asks, bids, get_value);
+        Indicators.calc(Indicators.sma, product, period, min_bars, timestamps, asks, bids, get_value);
     }
 
     // Donchian Channel
-    static donch = (timestamps, asks, bids, properties) => 
+    static donch = (product, timestamps, asks, bids, properties) => 
     {
         const period = properties.periods[0];
         const min_bars = period+1;
 
-        if (!(period in Indicators.donch.timestamps))
-        {
-            Indicators.donch.timestamps[period] = [];
-            Indicators.donch.asks[period] = [];
-            Indicators.donch.bids[period] = [];
-        }
+        Indicators.setIndicator(Indicators.donch, product, period);
 
         function get_value(i, ohlc)
         {
             // Validation Check
-            if (i < min_bars || ohlc[i].every((x) => x === 0))
+            if (i < min_bars || ohlc[i].every((x) => x === null))
+            {
                 return [null, null]
+            }
 
             let high_low = [0,0]
             for (let j = 0; j < period; j++)
@@ -122,30 +131,25 @@ class Indicators {
             return high_low;
         }
 
-        Indicators.calc(Indicators.donch, period, min_bars, timestamps, asks, bids, get_value);
+        Indicators.calc(Indicators.donch, product, period, min_bars, timestamps, asks, bids, get_value);
     }
 
     /* Studies */
 
     // True Range
-    static tr = (timestamps, asks, bids, properties) =>
+    static tr = (product, timestamps, asks, bids, properties) =>
     {
         for (let i = 0; i < properties.periods.length; i++)
         {
             const period = properties.periods[i];
             const min_bars = period;
 
-            if (!(period in Indicators.tr.timestamps))
-            {
-                Indicators.tr.timestamps[period] = [];
-                Indicators.tr.asks[period] = [];
-                Indicators.tr.bids[period] = [];
-            }
+            Indicators.setIndicator(Indicators.tr, product, period);
     
             function get_value(i, ohlc)
             {
                 // Validation Check
-                if (i < min_bars || ohlc[i].every((x) => x === 0))
+                if (i < min_bars || ohlc[i].every((x) => x === null))
                     return [null]
 
                 let ma = 0
@@ -155,7 +159,7 @@ class Indicators {
                 }
                 return [ma / period];
             }
-            Indicators.calc(Indicators.tr, period, min_bars, timestamps, asks, bids, get_value);
+            Indicators.calc(Indicators.tr, product, period, min_bars, timestamps, asks, bids, get_value);
         }
     }
     

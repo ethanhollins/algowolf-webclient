@@ -3,23 +3,25 @@ import WindowWrapper from './WindowWrapper';
 import WindowShadow from './WindowShadow';
 import io from 'socket.io-client';
 
-class Strategy extends Component 
+class Backtest extends Component 
 {
     state = {
         sio: undefined,
-        current_page: 0
+        current_page: 0,
+        start: undefined,
+        end: undefined
     }
 
     componentDidMount()
     {
-        const sio = this.handleSocket();
-        this.setState({ sio });
+        // const sio = this.handleSocket();
+        // this.setState({ sio });
     }
 
     componentWillUnmount()
     {
-        const { sio } = this.state;
-        sio.disconnect();
+        // const { sio } = this.state;
+        // sio.disconnect();
     }
 
     render() {
@@ -117,11 +119,11 @@ class Strategy extends Component
                             deleteHistory={this.props.deleteHistory}
                             // Chart Functions
                             retrieveChartData={this.props.retrieveChartData}
-                            addChart={this.props.addChart}
-                            getChart={this.props.getChart}
-                            updateChart={this.props.updateChart}
-                            getIndicator={this.props.getIndicator}
-                            calculateIndicator={this.props.calculateIndicator}
+                            addChart={this.addChart}
+                            getChart={this.getChart}
+                            updateChart={this.updateChart}
+                            getIndicator={this.getIndicator}
+                            calculateIndicator={this.calculateIndicator}
                             getPeriodOffsetSeconds={this.props.getPeriodOffsetSeconds}
                             getCountDate={this.props.getCountDate}
                             getCountDateFromDate={this.props.getCountDateFromDate}
@@ -133,10 +135,29 @@ class Strategy extends Component
         return gen_windows;
     }
 
-    ontrade = (data) =>
+    addChart = (product, period, ohlc_data) =>
     {
-        console.log('this');
-        console.log(data);
+        return this.props.addChart(this.props.id, product, period, ohlc_data)
+    }
+
+    getChart = (product, period) =>
+    {
+        return this.props.getChart(this.props.id, product, period)
+    }
+
+    updateChart = (product, period, ohlc_data) =>
+    {
+        return this.props.updateChart(this.props.id, product, period, ohlc_data)
+    }
+
+    getIndicator = (type, price, product, period) =>
+    {
+        return this.props.getIndicator(type, price, this.props.id, product, period)
+    }
+
+    calculateIndicator = (chart, price, ind) =>
+    {
+        return this.props.calculateIndicator(this.props.id, chart, price, ind)
     }
 
     handleSocket()
@@ -361,4 +382,4 @@ class Strategy extends Component
 
 const URI = 'http://127.0.0.1:5000';
 
-export default Strategy;
+export default Backtest;
