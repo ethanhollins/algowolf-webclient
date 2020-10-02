@@ -125,6 +125,9 @@ class Strategy extends Component
                             getPeriodOffsetSeconds={this.props.getPeriodOffsetSeconds}
                             getCountDate={this.props.getCountDate}
                             getCountDateFromDate={this.props.getCountDateFromDate}
+                            getDrawings={this.getDrawings}
+                            getPositions={this.getPositions}
+                            getOrders={this.getOrders}
                         />
                     )
                 }
@@ -238,8 +241,7 @@ class Strategy extends Component
 
     addPosition = (position) =>
     {
-        const strategy_id = this.props.id;
-        let strategy = this.props.getStrategyInfo(strategy_id);
+        let strategy = this.getStrategyInfo();
 
         if (strategy !== undefined)
         {
@@ -250,8 +252,7 @@ class Strategy extends Component
 
     updatePosition = (position) =>
     {
-        const strategy_id = this.props.id;
-        let strategy = this.props.getStrategyInfo(strategy_id);
+        let strategy = this.getStrategyInfo();
 
         if (strategy !== undefined)
         {
@@ -268,8 +269,7 @@ class Strategy extends Component
 
     deletePosition = (position) =>
     {
-        const strategy_id = this.props.id;
-        let strategy = this.props.getStrategyInfo(strategy_id);
+        let strategy = this.getStrategyInfo();
 
         if (strategy !== undefined)
         {
@@ -284,8 +284,7 @@ class Strategy extends Component
 
     getDrawingIdx = (layer, id) =>
     {
-        const strategy_id = this.props.id;
-        let strategy = this.props.getStrategyInfo(strategy_id);
+        let strategy = this.getStrategyInfo();
 
         if (strategy !== undefined)
         {
@@ -301,8 +300,7 @@ class Strategy extends Component
 
     createDrawing = (layer, drawing) =>
     {
-        const strategy_id = this.props.id;
-        let strategy = this.props.getStrategyInfo(strategy_id);
+        let strategy = this.getStrategyInfo();
 
         if (strategy !== undefined)
         {
@@ -316,8 +314,7 @@ class Strategy extends Component
 
     deleteDrawing = (layer, drawing_id) =>
     {
-        const strategy_id = this.props.id;
-        let strategy = this.props.getStrategyInfo(strategy_id);
+        let strategy = this.getStrategyInfo();
 
         if (strategy !== undefined)
         {
@@ -332,8 +329,7 @@ class Strategy extends Component
 
     deleteDrawingLayer = (layer) =>
     {
-        const strategy_id = this.props.id;
-        let strategy = this.props.getStrategyInfo(strategy_id);
+        let strategy = this.getStrategyInfo();
 
         if (strategy !== undefined)
         {
@@ -347,14 +343,37 @@ class Strategy extends Component
 
     deleteAllDrawings = () =>
     {
-        const strategy_id = this.props.id;
-        let strategy = this.props.getStrategyInfo(strategy_id);
+        let strategy = this.getStrategyInfo();
 
         if (strategy !== undefined)
         {
             strategy.drawings = {}
             this.props.updateStrategyInfo();
         }
+    }
+
+    getStrategyInfo = () =>
+    {
+        const strategy_id = this.props.id;
+        return this.props.getStrategyInfo(strategy_id);
+    }
+
+    getDrawings = () =>
+    {
+        let strategy = this.getStrategyInfo();
+        return strategy.drawings;
+    }
+
+    getPositions = () =>
+    {
+        let strategy = this.getStrategyInfo();
+        return strategy.positions;
+    }
+
+    getOrders = () =>
+    {
+        let strategy = this.getStrategyInfo();
+        return strategy.orders;
     }
 
 }

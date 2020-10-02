@@ -5,23 +5,30 @@ import io from 'socket.io-client';
 
 class Backtest extends Component 
 {
-    state = {
-        sio: undefined,
-        current_page: 0,
-        start: undefined,
-        end: undefined
-    }
+    constructor(props)
+    {
+        super(props);
 
+        let strategy = this.getStrategyInfo();
+        const current_timestamp = strategy.properties.start;
+        this.state = {
+            sio: undefined,
+            current_page: 0,
+            current_idx: 0,
+            current_timestamp: current_timestamp,
+            positions: [],
+            orders: [],
+            drawings: {},
+            info: [],
+            logs: []
+        }
+    }
     componentDidMount()
     {
-        // const sio = this.handleSocket();
-        // this.setState({ sio });
     }
 
     componentWillUnmount()
     {
-        // const { sio } = this.state;
-        // sio.disconnect();
     }
 
     render() {
@@ -127,6 +134,9 @@ class Backtest extends Component
                             getPeriodOffsetSeconds={this.props.getPeriodOffsetSeconds}
                             getCountDate={this.props.getCountDate}
                             getCountDateFromDate={this.props.getCountDateFromDate}
+                            getDrawings={this.getDrawings}
+                            getPositions={this.getPositions}
+                            getOrders={this.getOrders}
                         />
                     )
                 }
@@ -160,91 +170,6 @@ class Backtest extends Component
         return this.props.calculateIndicator(this.props.id, chart, price, ind)
     }
 
-    handleSocket()
-    {
-        const endpoint = `${URI}/user`
-        const socket = io(endpoint, {
-            transportOptions: {
-                polling: {
-                    extraHeaders: {
-                        Authorization: 'TEST_TOKEN'
-                    }
-                }
-            }
-        });
-
-        socket.on('connect', () =>
-        {
-            console.log('connected ' + this.props.id);
-            this.subscribe();
-        });
-
-        socket.on('disconnect', () =>
-        {
-            console.log('Disconnected ' + this.props.id)
-        });
-
-        socket.on('ontrade', (data) =>
-        {
-            for (let k in data)
-            {
-                // Handle chart important events
-                if (data[k].type === 'marketentry')
-                {
-                    this.addPosition(
-                        data[k].item
-                    );
-                }
-                else if (data[k].type === 'modify')
-                {
-                    this.updatePosition(
-                        data[k].item
-                    );
-                }
-                else if (
-                    data[k].type === 'positionclose' ||
-                    data[k].type === 'stoploss' ||
-                    data[k].type === 'takeprofit'
-                )
-                {
-                    this.deletePosition(
-                        data[k].item
-                    );
-                }
-            }
-
-            // Add to transaction history
-        });
-
-        socket.on('ongui', (data) =>
-        {
-            if (data.type === 'create_drawings')
-            {
-                for (let d of data.items)
-                {
-                    this.createDrawing(data.layer, d);
-                }
-            }
-            else if (data.type === 'delete_drawings')
-            {
-                for (let d of data.items)
-                {
-                    this.deleteDrawing(data.layer, d);
-                }
-            }
-            else if (data.type === 'delete_drawing_layer')
-            {
-                this.deleteDrawingLayer(data.layer);
-            }
-            else if (data.type === 'delete_all_drawings')
-            {
-                this.deleteAllDrawings();
-            }
-        });
-
-        return socket;
-    }
-
     subscribe()
     {
         const { sio } = this.state;
@@ -257,125 +182,194 @@ class Backtest extends Component
         );
     }
 
-    addPosition = (position) =>
+    handleCreatePosition = (positions, trans) =>
     {
-        const strategy_id = this.props.id;
-        let strategy = this.props.getStrategyInfo(strategy_id);
+        positions.push(trans.item.new);
+    }
 
-        if (strategy !== undefined)
+    handleClosePosition = (positions, trans) =>
+    {
+        for (let i = 0; i < positions.length; i++)
         {
-            strategy.positions.push(position);
-            this.props.updateStrategyInfo();
+            if (positions[i].order_id === trans.item.new.order_id)
+            {
+                positions.splice(i, 1);
+            }
         }
     }
 
-    updatePosition = (position) =>
+    handleCreateOrder = (orders, trans) =>
     {
-        const strategy_id = this.props.id;
-        let strategy = this.props.getStrategyInfo(strategy_id);
+        orders.push(trans.item.new);
+    }
 
-        if (strategy !== undefined)
+    handleCancelOrder = (orders, trans) =>
+    {
+        for (let i = 0; i < orders.length; i++)
         {
-            for (let j = 0; j < strategy.positions.length; j++)
+            if (orders[i].order_id === trans.item.new.order_id)
             {
-                if (strategy.positions[j].order_id === position.order_id)
+                orders.splice(i, 1);
+            }
+        }
+    }
+
+    handleModify = (positions, orders, trans) =>
+    {
+        const item = trans.item.new;
+        if (item.order_type === 'limitorder' || item.order_type === 'stoporder')
+        {
+            for (let i = 0; i < orders.length; i++)
+            {
+                if (orders[i].order_id === item.order_id)
                 {
-                    strategy.positions[j] = position;
+                    orders[i] = item;
                 }
             }
-            this.props.updateStrategyInfo();
         }
-    }
-
-    deletePosition = (position) =>
-    {
-        const strategy_id = this.props.id;
-        let strategy = this.props.getStrategyInfo(strategy_id);
-
-        if (strategy !== undefined)
+        else
         {
-            for (let j = 0; j < strategy.positions.length; j++)
+            for (let i = 0; i < positions.length; i++)
             {
-                if (strategy.positions[j].order_id === position.order_id)
-                    strategy.positions.splice(j, 1);
-            }
-            this.props.updateStrategyInfo();
-        }
-    }
-
-    getDrawingIdx = (layer, id) =>
-    {
-        const strategy_id = this.props.id;
-        let strategy = this.props.getStrategyInfo(strategy_id);
-
-        if (strategy !== undefined)
-        {
-            const drawings = strategy.drawings[layer];
-            for (let i = 0; i < drawings.length; i++)
-            {
-                const d = drawings[i];
-                if (d.id === id) return i;
+                if (positions[i].order_id === item.order_id)
+                {
+                    positions[i] = item;
+                }
             }
         }
-        return undefined
     }
 
-    createDrawing = (layer, drawing) =>
+    handleCreateDrawing = (drawings, trans) =>
     {
-        const strategy_id = this.props.id;
-        let strategy = this.props.getStrategyInfo(strategy_id);
-
-        if (strategy !== undefined)
+        const item = trans.item;
+        if (!(item.layer in drawings))
         {
-            if (this.getDrawingIdx(layer, drawing.id) === undefined)
-            {
-                strategy.drawings[layer].push(drawing);
-            } 
-            this.props.updateStrategyInfo();
+            drawings[item.layer] = [];
+        }
+
+        drawings[item.layer].push(trans.item);
+    }
+
+    handleClearDrawingLayer = (drawings, trans) =>
+    {
+        if (trans.item in drawings)
+        {
+            drawings[trans.item] = [];
         }
     }
 
-    deleteDrawing = (layer, drawing_id) =>
+    handleClearAllDrawings = (drawings, trans) =>
     {
-        const strategy_id = this.props.id;
-        let strategy = this.props.getStrategyInfo(strategy_id);
-
-        if (strategy !== undefined)
+        for (let i in drawings)
         {
-            const idx = this.getDrawingIdx(layer, drawing_id);
-            if (idx !== undefined)
+            drawings[i] = [];
+        }
+    }
+
+    handleCreateInfo = (info, trans) =>
+    {
+        info.push(trans.item);
+    }
+
+    handleCreateLog = (logs, trans) =>
+    {
+        logs.push(trans.item);
+    }
+
+    handleTransactions = (dest_timestamp) =>
+    {
+        let { current_idx, current_timestamp, positions, orders, drawings, info, logs } = this.state;
+        const transactions = this.getTransactions();
+
+        if (dest_timestamp === current_timestamp) return;
+        else if (dest_timestamp < current_timestamp)
+        {
+            // Reset all vars and start from beginning
+            current_idx = 0;
+            positions = orders = info = logs = [];
+            drawings = {};
+        }
+        current_timestamp = dest_timestamp;
+
+        for (current_idx; current_idx < transactions.length; current_idx++)
+        {
+            const t = transactions[current_idx];
+            if (t.timestamp > current_timestamp) break;
+
+            switch (t.type)
             {
-                strategy.drawings[layer].splice(idx, 1);
+                case 'marketentry':
+                case 'limitentry':
+                case 'stopentry':
+                    this.handleCreatePosition(positions, t);
+                    break;
+                case 'limitorder':
+                case 'stoporder':
+                    this.handleCreateOrder(orders, t);
+                    break;
+                case 'positionclose':
+                case 'stoploss':
+                case 'takeprofit':
+                    this.handleClosePosition(positions, t);
+                    break;
+                case 'ordercancel':
+                    this.handleCancelOrder(orders, t);
+                    break;
+                case 'modify':
+                    this.handleModify(positions, orders, t);
+                    break;
+                case 'create_drawing':
+                    this.handleCreateDrawing(drawings, t);
+                    break;
+                case 'clear_drawing_layer':
+                    this.handleClearDrawingLayer(drawings, t);
+                    break;
+                case 'clear_all_drawings':
+                    this.handleClearAllDrawings(drawings, t);
+                    break;
+                case 'create_info':
+                    this.handleCreateInfo(info, t);
+                    break;
+                case 'create_log':
+                    this.handleCreateLog(logs, t);
+                    break;
             }
-            this.props.updateStrategyInfo();
         }
+
+        this.setState({ current_idx, current_timestamp, positions, orders, info, logs });
     }
 
-    deleteDrawingLayer = (layer) =>
+    // GETTERS
+
+    getStrategyInfo = () =>
     {
         const strategy_id = this.props.id;
-        let strategy = this.props.getStrategyInfo(strategy_id);
+        return this.props.getStrategyInfo(strategy_id);
+    }
+
+    getTransactions = () =>
+    {
+        let strategy = this.getStrategyInfo();
 
         if (strategy !== undefined)
         {
-            if (layer in strategy.drawings)
-            {
-                delete strategy.drawings[layer];
-            }
-            this.props.updateStrategyInfo();
+            return strategy.transactions;
         }
     }
 
-    deleteAllDrawings = () =>
+    getDrawings = () =>
     {
-        const strategy_id = this.props.id;
-        let strategy = this.props.getStrategyInfo(strategy_id);
+        return this.state.drawings;
+    }
 
-        if (strategy !== undefined)
-        {
-            strategy.drawings = {}
-            this.props.updateStrategyInfo();
-        }
+    getPositions = () =>
+    {
+        return this.state.positions;
+    }
+
+    getOrders = () =>
+    {
+        return this.state.orders;
     }
 
 }

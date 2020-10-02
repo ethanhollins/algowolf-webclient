@@ -137,6 +137,9 @@ class WindowWrapper extends Component
                 getIndicator={this.props.getIndicator}
                 calculateIndicator={this.props.calculateIndicator}
                 getPeriodOffsetSeconds={this.props.getPeriodOffsetSeconds}
+                getDrawings={this.props.getDrawings}
+                getPositions={this.props.getPositions}
+                getOrders={this.props.getOrders}
                 getCountDate={this.props.getCountDate}
                 getCountDateFromDate={this.props.getCountDateFromDate}
                 getStrategyInfo={this.props.getStrategyInfo}

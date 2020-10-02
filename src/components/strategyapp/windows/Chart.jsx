@@ -58,9 +58,6 @@ class Chart extends Component
         this.studies = [];
         this.studyPrices = [];
 
-        // Drawings
-        this.drawings = [];
-
         // Refs Setters
         this.setContainerRef = elem => {
             this.container = elem;
@@ -86,9 +83,6 @@ class Chart extends Component
         }
         this.addStudyRef = elem => {
             this.studies.push(elem);
-        }
-        this.addDrawingRef = elem => {
-            this.drawings.push(elem);
         }
         this.addOverlayPriceRef = elem => {
             this.overlayPrices.push(elem);
@@ -169,7 +163,7 @@ class Chart extends Component
         if (this.getChart() !== undefined)
         {
             const bids = this.getBids();
-            const chart_properties = this.getChartProperties(bids, Math.floor(pos.x));
+            const chart_properties = this.getChartProperties(bids, Math.floor(pos.x), scale);
             if (first_load)
             {
                 first_load = false;
@@ -179,7 +173,7 @@ class Chart extends Component
             }
             else if (trans_x === 0)
             {
-                const num_steps = 5;
+                const num_steps = 3;
                 const c_scale = scale.y;
                 const scale_interval = (chart_properties.scale.y - c_scale) / Math.pow(num_steps, 2);
                 this.transitionScaleY(num_steps, scale_interval, c_scale, null, null, 0, this);
@@ -195,7 +189,7 @@ class Chart extends Component
                 }
                 else if (study.getTransX() === 0)
                 {
-                    const num_steps = 5;
+                    const num_steps = 3;
                     const c_scale = study.getScale().y;
                     const scale_interval = (study_properties.scale.y - c_scale) / Math.pow(num_steps, 2);
                     const c_pos = study.getPos().y;
@@ -381,11 +375,21 @@ class Chart extends Component
             );
             
             pos.x += move.x;
-
             if (is_move)
                 pos.y += move.y;
+            
+            // clearTimeout(is_scrolling);
+            // is_scrolling = setTimeout(() => {
+            //     trans_x = 0;
+            //     this.setState({ trans_x });
 
-            this.setState({ pos });
+            //     // for (let study of this.studies)
+            //     // {
+            //     //     if (study !== null) study.setTransX(0);
+            //     // }
+            // }, 100);
+
+            this.setState({ pos, scale });
         }
     }
 
@@ -424,16 +428,29 @@ class Chart extends Component
             studies[i].setIsMove(false);
         }
 
-        let { is_down, is_move, trans_x } = this.state;
+        let { is_down, is_move, trans_x, pos, scale } = this.state;
         is_down = false;
 
         if (is_move)
         {
-            is_move = false;
-            trans_x = 0;
-            for (let study of this.studies)
+            if (scale.x < 500)
             {
-                study.setTransX(0);
+                is_move = false;
+                trans_x = 0;
+                for (let study of this.studies)
+                {
+                    study.setTransX(0);
+                }
+            }
+            else
+            {
+                const chart_properties = this.getChartProperties(this.getBids(), Math.floor(pos.x), scale);
+                scale.y = chart_properties.scale.y;
+
+                for (let study of this.studies)
+                {
+                    study.setStudyProperties(study.getResult());
+                }
             }
         }
 
@@ -449,12 +466,7 @@ class Chart extends Component
             this.contextMenu.style.display = 'none';
         }
 
-        // this.limit(
-        //     this.getTimestamps()[this.getTimestamps().length-100],
-        //     this.getTimestamps()[this.getTimestamps().length-1]
-        // );
-
-        this.setState({ is_down, is_move, trans_x });
+        this.setState({ is_down, is_move, trans_x, scale });
     }
 
     onScroll(e)
@@ -462,7 +474,7 @@ class Chart extends Component
         const mouse_pos = {
             x: e.clientX, y: e.clientY
         };
-        let { pos, scale, trans_x, is_scrolling } = this.state;
+        let { pos, scale, is_scrolling } = this.state;
         const dz = e.deltaY;
         const speed = 0.1;
 
@@ -488,20 +500,19 @@ class Chart extends Component
             scale.x += (num_candles * speed * (dz / 100.0));
             scale.x = this.clampScale(scale.x);
             
-            clearTimeout(is_scrolling);
-            is_scrolling = setTimeout(() => {
-                trans_x = 0;
-                this.setState({ trans_x });
+            const chart_properties = this.getChartProperties(this.getBids(), Math.floor(pos.x), scale);
+            scale.y = chart_properties.scale.y;
 
-                for (let study of this.studies)
-                {
-                    if (study !== null) study.setTransX(0);
-                }
-            }, 100);
-    
+            for (let study of this.studies)
+            {
+                study.setStudyProperties(study.getResult());
+            }
+
             this.onCrosshairMove(e);
     
             this.setState({ pos, scale, is_scrolling });
+            this.setPriceInterval();
+            this.setTimeInterval();
         }
 
     }
@@ -577,7 +588,7 @@ class Chart extends Component
                             if (obj.setTimeInterval !== undefined) obj.setTimeInterval();
                             this.transitionScaleY(num_steps, scale_interval, c_scale, pos_interval, c_pos, i+1, obj);
                         }
-                    }, 25);
+                    }, 10);
                 }.bind(this)
             );
         }
@@ -1669,7 +1680,7 @@ class Chart extends Component
         const seg_size = this.getSegmentSize(0);
 
         const chart_drawings_layers = this.getProperties().drawing_layers;
-        const drawings = this.getDrawingsProperties();
+        const drawings = this.getDrawings();
 
         for (let layer of chart_drawings_layers)
         {
@@ -1740,7 +1751,7 @@ class Chart extends Component
         const { pos, scale } = this.state;
         const seg_size = this.getSegmentSize(0);
 
-        const drawings = this.getDrawingsProperties();
+        const drawings = this.getDrawings();
 
         for (let i = 0; i < drawings.length; i++)
         {
@@ -1771,8 +1782,8 @@ class Chart extends Component
         const seg_size = this.getSegmentSize(0);
         const camera = this.getCamera();
         const bids = this.getBids();
-
-        let c_bid = 0;
+        // console.log(bids);
+        let c_bid = undefined;
         for (let i = bids.length-1; i >= 0; i--)
         {
             c_bid = bids[i][3];
@@ -2065,8 +2076,6 @@ class Chart extends Component
     clampLimit = (ts) =>
     {
         const { limit } = this.state;
-        console.log(ts)
-        console.log(limit)
         if (limit[0] !== null && ts < limit[0])
         {
             ts = limit[0];
@@ -2075,7 +2084,6 @@ class Chart extends Component
         {
             ts = limit[0];
         }
-        console.log(ts)
 
         return ts;
     }
@@ -2122,13 +2130,11 @@ class Chart extends Component
 
     getStudyValueByPos = (idx, x) =>
     {
-        const values = this.getStudyValues(idx);
-        let result = [];
-        for (let i = 0; i < values.length; i++)
-        {
-            result.push(values[i][values[i].length-x]);
-        }
-        return result;
+        const study = this.studies[idx];
+        if (study === undefined)
+            return [];
+        else
+            return study.getValue(x);
     }
 
     setFutureTimestamps = () =>
@@ -2164,18 +2170,11 @@ class Chart extends Component
         this.setState({ future_timestamps });
     }
 
-    getChartProperties(ohlc, idx)
+    getChartProperties(ohlc, idx, scale)
     {
-        let { pos, scale } = this.state;
-        
+        let { pos } = this.state;
         let hl = [null,null]; // highest/lowest prices
         const max_len = this.getTimestamps().length;
-
-        const camera = this.getCamera();
-        const chart_size = this.getChartSize();
-        // const num_candles = camera.convertScreenUnitToWorldUnit(
-        //     { x: chart_size.width, y: 0 }, chart_size, scale
-        // ).x;
 
         let counted = 0;
         let i = idx;
@@ -2197,14 +2196,12 @@ class Chart extends Component
             
             counted++;
         }
-        
         if (hl.some((elem) => elem === null)) 
             return { pos: pos, scale: scale };
 
         let new_scale = (hl[0] - hl[1]);
         const padding_y = new_scale;
         new_scale += padding_y/2.0;
-
         let ref_point = Math.round((hl[0] + hl[1]) / 2 * 100000) / 100000;
         return { 
             pos: { x: pos.x, y: ref_point }, 
@@ -2348,11 +2345,6 @@ class Chart extends Component
         return this.getProperties().studies;
     }
 
-    getDrawings = () =>
-    {
-        return this.drawings;
-    }
-
     getCurrentPriceFormat = () =>
     {
         return this.getPriceFormat(this.state.intervals.x);
@@ -2450,12 +2442,12 @@ class Chart extends Component
 
     getPositions = () =>
     {
-        return this.getStrategy().positions;
+        return this.props.getPositions();
     }
 
     getOrders = () =>
     {
-        return this.getStrategy().orders;
+        return this.props.getOrders();
     }
 
     getMainPortion = () =>
@@ -2529,16 +2521,9 @@ class Chart extends Component
         return result;
     }
 
-    addDrawing = (name, timestamps, prices, properties) =>
+    getDrawings = () =>
     {
-        this.getDrawingsProperties().push(
-            Drawings.create(name, timestamps, prices, properties)
-        );
-    }
-
-    getDrawingsProperties = () =>
-    {
-        return this.getStrategy().drawings;
+        return this.props.getDrawings();
     }
 
     async addChart()
@@ -2548,14 +2533,15 @@ class Chart extends Component
         if (this.isBacktest())
         {
             const properties = this.getStrategy().properties;
-            start = moment.utc(parseFloat(
-                properties.start-this.getPeriodOffsetSeconds(this.getPeriod())
-            ) * 1000);
+            console.log(moment.utc(properties.start * 1000));
+            start = this.props.getCountDateFromDate(this.getPeriod(), 200, 
+                moment.utc(properties.start * 1000)
+            , -1);
             end = moment.utc(parseFloat(properties.end) * 1000);
         }
         else
         {
-            start = this.props.getCountDateFromDate(this.getPeriod(), 1000, moment(), -1);
+            start = this.props.getCountDateFromDate(this.getPeriod(), 1000, moment.utc(), -1);
             end = moment();
         }
 

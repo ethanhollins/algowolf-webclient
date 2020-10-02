@@ -12,7 +12,8 @@ class Study extends Component
         interval: 0,
         trans_x: 0,
         is_move: false,
-        is_resize: false
+        is_resize: false,
+        result: undefined
     }
 
     constructor(props)
@@ -28,11 +29,11 @@ class Study extends Component
         window.addEventListener("mousemove", this.onMouseMove);
         window.addEventListener("mouseup", this.onMouseUp);
 
-        let { pos, scale } = this.state;
-        const study_properties = this.getStudyProperties();
-        pos = study_properties.pos;
-        scale = study_properties.scale;
-        this.setState({ pos, scale });
+        // let { pos, scale } = this.state;
+        // const study_properties = this.getStudyProperties();
+        // pos = study_properties.pos;
+        // scale = study_properties.scale;
+        // this.setState({ pos, scale });
     }
 
     componentWillUnmount()
@@ -84,28 +85,44 @@ class Study extends Component
         this.setState({ trans_x, is_resize });
     }
 
-    getStudyProperties()
+    getStudyProperties(result)
     {
+        if (result === undefined)
+        {
+            result = this.state.result;
+        }
         const chart_pos = this.props.getPos();
         const chart_scale = this.props.getScale();
         let pos = { x: chart_pos.x, y: this.state.pos.y };
         let scale = { x: chart_scale.x, y: this.state.scale.y };
 
-        const values = this.props.getValues(this.props.index);
         let hl = [null, null];
-        for (let i = 0; i < values.length; i++)
-        {
-            for (let j = Math.round(pos.x + parseInt(scale.x)); j >= pos.x - 2; j--)
-            {
-                let val = values[i][values[i].length-1-j];
-                if (val === undefined) continue;
 
-                if (hl[0] == null || val > hl[0])
-                    hl[0] = val;
-                if (hl[1] == null || val < hl[1])
-                    hl[1] = val;
+        if (result !== undefined)
+        {
+            for (let x = 0; x < result.length; x++)
+            {
+                let counted = 0;
+                let y = parseInt(pos.x);
+                while (counted < Math.max(scale.x, 10) && y < result[x].length)
+                {
+                    let val = result[x][result[x].length-1-y];
+                    y++;
+                    if (val === undefined) continue;
+                    for (let z = 0; z < val.length; z++)
+                    {
+                        if (val[z] === undefined || val[z] === null) continue;
+                        if (hl[0] == null || val[z] > hl[0])
+                            hl[0] = val[z];
+                        if (hl[1] == null || val[z] < hl[1])
+                            hl[1] = val[z];
+                        
+                        if (z === 0) counted += 1;
+                    }
+                }
             }
         }
+
         if (hl.every((x) => x !== null))
         {
             scale.y = (hl[0] - hl[1]);
@@ -119,6 +136,16 @@ class Study extends Component
             pos: pos,
             scale: scale
         }
+    }
+
+    setStudyProperties(result)
+    {
+        const study_props = this.getStudyProperties(result);
+        let { pos, scale } = this.state;
+        pos = { y: study_props.pos.y };
+        scale = { y: study_props.scale.y };
+
+        this.setState({ pos, scale });
     }
 
     move = (y) =>
@@ -167,6 +194,13 @@ class Study extends Component
 
     draw() 
     {
+        let { result } = this.state;
+        let setProperties = false;
+        if (result === undefined)
+            setProperties = true;
+
+        result = [];
+
         const camera = this.props.getCamera();
         const canvas = this.props.getCanvas();
         const ctx = canvas.getContext("2d");
@@ -182,10 +216,8 @@ class Study extends Component
 
         const size = this.props.getSegmentSize(this.getWindowIndex());
         const ohlc = this.props.getOhlcValues();
-        const f_off = this.props.getFilteredOffset();
         const values = this.props.getValues(this.props.index);
         const properties = this.props.getProperties(this.props.index);
-        const limit = this.props.getLimit();
 
         // If empty values list, cancel drawing
         if (values.length === 0) return;
@@ -197,12 +229,14 @@ class Study extends Component
             ctx.lineWidth = 1.5;
             let first_pos = null;
             
+            result.push([...Array(ohlc.length)].map(x=>Array(values[i][0].length)));
             // Iterate rows
             for (let y = 0; y < values[i][0].length; y++)
             {
                 let c_x = -1;
                 ctx.strokeStyle = properties.colors[i][y];
                 ctx.beginPath();
+
                 for (let x = 0; x < ohlc.length; x++) 
                 {
                     if (ohlc[x][0] !== null) c_x += 1;
@@ -228,7 +262,12 @@ class Study extends Component
                     }
 
                     let i_val = values[i][c_x][y];
-                    if (i_val === null || ohlc[x][0] === null) continue;
+                    if (i_val === null || ohlc[x][0] === null)
+                    {
+                        result[i][x][y] = null;
+                        continue;
+                    }
+                    result[i][x][y] = i_val;
 
                     let line_pos = camera.convertWorldPosToScreenPos(
                         { x: x_pos, y: i_val },
@@ -244,6 +283,10 @@ class Study extends Component
                 ctx.stroke();
             }
         }
+
+        this.setState({ result });
+
+        if(setProperties) this.setStudyProperties(result);
     }
 
     drawPriceGrid(ctx)
@@ -442,6 +485,25 @@ class Study extends Component
     setIsResize = (is_resize) =>
     {
         this.setState({ is_resize });
+    }
+
+    getValue = (x) =>
+    {
+        const { result } = this.state;
+        const values = [];
+        if (result !== undefined)
+        {
+            for (let i = 0; i < result.length; i++)
+            {
+                values.push(result[i][result[i].length-x]);
+            }
+        }
+        return values;
+    }
+
+    getResult = () =>
+    {
+        return this.state.result;
     }
 
 }

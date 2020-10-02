@@ -843,7 +843,6 @@ class StrategyApp extends Component
             );
 
         }
-        console.log(strategyInfo);
 
         this.setState({ strategyInfo });
     }
@@ -954,7 +953,7 @@ class StrategyApp extends Component
         let { charts } = this.state;
 
         this.connectChart(product, period);
-        
+
         const key = product + ':' + period;
         charts[key] = {
             product: product,
@@ -1076,8 +1075,8 @@ class StrategyApp extends Component
     generateNextTimestamp(chart)
     {
         const off = this.getPeriodOffsetSeconds(chart.period);        
-        const ask_close = chart.asks[chart.asks.length-1];
-        const bid_close = chart.bids[chart.bids.length-1];
+        const ask_close = chart.asks[chart.asks.length-1][3];
+        const bid_close = chart.bids[chart.bids.length-1][3];
 
         let ts = chart.timestamps[chart.timestamps.length-1] + off;
         let c_weekend = this.getWeekendDates(ts);
@@ -1108,7 +1107,7 @@ class StrategyApp extends Component
     {
         let { charts } = this.state;
         let chart = charts[item['product'] + ':' + item['period']];
-
+        
         chart.asks[chart.asks.length-1] = item['item']['ask'];
         chart.bids[chart.bids.length-1] = item['item']['bid'];
 
@@ -1870,7 +1869,7 @@ class StrategyApp extends Component
             }
             i += 1
         }
-        return moment((ts + off * i * direction) * 1000);
+        return moment.utc((ts + off * i * direction) * 1000);
     }
 
     getCountDateFromDate = (period, count, date, direction) =>
@@ -1888,7 +1887,7 @@ class StrategyApp extends Component
             }
             i += 1
         }
-        return moment((ts + off * i * direction) * 1000);
+        return moment.utc((ts + off * i * direction) * 1000);
     }
 }
 
