@@ -17,14 +17,13 @@ class Candlesticks extends Component
         const scale = this.props.getScale();
         const size = this.props.getSegmentSize(0);
         
+        const current_timestamp = this.props.getCurrentTimestamp();
         const ohlc = this.props.getBids();
-        const limit = this.props.getLimit();
         const info = this.props.getWindowInfo();
 
         for (let i = 0; i < ohlc.length; i++) 
         {
             let x_pos = (ohlc.length - i)+0.5;
-            // if (limit[0] != null && (i < limit[0] || i > limit[1])) continue;
             if (x_pos > pos.x + scale.x+1 || x_pos < pos.x-1 ) continue;
             
             let candle = ohlc[i];

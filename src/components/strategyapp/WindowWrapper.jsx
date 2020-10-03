@@ -38,23 +38,16 @@ class WindowWrapper extends Component
         
         // Bind functions
         this.onMouseDown = this.onMouseDown.bind(this);
-        this.onMouseMove = this.onMouseMove.bind(this);
         this.onMouseMoveThrottled = _.throttle(this.onMouseMoveThrottled.bind(this), 10);
         this.onMouseUp = this.onMouseUp.bind(this);
         this.onResize = this.onResize.bind(this);
-        this.onKeyDown = this.onKeyDown.bind(this);
-        this.onKeyUp = this.onKeyUp.bind(this);
     }
 
     componentDidMount()
     {
         window.addEventListener("mousedown", this.onMouseDown);
-        window.addEventListener("mousemove", this.onMouseMove);
         window.addEventListener("mouseup", this.onMouseUp);
         window.addEventListener("resize", this.onResize);
-        
-        window.addEventListener("keydown", this.onKeyDown);
-        window.addEventListener("keyup", this.onKeyUp);
         
         window.addEventListener("mousemove", this.onMouseMoveThrottled);
 
@@ -75,12 +68,8 @@ class WindowWrapper extends Component
     componentWillUnmount()
     {
         window.removeEventListener("mousedown", this.onMouseDown);
-        window.removeEventListener("mousemove", this.onMouseMove);
         window.removeEventListener("mouseup", this.onMouseUp);
         window.removeEventListener("resize", this.onResize);
-        
-        window.removeEventListener("keydown", this.onKeyDown);
-        window.removeEventListener("keyup", this.onKeyUp);
 
         window.removeEventListener("mousemove", this.onMouseMoveThrottled);
     }
@@ -125,7 +114,7 @@ class WindowWrapper extends Component
                 getWindowWorldPos={this.getWorldPos}
                 getWindowScreenPos={this.getScreenPos}
                 getWindowSize={this.getWorldSize}
-                getKeys={this.getKeys}
+                getKeys={this.props.getKeys}
                 getCursor={this.getCursor}
                 setCursor={this.setCursor}
     
@@ -140,6 +129,7 @@ class WindowWrapper extends Component
                 getDrawings={this.props.getDrawings}
                 getPositions={this.props.getPositions}
                 getOrders={this.props.getOrders}
+                getCurrentTimestamp={this.props.getCurrentTimestamp}
                 getCountDate={this.props.getCountDate}
                 getCountDateFromDate={this.props.getCountDateFromDate}
                 getStrategyInfo={this.props.getStrategyInfo}
@@ -161,7 +151,7 @@ class WindowWrapper extends Component
                 x: e.clientX, y: e.clientY-this.getTopOffset()
             }
             const { pos, size } = this.state.info;
-            const { keys } = this.state;
+            const keys = this.props.getKeys();
             let { is_move, is_resize, before_change } = this.state;
 
             if (this.props.isTopWindow(
@@ -260,18 +250,39 @@ class WindowWrapper extends Component
         return direction;
     }
 
-    onMoveKey()
+    handleKeys(e)
     {
-        let { keys } = this.state;
+        const { is_move, is_resize } = this.state;
+        const keys = this.props.getKeys();
+        const mouse_pos = {
+            x: e.clientX, y: e.clientY-this.getTopOffset()
+        }
+        const is_top = this.props.isTopWindow(
+            this.getStrategyId(), this.getItemId(), mouse_pos
+        )
 
         if (keys.includes(SPACEBAR))
         {
             this.hideWindowBtns();
             this.setCursor('move');
-            return true;
-        }
 
-        return false;
+            if (!is_move && !is_resize)
+            {
+                if (is_top)
+                {
+                    mouse_pos.y += this.getTopOffset();
+                    if (!this.isResizeMouseLocation(mouse_pos))
+                    {
+                        this.setCursor('move');
+                    }
+                }
+            }
+        }
+        else
+        {
+            this.showWindowBtns(is_top);
+            this.setCursor('auto');
+        }
     }
 
     getCursor = () =>
@@ -289,13 +300,9 @@ class WindowWrapper extends Component
         }
     }
 
-    showWindowBtns(e)
+    showWindowBtns(is_top)
     {
-        const mouse_pos = {
-            x: e.clientX, y: e.clientY-this.getTopOffset()
-        }
-
-        if (this.props.isTopWindow(this.getStrategyId(), this.getItemId(), mouse_pos))
+        if (is_top)
         {
             this.windowBtns.style.display = '';
         }
@@ -434,34 +441,9 @@ class WindowWrapper extends Component
         }
     }
 
-    onMouseMove(e)
-    {
-    }
-
     onMouseMoveThrottled(e)
     {
-        const { keys, is_move, is_resize } = this.state;
-        
-        if (!keys.includes(SPACEBAR))
-        {
-            this.showWindowBtns(e);
-        }
-        else if (!is_move && !is_resize)
-        {
-            const mouse_pos = {
-                x: e.clientX, y: e.clientY-this.getTopOffset()
-            }
-            if (this.props.isTopWindow(
-                this.getStrategyId(), this.getItemId(), mouse_pos
-            ))
-            {
-                mouse_pos.y += this.getTopOffset();
-                if (!this.isResizeMouseLocation(mouse_pos))
-                {
-                    this.setCursor('move');
-                }
-            }
-        }
+        this.handleKeys(e);
 
         this.moveWindow(e);
         this.resizeWindow(e);
@@ -517,35 +499,6 @@ class WindowWrapper extends Component
     hasResized(new_item)
     {
         return (new_item.item.width !== 0 || new_item.item.height !== 0);
-    }
-
-    onKeyDown(e)
-    {
-        let { keys } = this.state;
-
-        if (!keys.includes(e.keyCode))
-        {
-            keys.push(e.keyCode);
-            if (!this.onMoveKey())
-                this.setCursor('auto');
-        }
-
-        this.setState({ keys });
-    }
-
-    onKeyUp(e)
-    {
-        let { keys } = this.state;
-
-        if (keys.includes(e.keyCode)) 
-        {
-            keys.splice(keys.indexOf(e.keyCode));
-            if (!this.onMoveKey())
-                this.setCursor('auto'); 
-        }
-
-        
-        this.setState({ keys });
     }
 
     onResize()

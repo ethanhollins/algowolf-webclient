@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import WindowWrapper from './WindowWrapper';
 import WindowShadow from './WindowShadow';
-import io from 'socket.io-client';
 
 class Backtest extends Component 
 {
@@ -22,13 +21,6 @@ class Backtest extends Component
             info: [],
             logs: []
         }
-    }
-    componentDidMount()
-    {
-    }
-
-    componentWillUnmount()
-    {
     }
 
     render() {
@@ -112,6 +104,7 @@ class Backtest extends Component
                             getChartElement={this.props.getChartElement}
                             getStrategyInfo={this.props.getStrategyInfo}
                             updateStrategyInfo={this.props.updateStrategyInfo}
+                            getKeys={this.props.getKeys}
                             setPopup={this.props.setPopup}
                             // Window Funcs
                             closeWindow={this.props.closeWindow}
@@ -137,6 +130,7 @@ class Backtest extends Component
                             getDrawings={this.getDrawings}
                             getPositions={this.getPositions}
                             getOrders={this.getOrders}
+                            getCurrentTimestamp={this.getCurrentTimestamp}
                         />
                     )
                 }
@@ -180,6 +174,24 @@ class Backtest extends Component
                 'field': 'ontrade'
             }
         );
+    }
+
+    handleKeys = () =>
+    {
+        const keys = this.props.getKeys();
+        
+        if (keys.includes(ARROW_RIGHT))
+        {
+            console.log('->');
+            const { current_timestamp } = this.state;
+            this.handleTransactions(current_timestamp + this.props.getPeriodOffsetSeconds('M1'));
+        }
+        else if (keys.includes(ARROW_LEFT))
+        {
+            console.log('<-');
+            const { current_timestamp } = this.state;
+            this.handleTransactions(current_timestamp - this.props.getPeriodOffsetSeconds('M1'));
+        }
     }
 
     handleCreatePosition = (positions, trans) =>
@@ -336,7 +348,7 @@ class Backtest extends Component
             }
         }
 
-        this.setState({ current_idx, current_timestamp, positions, orders, info, logs });
+        this.setState({ current_idx, current_timestamp, positions, orders, drawings, info, logs });
     }
 
     // GETTERS
@@ -372,7 +384,17 @@ class Backtest extends Component
         return this.state.orders;
     }
 
+    getCurrentTimestamp = () =>
+    {
+        return this.state.current_timestamp;
+    }
+
 }
+
+const ARROW_LEFT = 37;
+const ARROW_UP = 38;
+const ARROW_RIGHT = 39;
+const ARROW_DOWN = 40;
 
 const URI = 'http://127.0.0.1:5000';
 

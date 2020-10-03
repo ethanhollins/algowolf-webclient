@@ -24,6 +24,7 @@ class StrategyApp extends Component
 {
     state = {
         sio: null,
+        keys: [],
         account: {},
         strategyInfo: {},
         positions: [],
@@ -51,6 +52,8 @@ class StrategyApp extends Component
         this.update = this.update.bind(this);
         this.onMouseUp = this.onMouseUp.bind(this);
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
+        this.onKeyDown = this.onKeyDown.bind(this);
+        this.onKeyUp = this.onKeyUp.bind(this);
 
         this.setAppContainerRef = elem => {
             this.appContainer = elem;
@@ -98,6 +101,9 @@ class StrategyApp extends Component
         this.setBacktestElem = elem => {
             this.backtestElem = elem;
         }
+        this.setStrategy = elem => {
+            this.strategy = elem;
+        }
 
     }
 
@@ -106,6 +112,8 @@ class StrategyApp extends Component
         this.updateWindowDimensions();
         window.addEventListener("mouseup", this.onMouseUp);
         window.addEventListener("resize", this.update);
+        window.addEventListener("keydown", this.onKeyDown);
+        window.addEventListener("keyup", this.onKeyUp);
 
         const user_id = await this.props.checkAuthorization();
         this.props.setUserId(user_id);
@@ -128,6 +136,8 @@ class StrategyApp extends Component
     {
         window.removeEventListener("mouseup", this.onMouseUp);
         window.removeEventListener("resize", this.update);
+        window.removeEventListener("keydown", this.onKeyDown);
+        window.removeEventListener("keyup", this.onKeyUp);
     }
 
     render()
@@ -428,6 +438,7 @@ class StrategyApp extends Component
                 {
                     return <Backtest
                         id={current_strategy}
+                        ref={this.setStrategy}
                         clone={this.clone}
                         getAppContainer={this.getAppContainer}
                         convertScreenUnitToWorldUnit={this.convertScreenUnitToWorldUnit}
@@ -439,6 +450,7 @@ class StrategyApp extends Component
                         getChartElement={this.getChartElement}
                         getCamera={this.getCamera}
                         getSio={this.getSio}
+                        getKeys={this.getKeys}
                         setPopup={this.setPopup}
                         // Window Funcs
                         closeWindow={this.closeWindow}
@@ -466,6 +478,7 @@ class StrategyApp extends Component
                 {
                     return <Strategy
                         id={current_strategy}
+                        ref={this.setStrategy}
                         clone={this.clone}
                         getAppContainer={this.getAppContainer}
                         convertScreenUnitToWorldUnit={this.convertScreenUnitToWorldUnit}
@@ -477,6 +490,7 @@ class StrategyApp extends Component
                         getChartElement={this.getChartElement}
                         getCamera={this.getCamera}
                         getSio={this.getSio}
+                        getKeys={this.getKeys}
                         setPopup={this.setPopup}
                         // Window Funcs
                         closeWindow={this.closeWindow}
@@ -753,6 +767,32 @@ class StrategyApp extends Component
             x: e.clientX, y: e.clientY
         }
         this.closeTemporaryWindows(mouse_pos);
+    }
+
+    onKeyDown(e)
+    {
+        let { keys } = this.state;
+
+        if (!keys.includes(e.keyCode))
+        {
+            keys.push(e.keyCode);
+        }
+        this.strategy.handleKeys();
+
+        this.setState({ keys });
+    }
+
+    onKeyUp(e)
+    {
+        let { keys } = this.state;
+
+        if (keys.includes(e.keyCode)) 
+        {
+            keys.splice(keys.indexOf(e.keyCode));
+        }
+
+        
+        this.setState({ keys });
     }
 
     update()
@@ -1888,6 +1928,11 @@ class StrategyApp extends Component
             i += 1
         }
         return moment.utc((ts + off * i * direction) * 1000);
+    }
+
+    getKeys = () =>
+    {
+        return this.state.keys;
     }
 }
 

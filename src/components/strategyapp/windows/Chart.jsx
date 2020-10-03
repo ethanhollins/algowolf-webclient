@@ -275,6 +275,7 @@ class Chart extends Component
                     getSegmentSize={this.getSegmentSize}
                     getPortions={this.getPortions}
                     getLimit={this.getLimit}
+                    getCurrentTimestamp={this.getCurrentTimestamp}
                     getWindowInfo={this.getWindowInfo}
                 />
                 {this.generateOverlays()}
@@ -626,6 +627,7 @@ class Chart extends Component
                         getSegmentSize={this.getSegmentSize}
                         getWindowInfo={this.getWindowInfo}
                         getLimit={this.getLimit}
+                        getCurrentTimestamp={this.getCurrentTimestamp}
                     />
                 );
             }
@@ -664,6 +666,7 @@ class Chart extends Component
                         getSegmentSize={this.getSegmentSize}
                         getWindowInfo={this.getWindowInfo}
                         getLimit={this.getLimit}
+                        getCurrentTimestamp={this.getCurrentTimestamp}
                         resizePortion={this.resizePortion}
                     />
                 );
@@ -914,10 +917,7 @@ class Chart extends Component
         this.handlePriceLine(ctx);
 
         // Handle Positions/Orders
-        if (!this.isBacktest())
-        {
-            this.handleTrades(ctx);
-        }
+        this.handleTrades(ctx);
 
         // Handle Axis prices
         this.drawPrices(ctx, price_data);
@@ -1782,7 +1782,6 @@ class Chart extends Component
         const seg_size = this.getSegmentSize(0);
         const camera = this.getCamera();
         const bids = this.getBids();
-        // console.log(bids);
         let c_bid = undefined;
         for (let i = bids.length-1; i >= 0; i--)
         {
@@ -2019,7 +2018,7 @@ class Chart extends Component
     {
         const timestamps = this.getTimestamps();
         // Return undefined if timestamp is greater than latest existing timestamp
-        if (ts >= this.getNextTimestamp())
+        if (!this.isBacktest() && ts >= this.getNextTimestamp())
             return undefined
 
         const indicies = [...Array(timestamps.length).keys()]
@@ -2526,6 +2525,11 @@ class Chart extends Component
         return this.props.getDrawings();
     }
 
+    getCurrentTimestamp = () =>
+    {
+        return this.props.getCurrentTimestamp();
+    }
+
     async addChart()
     {
         let start;
@@ -2533,7 +2537,6 @@ class Chart extends Component
         if (this.isBacktest())
         {
             const properties = this.getStrategy().properties;
-            console.log(moment.utc(properties.start * 1000));
             start = this.props.getCountDateFromDate(this.getPeriod(), 200, 
                 moment.utc(properties.start * 1000)
             , -1);

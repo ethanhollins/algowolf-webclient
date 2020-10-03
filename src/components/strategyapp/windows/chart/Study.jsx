@@ -215,6 +215,7 @@ class Study extends Component
         const scale = { x: chart_scale.x, y: this.state.scale.y };
 
         const size = this.props.getSegmentSize(this.getWindowIndex());
+        const current_timestamp = this.props.getCurrentTimestamp();
         const ohlc = this.props.getOhlcValues();
         const values = this.props.getValues(this.props.index);
         const properties = this.props.getProperties(this.props.index);
@@ -243,7 +244,6 @@ class Study extends Component
                     if (x === 0) c_x = 0;
 
                     let x_pos = (ohlc.length - x)+0.5;
-                    // if (limit[0] != null && (x < limit[0] || x > limit[1])) continue;
                     if (x_pos > pos.x + scale.x+1 || first_pos === null)
                     {
                         if (ohlc[x][0] !== null && values[i][c_x][y] !== null)

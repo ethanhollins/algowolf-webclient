@@ -18,12 +18,11 @@ class Overlay extends Component
         const scale = this.props.getScale();
         const size = this.props.getSegmentSize(0);
         
+        const current_timestamp = this.props.getCurrentTimestamp();
         const ohlc = this.props.getOhlcValues();
         const values = this.props.getValues(this.props.index);
         const properties = this.props.getProperties(this.props.index);
-        const limit = this.props.getLimit();
-        // console.log(values[0].length);
-        // console.log(ohlc.length);
+
         // If empty values list, cancel drawing
         if (values.length === 0) return;
         // Iterate columns
@@ -44,7 +43,6 @@ class Overlay extends Component
                     if (x === 0) c_x = 0;
 
                     let x_pos = (ohlc.length - x)+0.5;
-                    // if (limit[0] != null && (x < limit[0] || x > limit[1])) continue;
                     if (x_pos > pos.x + scale.x+1 || first_pos === null)
                     {
                         if (ohlc[x][0] !== null && values[i][c_x][y] !== null) 

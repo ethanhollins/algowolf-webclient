@@ -103,6 +103,7 @@ class Strategy extends Component
                             getChartElement={this.props.getChartElement}
                             getStrategyInfo={this.props.getStrategyInfo}
                             updateStrategyInfo={this.props.updateStrategyInfo}
+                            getKeys={this.props.getKeys}
                             setPopup={this.props.setPopup}
                             // Window Funcs
                             closeWindow={this.props.closeWindow}
@@ -128,6 +129,7 @@ class Strategy extends Component
                             getDrawings={this.getDrawings}
                             getPositions={this.getPositions}
                             getOrders={this.getOrders}
+                            getCurrentTimestamp={this.getCurrentTimestamp}
                         />
                     )
                 }
@@ -237,6 +239,11 @@ class Strategy extends Component
                 'field': 'ontrade'
             }
         );
+    }
+
+    handleKeys = () =>
+    {
+
     }
 
     addPosition = (position) =>
@@ -376,7 +383,17 @@ class Strategy extends Component
         return strategy.orders;
     }
 
+    getCurrentTimestamp = () =>
+    {
+        return null;
+    }
+
 }
+
+const ARROW_LEFT = 37;
+const ARROW_UP = 38;
+const ARROW_RIGHT = 39;
+const ARROW_DOWN = 40;
 
 const URI = 'http://127.0.0.1:5000';
 
