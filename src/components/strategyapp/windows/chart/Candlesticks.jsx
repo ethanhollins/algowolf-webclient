@@ -19,6 +19,7 @@ class Candlesticks extends Component
         
         const current_timestamp = this.props.getCurrentTimestamp();
         const ohlc = this.props.getBids();
+        const timestamps = this.props.getTimestamps();
         const info = this.props.getWindowInfo();
 
         for (let i = 0; i < ohlc.length; i++) 
@@ -45,6 +46,17 @@ class Candlesticks extends Component
             let wick_up_size;
             let wick_down_size;
             
+            // Colors
+            let opacity;
+            if (current_timestamp !== null && timestamps[i] > current_timestamp)
+            {
+                opacity = 0.2;
+            }
+            else
+            {
+                opacity = 1.0;
+            }
+            
             let body_color;
             let outline_color;
             let wick_color;
@@ -52,8 +64,11 @@ class Candlesticks extends Component
             if (candle[0] > candle[3]) 
             {
                 body_color = info.properties.bars.bodyShort;
+                body_color = `rgba(${body_color[0]}, ${body_color[1]}, ${body_color[2]}, ${opacity})`
                 outline_color = info.properties.bars.outlineShort;
+                outline_color = `rgba(${outline_color[0]}, ${outline_color[1]}, ${outline_color[2]}, ${opacity})`
                 wick_color = info.properties.bars.wickShort;
+                wick_color = `rgba(${wick_color[0]}, ${wick_color[1]}, ${wick_color[2]}, ${opacity})`
                 ctx.lineWidth = 0.5;
 
                 wick_up_size = candle[1] - candle[0];
@@ -71,8 +86,11 @@ class Candlesticks extends Component
             else 
             {
                 body_color = info.properties.bars.bodyLong;
+                body_color = `rgba(${body_color[0]}, ${body_color[1]}, ${body_color[2]}, ${opacity})`
                 outline_color = info.properties.bars.outlineLong;
+                outline_color = `rgba(${outline_color[0]}, ${outline_color[1]}, ${outline_color[2]}, ${opacity})`
                 wick_color = info.properties.bars.wickLong;
+                wick_color = `rgba(${wick_color[0]}, ${wick_color[1]}, ${wick_color[2]}, ${opacity})`
                 ctx.lineWidth = 0.5;
 
                 wick_up_size = candle[1] - candle[3];

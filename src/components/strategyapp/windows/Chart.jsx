@@ -3,7 +3,7 @@ import Camera from '../Camera';
 import Candlesticks from './chart/Candlesticks';
 import Overlay from './chart/Overlay';
 import Study from './chart/Study';
-import _ from 'underscore';
+import _, { before } from 'underscore';
 import moment from "moment-timezone";
 import Drawings from '../paths/Paths';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -38,12 +38,13 @@ class Chart extends Component
         future_timestamps: [],
         is_down: false,
         is_move: false,
+        before_change: null,
         trans_x: 0,
         limit: [null,null],
         first_load: true,
         is_scrolling: null,
         is_loading: false,
-        cursor: null
+        cursor: 'inherit'
     }
 
     constructor(props)
@@ -227,8 +228,11 @@ class Chart extends Component
                     width: "100%",
                     height: "100%",
                     overflow: "hidden",
+                    cursor: this.state.cursor
                 }}
                 onContextMenu={this.onContextMenu.bind(this)}
+                onClick={this.onClick.bind(this)}
+                onDoubleClick={this.onDoubleClick.bind(this)}
             >
                 <div ref={this.setContextMenuRef} className='context-menu body'>
                     <div className='context-menu item separator' onClick={this.onContextMenuItem.bind(this)} name={'trade'}>
@@ -275,6 +279,7 @@ class Chart extends Component
                     getSegmentSize={this.getSegmentSize}
                     getPortions={this.getPortions}
                     getLimit={this.getLimit}
+                    getTimestamps={this.getTimestamps}
                     getCurrentTimestamp={this.getCurrentTimestamp}
                     getWindowInfo={this.getWindowInfo}
                 />
@@ -282,6 +287,49 @@ class Chart extends Component
                 {this.generateStudies()}
             </div>
         );
+    }
+
+    onClick(e)
+    {
+        // const mouse_pos = {
+        //     x: e.clientX, y: e.clientY
+        // }
+        // const top_offset = this.props.getTopOffset();
+
+        // if (this.props.isTopWindow(
+        //     this.getStrategyId(), this.getItemId(), 
+        //     { x: mouse_pos.x, y: mouse_pos.y - top_offset }
+        // ))
+        // {
+        //     if (this.isBacktest())
+        //     {
+        //         console.log('CLICK');
+        //         console.log(this.isWithinBarBounds(mouse_pos));
+        //     }
+        // }
+    }
+
+    onDoubleClick(e)
+    {
+        // const mouse_pos = {
+        //     x: e.clientX, y: e.clientY
+        // }
+        // const top_offset = this.props.getTopOffset();
+
+        // if (this.props.isTopWindow(
+        //     this.getStrategyId(), this.getItemId(), 
+        //     { x: mouse_pos.x, y: mouse_pos.y - top_offset }
+        // ))
+        // {
+        //     if (this.isBacktest())
+        //     {
+        //         const timestamp = this.isWithinBarBounds(mouse_pos);
+        //         if (timestamp !== null)
+        //         {
+        //             this.props.setCurrentTimestamp(timestamp);
+        //         }
+        //     }
+        // }
     }
 
     onMouseDown(e)
@@ -299,7 +347,7 @@ class Chart extends Component
             { x: mouse_pos.x, y: mouse_pos.y - top_offset }
         ))
         {
-            let { is_down, is_move } = this.state;
+            let { is_down, is_move, pos, before_change } = this.state;
     
             // Check mouse within main segment bounds
     
@@ -317,6 +365,7 @@ class Chart extends Component
                 e.preventDefault();
                 is_down = true;
                 is_move = true;
+                before_change = { x: pos.x, y: pos.y };
             }
     
             // Check mouse within study bounds
@@ -354,7 +403,7 @@ class Chart extends Component
                 }
             }
 
-            this.setState({ is_down, is_move });
+            this.setState({ is_down, is_move, before_change });
         }
     }
 
@@ -378,17 +427,6 @@ class Chart extends Component
             pos.x += move.x;
             if (is_move)
                 pos.y += move.y;
-            
-            // clearTimeout(is_scrolling);
-            // is_scrolling = setTimeout(() => {
-            //     trans_x = 0;
-            //     this.setState({ trans_x });
-
-            //     // for (let study of this.studies)
-            //     // {
-            //     //     if (study !== null) study.setTransX(0);
-            //     // }
-            // }, 100);
 
             this.setState({ pos, scale });
         }
@@ -400,6 +438,7 @@ class Chart extends Component
         if (keys.includes(SPACEBAR)) return;
 
         this.onCrosshairMove(e);
+        this.onBarHover(e);
     }
 
     onCrosshairMove(e)
@@ -418,6 +457,34 @@ class Chart extends Component
             this.setState({ mouse_pos });
     }
 
+    onBarHover(e)
+    {
+        const mouse_pos = {
+            x: e.clientX, y: e.clientY
+        }
+        const top_offset = this.props.getTopOffset();
+
+        if (this.getChart() !== undefined && this.isBacktest())
+        {
+            if (this.props.isTopWindow(
+                this.getStrategyId(), this.getItemId(), 
+                { x: mouse_pos.x, y: mouse_pos.y - top_offset }
+            ))
+            {
+                const timestamp = this.isWithinBarBounds(mouse_pos);
+                if (timestamp !== null)
+                {
+                    if (this.state.cursor !== 'pointer')
+                        this.setCursor('pointer');
+                }
+                else if (this.state.cursor === 'pointer')
+                {
+                    this.setCursor('inherit');
+                }
+            }
+        }
+    }
+
     onMouseUp(e)
     {
         const keys = this.props.getKeys();
@@ -429,7 +496,7 @@ class Chart extends Component
             studies[i].setIsMove(false);
         }
 
-        let { is_down, is_move, trans_x, pos, scale } = this.state;
+        let { is_down, is_move, before_change, trans_x, pos, scale } = this.state;
         is_down = false;
 
         if (is_move)
@@ -457,6 +524,25 @@ class Chart extends Component
 
         const mouse_pos = {
             x: e.clientX, y: e.clientY
+        }
+        const top_offset = this.props.getTopOffset();
+
+        if (before_change !== null && this.isBacktest())
+        {
+            if (Math.abs(pos.x - before_change.x) < 1 && Math.abs(pos.y - before_change.y) < 1)
+            {
+                if (this.props.isTopWindow(
+                    this.getStrategyId(), this.getItemId(), 
+                    { x: mouse_pos.x, y: mouse_pos.y - top_offset }
+                ))
+                {
+                    const timestamp = this.isWithinBarBounds(mouse_pos);
+                    if (timestamp !== null)
+                    {
+                        this.props.setCurrentTimestamp(timestamp);
+                    }
+                }
+            }
         }
 
         if (this.getChart()) this.setFutureTimestamps();
@@ -627,6 +713,7 @@ class Chart extends Component
                         getSegmentSize={this.getSegmentSize}
                         getWindowInfo={this.getWindowInfo}
                         getLimit={this.getLimit}
+                        getTimestamps={this.getTimestamps}
                         getCurrentTimestamp={this.getCurrentTimestamp}
                     />
                 );
@@ -666,6 +753,7 @@ class Chart extends Component
                         getSegmentSize={this.getSegmentSize}
                         getWindowInfo={this.getWindowInfo}
                         getLimit={this.getLimit}
+                        getTimestamps={this.getTimestamps}
                         getCurrentTimestamp={this.getCurrentTimestamp}
                         resizePortion={this.resizePortion}
                     />
@@ -914,7 +1002,10 @@ class Chart extends Component
         }
 
         // Handle Price Line
-        this.handlePriceLine(ctx);
+        if (!this.isBacktest())
+        {
+            this.handlePriceLine(ctx);
+        }
 
         // Handle Positions/Orders
         this.handleTrades(ctx);
@@ -923,7 +1014,10 @@ class Chart extends Component
         this.drawPrices(ctx, price_data);
 
         // Handle Price Label
-        this.handlePriceLabel(ctx);
+        if (!this.isBacktest())
+        {
+            this.handlePriceLabel(ctx);
+        }
 
         // Handle Drawings
         this.handleDrawings(ctx);
@@ -960,7 +1054,7 @@ class Chart extends Component
 
         this.drawTimes(ctx, time_data);
         // Handle Cross Segment Drawings
-        // this.handleUniversalDrawings(ctx);
+        this.handleUniversalDrawings(ctx);
         // Handle Crosshairs
         this.handleCrosshairs(ctx);
     }
@@ -1077,11 +1171,11 @@ class Chart extends Component
         {
             prices.ohlc_color = this.getWindowInfo().properties.bars.bodyLong
         }
-        if (prices.ohlc_color.toUpperCase() === '#FFF' || 
-                prices.ohlc_color.toUpperCase() === '#FFFFFF')
+        if (prices.ohlc_color.every(x => x === 255))
         {
-            prices.ohlc_color = '#000';
+            prices.ohlc_color = [0,0,0];
         }
+        prices.ohlc_color = `rgba(${prices.ohlc_color[0]}, ${prices.ohlc_color[1]}, ${prices.ohlc_color[2]}, 1.0)`;
 
         return prices;
     }
@@ -1257,6 +1351,18 @@ class Chart extends Component
     }
 
     getPriceFormat(offset)
+    {
+        if (offset < this.props.getPeriodOffsetSeconds("D"))
+            return 'DD MMM \'YY HH:mm';
+        else if (offset < this.props.getPeriodOffsetSeconds("W"))
+            return 'ddd d';
+        else if (offset < this.props.getPeriodOffsetSeconds("Y"))
+            return 'MMM';
+        else
+            return 'YYYY';
+    }
+
+    getShortPriceFormat(offset)
     {
         if (offset < this.props.getPeriodOffsetSeconds("D"))
             return 'HH:mm';
@@ -1473,12 +1579,12 @@ class Chart extends Component
                 ctx.strokeStyle = 'rgb(255, 255, 255)';
                 ctx.lineWidth = 2.0;
                 ctx.strokeText(
-                    time.format(this.getCurrentPriceFormat()), 
+                    time.format(this.getCurrentShortPriceFormat()), 
                     screen_x, 
                     start_pos.y + seg_size.height - 4
                 );
                 ctx.fillText(
-                    time.format(this.getCurrentPriceFormat()), 
+                    time.format(this.getCurrentShortPriceFormat()), 
                     screen_x, 
                     start_pos.y + seg_size.height - 4
                 );
@@ -1632,7 +1738,7 @@ class Chart extends Component
             ctx.fillStyle = `rgba(255, 255, 255, 1.0)`;
             ctx.fillRect(rect.x + handle_middle_off/2, Math.round(start_pos.y), rect.width - handle_middle_off, 1);
 
-            if (this.getCursor() === null)
+            if (this.getCursor() === 'inherit')
             {
                 this.setCursor('ns-resize');
             }
@@ -1650,7 +1756,7 @@ class Chart extends Component
             
             if (this.getCursor() === 'ns-resize')
             {
-                this.setCursor(null);
+                this.setCursor('inherit');
             }
         }
     }
@@ -1705,41 +1811,42 @@ class Chart extends Component
                 )
                 
                 // Handle Vertical Line
-                if (d_props.type === 'verticalLine')
-                    continue
-                // Handle Horizontal Line
-                else if (d_props.type === 'horizontalLine')
-                    this.drawHorizontalLine(ctx, screen_pos, d_props.properties);
-                // Handle Misc Drawings
-                else
+                if (!UNIVERSAL_DRAWINGS.includes(d_props.type))
                 {
-                    if (!(d_props.type in Drawings)) continue;
-                    const drawing = Drawings[d_props.type]();
-    
-                    // Get Rotation and Scale
-                    const rotation = this.degsToRads(d_props.properties.rotation);
-                    const drawing_scale = ((drawing.scale + d_props.properties.scale) * (1/scale.x));
+                    // Handle Horizontal Line
+                    if (d_props.type === 'horizontalLine')
+                        this.drawHorizontalLine(ctx, screen_pos, d_props.properties);
+                    // Handle Misc Drawings
+                    else
+                    {
+                        if (!(d_props.type in Drawings)) continue;
+                        const drawing = Drawings[d_props.type]();
         
-                    const width = drawing.size.width;
-                    const height = drawing.size.height;
-        
-                    // Move to position
-                    ctx.translate(
-                        screen_pos.x - (width*drawing_scale),
-                        screen_pos.y - (height*drawing_scale)
-                    );
-                    ctx.scale(drawing_scale, drawing_scale);
-        
-                    // Rotate around center
-                    ctx.translate(width, height);
-                    ctx.rotate(rotation);
-                    ctx.translate(-width/2, -height/2);
-                    
-                    ctx.fillStyle = d_props.properties.colors[0];
-                    // Fill Path
-                    ctx.fill(new Path2D(drawing.path));
-                    // Reset Transform
-                    ctx.setTransform(1,0,0,1,0,0);
+                        // Get Rotation and Scale
+                        const rotation = this.degsToRads(d_props.properties.rotation);
+                        const drawing_scale = ((drawing.scale + d_props.properties.scale) * (1/scale.x));
+            
+                        const width = drawing.size.width;
+                        const height = drawing.size.height;
+            
+                        // Move to position
+                        ctx.translate(
+                            screen_pos.x - (width*drawing_scale),
+                            screen_pos.y - (height*drawing_scale)
+                        );
+                        ctx.scale(drawing_scale, drawing_scale);
+            
+                        // Rotate around center
+                        ctx.translate(width, height);
+                        ctx.rotate(rotation);
+                        ctx.translate(-width/2, -height/2);
+                        
+                        ctx.fillStyle = d_props.properties.colors[0];
+                        // Fill Path
+                        ctx.fill(new Path2D(drawing.path));
+                        // Reset Transform
+                        ctx.setTransform(1,0,0,1,0,0);
+                    }
                 }
             }
         }
@@ -1751,28 +1858,38 @@ class Chart extends Component
         const { pos, scale } = this.state;
         const seg_size = this.getSegmentSize(0);
 
+        const chart_drawings_layers = this.getProperties().drawing_layers;
         const drawings = this.getDrawings();
 
-        for (let i = 0; i < drawings.length; i++)
+        for (let layer of chart_drawings_layers)
         {
-            const d_props = drawings[i];
+            if (!(layer in drawings)) continue;
 
-            // Get Position
-            const x = this.getPosFromAllTimestamps(d_props.timestamps[0]);
-            // Skip if x doesn't exist
-            if (x === undefined) continue
+            for (let i = 0; i < drawings[layer].length; i++)
+            {
+                const d_props = drawings[layer][i];
 
-            const y = d_props.prices[0];
-            const screen_pos = camera.convertWorldPosToScreenPos(
-                { x: x+0.5, y: y }, 
-                pos, 
-                seg_size,
-                scale
-            )
-            
-            // Handle Vertical Line
-            if (d_props.type === 'verticalLine')
-                this.drawVerticalLine(ctx, screen_pos, d_props.properties);
+                if (UNIVERSAL_DRAWINGS.includes(d_props.type))
+                {
+                    // Get Position
+                    const x = this.getPosFromAllTimestamps(d_props.timestamps[0]);
+                    // Skip if x doesn't exist
+                    if (x === undefined) continue
+        
+                    const y = d_props.prices[0];
+                    const screen_pos = camera.convertWorldPosToScreenPos(
+                        { x: x+0.5, y: y }, 
+                        pos, 
+                        seg_size,
+                        scale
+                    )
+                    
+                    // Handle Vertical Line
+                    if (d_props.type === 'verticalLine')
+                        this.drawVerticalLine(ctx, screen_pos, d_props.properties);
+                }
+
+            }
         }
     }
 
@@ -1858,8 +1975,7 @@ class Chart extends Component
             this.props.isTopWindow(
                 this.getStrategyId(), this.getItemId(), 
                 {x: mouse_pos.x, y: mouse_pos.y - top_offset}
-            ) && 
-            this.getCursor() === null
+            )
         )
         {
             const camera = this.getCamera();
@@ -2050,6 +2166,8 @@ class Chart extends Component
 
     getTimestampByPos = (x) =>
     {
+        x = Math.floor(x);
+
         const timestamps = this.getTimestamps();
         const all_timestamps = this.getAllTimestamps();
         const idx = timestamps.length - x;
@@ -2095,6 +2213,34 @@ class Chart extends Component
         this.setState({ pos });
     }
 
+    isWithinBarBounds = (mouse_pos) =>
+    {
+        const { pos, scale } = this.state;
+        const camera = this.getCamera();
+        const seg_idx = this.getSegment(mouse_pos);
+        const top_offset = this.props.getTopOffset();
+
+        if (seg_idx === 0)
+        {
+            const seg_size = this.getSegmentSize(seg_idx);
+    
+            const world_pos = camera.convertScreenPosToWorldPos(
+                { x: mouse_pos.x, y: mouse_pos.y - top_offset }, pos, seg_size, scale
+            )
+            const ohlc = this.getOhlcByPos(world_pos.x);
+
+            if (ohlc !== undefined)
+            {
+                if (world_pos.y < ohlc[1] && world_pos.y > ohlc[2])
+                {
+                    return this.getTimestampByPos(world_pos.x);
+                }
+            }
+        }
+
+        return null;
+    }
+
     getPosFromTimestamp = (ts) =>
     {
         const idx = this.getTimestampIdx(ts);
@@ -2112,6 +2258,7 @@ class Chart extends Component
 
     getOhlcByPos = (x) =>
     {
+        x = Math.floor(x);
         const bids = this.getBids();
         return bids[bids.length-x];
     }
@@ -2347,6 +2494,11 @@ class Chart extends Component
     getCurrentPriceFormat = () =>
     {
         return this.getPriceFormat(this.state.intervals.x);
+    }
+
+    getCurrentShortPriceFormat = () =>
+    {
+        return this.getShortPriceFormat(this.state.intervals.x);
     }
 
     getPos = () =>
@@ -2627,8 +2779,6 @@ class Chart extends Component
     setCursor = (cursor) =>
     {
         this.setState({ cursor });
-        if (cursor === null) cursor = 'auto';
-        this.props.setCursor(cursor);
     }
 
     calculateIndicator = (ind) =>
@@ -2650,7 +2800,7 @@ class Chart extends Component
 const SPACEBAR = 32;
 const MIN_PORTION_SIZE = 0.1
 
-
+const UNIVERSAL_DRAWINGS = ['verticalLine'];
 
 
 

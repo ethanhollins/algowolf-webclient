@@ -4,21 +4,12 @@ import Indicators from './strategyapp/Indicators';
 import io from 'socket.io-client';
 import moment from "moment-timezone";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-    faCircle, 
-} from '@fortawesome/pro-solid-svg-icons';
-import { 
-    faBars,  faChartLine, faChartPie, 
-    faLightbulb, faCode, faHistory, faChevronRight, faChevronDown, faTools, faExpandArrowsAlt, faLink, faExpandAlt, faToolbox
-} from '@fortawesome/pro-regular-svg-icons';
-import { 
-    faTimes, faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
-    faFileInvoice, faChartBar, faTicketAlt, faLayerGroup, faHandshakeAltSlash,
-    faHandPaper, faQuestionCircle, faHandshakeAlt, faUser
-} from '@fortawesome/pro-light-svg-icons';
+import { faTimes, faPlus } from '@fortawesome/pro-light-svg-icons';
 import Strategy from './strategyapp/Strategy';
-import Popup from './strategyapp/Popup';
+import StrategyToolbar from './strategyapp/StrategyToolbar';
 import Backtest from './strategyapp/Backtest';
+import BacktestToolbar from './strategyapp/BacktestToolbar';
+import Popup from './strategyapp/Popup';
 
 class StrategyApp extends Component
 {
@@ -36,7 +27,6 @@ class StrategyApp extends Component
             width: 0, height: 0
         },
         scale: { x: 100, y: 100 },
-        statusMsg: undefined,
         popup: null,
         hovered: {},
         toSave: [],
@@ -62,47 +52,11 @@ class StrategyApp extends Component
         {
             this.camera = elem;
         }
-        this.setStatusIndicator = elem => {
-            this.statusIndicator = elem;
-        }
-        this.setActivationElem = elem => {
-            this.activationElem = elem;
-        }
-        this.setActivationDropdown = elem => {
-            this.activationDropdown = elem;
-        }
-        this.setChartsElem = elem => {
-            this.chartsElem = elem;
-        }
-        this.setChartsDropdown = elem => {
-            this.chartsDropdown = elem;
-        }
-        this.setStatsElem = elem => {
-            this.statsElem = elem;
-        }
-        this.setStatsDropdown = elem => {
-            this.statsDropdown = elem;
-        }
-        this.setUtilsElem = elem => {
-            this.utilsElem = elem;
-        }
-        this.setToolsElem = elem => {
-            this.toolsElem = elem;
-        }
-        this.setUtilsDropdown = elem => {
-            this.utilsDropdown = elem;
-        }
-        this.setToolsDropdown = elem => {
-            this.toolsDropdown = elem;
-        }
-        this.setScriptElem = elem => {
-            this.scriptElem = elem;
-        }
-        this.setBacktestElem = elem => {
-            this.backtestElem = elem;
-        }
         this.setStrategy = elem => {
             this.strategy = elem;
+        }
+        this.setToolbarRef = elem => {
+            this.toolbar = elem;
         }
 
     }
@@ -167,193 +121,7 @@ class StrategyApp extends Component
                         </div>
                     </div>
                     
-    
-                    <div className='toolbox body noselect' onDragStart={this.onDragStart}>
-                        <div>
-                            <div className='toolbox item row'>
-                                <FontAwesomeIcon className='toolbox icon' icon={faBars} />
-                            </div>
-                            <div className='toolbox item row'>
-                                <FontAwesomeIcon className='toolbox icon small black' icon={faUser} />
-                                <span className='toolbox label right-space'>ZVS567</span>
-                                <div className='toolbox item btn'>
-                                    <FontAwesomeIcon className='toolbox selection-icon' icon={faChevronDown} />
-                                </div>
-                            </div>
-                            <div className='toolbox item right-space'>
-                                <div ref={this.setActivationElem} className='toolbox item row btn'>
-                                    <FontAwesomeIcon id='live_icon' className='toolbox icon red_btn' icon={faHandshakeAlt} />
-                                    <span className='toolbox label'>Go Live</span>
-                                </div>
-                                <div className='toolbox item btn' onClick={this.onActivationDropdown}>
-                                    <FontAwesomeIcon className='toolbox selection-icon' icon={faChevronDown} />
-                                </div>
-                                <div ref={this.setActivationDropdown} className='toolbox dropdown' style={{display: 'none'}}>
-                                    <div onClick={this.onActivationDropdownItem}>
-                                        <span className='toolbox left'>
-                                            <FontAwesomeIcon icon={faHandshakeAlt} className='toolbox left-icon' /><span>Go Live</span>
-                                        </span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faQuestionCircle} className='toolbox right-icon' /></span>
-                                    </div>
-                                   <div onClick={this.onActivationDropdownItem}>
-                                        <span className='toolbox left'>
-                                            <FontAwesomeIcon icon={faHandshakeAltSlash} className='toolbox left-icon' /><span>Go Offline</span>
-                                        </span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faQuestionCircle} className='toolbox right-icon' /></span>
-                                    </div>
-                                    <div onClick={this.onActivationDropdownItem}>
-                                        <span className='toolbox left'>
-                                            <FontAwesomeIcon icon={faHandPaper} className='toolbox left-icon' /><span>Stop Trading</span>
-                                        </span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faQuestionCircle} className='toolbox right-icon' /></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='toolbox item row status'>
-                                <FontAwesomeIcon className='toolbox icon' icon={faCircle} />
-                                <span className='toolbox label'>Papertrading</span>
-                            </div>
-                            <div className='toolbox separator' />
-                            <div className='toolbox item'>
-                                <div ref={this.setChartsElem} className='toolbox item row btn' onClick={this.onChartsDropdown}>
-                                    <FontAwesomeIcon className='toolbox icon orange_btn' icon={faChartLine} />
-                                    <span className='toolbox label'>Charts</span>
-                                </div>
-                                <div ref={this.setChartsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
-                                    <div onClick={this.onChartsDropdownItem} name='cryptocurrencies'>
-                                        <span className='toolbox left'>Cryptocurrencies</span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
-                                    </div>
-                                    <div onClick={this.onChartsDropdownItem} name='currencies'>
-                                        <span className='toolbox left'>Currencies</span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
-                                    </div>
-                                    <div onClick={this.onChartsDropdownItem} name='stocks'>
-                                        <span className='toolbox left'>Stocks</span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
-                                    </div>
-                                    <div onClick={this.onChartsDropdownItem} name='indicies'>
-                                        <span className='toolbox left'>Indicies</span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
-                                    </div>
-                                    <div onClick={this.onChartsDropdownItem} name='futures'>
-                                        <span className='toolbox left'>Futures</span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
-                                    </div>
-                                    <div onClick={this.onChartsDropdownItem} name='bonds'>
-                                        <span className='toolbox left'>Bonds</span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='toolbox item'>
-                                <div ref={this.setStatsElem} className='toolbox item row btn' onClick={this.onStatsDropdown}>
-                                    <FontAwesomeIcon className='toolbox icon orange_btn' icon={faChartPie} />
-                                    <span className='toolbox label'>Stats</span>
-                                </div>
-                                <div ref={this.setStatsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
-                                    <div onClick={this.onStatsDropdownItem}>
-                                        <span className='toolbox left'>
-                                            <FontAwesomeIcon icon={faChartBar} className='toolbox left-icon' /><span>Graphs</span>
-                                        </span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
-                                    </div>
-                                    <div onClick={this.onStatsDropdownItem}>
-                                        <span className='toolbox left'>
-                                            <FontAwesomeIcon icon={faFileInvoice} className='toolbox left-icon' /><span>Reports</span>
-                                        </span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='toolbox item'>
-                                <div ref={this.setUtilsElem} className='toolbox item row btn' onClick={this.onUtilsDropdown}>
-                                    <FontAwesomeIcon className='toolbox icon orange_btn' icon={faLightbulb} />
-                                    <span className='toolbox label'>Utilities</span>
-                                </div>
-                                <div ref={this.setUtilsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
-                                    <div onClick={this.onUtilsDropdownItem}>
-                                        <span className='toolbox left'>
-                                            <FontAwesomeIcon icon={faSort} className='toolbox left-icon' /><span>Positions/Orders</span>
-                                        </span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
-                                    </div>
-                                    <div onClick={this.onUtilsDropdownItem}>
-                                        <span className='toolbox left'>
-                                            <FontAwesomeIcon icon={faTicketAlt} className='toolbox left-icon' /><span>Ticket</span>
-                                        </span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
-                                    </div>
-                                    <div onClick={this.onUtilsDropdownItem}>
-                                        <span className='toolbox left'>
-                                            <FontAwesomeIcon icon={faReceipt} className='toolbox left-icon' /><span>Transactions</span>
-                                        </span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
-                                    </div>
-                                    <div onClick={this.onUtilsDropdownItem}>
-                                        <span className='toolbox left'>
-                                            <FontAwesomeIcon icon={faSlidersVSquare} className='toolbox left-icon' /><span>Control Center</span>
-                                        </span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
-                                    </div>
-                                    <div onClick={this.onUtilsDropdownItem}>
-                                        <span className='toolbox left'>
-                                            <FontAwesomeIcon icon={faLayerGroup} className='toolbox left-icon' /><span>Drawing Layers</span>
-                                        </span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
-                                    </div>
-                                    <div onClick={this.onUtilsDropdownItem}>
-                                        <span className='toolbox left'>
-                                            <FontAwesomeIcon icon={faCodeLight} className='toolbox left-icon' /><span>Script Editor</span>
-                                        </span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='toolbox item'>
-                                <div ref={this.setToolsElem} className='toolbox item row btn' onClick={this.onToolsDropdown}>
-                                    <FontAwesomeIcon className='toolbox icon orange_btn' icon={faTools} />
-                                    <span className='toolbox label'>Tools</span>
-                                </div>
-                                <div ref={this.setToolsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
-                                    <div onClick={this.onToolsDropdownItem}>
-                                        <span className='toolbox left'>
-                                            <FontAwesomeIcon icon={faExpandArrowsAlt} className='toolbox left-icon' /><span>Move</span>
-                                        </span>
-                                    </div>
-                                    <div onClick={this.onToolsDropdownItem}>
-                                        <span className='toolbox left'>
-                                            <FontAwesomeIcon icon={faLink} className='toolbox left-icon' /><span>Link</span>
-                                        </span>
-                                    </div>
-                                    <div onClick={this.onToolsDropdownItem}>
-                                        <span className='toolbox left'>
-                                            <FontAwesomeIcon icon={faExpandAlt} className='toolbox left-icon' /><span>Resize</span>
-                                        </span>
-                                    </div>
-                                    <div onClick={this.onToolsDropdownItem}>
-                                        <span className='toolbox left'>
-                                            <FontAwesomeIcon icon={faToolbox} className='toolbox left-icon' /><span>Toolbox</span>
-                                        </span>
-                                        <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='toolbox separator' />
-                            <div className='toolbox item'>
-                                <div ref={this.setScriptElem} className='toolbox item row btn'>
-                                    <FontAwesomeIcon className='toolbox icon blue_btn' icon={faCode} />
-                                    <span className='toolbox label'>Script</span>
-                                </div>
-                            </div>
-                            <div className='toolbox item'>
-                                <div ref={this.setBacktestElem} className='toolbox item row btn'>
-                                    <FontAwesomeIcon className='toolbox icon blue_btn' icon={faHistory} />
-                                    <span className='toolbox label'>Backtest</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div> 
+                    {this.generateToolbar()}
                     <div className='toolbox_shadow'/> 
 
                     <Popup
@@ -463,6 +231,7 @@ class StrategyApp extends Component
                         getLastHistoryAction={this.getLastHistoryAction}
                         deleteHistory={this.deleteHistory}
                         // Chart Functions
+                        retrieveTransactions={this.retrieveTransactions}
                         retrieveChartData={this.retrieveChartData}
                         addChart={this.addBacktestChart}
                         getChart={this.getBacktestChart}
@@ -526,131 +295,39 @@ class StrategyApp extends Component
         return <React.Fragment />;
     }
 
-    onActivationDropdown = (e) =>
+    generateToolbar() 
     {
-        if (this.activationDropdown.style.display === 'none')
-        {
-            this.activationDropdown.style.display = 'block';
-            const btn_rect = this.activationElem.getBoundingClientRect();
-            this.activationDropdown.style.left = parseInt(btn_rect.x) + 'px';
-        }
-        else
-        {
-            this.activationDropdown.style.display = 'none';
-        }
-    }
+        const current_strategy = this.getCurrentStrategy();
 
-    onChartsDropdown = (e) =>
-    {
-        if (this.chartsDropdown.style.display === 'none')
+        if (current_strategy !== undefined)
         {
-            this.chartsDropdown.style.display = 'block';
-            const btn_rect = this.chartsElem.getBoundingClientRect();
-            this.chartsDropdown.style.left = parseInt(btn_rect.x) + 'px';
+            if (current_strategy.includes('/backtest/'))
+            {
+                return <BacktestToolbar 
+                    ref={this.setToolbarRef}
+                    getCurrentStrategy={this.getCurrentStrategy}
+                    getStrategyInfo={this.getStrategyInfo}
+                    isWithinBounds={this.isWithinBounds}
+                    setPopup={this.setPopup}
+                />
+            }
+            else
+            {
+                return <StrategyToolbar 
+                    ref={this.setToolbarRef}
+                    getCurrentStrategy={this.getCurrentStrategy}
+                    getStrategyInfo={this.getStrategyInfo}
+                    goLive={this.goLive.bind(this)}
+                    goOffline={this.goOffline.bind(this)}
+                    startScript={this.startScript.bind(this)}
+                    stopScript={this.stopScript.bind(this)}
+                    isWithinBounds={this.isWithinBounds}
+                    setPopup={this.setPopup}
+                />
+            }
         }
-        else
-        {
-            this.chartsDropdown.style.display = 'none';
-        }
-    }
-
-    onStatsDropdown = (e) =>
-    {
-        if (this.statsDropdown.style.display === 'none')
-        {
-            this.statsDropdown.style.display = 'block';
-            const btn_rect = this.statsElem.getBoundingClientRect();
-            this.statsDropdown.style.left = parseInt(btn_rect.x) + 'px';
-        }
-        else
-        {
-            this.statsDropdown.style.display = 'none';
-        }
-    }
-
-    onUtilsDropdown = (e) =>
-    {
-        if (this.utilsDropdown.style.display === 'none')
-        {
-            this.utilsDropdown.style.display = 'block';
-            const btn_rect = this.utilsElem.getBoundingClientRect();
-            this.utilsDropdown.style.left = parseInt(btn_rect.x) + 'px';
-        }
-        else
-        {
-            this.utilsDropdown.style.display = 'none';
-        }
-    }
-
-    onToolsDropdown = (e) =>
-    {
-        if (this.toolsDropdown.style.display === 'none')
-        {
-            this.toolsDropdown.style.display = 'block';
-            const btn_rect = this.toolsElem.getBoundingClientRect();
-            this.toolsDropdown.style.left = parseInt(btn_rect.x) + 'px';
-        }
-        else
-        {
-            this.toolsDropdown.style.display = 'none';
-        }
-    }
-
-    onBacktestDropdown = (e) =>
-    {
-        if (this.backtestDropdown.style.display === 'none')
-        {
-            this.backtestDropdown.style.display = 'block';
-            const btn_rect = this.backtestElem.getBoundingClientRect();
-            this.backtestDropdown.style.left = parseInt(btn_rect.x) + 'px';
-        }
-        else
-        {
-            this.backtestDropdown.style.display = 'none';
-        }
-    }
-
-    onActivationDropdownItem = (e) =>
-    {
-        this.activationDropdown.style.display = 'none';
-    }
-
-    onChartsDropdownItem = (e) =>
-    {
-        this.chartsDropdown.style.display = 'none';
-
-        // const popup = {
-        //     type: 'windows-charts',
-        //     size: {
-        //         width: 75,
-        //         height: 60
-        //     },
-        //     opened: e.target.getAttribute('name')
-        // }
-        const popup = {
-            type: 'chart-settings',
-            size: {
-                width: 60,
-                height: 75
-            },
-            opened: 'general'
-        }
-        this.setPopup(popup);
-    }
-
-    onStatsDropdownItem = (e) =>
-    {
-        this.statsDropdown.style.display = 'none';
-    }
-
-    onUtilsDropdownItem = (e) =>
-    {
-        this.utilsDropdown.style.display = 'none';
-    }
-
-    onToolsDropdownItem = (e) =>
-    {
-        this.toolsDropdown.style.display = 'none';
+        
+        return <React.Fragment />;
     }
 
     isWithinBounds(rect, mouse_pos)
@@ -732,41 +409,14 @@ class StrategyApp extends Component
         }
     }
 
-    closeTemporaryWindows(mouse_pos)
-    {
-        if (this.activationDropdown.style.display !== 'none')
-        {
-            if (!this.isWithinBounds(this.activationDropdown.getBoundingClientRect(), mouse_pos))
-                this.activationDropdown.style.display = 'none';
-        }
-        if (this.chartsDropdown.style.display !== 'none')
-        {
-            if (!this.isWithinBounds(this.chartsDropdown.getBoundingClientRect(), mouse_pos))
-                this.chartsDropdown.style.display = 'none';
-        }
-        if (this.statsDropdown.style.display !== 'none')
-        {
-            if (!this.isWithinBounds(this.statsDropdown.getBoundingClientRect(), mouse_pos))
-                this.statsDropdown.style.display = 'none';
-        }
-        if (this.utilsDropdown.style.display !== 'none')
-        {
-            if (!this.isWithinBounds(this.utilsDropdown.getBoundingClientRect(), mouse_pos))
-                this.utilsDropdown.style.display = 'none';
-        }
-        if (this.toolsDropdown.style.display !== 'none')
-        {
-            if (!this.isWithinBounds(this.toolsDropdown.getBoundingClientRect(), mouse_pos))
-                this.toolsDropdown.style.display = 'none';
-        }
-    }
+    
 
     onMouseUp(e)
     {
         const mouse_pos = {
             x: e.clientX, y: e.clientY
         }
-        this.closeTemporaryWindows(mouse_pos);
+        this.toolbar.closeTemporaryWindows(mouse_pos);
     }
 
     onKeyDown(e)
@@ -776,10 +426,10 @@ class StrategyApp extends Component
         if (!keys.includes(e.keyCode))
         {
             keys.push(e.keyCode);
+            this.setState({ keys });
+            this.strategy.handleKeys();
         }
-        this.strategy.handleKeys();
 
-        this.setState({ keys });
     }
 
     onKeyUp(e)
@@ -789,10 +439,8 @@ class StrategyApp extends Component
         if (keys.includes(e.keyCode)) 
         {
             keys.splice(keys.indexOf(e.keyCode));
+            this.setState({ keys });
         }
-
-        
-        this.setState({ keys });
     }
 
     update()
@@ -876,8 +524,7 @@ class StrategyApp extends Component
             strategyInfo[strategy_ids[i]] = Object.assign(
                 {}, strategyInfo[strategy_ids[i]],
                 await fetch(
-                    `${URI}/v1/strategy/` +
-                    strategy_ids[i],
+                    `${URI}/v1/strategy/${strategy_ids[i]}`,
                     reqOptions
                 ).then(res => res.json())
             );
@@ -885,6 +532,23 @@ class StrategyApp extends Component
         }
 
         this.setState({ strategyInfo });
+    }
+
+    async retrieveTransactions(strategy_id)
+    {
+        /** Retrieve strategy info */
+        const reqOptions = {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
+        }
+
+        return await fetch(
+            `${URI}/v1/strategy/${strategy_id}/transactions`,
+            reqOptions
+        ).then(res => res.json());
     }
 
     async retrieveChartData(product, period, from, to, tz)
@@ -895,7 +559,7 @@ class StrategyApp extends Component
         {   
             if (to !== undefined)
             {
-                const uri = `${URI}/v1/prices/oanda/\
+                const uri = `${URI}/v1/prices/ig/\
                 ${product}/${period}\
                 ?from=${from.format('YYYY-MM-DDTHH:mm:ss')}Z\
                 &to=${to.format('YYYY-MM-DDTHH:mm:ss')}Z\
@@ -905,7 +569,7 @@ class StrategyApp extends Component
             }
             else
             {
-                const uri = `${URI}/v1/prices/oanda/\
+                const uri = `${URI}/v1/prices/ig/\
                 ${product}/${period}\
                 ?from=${from.format('YYYY-MM-DDTHH:mm:ss')}Z\
                 &count=1000&tz=${tz}`.replace(/\s/g, '');
@@ -916,7 +580,7 @@ class StrategyApp extends Component
         }
         else
         {
-            const uri = `${URI}/v1/prices/oanda/\
+            const uri = `${URI}/v1/prices/ig/\
                 ${product}/${period}\
                 ?count=1000`.replace(/\s/g, '');
             return await fetch(uri)
@@ -1303,14 +967,12 @@ class StrategyApp extends Component
 
     async requestStrategyStatusUpdate(strategy_id, accounts, new_status)
     {
-        const username = this.props.getUsername();
-
         const reqOptions = {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'username': username
-            }
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include'
         }
 
         let res = await fetch(
@@ -1318,7 +980,7 @@ class StrategyApp extends Component
             reqOptions
         );
 
-        let { account, strategyInfo, statusMsg } = this.state;
+        let { strategyInfo } = this.state;
 
         if (res.status === 200)
         {
@@ -1327,12 +989,7 @@ class StrategyApp extends Component
             this.setState({ strategyInfo });
         }
         
-        statusMsg = Object.values(strategyInfo[account.metadata.current_strategy].accounts)[0];
-        if (statusMsg === 'live') 
-            statusMsg = 'Live';
-        else 
-            statusMsg = 'Offline';
-        this.setState({ statusMsg });
+        this.toolbar.setStatusMsg(null);
     }
 
     getAppContainer = () =>
@@ -1342,7 +999,14 @@ class StrategyApp extends Component
 
     getCurrentStrategy = () =>
     {
-        return this.state.account.metadata.current_strategy;
+        let { account } = this.state;
+
+        if ('metadata' in account)
+        {
+            return account.metadata.current_strategy;
+        }
+
+        return undefined;
     }
 
     getStrategyInfo = (strategy_id) =>
@@ -1359,9 +1023,7 @@ class StrategyApp extends Component
 
     async goLive()
     {
-        let { statusMsg } = this.state;
-        statusMsg = 'Going live...';
-        this.setState({ statusMsg });
+        this.toolbar.setStatusMsg('Switching Live...');
 
         const { account, strategyInfo } = this.state;
         const strategy_id = account.metadata.current_strategy;
@@ -1374,9 +1036,7 @@ class StrategyApp extends Component
 
     async goOffline()
     {
-        let { statusMsg } = this.state;
-        statusMsg = 'Going offline...';
-        this.setState({ statusMsg });
+        this.toolbar.setStatusMsg('Switching Paper Trader...');
 
         const { account, strategyInfo } = this.state;
         const strategy_id = account.metadata.current_strategy;
@@ -1387,18 +1047,29 @@ class StrategyApp extends Component
         );
     }
 
-    async terminate()
+    async startScript()
     {
-        let { statusMsg } = this.state;
-        statusMsg = 'Terminating...';
-        this.setState({ statusMsg });
+        this.toolbar.setStatusMsg('Starting strategy...');
 
         const { account, strategyInfo } = this.state;
         const strategy_id = account.metadata.current_strategy;
         await this.requestStrategyStatusUpdate(
             strategy_id, 
             Object.keys(strategyInfo[strategy_id].accounts), 
-            'terminate'
+            'start'
+        );
+    }
+
+    async stopScript()
+    {
+        this.toolbar.setStatusMsg('Stopping strategy...');
+
+        const { account, strategyInfo } = this.state;
+        const strategy_id = account.metadata.current_strategy;
+        await this.requestStrategyStatusUpdate(
+            strategy_id, 
+            Object.keys(strategyInfo[strategy_id].accounts), 
+            'stop'
         );
     }
 

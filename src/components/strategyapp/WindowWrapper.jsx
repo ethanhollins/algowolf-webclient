@@ -9,6 +9,7 @@ import {
 } from '@fortawesome/pro-light-svg-icons';
 import _ from 'underscore';
 import Chart from './windows/Chart';
+import Log from './windows/Log';
 
 class WindowWrapper extends Component 
 {
@@ -130,6 +131,7 @@ class WindowWrapper extends Component
                 getPositions={this.props.getPositions}
                 getOrders={this.props.getOrders}
                 getCurrentTimestamp={this.props.getCurrentTimestamp}
+                setCurrentTimestamp={this.props.setCurrentTimestamp}
                 getCountDate={this.props.getCountDate}
                 getCountDateFromDate={this.props.getCountDateFromDate}
                 getStrategyInfo={this.props.getStrategyInfo}
@@ -138,6 +140,14 @@ class WindowWrapper extends Component
                 isTopWindow={this.props.isTopWindow}
                 setPopup={this.props.setPopup}
             />)
+        }
+        else if (this.state.info.type === 'log')
+        {
+            return <Log
+                strategy_id={this.props.strategy_id}
+                item_id={this.state.info.id}
+                getLog={this.props.getLog}
+            />
         }
 
         return <React.Fragment/>;
@@ -162,7 +172,10 @@ class WindowWrapper extends Component
                 
                 if (keys.includes(SPACEBAR))
                 {
+                    
                     e.preventDefault();
+                    this.props.hideShadows(true);
+
                     mouse_pos.y += this.getTopOffset();
                     const direction = this.isResizeMouseLocation(mouse_pos);
                     if (direction !== false)
@@ -252,7 +265,7 @@ class WindowWrapper extends Component
 
     handleKeys(e)
     {
-        const { is_move, is_resize } = this.state;
+        const { is_move, is_resize, cursor } = this.state;
         const keys = this.props.getKeys();
         const mouse_pos = {
             x: e.clientX, y: e.clientY-this.getTopOffset()
@@ -263,22 +276,26 @@ class WindowWrapper extends Component
 
         if (keys.includes(SPACEBAR))
         {
-            this.hideWindowBtns();
-            this.setCursor('move');
-
-            if (!is_move && !is_resize)
+            // console.log(cursor);
+            if (cursor === 'auto')
             {
-                if (is_top)
+                this.hideWindowBtns();
+                // this.setCursor('move');
+    
+                if (!is_move && !is_resize)
                 {
-                    mouse_pos.y += this.getTopOffset();
-                    if (!this.isResizeMouseLocation(mouse_pos))
+                    if (is_top)
                     {
-                        this.setCursor('move');
+                        mouse_pos.y += this.getTopOffset();
+                        if (!this.isResizeMouseLocation(mouse_pos))
+                        {
+                            this.setCursor('move');
+                        }
                     }
                 }
             }
         }
-        else
+        else if (cursor !== 'auto')
         {
             this.showWindowBtns(is_top);
             this.setCursor('auto');
@@ -489,6 +506,7 @@ class WindowWrapper extends Component
 
             this.setState({ is_resize });
         }
+        this.props.hideShadows(false);
     }
 
     hasMoved(new_item)

@@ -17,8 +17,8 @@ class Indicators {
             start = timestamps.filter((x) => x < cache_ts[0]).length;
             for (let i = start-1; i > 0; i--)
             {
-                ask = get_value(i, asks);
-                bid = get_value(i, bids);
+                ask = get_value(i, asks, cache_asks);
+                bid = get_value(i, bids, cache_bids);
 
                 if (ask[0] !== null || asks[i].every((x) => x === null))
                 {
@@ -35,8 +35,8 @@ class Indicators {
         {
             if (!(asks[start].every((x) => x === null)) || asks[start][0] !== null)
             {
-                cache_asks[start] = get_value(start, asks);
-                cache_bids[start] = get_value(start, bids);
+                cache_asks[start] = get_value(start, asks, cache_asks);
+                cache_bids[start] = get_value(start, bids, cache_bids);
             }
         }
 
@@ -49,8 +49,8 @@ class Indicators {
 
         for (let i = start; i < timestamps.length; i++) 
         {
-            ask = get_value(i, asks);
-            bid = get_value(i, bids);
+            ask = get_value(i, asks, cache_asks);
+            bid = get_value(i, bids, cache_bids);
             if (ask[0] !== null || asks[i].every((x) => x === null))
             {
                 cache_ts.push(timestamps[i]);
@@ -85,7 +85,7 @@ class Indicators {
 
         Indicators.setIndicator(Indicators.sma, product, period);
 
-        function get_value(i, ohlc)
+        function get_value(i, ohlc, values)
         {
             // Validation Check
             if (i < min_bars || ohlc[i].every((x) => x === null))
@@ -104,6 +104,46 @@ class Indicators {
         Indicators.calc(Indicators.sma, product, period, min_bars, timestamps, asks, bids, get_value);
     }
 
+    // Exponential Moving Average
+    static ema = (product, timestamps, asks, bids, properties) => 
+    {
+        const period = properties.periods[0];
+        const min_bars = period;
+
+        Indicators.setIndicator(Indicators.ema, product, period);
+
+        function get_value(i, ohlc, values)
+        {
+            // Validation Check
+            if (i < min_bars || ohlc[i].every((x) => x === null))
+                return [null]
+            
+            if (i-1 >= 0 && values[i-1][0] !== null)
+            {
+                const multi = 2 / (period + 1);
+                const prev_ema = values[i-1][0];
+                return [Math.round((
+                    (ohlc[i][3] - prev_ema) * multi + prev_ema
+                ) * 100000) / 100000];
+            }
+            else
+            {
+                let ma = 0
+                for (let j = 0; j < period; j++)
+                {
+                    ma = ma + ohlc[i - j][3];
+                }
+                return [Math.round((
+                    ma / period
+                ) * 100000) / 100000];
+            }
+
+            
+        }
+
+        Indicators.calc(Indicators.ema, product, period, min_bars, timestamps, asks, bids, get_value);
+    }
+
     // Donchian Channel
     static donch = (product, timestamps, asks, bids, properties) => 
     {
@@ -112,7 +152,7 @@ class Indicators {
 
         Indicators.setIndicator(Indicators.donch, product, period);
 
-        function get_value(i, ohlc)
+        function get_value(i, ohlc, values)
         {
             // Validation Check
             if (i < min_bars || ohlc[i].every((x) => x === null))
@@ -146,7 +186,7 @@ class Indicators {
 
             Indicators.setIndicator(Indicators.tr, product, period);
     
-            function get_value(i, ohlc)
+            function get_value(i, ohlc, values)
             {
                 // Validation Check
                 if (i < min_bars || ohlc[i].every((x) => x === null))

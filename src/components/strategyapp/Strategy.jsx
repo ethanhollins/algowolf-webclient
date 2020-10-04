@@ -7,7 +7,8 @@ class Strategy extends Component
 {
     state = {
         sio: undefined,
-        current_page: 0
+        current_page: 0,
+        hide_shadows: false
     }
 
     componentDidMount()
@@ -40,13 +41,13 @@ class Strategy extends Component
 
     generateShadows()
     {
-        const { current_page } = this.state;
+        const { current_page, hide_shadows } = this.state;
 
         let gen_windows = [];
 
         const strategy_info = this.props.getStrategyInfo(this.props.id);
         let i = '';
-        if (strategy_info !== undefined)
+        if (!hide_shadows && strategy_info !== undefined)
         {
             for (i in strategy_info.windows)
             {
@@ -111,6 +112,7 @@ class Strategy extends Component
                             isTopWindow={this.props.isTopWindow}
                             setTopWindow={this.props.setTopWindow}
                             moveWindow={this.props.moveWindow}
+                            hideShadows={this.hideShadows}
                             // History Functions
                             addHistory={this.props.addHistory}
                             getHistory={this.props.getHistory}
@@ -140,8 +142,7 @@ class Strategy extends Component
 
     ontrade = (data) =>
     {
-        console.log('this');
-        console.log(data);
+        
     }
 
     handleSocket()
@@ -239,6 +240,11 @@ class Strategy extends Component
                 'field': 'ontrade'
             }
         );
+    }
+
+    hideShadows = (hide_shadows) =>
+    {
+        this.setState({ hide_shadows });
     }
 
     handleKeys = () =>

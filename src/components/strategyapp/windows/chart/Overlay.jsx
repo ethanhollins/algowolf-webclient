@@ -19,6 +19,7 @@ class Overlay extends Component
         const size = this.props.getSegmentSize(0);
         
         const current_timestamp = this.props.getCurrentTimestamp();
+        const timestamps = this.props.getTimestamps();
         const ohlc = this.props.getOhlcValues();
         const values = this.props.getValues(this.props.index);
         const properties = this.props.getProperties(this.props.index);
@@ -29,13 +30,16 @@ class Overlay extends Component
         for (let i = 0; i < values.length; i++)
         {
             ctx.lineWidth = 1.5;
-            let first_pos = null;
+            let current_pos = null;
 
             // Iterate rows
             for (let y = 0; y < values[i][0].length; y++)
             {
                 let c_x = -1;
-                ctx.strokeStyle = properties.colors[i][y];
+                const color = properties.colors[i][y];
+                let is_future = false;
+
+                ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 1.0)`;
                 ctx.beginPath();
                 for (let x = 0; x < ohlc.length; x++) 
                 {
@@ -43,16 +47,16 @@ class Overlay extends Component
                     if (x === 0) c_x = 0;
 
                     let x_pos = (ohlc.length - x)+0.5;
-                    if (x_pos > pos.x + scale.x+1 || first_pos === null)
+                    if (x_pos > pos.x + scale.x+1 || current_pos === null)
                     {
                         if (ohlc[x][0] !== null && values[i][c_x][y] !== null) 
                         {
                             // Move to first position
-                            first_pos = camera.convertWorldPosToScreenPos(
+                            current_pos = camera.convertWorldPosToScreenPos(
                                 { x: x_pos, y: values[i][c_x][y] },
                                 pos, size, scale
                             );
-                            ctx.moveTo(first_pos.x, first_pos.y);
+                            ctx.moveTo(current_pos.x, current_pos.y);
                         }
                         continue
                     }
@@ -60,13 +64,23 @@ class Overlay extends Component
                     let i_val = values[i][c_x][y];
                     if (i_val === null || ohlc[x][0] === null) continue;
 
-                    let line_pos = camera.convertWorldPosToScreenPos(
+                    if (!is_future && current_timestamp !== null && timestamps[x] > current_timestamp)
+                    {
+                        is_future = true;
+                        ctx.stroke();
+                        ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.2)`;
+                        ctx.beginPath();
+                        ctx.moveTo(current_pos.x, current_pos.y);
+                    }
+
+                    current_pos = camera.convertWorldPosToScreenPos(
                         { x: x_pos, y: i_val },
                         pos, size, scale
                     );
+                    ctx.lineTo(current_pos.x, current_pos.y);
 
-                    ctx.lineTo(line_pos.x, line_pos.y);
                     if (x_pos < pos.x-1) break;
+
                 }
                 ctx.stroke();
             }

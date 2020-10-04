@@ -8,19 +8,29 @@ class Backtest extends Component
     {
         super(props);
 
-        let strategy = this.getStrategyInfo();
-        const current_timestamp = strategy.properties.start;
+        this.transactions = null;
+
         this.state = {
             sio: undefined,
             current_page: 0,
             current_idx: 0,
-            current_timestamp: current_timestamp,
+            current_timestamp: 0,
             positions: [],
             orders: [],
             drawings: {},
             info: [],
-            logs: []
+            log: [],
+            hide_shadows: false
         }
+    }
+
+    async componentDidMount()
+    {
+        this.transactions = (await this.props.retrieveTransactions(this.props.id)).transactions;
+        console.log(this.transactions);
+
+        let strategy = this.getStrategyInfo();
+        this.handleTransactions(strategy.properties.end);
     }
 
     render() {
@@ -41,13 +51,13 @@ class Backtest extends Component
 
     generateShadows()
     {
-        const { current_page } = this.state;
+        const { current_page, hide_shadows } = this.state;
 
         let gen_windows = [];
 
         const strategy_info = this.props.getStrategyInfo(this.props.id);
         let i = '';
-        if (strategy_info !== undefined)
+        if (!hide_shadows && strategy_info !== undefined)
         {
             for (i in strategy_info.windows)
             {
@@ -112,6 +122,7 @@ class Backtest extends Component
                             isTopWindow={this.props.isTopWindow}
                             setTopWindow={this.props.setTopWindow}
                             moveWindow={this.props.moveWindow}
+                            hideShadows={this.hideShadows}
                             // History Functions
                             addHistory={this.props.addHistory}
                             getHistory={this.props.getHistory}
@@ -131,6 +142,9 @@ class Backtest extends Component
                             getPositions={this.getPositions}
                             getOrders={this.getOrders}
                             getCurrentTimestamp={this.getCurrentTimestamp}
+                            setCurrentTimestamp={this.setCurrentTimestamp}
+                            // Log Functions
+                            getLog={this.getLog}
                         />
                     )
                 }
@@ -176,19 +190,22 @@ class Backtest extends Component
         );
     }
 
+    hideShadows = (hide_shadows) =>
+    {
+        this.setState({ hide_shadows });
+    }
+
     handleKeys = () =>
     {
         const keys = this.props.getKeys();
         
         if (keys.includes(ARROW_RIGHT))
         {
-            console.log('->');
             const { current_timestamp } = this.state;
             this.handleTransactions(current_timestamp + this.props.getPeriodOffsetSeconds('M1'));
         }
-        else if (keys.includes(ARROW_LEFT))
+        if (keys.includes(ARROW_LEFT))
         {
-            console.log('<-');
             const { current_timestamp } = this.state;
             this.handleTransactions(current_timestamp - this.props.getPeriodOffsetSeconds('M1'));
         }
@@ -283,72 +300,79 @@ class Backtest extends Component
         info.push(trans.item);
     }
 
-    handleCreateLog = (logs, trans) =>
+    handleCreateLog = (log, trans) =>
     {
-        logs.push(trans.item);
+        log.push(trans);
     }
 
     handleTransactions = (dest_timestamp) =>
     {
-        let { current_idx, current_timestamp, positions, orders, drawings, info, logs } = this.state;
-        const transactions = this.getTransactions();
-
-        if (dest_timestamp === current_timestamp) return;
-        else if (dest_timestamp < current_timestamp)
+        if (this.transactions !== null)
         {
-            // Reset all vars and start from beginning
-            current_idx = 0;
-            positions = orders = info = logs = [];
-            drawings = {};
-        }
-        current_timestamp = dest_timestamp;
-
-        for (current_idx; current_idx < transactions.length; current_idx++)
-        {
-            const t = transactions[current_idx];
-            if (t.timestamp > current_timestamp) break;
-
-            switch (t.type)
+            let { current_idx, current_timestamp, positions, orders, drawings, info, log } = this.state;
+            const transactions = this.getTransactions();
+    
+            if (dest_timestamp === current_timestamp) return;
+            else if (dest_timestamp < current_timestamp)
             {
-                case 'marketentry':
-                case 'limitentry':
-                case 'stopentry':
-                    this.handleCreatePosition(positions, t);
-                    break;
-                case 'limitorder':
-                case 'stoporder':
-                    this.handleCreateOrder(orders, t);
-                    break;
-                case 'positionclose':
-                case 'stoploss':
-                case 'takeprofit':
-                    this.handleClosePosition(positions, t);
-                    break;
-                case 'ordercancel':
-                    this.handleCancelOrder(orders, t);
-                    break;
-                case 'modify':
-                    this.handleModify(positions, orders, t);
-                    break;
-                case 'create_drawing':
-                    this.handleCreateDrawing(drawings, t);
-                    break;
-                case 'clear_drawing_layer':
-                    this.handleClearDrawingLayer(drawings, t);
-                    break;
-                case 'clear_all_drawings':
-                    this.handleClearAllDrawings(drawings, t);
-                    break;
-                case 'create_info':
-                    this.handleCreateInfo(info, t);
-                    break;
-                case 'create_log':
-                    this.handleCreateLog(logs, t);
-                    break;
+                // Reset all vars and start from beginning
+                current_idx = 0;
+                positions = [];
+                orders = [];
+                info = [];
+                log = [];
+                drawings = {};
             }
+            current_timestamp = dest_timestamp;
+    
+            for (current_idx; current_idx < transactions.length; current_idx++)
+            {
+                const t = transactions[current_idx];
+                if (t.timestamp > current_timestamp) break;
+    
+                switch (t.type)
+                {
+                    case 'marketentry':
+                    case 'limitentry':
+                    case 'stopentry':
+                        this.handleCreatePosition(positions, t);
+                        break;
+                    case 'limitorder':
+                    case 'stoporder':
+                        this.handleCreateOrder(orders, t);
+                        break;
+                    case 'positionclose':
+                    case 'stoploss':
+                    case 'takeprofit':
+                        this.handleClosePosition(positions, t);
+                        break;
+                    case 'ordercancel':
+                        this.handleCancelOrder(orders, t);
+                        break;
+                    case 'modify':
+                        this.handleModify(positions, orders, t);
+                        break;
+                    case 'create_drawing':
+                        this.handleCreateDrawing(drawings, t);
+                        break;
+                    case 'clear_drawing_layer':
+                        this.handleClearDrawingLayer(drawings, t);
+                        break;
+                    case 'clear_all_drawings':
+                        this.handleClearAllDrawings(drawings, t);
+                        break;
+                    case 'create_info':
+                        this.handleCreateInfo(info, t);
+                        break;
+                    case 'create_log':
+                        this.handleCreateLog(log, t);
+                        break;
+                }
+            }
+    
+            this.setState({ current_idx, current_timestamp, positions, orders, drawings, info, log });
         }
 
-        this.setState({ current_idx, current_timestamp, positions, orders, drawings, info, logs });
     }
 
     // GETTERS
@@ -361,12 +385,7 @@ class Backtest extends Component
 
     getTransactions = () =>
     {
-        let strategy = this.getStrategyInfo();
-
-        if (strategy !== undefined)
-        {
-            return strategy.transactions;
-        }
+        return this.transactions;
     }
 
     getDrawings = () =>
@@ -384,9 +403,19 @@ class Backtest extends Component
         return this.state.orders;
     }
 
+    getLog = () =>
+    {
+        return this.state.log;
+    }
+
     getCurrentTimestamp = () =>
     {
         return this.state.current_timestamp;
+    }
+
+    setCurrentTimestamp = (timestamp) =>
+    {
+        this.handleTransactions(timestamp);
     }
 
 }
