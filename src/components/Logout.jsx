@@ -21,27 +21,28 @@ class Logout extends Component
 
     async handleLogout()
     {
-        const reqOptions = {
-            method: 'POST',
-            credentials: 'include'
-        }
-        let res = await fetch(
-            `${URI}/logout`,
-            reqOptions
-        );
+        // const reqOptions = {
+        //     method: 'POST',
+        //     credentials: 'include'
+        // }
+        // let res = await fetch(
+        //     `${this.props.getURI()}/logout`,
+        //     reqOptions
+        // );
         
-        const status = res.status;
-        res = await res.json(); 
+        // const status = res.status;
+        // res = await res.json(); 
 
-        if (status === 200)
-        {
-            this.props.setUserId(null);
-        }
+        // if (status === 200)
+        // {
+        //     this.props.setUserId(null);
+        // }
 
-        this.props.history.push('/');
+        
+        this.props.getCookies().remove('Authorization');
+        this.props.setUserId(null);
+        this.props.history.push('/login');
     }
 }
-
-const URI = 'http://127.0.0.1:5000'
 
 export default withRouter(Logout);

@@ -20,7 +20,7 @@ class Strategy extends Component
     componentWillUnmount()
     {
         const { sio } = this.state;
-        sio.disconnect();
+        if (sio !== undefined) sio.disconnect();
     }
 
     render() {
@@ -132,6 +132,8 @@ class Strategy extends Component
                             getPositions={this.getPositions}
                             getOrders={this.getOrders}
                             getCurrentTimestamp={this.getCurrentTimestamp}
+                            // Log Functions
+                            getLog={this.getLog}
                         />
                     )
                 }
@@ -147,12 +149,12 @@ class Strategy extends Component
 
     handleSocket()
     {
-        const endpoint = `${URI}/user`
+        const endpoint = `/user`
         const socket = io(endpoint, {
             transportOptions: {
                 polling: {
                     extraHeaders: {
-                        Authorization: 'TEST_TOKEN'
+                        Authorization: this.props.getCookies().get('Authorization')
                     }
                 }
             }
@@ -379,19 +381,93 @@ class Strategy extends Component
 
     getPositions = () =>
     {
+        const current_account = this.getCurrentAccount();
         let strategy = this.getStrategyInfo();
-        return strategy.positions;
+        let positions = [];
+
+        if (current_account !== undefined)
+        {
+            for (let pos of strategy.positions)
+            {
+                if (pos.account_id === current_account)
+                {
+                    positions.push(pos);
+                }
+            }
+        }
+
+        return positions;
     }
 
     getOrders = () =>
     {
+        const current_account = this.getCurrentAccount();
         let strategy = this.getStrategyInfo();
-        return strategy.orders;
+        let orders = [];
+
+        if (current_account !== undefined)
+        {
+            for (let order of strategy.orders)
+            {
+                if (order.account_id === current_account)
+                {
+                    orders.push(order);
+                }
+            }
+        }
+
+        return orders;
+    }
+
+    getLog = () =>
+    {
+        return [];
     }
 
     getCurrentTimestamp = () =>
     {
         return null;
+    }
+
+    switchAccount = (account_id) =>
+    {
+        let strategy = this.getStrategyInfo();
+        
+        if (strategy !== undefined)
+        {
+            strategy.account = account_id;
+            this.props.updateStrategyInfo();
+        }
+    }
+
+    getAccounts = () =>
+    {
+        let strategy = this.getStrategyInfo();
+
+        if (strategy !== undefined)
+        {
+            let accounts = Object.keys(strategy.accounts);
+            let start = accounts.splice(accounts.indexOf('papertrader'), 1);
+            return start.concat(accounts.sort());
+        }
+    }
+
+    getCurrentAccount = () =>
+    {
+        const accounts = this.getAccounts();
+        let strategy = this.getStrategyInfo();
+
+        if (accounts !== undefined && accounts.length > 0)
+        {
+            let current_account = strategy.account;
+            if (!accounts.includes(current_account))
+            {
+                current_account = accounts[0];
+                this.switchAccount(current_account);
+            }
+
+            return current_account;
+        }
     }
 
 }
@@ -400,7 +476,5 @@ const ARROW_LEFT = 37;
 const ARROW_UP = 38;
 const ARROW_RIGHT = 39;
 const ARROW_DOWN = 40;
-
-const URI = 'http://127.0.0.1:5000';
 
 export default Strategy;

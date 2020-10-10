@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-    faCircle, faInfo, faExclamation
+    faCircle, faInfo
 } from '@fortawesome/pro-solid-svg-icons';
 import { 
     faBars,  faChartLine, faChartPie, faPlay, faStop,
@@ -9,8 +9,7 @@ import {
 } from '@fortawesome/pro-regular-svg-icons';
 import { 
     faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
-    faFileInvoice, faChartBar, faTicketAlt, faLayerGroup, faHandshakeAltSlash,
-    faHandshakeAlt, faUser,
+    faFileInvoice, faChartBar, faTicketAlt, faLayerGroup, faUser,
 } from '@fortawesome/pro-light-svg-icons';
 
 class StrategyToolbar extends Component
@@ -19,6 +18,12 @@ class StrategyToolbar extends Component
     {
         super(props);
 
+        this.setAccountsElem = elem => {
+            this.accountsElem = elem;
+        }
+        this.setAccountsDropdown = elem => {
+            this.accountsDropdown = elem;
+        }
         this.setStatusIndicator = elem => {
             this.statusIndicator = elem;
         }
@@ -72,21 +77,15 @@ class StrategyToolbar extends Component
                     <div className='toolbox item row'>
                         <FontAwesomeIcon className='toolbox icon' icon={faBars} />
                     </div>
-                    <div className='toolbox item row'>
+                    <div ref={this.setAccountsElem} className='toolbox item row'>
                         <FontAwesomeIcon className='toolbox icon small black' icon={faUser} />
-                        <span className='toolbox label right-space'>ZVS567</span>
-                        <div className='toolbox item btn'>
-                            <FontAwesomeIcon className='toolbox selection-icon' icon={faChevronDown} />
-                        </div>
+                        {this.generateAccounts()}
                     </div>
                     <div className='toolbox item row status right-space'>
                         {this.generateStatusLabel()}
                     </div>
-                    <div className='toolbox item right-space' onClick={this.onScriptSwitch}>
+                    <div className='toolbox item' onClick={this.onScriptSwitch}>
                         {this.generateScriptBtn()}
-                    </div>
-                    <div className='toolbox item' onClick={this.onActivationSwitch}>
-                        {this.generateActivationBtn()}
                     </div>
                     <div className='toolbox separator' />
                     <div className='toolbox item'>
@@ -234,12 +233,52 @@ class StrategyToolbar extends Component
 
     generateAccounts = () =>
     {
+        const accounts = this.getAccounts();
 
+        if (accounts !== undefined)
+        {
+            let current_account = this.getCurrentAccount();
+
+            let account_elems = [];
+            let class_name;
+            for (let acc of accounts)
+            {
+                if (acc === current_account)
+                {
+                    class_name = 'toolbox dropdown-item selected';
+                }
+                else
+                {
+                    class_name = 'toolbox dropdown-item ';
+                }
+
+                account_elems.push(
+                    <div key={acc} className={class_name} onClick={this.onAccountsDropdownItem} name={acc}>
+                        <span className='toolbox left'>{this.getAccountDisplayName(acc)}</span>
+                    </div>
+                );
+            }
+
+            return (
+                <React.Fragment>
+    
+                <span className='toolbox label right-space'>{this.getAccountDisplayName(current_account)}</span>
+                <div className='toolbox item btn' onClick={this.onAccountsDropdown}>
+                    <FontAwesomeIcon className='toolbox selection-icon' icon={faChevronDown} />
+                </div>
+                <div ref={this.setAccountsDropdown} className='toolbox dropdown small' style={{display: 'none'}}>
+                    {account_elems}
+                </div>
+    
+                </React.Fragment>
+            );
+        }
     }
 
     generateScriptBtn = () =>
     {
-        const is_running = this.getScriptStatus();
+        let current_account = this.getCurrentAccount();
+        const is_running = this.getScriptStatus(current_account);
 
         if (is_running === null)
         {
@@ -265,38 +304,11 @@ class StrategyToolbar extends Component
         }
     }
 
-    generateActivationBtn = () =>
-    {
-        const status = this.getCurrentStatus();
-
-        if (status === 'live')
-        {
-            return (
-                <div ref={this.setActivationElem} className='toolbox item row btn'>
-                    <FontAwesomeIcon id='offline_status' className='toolbox icon grey_btn' icon={faHandshakeAltSlash} />
-                    <span className='toolbox label'>Paper Trader</span>
-                </div>
-            );
-        }
-        else if (status === 'offline')
-        {
-            return (
-                <div ref={this.setActivationElem} className='toolbox item row btn'>
-                    <FontAwesomeIcon id='live_status' className='toolbox icon red_btn' icon={faHandshakeAlt} />
-                    <span className='toolbox label'>Go Live</span>
-                </div>
-            );
-        }
-        else
-        {
-            return <React.Fragment />;
-        }
-    }
-
     generateStatusLabel = () =>
     {
         const { statusMsg } = this.state;
-        const status = this.getCurrentStatus();
+        let current_account = this.getCurrentAccount();
+        const is_running = this.getScriptStatus(current_account);
 
         if (statusMsg !== null)
         {
@@ -309,59 +321,63 @@ class StrategyToolbar extends Component
                 </React.Fragment>
             );
         }
-        else if (status === 'live')
+        else if (is_running === null)
+        {
+            return <React.Fragment />;
+        }
+        else if (is_running)
         {
             return (
                 <React.Fragment>
 
                 <FontAwesomeIcon id='live_status' className='toolbox icon' icon={faCircle} />
-                <span id='live_status' className='toolbox label'>Live Trading</span>
+                <span id='live_status' className='toolbox label'>Strategy running</span>
 
                 </React.Fragment>
             );
         }
-        else if (status === 'offline')
+        else
         {
             return (
                 <React.Fragment>
 
                 <FontAwesomeIcon id='offline_status' className='toolbox icon' icon={faCircle} />
-                <span id='offline_status' className='toolbox label'>Paper Trading</span>
+                <span id='offline_status' className='toolbox label'>Strategy stopped</span>
 
                 </React.Fragment>
             );
-        }
-        else
-        {
-            return <React.Fragment />
         }
     }
 
     onScriptSwitch = () =>
     {
-        const is_running = this.getScriptStatus();
+        let current_account = this.getCurrentAccount();
+        const is_running = this.getScriptStatus(current_account);
 
-        if (is_running)
+        if (current_account !== undefined)
         {
-            this.props.stopScript();
-        }
-        else
-        {
-            this.props.startScript();
+            if (is_running)
+            {
+                this.props.stopScript(current_account);
+            }
+            else
+            {
+                this.props.startScript(current_account);
+            }
         }
     }
 
-    onActivationSwitch = (e) =>
+    onAccountsDropdown = (e) =>
     {
-        const status = this.getCurrentStatus();
-
-        if (status === 'live')
+        if (this.accountsDropdown.style.display === 'none')
         {
-            this.props.goOffline();
+            this.accountsDropdown.style.display = 'block';
+            const btn_rect = this.accountsElem.getBoundingClientRect();
+            this.accountsDropdown.style.left = parseInt(btn_rect.x) + 'px';
         }
-        else if (status === 'offline')
+        else
         {
-            this.props.goLive();
+            this.accountsDropdown.style.display = 'none';
         }
     }
 
@@ -435,6 +451,19 @@ class StrategyToolbar extends Component
         }
     }
 
+    onAccountsDropdownItem = (e) =>
+    {
+        this.accountsDropdown.style.display = 'none';
+
+        const current_account = this.getCurrentAccount();
+        const new_account = e.target.getAttribute('name');
+
+        if (new_account !== current_account)
+        {
+            this.switchAccount(new_account);
+        }
+    }
+
     onChartsDropdownItem = (e) =>
     {
         this.chartsDropdown.style.display = 'none';
@@ -475,6 +504,11 @@ class StrategyToolbar extends Component
 
     closeTemporaryWindows(mouse_pos)
     {
+        if (this.accountsDropdown.style.display !== 'none')
+        {
+            if (!this.props.isWithinBounds(this.accountsDropdown.getBoundingClientRect(), mouse_pos))
+                this.accountsDropdown.style.display = 'none';
+        }
         if (this.chartsDropdown.style.display !== 'none')
         {
             if (!this.props.isWithinBounds(this.chartsDropdown.getBoundingClientRect(), mouse_pos))
@@ -497,35 +531,68 @@ class StrategyToolbar extends Component
         }
     }
 
-    getCurrentStatus = () =>
+    switchAccount = (account_id) =>
+    {
+        const strategy = this.props.getStrategyInfo(this.props.getCurrentStrategy());
+        
+        if (strategy !== undefined)
+        {
+            strategy.account = account_id;
+            this.props.updateStrategyInfo();
+        }
+    }
+
+    getAccounts = () =>
     {
         const strategy = this.props.getStrategyInfo(this.props.getCurrentStrategy());
 
         if (strategy !== undefined)
         {
-            if (Object.values(strategy.accounts).some(x => x['broker_status'] === 'live'))
+            let accounts = Object.keys(strategy.accounts);
+            let start = accounts.splice(accounts.indexOf('papertrader'), 1);
+            return start.concat(accounts.sort());
+        }
+    }
+
+    getCurrentAccount = () =>
+    {
+        const accounts = this.getAccounts();
+        const strategy = this.props.getStrategyInfo(this.props.getCurrentStrategy());
+
+        if (accounts !== undefined && accounts.length > 0)
+        {
+            let current_account = strategy.account;
+            if (!accounts.includes(current_account))
             {
-                return 'live';
+                return undefined;
             }
-            else
-            {
-                return 'offline';
-            }
+
+            return current_account;
+        }
+    }
+
+    getScriptStatus = (account_id) =>
+    {
+        const strategy = this.props.getStrategyInfo(this.props.getCurrentStrategy());
+
+        if (strategy !== undefined && account_id !== undefined)
+        {
+            return strategy.accounts[account_id]['strategy_status'];
         }
 
         return null;
     }
 
-    getScriptStatus = () =>
+    getAccountDisplayName = (account) =>
     {
-        const strategy = this.props.getStrategyInfo(this.props.getCurrentStrategy());
-
-        if (strategy !== undefined)
+        if (account === 'papertrader')
         {
-            return Object.values(strategy.accounts).some(x => x['strategy_status'])
+            return 'Paper Trader';
         }
-
-        return null;
+        else
+        {
+            return account;
+        }
     }
 
     setStatusMsg = (statusMsg) =>

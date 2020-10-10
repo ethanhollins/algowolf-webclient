@@ -17,65 +17,80 @@ class Login extends Component
     }
 
     state = {
-        'username': '',
-        'password': '',
+        username: '',
+        password: '',
+        loginCheck: false
+
     }
 
     async componentDidMount()
     {
+        let { loginCheck } = this.state;
         const user_id = await this.props.checkAuthorization();
-        this.props.setUserId(user_id);
+        if (user_id === null)
+        {
+            loginCheck = true;
+            this.setState({ loginCheck });
+        }
     }
 
     render()
     {
-        return (
-            <div className="login container">
-                <form className="login form" onSubmit={this.handleSubmit.bind(this)}>
-                    <a className='login logo' href='/'>
-                        <ReactSVG src="./algowolf.svg" />
-                    </a>
-
-                    <div className="login field">
-                        <input 
-                            type="text" className="login input" 
-                            name="username" id="username" 
-                            placeholder="Username"
-                            autoComplete="username" required 
-                            onChange={this.handleChange} 
-                        />
-                        <span className='login icon'>
-                            <FontAwesomeIcon icon={faUser} />
-                        </span>
-                    </div>
-
-                    <div className="login field">
-                        <input 
-                            type="password" className="login input" 
-                            name="password" id="password" 
-                            placeholder="Password"
-                            required onChange={this.handleChange} 
-                        />
-                        <span className='login icon'>
-                            <FontAwesomeIcon icon={faLock} />
-                        </span>
-                    </div>
-
-                    <div className="login field">
-                        <input type="submit" id="submit" className="login input" value="LOGIN"/>
-                    </div>
-
-                    <div className="login field center">
-                        <span>Forgot <a href='/login#'>Username/Password</a>?</span>
-                    </div>
-
-                    <div className="login field center">
-                        <span className='error' ref={this.setErrorMsgRef}></span>
-                    </div>
-                </form>
-                {/* <span>Create an Account</span> */}
-            </div>
-        )
+        const { loginCheck } = this.state;
+        if (loginCheck)
+        {
+            return (
+                <div className="login container">
+                    <form className="login form" onSubmit={this.handleSubmit.bind(this)}>
+                        <a className='login logo' href='/'>
+                            <ReactSVG src="./algowolf.svg" />
+                        </a>
+    
+                        <div className="login field">
+                            <input 
+                                type="text" className="login input" 
+                                name="username" id="username" 
+                                placeholder="Username"
+                                autoComplete="username" required 
+                                onChange={this.handleChange} 
+                            />
+                            <span className='login icon'>
+                                <FontAwesomeIcon icon={faUser} />
+                            </span>
+                        </div>
+    
+                        <div className="login field">
+                            <input 
+                                type="password" className="login input" 
+                                name="password" id="password" 
+                                placeholder="Password"
+                                required onChange={this.handleChange} 
+                            />
+                            <span className='login icon'>
+                                <FontAwesomeIcon icon={faLock} />
+                            </span>
+                        </div>
+    
+                        <div className="login field">
+                            <input type="submit" id="submit" className="login input" value="LOGIN"/>
+                        </div>
+    
+                        <div className="login field center">
+                            <span>Forgot <a href='/login#'>Username/Password</a>?</span>
+                        </div>
+    
+                        <div className="login field center">
+                            <span className='error' ref={this.setErrorMsgRef}></span>
+                        </div>
+                    </form>
+                    {/* <span>Create an Account</span> */}
+                </div>
+            )
+        }
+        else
+        {
+            return <React.Fragment />;
+        }
     }
 
     handleChange = (event) =>
@@ -101,20 +116,24 @@ class Login extends Component
         });
         var requestOptions = {
             method: 'POST',
-            credentials: 'include',
             headers: {
                 "Content-Type": "application/json"
             },
+            credentials: 'include',
             body: raw
         };
 
-        const res = await fetch(`${URI}/login`, requestOptions);
+        const res = await fetch(`/login`, requestOptions);
 
         const status = res.status;
         const data = await res.json();
 
         if (status === 200)
         {
+            console.log(data);
+            this.props.getCookies().set('Authorization', data.token, {
+                path: '/'
+            })
             this.props.setUserId(data.user_id);
         }
         else
@@ -123,7 +142,5 @@ class Login extends Component
         }
     }
 }
-
-const URI = 'http://127.0.0.1:5000';
 
 export default Login;

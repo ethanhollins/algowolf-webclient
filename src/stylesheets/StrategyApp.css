@@ -173,6 +173,14 @@
     padding: 15px 20px 15px 20px;
 }
 
+.toolbox.dropdown.small > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 10px 10px 10px;
+    font-size: 0.9em;
+}
+
 .toolbox.dropdown > div > * {
     pointer-events: none;
 }
@@ -181,6 +189,11 @@
     background-color: #fff2cf;
     color: #ff8103;
     cursor: pointer;
+}
+
+.toolbox.dropdown-item.selected {
+    background-color: #fff2cf;
+    /* color: #ff8103; */
 }
 
 .toolbox.left {

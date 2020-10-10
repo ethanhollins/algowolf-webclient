@@ -952,7 +952,7 @@ class Chart extends Component
             {
                 // Retrieve all available data
                 let data = await this.props.retrieveChartData(
-                    this.getProduct(), this.getPeriod(), from_dt, to_dt
+                    this.getBroker(), this.getProduct(), this.getPeriod(), from_dt, to_dt
                 );
     
                 // Update chart with new data
@@ -1105,7 +1105,7 @@ class Chart extends Component
                 this.getStrategyId(), this.getItemId(), 
                 {x: mouse_pos.x, y: mouse_pos.y - top_offset}
             ) && 
-            this.getCursor() === null
+            this.getCursor() === 'inherit'
         )
         {
             x_pos = Math.floor(camera.convertScreenPosToWorldPos(mouse_pos, pos, chart_size, scale).x);
@@ -2581,6 +2581,11 @@ class Chart extends Component
         ).properties;
     }
 
+    getBroker = () =>
+    {
+        return this.getStrategy().broker;
+    }
+
     getProduct = () => 
     {
         return this.getProperties().product;
@@ -2701,10 +2706,10 @@ class Chart extends Component
         }
 
         const ohlc_data = await this.props.retrieveChartData(
-            this.getProduct(), this.getPeriod(), start, end
+            this.getBroker(), this.getProduct(), this.getPeriod(), start, end
         );
         this.props.addChart(
-            this.getProduct(), this.getPeriod(), ohlc_data
+            this.getBroker(), this.getProduct(), this.getPeriod(), ohlc_data
         );
     }
 

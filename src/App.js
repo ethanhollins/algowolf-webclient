@@ -7,8 +7,8 @@ import {
 import StrategyApp from './components/StrategyApp';
 import Login from './components/Login';
 import Logout from './components/Logout';
-import Home from './components/Home';
 import { config } from '@fortawesome/fontawesome-svg-core'
+import Cookies from 'universal-cookie';
 
 class App extends Component 
 {
@@ -20,6 +20,8 @@ class App extends Component
     {
         super(props);
         config.autoAddCss = false
+        this.cookies = new Cookies();
+        this.checkAuthorization = this.checkAuthorization.bind(this);
     }
 
     render() {
@@ -31,25 +33,23 @@ class App extends Component
                     </Route>
                     <Route path="/logout">
                         <Logout 
+                            getURI={this.getURI}
+                            getCookies={this.getCookies}
                             setUserId={this.setUserId}
                         />
                     </Route>
                     <Route path="/app">
-                        <StrategyApp
-                            getUserId={this.getUserId}
-                            setUserId={this.setUserId}
-                            checkAuthorization={this.checkAuthorization}
-                        />
+                        {this.getConditionalAppComponent()}
                     </Route>
 
-                    <Route exact path={["/", "/alerts", "/learn", "/hire", "/brokers", "/u/:username"]}>
+                    {/* <Route exact path={["/", "/alerts", "/learn", "/hire", "/brokers", "/u/:username"]}>
                         <Home
                             getUserId={this.getUserId}
                             setUserId={this.setUserId}
                             checkAuthorization={this.checkAuthorization}
                             getAxiosObj={this.getAxiosObj}
                         />
-                    </Route>
+                    </Route> */}
 
                     <Route>
                         404
@@ -62,40 +62,95 @@ class App extends Component
     getConditionalLoginComponent()
     {
         if (this.state.user_id !== null)
-            return <Redirect to="/"/>;
+        {
+            return <Redirect to="/app"/>;
+        }
         else
+        {
             return <Login
+                getURI={this.getURI}
+                getCookies={this.getCookies}
                 getUserId={this.getUserId}
                 setUserId={this.setUserId}
                 checkAuthorization={this.checkAuthorization}
                 getAxiosObj={this.getAxiosObj}
             />;
+        }
+    }
+
+    getConditionalAppComponent()
+    {
+        if (this.state.user_id === null)
+        {
+            return <Redirect to="/login"/>;
+        }
+        else
+        {
+            return <StrategyApp
+                getURI={this.getURI}
+                getCookies={this.getCookies}
+                getHeaders={this.getHeaders}
+                getUserId={this.getUserId}
+                checkAuthorization={this.checkAuthorization}
+            />
+        }
     }
 
     async checkAuthorization()
     {
-        var requestOptions = {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-                "Content-Type": "application/json"
-            }
-        };
-
-        const res = await fetch(`${URI}/authorize`, requestOptions);
-
+        const auth_token = this.getCookies().get('Authorization');
         let user_id = null;
-        if (res.status === 200)
+        if (auth_token !== undefined)
         {
-            // Redirect to App
-            const data = await res.json();
-            user_id = data.user_id;
+            var requestOptions = {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: '*/*',
+                    Authorization: 'Bearer ' + auth_token
+                },
+                credentials: 'include'
+            };
+    
+            const res = await fetch(`/authorize`, requestOptions);
+    
+            if (res.status === 200)
+            {
+                // Redirect to App
+                const data = await res.json();
+                user_id = data.user_id;
+            }
+            else
+            {
+                user_id = null;
+            }
         }
         else
         {
             user_id = null;
         }
+
+        this.setUserId(user_id);
         return user_id;
+    }
+
+    getURI = () =>
+    {
+        return URI;
+    }
+
+    getCookies = () =>
+    {
+        return this.cookies;
+    }
+
+    getHeaders = () =>
+    {
+        return {
+            "Content-Type": "application/json",
+            Accept: '*/*',
+            Authorization: 'Bearer ' + this.getCookies().get('Authorization')
+        };
     }
 
     getUserId = () =>
@@ -103,14 +158,14 @@ class App extends Component
         return this.state.user_id;
     }
 
-    setUserId = (new_id) =>
+    setUserId = (user_id) =>
     {
-        let { user_id } = this.state;
-        user_id = new_id;
         this.setState({ user_id });
     }
+    
 }
 
-const URI = 'http://127.0.0.1:5000';
+const URI = '/api';
+// const URI = 'https://api.algowolf.com';
 
 export default App;

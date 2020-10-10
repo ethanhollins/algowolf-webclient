@@ -14,6 +14,7 @@ import Popup from './strategyapp/Popup';
 class StrategyApp extends Component
 {
     state = {
+        checkLogin: false,
         sio: null,
         keys: [],
         account: {},
@@ -45,6 +46,8 @@ class StrategyApp extends Component
         this.onKeyDown = this.onKeyDown.bind(this);
         this.onKeyUp = this.onKeyUp.bind(this);
 
+        this.retrieveChartData = this.retrieveChartData.bind(this);
+
         this.setAppContainerRef = elem => {
             this.appContainer = elem;
         };
@@ -69,8 +72,10 @@ class StrategyApp extends Component
         window.addEventListener("keydown", this.onKeyDown);
         window.addEventListener("keyup", this.onKeyUp);
 
+        let { checkLogin } = this.state;
         const user_id = await this.props.checkAuthorization();
-        this.props.setUserId(user_id);
+        checkLogin = true;
+        this.setState({ checkLogin });
 
         if (user_id !== null)
         {
@@ -96,7 +101,8 @@ class StrategyApp extends Component
 
     render()
     {
-        if (this.props.getUserId !== null)
+        const { checkLogin } = this.state;
+        if (checkLogin && this.props.getUserId() !== null)
         {
             return (
                 <div className='main container'>
@@ -249,6 +255,8 @@ class StrategyApp extends Component
                         id={current_strategy}
                         ref={this.setStrategy}
                         clone={this.clone}
+                        getURI={this.props.getURI}
+                        getCookies={this.props.getCookies}
                         getAppContainer={this.getAppContainer}
                         convertScreenUnitToWorldUnit={this.convertScreenUnitToWorldUnit}
                         convertWorldUnitToScreenUnit={this.convertWorldUnitToScreenUnit}
@@ -306,6 +314,7 @@ class StrategyApp extends Component
                 return <BacktestToolbar 
                     ref={this.setToolbarRef}
                     getCurrentStrategy={this.getCurrentStrategy}
+                    updateStrategyInfo={this.updateStrategyInfo}
                     getStrategyInfo={this.getStrategyInfo}
                     isWithinBounds={this.isWithinBounds}
                     setPopup={this.setPopup}
@@ -316,9 +325,8 @@ class StrategyApp extends Component
                 return <StrategyToolbar 
                     ref={this.setToolbarRef}
                     getCurrentStrategy={this.getCurrentStrategy}
+                    updateStrategyInfo={this.updateStrategyInfo}
                     getStrategyInfo={this.getStrategyInfo}
-                    goLive={this.goLive.bind(this)}
-                    goOffline={this.goOffline.bind(this)}
                     startScript={this.startScript.bind(this)}
                     stopScript={this.stopScript.bind(this)}
                     isWithinBounds={this.isWithinBounds}
@@ -409,8 +417,6 @@ class StrategyApp extends Component
         }
     }
 
-    
-
     onMouseUp(e)
     {
         const mouse_pos = {
@@ -451,7 +457,7 @@ class StrategyApp extends Component
 
     handleSocket()
     {
-        const endpoint = `${URI}/user`
+        const endpoint = `/user`
         const socket = io(endpoint, {
             transportOptions: {
                 polling: {
@@ -490,14 +496,12 @@ class StrategyApp extends Component
 
         const reqOptions = {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: this.props.getHeaders(),
             credentials: 'include'
         }
 
         account = await fetch(
-            `${URI}/v1/account`,
+            `/v1/account`,
             reqOptions
         )
             .then(res => res.json());
@@ -513,9 +517,7 @@ class StrategyApp extends Component
         /** Retrieve strategy info */
         const reqOptions = {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: this.props.getHeaders(),
             credentials: 'include'
         }
 
@@ -524,7 +526,7 @@ class StrategyApp extends Component
             strategyInfo[strategy_ids[i]] = Object.assign(
                 {}, strategyInfo[strategy_ids[i]],
                 await fetch(
-                    `${URI}/v1/strategy/${strategy_ids[i]}`,
+                    `/v1/strategy/${strategy_ids[i]}`,
                     reqOptions
                 ).then(res => res.json())
             );
@@ -539,51 +541,55 @@ class StrategyApp extends Component
         /** Retrieve strategy info */
         const reqOptions = {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: this.props.getHeaders(),
             credentials: 'include'
         }
 
         return await fetch(
-            `${URI}/v1/strategy/${strategy_id}/transactions`,
+            `/v1/strategy/${strategy_id}/transactions`,
             reqOptions
         ).then(res => res.json());
     }
 
-    async retrieveChartData(product, period, from, to, tz)
+    async retrieveChartData(broker, product, period, from, to, tz)
     {
+        const reqOptions = {
+            method: 'GET',
+            headers: this.props.getHeaders(),
+            credentials: 'include'
+        }
+
         if (tz === undefined) tz = 'UTC';
 
         if (from !== undefined)
         {   
             if (to !== undefined)
             {
-                const uri = `${URI}/v1/prices/ig/\
+                const uri = `/v1/prices/${broker}/\
                 ${product}/${period}\
                 ?from=${from.format('YYYY-MM-DDTHH:mm:ss')}Z\
                 &to=${to.format('YYYY-MM-DDTHH:mm:ss')}Z\
                 &tz=${tz}`.replace(/\s/g, '');
-                return await fetch(uri)
+                return await fetch(uri, reqOptions)
                     .then(res => res.json());
             }
             else
             {
-                const uri = `${URI}/v1/prices/ig/\
+                const uri = `/v1/prices/${broker}/\
                 ${product}/${period}\
                 ?from=${from.format('YYYY-MM-DDTHH:mm:ss')}Z\
                 &count=1000&tz=${tz}`.replace(/\s/g, '');
 
-                return await fetch(uri)
+                return await fetch(uri, reqOptions)
                     .then(res => res.json());
             }
         }
         else
         {
-            const uri = `${URI}/v1/prices/ig/\
+            const uri = `/v1/prices/${broker}/\
                 ${product}/${period}\
                 ?count=1000`.replace(/\s/g, '');
-            return await fetch(uri)
+            return await fetch(uri, reqOptions)
                 .then(res => res.json());
         }
     }
@@ -597,7 +603,7 @@ class StrategyApp extends Component
             let chart = charts[k];
 
             // Reconnect chart live data
-            this.connectChart(chart.product, chart.period);
+            this.connectChart(chart.broker, chart.product, chart.period);
 
             let last_ts = chart.timestamps[chart.timestamps.length-1] - this.getPeriodOffsetSeconds(chart.period);
 
@@ -608,7 +614,7 @@ class StrategyApp extends Component
             while (last_ts < moment().unix() - this.getPeriodOffsetSeconds(chart.period))
             {
                 let data = await this.retrieveChartData(
-                    chart.product, chart.period, 
+                    chart.broker, chart.product, chart.period, 
                     moment(last_ts * 1000), moment(),
                     'Australia/Melbourne'
                 )
@@ -652,14 +658,15 @@ class StrategyApp extends Component
         }
     }
 
-    addChart = (product, period, ohlc_data) =>
+    addChart = (broker, product, period, ohlc_data) =>
     {
         let { charts } = this.state;
 
-        this.connectChart(product, period);
+        this.connectChart(broker, product, period);
 
         const key = product + ':' + period;
         charts[key] = {
+            broker: broker,
             product: product,
             period: period,
             timestamps: ohlc_data.ohlc.timestamps,
@@ -675,7 +682,7 @@ class StrategyApp extends Component
         return charts[key];
     }
 
-    addBacktestChart = (backtest_id, product, period, ohlc_data) =>
+    addBacktestChart = (backtest_id, broker, product, period, ohlc_data) =>
     {
         let { backtestCharts } = this.state;
         if (!(backtest_id in backtestCharts))
@@ -685,6 +692,7 @@ class StrategyApp extends Component
 
         const key = product + ':' + period;
         backtestCharts[backtest_id][key] = {
+            broker: broker,
             product: product,
             period: period,
             timestamps: ohlc_data.ohlc.timestamps,
@@ -715,7 +723,7 @@ class StrategyApp extends Component
         return backtestCharts[backtest_id][product + ':' + period];
     }
 
-    connectChart(product, period)
+    connectChart(broker, product, period)
     {
         const { sio } = this.state;
         sio.emit('subscribe', {
@@ -723,7 +731,7 @@ class StrategyApp extends Component
             'field': 'ontick',
             'items': [
                 {
-                    'broker': 'oanda',
+                    'broker': broker,
                     'product': product,
                     'period': period
                 }
@@ -969,14 +977,12 @@ class StrategyApp extends Component
     {
         const reqOptions = {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: this.props.getHeaders(),
             credentials: 'include'
         }
 
         let res = await fetch(
-            `${URI}/v1/strategy/${strategy_id}/${new_status}?accounts=${accounts.join(',')}`,
+            `/v1/strategy/${strategy_id}/${new_status}?accounts=${accounts.join(',')}`,
             reqOptions
         );
 
@@ -1021,55 +1027,25 @@ class StrategyApp extends Component
         return strategyInfo[strategy_id].accounts[account_id];
     }
 
-    async goLive()
-    {
-        this.toolbar.setStatusMsg('Switching Live...');
-
-        const { account, strategyInfo } = this.state;
-        const strategy_id = account.metadata.current_strategy;
-        await this.requestStrategyStatusUpdate(
-            strategy_id, 
-            Object.keys(strategyInfo[strategy_id].accounts), 
-            'live'
-        );
-    }
-
-    async goOffline()
-    {
-        this.toolbar.setStatusMsg('Switching Paper Trader...');
-
-        const { account, strategyInfo } = this.state;
-        const strategy_id = account.metadata.current_strategy;
-        await this.requestStrategyStatusUpdate(
-            strategy_id, 
-            Object.keys(strategyInfo[strategy_id].accounts), 
-            'offline'
-        );
-    }
-
-    async startScript()
+    async startScript(account_id)
     {
         this.toolbar.setStatusMsg('Starting strategy...');
 
         const { account, strategyInfo } = this.state;
         const strategy_id = account.metadata.current_strategy;
         await this.requestStrategyStatusUpdate(
-            strategy_id, 
-            Object.keys(strategyInfo[strategy_id].accounts), 
-            'start'
+            strategy_id, [account_id], 'start'
         );
     }
 
-    async stopScript()
+    async stopScript(account_id)
     {
         this.toolbar.setStatusMsg('Stopping strategy...');
 
         const { account, strategyInfo } = this.state;
         const strategy_id = account.metadata.current_strategy;
         await this.requestStrategyStatusUpdate(
-            strategy_id, 
-            Object.keys(strategyInfo[strategy_id].accounts), 
-            'stop'
+            strategy_id, [account_id], 'stop'
         );
     }
 
@@ -1332,6 +1308,7 @@ class StrategyApp extends Component
         {
             history[strategy_id] = [];
         }
+        
         history[strategy_id].push(new_item);
         history[strategy_id] = history[strategy_id].slice(Math.max(history[strategy_id].length-10,0));
         
@@ -1414,17 +1391,23 @@ class StrategyApp extends Component
         // Organise into appropriate groups
         for (s_id in toSave)
         {
-            to_update[s_id] = [];
-            to_delete[s_id] = [];
+            to_update[s_id] = { windows: [] };
+            to_delete[s_id] = { windows: [] };
+
+            if (!s_id.includes('/backtest/'))
+            {
+                to_update.account = this.getCurrentAccount(s_id);
+            }
+
             for (let i of toSave[s_id])
             {
                 if (this.windowExists(s_id, i))
                 {
-                    to_update[s_id].push(this.getWindowInfo(s_id, i));
+                    to_update[s_id].windows.push(this.getWindowInfo(s_id, i));
                 } 
                 else
                 {
-                    to_delete[s_id].push(i);
+                    to_delete[s_id].windows.push(i);
                 }
             }
         }
@@ -1436,14 +1419,12 @@ class StrategyApp extends Component
         var requestOptions = {
             method: 'PUT',
             credentials: 'include',
-            headers: {
-                "Content-Type": "application/json"
-            }
+            headers: this.props.getHeaders()
         };
         for (s_id in to_update)
         {
-            requestOptions.body = JSON.stringify({items: to_update[s_id]});
-            const res = await fetch(`${URI}/v1/strategy/${s_id}/gui`, requestOptions);
+            requestOptions.body = JSON.stringify(to_update[s_id]);
+            const res = await fetch(`/v1/strategy/${s_id}/gui`, requestOptions);
             const status = res.status;
 
             if (status !== 200)
@@ -1463,14 +1444,12 @@ class StrategyApp extends Component
         var requestOptions = {
             method: 'DELETE',
             credentials: 'include',
-            headers: {
-                "Content-Type": "application/json"
-            }
+            headers: this.props.getHeaders()
         };
         for (s_id in to_delete)
         {
-            requestOptions.body = JSON.stringify({items: to_delete[s_id]});
-            const res = await fetch(`${URI}/v1/strategy/${s_id}/gui`, requestOptions);
+            requestOptions.body = JSON.stringify(to_delete[s_id]);
+            const res = await fetch(`/v1/strategy/${s_id}/gui`, requestOptions);
             const status = res.status;
 
             if (status !== 200)
@@ -1601,6 +1580,12 @@ class StrategyApp extends Component
         return moment.utc((ts + off * i * direction) * 1000);
     }
 
+    getCurrentAccount = (strategy_id) =>
+    {
+        const strategy = this.getStrategyInfo(strategy_id);
+        return strategy.account;
+    }
+
     getKeys = () =>
     {
         return this.state.keys;
@@ -1608,6 +1593,5 @@ class StrategyApp extends Component
 }
 
 const WAIT_FOR_SAVE = 5;
-const URI = 'http://127.0.0.1:5000';
 
 export default StrategyApp;

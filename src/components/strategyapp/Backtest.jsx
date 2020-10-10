@@ -27,7 +27,6 @@ class Backtest extends Component
     async componentDidMount()
     {
         this.transactions = (await this.props.retrieveTransactions(this.props.id)).transactions;
-        console.log(this.transactions);
 
         let strategy = this.getStrategyInfo();
         this.handleTransactions(strategy.properties.end);
@@ -424,7 +423,5 @@ const ARROW_LEFT = 37;
 const ARROW_UP = 38;
 const ARROW_RIGHT = 39;
 const ARROW_DOWN = 40;
-
-const URI = 'http://127.0.0.1:5000';
 
 export default Backtest;

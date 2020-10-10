@@ -276,11 +276,9 @@ class WindowWrapper extends Component
 
         if (keys.includes(SPACEBAR))
         {
-            // console.log(cursor);
             if (cursor === 'auto')
             {
                 this.hideWindowBtns();
-                // this.setCursor('move');
     
                 if (!is_move && !is_resize)
                 {
@@ -295,10 +293,13 @@ class WindowWrapper extends Component
                 }
             }
         }
-        else if (cursor !== 'auto')
+        else
         {
             this.showWindowBtns(is_top);
-            this.setCursor('auto');
+            if (cursor !== 'auto')
+            {
+                this.setCursor('auto');
+            }
         }
     }
 
