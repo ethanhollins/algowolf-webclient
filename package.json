@@ -1,7 +1,7 @@
 {
   "name": "client",
   "version": "0.1.0",
-  "proxy":"http://api.algowolf.com",
+  "proxy": "http://127.0.0.1:5000",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.30",
@@ -15,6 +15,7 @@
     "@testing-library/react": "^9.5.0",
     "@testing-library/user-event": "^7.2.1",
     "axios": "^0.20.0",
+    "can-ndjson-stream": "^1.0.2",
     "http-proxy-middleware": "^1.0.5",
     "moment-timezone": "^0.5.31",
     "prop-types": "^15.7.2",

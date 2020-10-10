@@ -2,25 +2,34 @@ import React, { Component } from 'react';
 import WindowWrapper from './WindowWrapper';
 import WindowShadow from './WindowShadow';
 import io from 'socket.io-client';
+import ndjsonStream from 'can-ndjson-stream';
 
 class Strategy extends Component 
 {
+    constructor(props)
+    {
+        super(props);
+
+        this.handleStream = this.handleStream.bind(this);
+    }
+
     state = {
         sio: undefined,
         current_page: 0,
         hide_shadows: false
     }
 
-    componentDidMount()
+    async componentDidMount()
     {
-        const sio = this.handleSocket();
-        this.setState({ sio });
+        // const sio = this.handleSocket();
+        // this.setState({ sio });
+        await this.handleStream();
     }
 
     componentWillUnmount()
     {
-        const { sio } = this.state;
-        if (sio !== undefined) sio.disconnect();
+        // const { sio } = this.state;
+        // if (sio !== undefined) sio.disconnect();
     }
 
     render() {
@@ -145,6 +154,43 @@ class Strategy extends Component
     ontrade = (data) =>
     {
         
+    }
+
+    uint8arrayToString = (myUint8Arr) =>
+    {
+        return String.fromCharCode.apply(null, myUint8Arr);
+    }
+
+    async handleStream()
+    {
+        console.log('handling stream')
+        const endpoint = `/v1/strategy/${this.props.id}/stream/ontick`
+
+        const requestOptions = {
+            method: 'POST',
+            headers: this.props.getHeaders(),
+            credentials: 'include',
+            body: JSON.stringify({
+                'GBP_USD': ['M1']
+            })
+        };
+        fetch(endpoint, requestOptions)
+            .then(res => {
+                return ndjsonStream(res.body);
+            })
+            .then(exampleStream => {
+                let read;
+                exampleStream.getReader().read().then(read = (result) => {
+                    if (result.done) return;
+                    console.log(result.value);
+
+                    exampleStream.getReader().read().then(read);
+                })
+            })
+        
+
+        
+        console.log('done');
     }
 
     handleSocket()

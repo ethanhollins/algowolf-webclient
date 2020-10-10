@@ -82,8 +82,8 @@ class StrategyApp extends Component
             let { sio } = this.state;
     
             // Connect to API socket
-            sio = this.handleSocket();
-            this.setState({ sio });
+            // sio = this.handleSocket();
+            // this.setState({ sio });
             
             // Retrieve user specific strategy informations
             const account = await this.retrieveGuiInfo();
@@ -257,6 +257,7 @@ class StrategyApp extends Component
                         clone={this.clone}
                         getURI={this.props.getURI}
                         getCookies={this.props.getCookies}
+                        getHeaders={this.props.getHeaders}
                         getAppContainer={this.getAppContainer}
                         convertScreenUnitToWorldUnit={this.convertScreenUnitToWorldUnit}
                         convertWorldUnitToScreenUnit={this.convertWorldUnitToScreenUnit}
@@ -603,7 +604,7 @@ class StrategyApp extends Component
             let chart = charts[k];
 
             // Reconnect chart live data
-            this.connectChart(chart.broker, chart.product, chart.period);
+            // this.connectChart(chart.broker, chart.product, chart.period);
 
             let last_ts = chart.timestamps[chart.timestamps.length-1] - this.getPeriodOffsetSeconds(chart.period);
 
@@ -662,7 +663,7 @@ class StrategyApp extends Component
     {
         let { charts } = this.state;
 
-        this.connectChart(broker, product, period);
+        // this.connectChart(broker, product, period);
 
         const key = product + ':' + period;
         charts[key] = {

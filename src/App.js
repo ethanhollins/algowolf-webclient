@@ -113,11 +113,12 @@ class App extends Component
             };
     
             const res = await fetch(`/authorize`, requestOptions);
-    
+            
             if (res.status === 200)
             {
                 // Redirect to App
                 const data = await res.json();
+                console.log(data);
                 user_id = data.user_id;
             }
             else
