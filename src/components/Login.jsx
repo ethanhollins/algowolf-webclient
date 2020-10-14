@@ -110,6 +110,7 @@ class Login extends Component
 
     async handleSubmit(event)
     {
+        const { REACT_APP_API_URL } = process.env;
         event.preventDefault();
         const raw = JSON.stringify({
             'username': this.state.username,
@@ -124,7 +125,7 @@ class Login extends Component
             body: raw
         };
 
-        const res = await fetch(`/login`, requestOptions);
+        const res = await fetch(`${REACT_APP_API_URL}/login`, requestOptions);
 
         const status = res.status;
         const data = await res.json();

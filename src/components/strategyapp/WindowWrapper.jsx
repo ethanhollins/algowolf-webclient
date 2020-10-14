@@ -126,6 +126,7 @@ class WindowWrapper extends Component
                 updateChart={this.props.updateChart}
                 getIndicator={this.props.getIndicator}
                 calculateIndicator={this.props.calculateIndicator}
+                resetIndicators={this.props.resetIndicators}
                 getPeriodOffsetSeconds={this.props.getPeriodOffsetSeconds}
                 getDrawings={this.props.getDrawings}
                 getPositions={this.props.getPositions}
@@ -528,7 +529,7 @@ class WindowWrapper extends Component
 
     onClose = () =>
     {
-        this.props.closeWindow(this.getStrategyId(), this.getItemId());
+        // this.props.closeWindow(this.getStrategyId(), this.getItemId());
     }
 
     onMinimize()

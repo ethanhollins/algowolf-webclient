@@ -62,7 +62,7 @@ class Overlay extends Component
                     }
 
                     let i_val = values[i][c_x][y];
-                    if (i_val === null || ohlc[x][0] === null) continue;
+                    if (i_val === null || ohlc === undefined || ohlc[x][0] === null) continue;
 
                     if (!is_future && current_timestamp !== null && timestamps[x] > current_timestamp)
                     {

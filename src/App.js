@@ -28,17 +28,20 @@ class App extends Component
         return (
             <Router >
                 <Switch>
-                    <Route path="/login">
+                    <Route exact path="/">
+                        <Redirect to="/login"/>
+                    </Route>
+                    <Route exact path="/login">
                         {this.getConditionalLoginComponent()}
                     </Route>
-                    <Route path="/logout">
+                    <Route exact path="/logout">
                         <Logout 
                             getURI={this.getURI}
                             getCookies={this.getCookies}
                             setUserId={this.setUserId}
                         />
                     </Route>
-                    <Route path="/app">
+                    <Route exact path="/app">
                         {this.getConditionalAppComponent()}
                     </Route>
 
@@ -98,6 +101,7 @@ class App extends Component
 
     async checkAuthorization()
     {
+        const { REACT_APP_API_URL } = process.env;
         const auth_token = this.getCookies().get('Authorization');
         let user_id = null;
         if (auth_token !== undefined)
@@ -112,7 +116,7 @@ class App extends Component
                 credentials: 'include'
             };
     
-            const res = await fetch(`/authorize`, requestOptions);
+            const res = await fetch(`${REACT_APP_API_URL}/authorize`, requestOptions);
             
             if (res.status === 200)
             {

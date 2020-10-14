@@ -266,7 +266,7 @@ class Study extends Component
                     }
 
                     let i_val = values[i][c_x][y];
-                    if (i_val === null || ohlc[x][0] === null)
+                    if (i_val === null || ohlc === undefined || ohlc[x][0] === null)
                     {
                         result[i][x][y] = null;
                         continue;
@@ -521,6 +521,13 @@ class Study extends Component
     getResult = () =>
     {
         return this.state.result;
+    }
+
+    resetResult = () =>
+    {
+        let { result } = this.state;
+        result = [];
+        this.setState({ result });
     }
 
 }

@@ -134,6 +134,7 @@ class Backtest extends Component
                             updateChart={this.updateChart}
                             getIndicator={this.getIndicator}
                             calculateIndicator={this.calculateIndicator}
+                            resetIndicators={this.props.resetIndicators}
                             getPeriodOffsetSeconds={this.props.getPeriodOffsetSeconds}
                             getCountDate={this.props.getCountDate}
                             getCountDateFromDate={this.props.getCountDateFromDate}

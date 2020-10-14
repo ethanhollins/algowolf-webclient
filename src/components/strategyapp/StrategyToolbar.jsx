@@ -476,15 +476,15 @@ class StrategyToolbar extends Component
         //     },
         //     opened: e.target.getAttribute('name')
         // }
-        const popup = {
-            type: 'chart-settings',
-            size: {
-                width: 60,
-                height: 75
-            },
-            opened: 'general'
-        }
-        this.props.setPopup(popup);
+        // const popup = {
+        //     type: 'chart-settings',
+        //     size: {
+        //         width: 60,
+        //         height: 75
+        //     },
+        //     opened: 'general'
+        // }
+        // this.props.setPopup(popup);
     }
 
     onStatsDropdownItem = (e) =>

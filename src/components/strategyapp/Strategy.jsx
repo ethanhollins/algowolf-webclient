@@ -2,15 +2,12 @@ import React, { Component } from 'react';
 import WindowWrapper from './WindowWrapper';
 import WindowShadow from './WindowShadow';
 import io from 'socket.io-client';
-import ndjsonStream from 'can-ndjson-stream';
 
 class Strategy extends Component 
 {
     constructor(props)
     {
         super(props);
-
-        this.handleStream = this.handleStream.bind(this);
     }
 
     state = {
@@ -21,15 +18,14 @@ class Strategy extends Component
 
     async componentDidMount()
     {
-        // const sio = this.handleSocket();
-        // this.setState({ sio });
-        await this.handleStream();
+        const sio = this.handleSocket();
+        this.setState({ sio });
     }
 
     componentWillUnmount()
     {
-        // const { sio } = this.state;
-        // if (sio !== undefined) sio.disconnect();
+        const { sio } = this.state;
+        if (sio !== undefined) sio.disconnect();
     }
 
     render() {
@@ -134,6 +130,7 @@ class Strategy extends Component
                             updateChart={this.props.updateChart}
                             getIndicator={this.props.getIndicator}
                             calculateIndicator={this.props.calculateIndicator}
+                            resetIndicators={this.props.resetIndicators}
                             getPeriodOffsetSeconds={this.props.getPeriodOffsetSeconds}
                             getCountDate={this.props.getCountDate}
                             getCountDateFromDate={this.props.getCountDateFromDate}
@@ -161,46 +158,14 @@ class Strategy extends Component
         return String.fromCharCode.apply(null, myUint8Arr);
     }
 
-    async handleStream()
-    {
-        console.log('handling stream')
-        const endpoint = `/v1/strategy/${this.props.id}/stream/ontick`
-
-        const requestOptions = {
-            method: 'POST',
-            headers: this.props.getHeaders(),
-            credentials: 'include',
-            body: JSON.stringify({
-                'GBP_USD': ['M1']
-            })
-        };
-        fetch(endpoint, requestOptions)
-            .then(res => {
-                return ndjsonStream(res.body);
-            })
-            .then(exampleStream => {
-                let read;
-                exampleStream.getReader().read().then(read = (result) => {
-                    if (result.done) return;
-                    console.log(result.value);
-
-                    exampleStream.getReader().read().then(read);
-                })
-            })
-        
-
-        
-        console.log('done');
-    }
-
     handleSocket()
     {
-        const endpoint = `/user`
-        const socket = io(endpoint, {
+        const { REACT_APP_STREAM_URL } = process.env;
+        const socket = io(`${REACT_APP_STREAM_URL}/user`, {
             transportOptions: {
                 polling: {
                     extraHeaders: {
-                        Authorization: this.props.getCookies().get('Authorization')
+                        Authorization: `Bearer ${this.props.getCookies().get('Authorization')}`
                     }
                 }
             }

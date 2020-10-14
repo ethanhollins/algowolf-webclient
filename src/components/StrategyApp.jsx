@@ -62,6 +62,8 @@ class StrategyApp extends Component
             this.toolbar = elem;
         }
 
+        this.is_loaded = false;
+
     }
 
     async componentDidMount()
@@ -82,13 +84,15 @@ class StrategyApp extends Component
             let { sio } = this.state;
     
             // Connect to API socket
-            // sio = this.handleSocket();
-            // this.setState({ sio });
+            sio = this.handleSocket();
+            this.setState({ sio });
             
             // Retrieve user specific strategy informations
             const account = await this.retrieveGuiInfo();
             await this.retrieveStrategies(account.metadata.open_strategies);
         }
+
+        this.is_loaded = true;
     }
 
     componentWillUnmount()
@@ -244,6 +248,7 @@ class StrategyApp extends Component
                         updateChart={this.updateBacktestChart}
                         getIndicator={this.getBacktestIndicator}
                         calculateIndicator={this.calculateBacktestIndicator}
+                        resetIndicators={this.resetIndicators}
                         getPeriodOffsetSeconds={this.getPeriodOffsetSeconds}
                         getCountDate={this.getCountDate}
                         getCountDateFromDate={this.getCountDateFromDate}
@@ -287,6 +292,7 @@ class StrategyApp extends Component
                         updateChart={this.updateChart}
                         getIndicator={this.getIndicator}
                         calculateIndicator={this.calculateIndicator}
+                        resetIndicators={this.resetIndicators}
                         getPeriodOffsetSeconds={this.getPeriodOffsetSeconds}
                         getCountDate={this.getCountDate}
                         getCountDateFromDate={this.getCountDateFromDate}
@@ -423,7 +429,8 @@ class StrategyApp extends Component
         const mouse_pos = {
             x: e.clientX, y: e.clientY
         }
-        this.toolbar.closeTemporaryWindows(mouse_pos);
+        if (this.is_loaded)
+            this.toolbar.closeTemporaryWindows(mouse_pos);
     }
 
     onKeyDown(e)
@@ -458,12 +465,14 @@ class StrategyApp extends Component
 
     handleSocket()
     {
-        const endpoint = `/user`
+        const { REACT_APP_STREAM_URL } = process.env;
+        console.log(REACT_APP_STREAM_URL);
+        const endpoint = `${REACT_APP_STREAM_URL}/user`
         const socket = io(endpoint, {
             transportOptions: {
                 polling: {
                     extraHeaders: {
-                        Authorization: 'TEST_TOKEN'
+                        Authorization: `Bearer ${this.props.getCookies().get('Authorization')}`
                     }
                 }
             }
@@ -493,6 +502,7 @@ class StrategyApp extends Component
 
     async retrieveGuiInfo()
     {
+        const { REACT_APP_API_URL } = process.env;
         let { account } = this.state;
 
         const reqOptions = {
@@ -502,7 +512,7 @@ class StrategyApp extends Component
         }
 
         account = await fetch(
-            `/v1/account`,
+            `${REACT_APP_API_URL}/v1/account`,
             reqOptions
         )
             .then(res => res.json());
@@ -513,6 +523,7 @@ class StrategyApp extends Component
 
     async retrieveStrategies(strategy_ids)
     {
+        const { REACT_APP_API_URL } = process.env;
         let { strategyInfo } = this.state;
 
         /** Retrieve strategy info */
@@ -527,7 +538,7 @@ class StrategyApp extends Component
             strategyInfo[strategy_ids[i]] = Object.assign(
                 {}, strategyInfo[strategy_ids[i]],
                 await fetch(
-                    `/v1/strategy/${strategy_ids[i]}`,
+                    `${REACT_APP_API_URL}/v1/strategy/${strategy_ids[i]}`,
                     reqOptions
                 ).then(res => res.json())
             );
@@ -539,6 +550,7 @@ class StrategyApp extends Component
 
     async retrieveTransactions(strategy_id)
     {
+        const { REACT_APP_API_URL } = process.env;
         /** Retrieve strategy info */
         const reqOptions = {
             method: 'GET',
@@ -547,13 +559,14 @@ class StrategyApp extends Component
         }
 
         return await fetch(
-            `/v1/strategy/${strategy_id}/transactions`,
+            `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/transactions`,
             reqOptions
         ).then(res => res.json());
     }
 
     async retrieveChartData(broker, product, period, from, to, tz)
     {
+        const { REACT_APP_API_URL } = process.env;
         const reqOptions = {
             method: 'GET',
             headers: this.props.getHeaders(),
@@ -566,7 +579,7 @@ class StrategyApp extends Component
         {   
             if (to !== undefined)
             {
-                const uri = `/v1/prices/${broker}/\
+                const uri = `${REACT_APP_API_URL}/v1/prices/${broker}/\
                 ${product}/${period}\
                 ?from=${from.format('YYYY-MM-DDTHH:mm:ss')}Z\
                 &to=${to.format('YYYY-MM-DDTHH:mm:ss')}Z\
@@ -576,7 +589,7 @@ class StrategyApp extends Component
             }
             else
             {
-                const uri = `/v1/prices/${broker}/\
+                const uri = `${REACT_APP_API_URL}/v1/prices/${broker}/\
                 ${product}/${period}\
                 ?from=${from.format('YYYY-MM-DDTHH:mm:ss')}Z\
                 &count=1000&tz=${tz}`.replace(/\s/g, '');
@@ -587,7 +600,7 @@ class StrategyApp extends Component
         }
         else
         {
-            const uri = `/v1/prices/${broker}/\
+            const uri = `${REACT_APP_API_URL}/v1/prices/${broker}/\
                 ${product}/${period}\
                 ?count=1000`.replace(/\s/g, '');
             return await fetch(uri, reqOptions)
@@ -604,7 +617,7 @@ class StrategyApp extends Component
             let chart = charts[k];
 
             // Reconnect chart live data
-            // this.connectChart(chart.broker, chart.product, chart.period);
+            this.connectChart(chart.broker, chart.product, chart.period);
 
             let last_ts = chart.timestamps[chart.timestamps.length-1] - this.getPeriodOffsetSeconds(chart.period);
 
@@ -663,7 +676,7 @@ class StrategyApp extends Component
     {
         let { charts } = this.state;
 
-        // this.connectChart(broker, product, period);
+        this.connectChart(broker, product, period);
 
         const key = product + ':' + period;
         charts[key] = {
@@ -728,15 +741,11 @@ class StrategyApp extends Component
     {
         const { sio } = this.state;
         sio.emit('subscribe', {
-            'strategy_id': this.getCurrentStrategy(),
-            'field': 'ontick',
-            'items': [
-                {
-                    'broker': broker,
-                    'product': product,
-                    'period': period
-                }
-            ]
+            strategy_id: this.getCurrentStrategy(),
+            field: 'ontick',
+            items: {
+                [product]: [period]
+            }
         });
     }
 
@@ -957,6 +966,30 @@ class StrategyApp extends Component
         );
     }
 
+    resetIndicators = (chart, chart_indicators) =>
+    {
+        for (let ind of chart_indicators)
+        {
+            console.log(ind.type);
+            if (ind.type in Indicators)
+            {
+                console.log(1);
+                if (chart.product in Indicators[ind.type].timestamps)
+                {
+                    console.log(2);
+                    for (let period in Indicators[ind.type].timestamps[chart.product])
+                    {
+                        console.log(3);
+                        Indicators[ind.type].timestamps[chart.product][period] = [];
+                        Indicators[ind.type].asks[chart.product][period] = [];
+                        Indicators[ind.type].bids[chart.product][period] = [];
+                        console.log(ind.type, chart.product, period);
+                    }
+                }
+            }
+        }
+    }
+
     getBacktestIndicator = (type, price, backtest_id, product, period) =>
     {
         return Indicators[type][price][backtest_id + '/' + product][period];
@@ -976,6 +1009,7 @@ class StrategyApp extends Component
 
     async requestStrategyStatusUpdate(strategy_id, accounts, new_status)
     {
+        const { REACT_APP_API_URL } = process.env;
         const reqOptions = {
             method: 'POST',
             headers: this.props.getHeaders(),
@@ -983,7 +1017,7 @@ class StrategyApp extends Component
         }
 
         let res = await fetch(
-            `/v1/strategy/${strategy_id}/${new_status}?accounts=${accounts.join(',')}`,
+            `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/${new_status}?accounts=${accounts.join(',')}`,
             reqOptions
         );
 
@@ -1386,6 +1420,7 @@ class StrategyApp extends Component
 
     async save(toSave, handleSaveResult)
     {
+        const { REACT_APP_API_URL } = process.env;
         let s_id = undefined;
         let to_update = {};
         let to_delete = {};
@@ -1425,7 +1460,7 @@ class StrategyApp extends Component
         for (s_id in to_update)
         {
             requestOptions.body = JSON.stringify(to_update[s_id]);
-            const res = await fetch(`/v1/strategy/${s_id}/gui`, requestOptions);
+            const res = await fetch(`${REACT_APP_API_URL}/v1/strategy/${s_id}/gui`, requestOptions);
             const status = res.status;
 
             if (status !== 200)
@@ -1450,7 +1485,7 @@ class StrategyApp extends Component
         for (s_id in to_delete)
         {
             requestOptions.body = JSON.stringify(to_delete[s_id]);
-            const res = await fetch(`/v1/strategy/${s_id}/gui`, requestOptions);
+            const res = await fetch(`${REACT_APP_API_URL}/v1/strategy/${s_id}/gui`, requestOptions);
             const status = res.status;
 
             if (status !== 200)
