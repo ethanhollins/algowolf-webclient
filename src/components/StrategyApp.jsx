@@ -690,7 +690,10 @@ class StrategyApp extends Component
         };
 
         this.generateMissingBars(charts[key]);
-        this.generateNextTimestamp(charts[key]);
+        this.generateNextTimestamp(
+            charts[key], 
+            charts[key].timestamps[charts[key].timestamps.length-1] - this.getPeriodOffsetSeconds(charts[key].period)
+        );
 
         this.setState({ charts });
         return charts[key];
@@ -794,11 +797,9 @@ class StrategyApp extends Component
         return chart;
     }
 
-    generateNextTimestamp(chart)
+    generateNextTimestamp(chart, now)
     {
-        const off = this.getPeriodOffsetSeconds(chart.period);        
-        const ask_close = chart.asks[chart.asks.length-1][3];
-        const bid_close = chart.bids[chart.bids.length-1][3];
+        const off = this.getPeriodOffsetSeconds(chart.period);
 
         let ts = chart.timestamps[chart.timestamps.length-1] + off;
         let c_weekend = this.getWeekendDates(ts);
@@ -808,11 +809,11 @@ class StrategyApp extends Component
             c_weekend = this.getWeekendDates(ts);
         }
         
-        while (ts < moment.utc().unix())
+        while (ts <= now)
         {
             chart.timestamps.push(ts);
-            chart.asks.push([ask_close,ask_close,ask_close,ask_close]);
-            chart.bids.push([bid_close,bid_close,bid_close,bid_close]);
+            chart.asks.push([null,null,null,null]);
+            chart.bids.push([null,null,null,null]);
 
             ts += off
             if (ts >= c_weekend[0].unix())
@@ -821,6 +822,7 @@ class StrategyApp extends Component
                 c_weekend = this.getWeekendDates(ts);
             }
         }
+        console.log('NEW: ' + ts);
         // Set Next Timestamp
         chart.next_timestamp = ts;
     }
@@ -830,17 +832,28 @@ class StrategyApp extends Component
         let { charts } = this.state;
         let chart = charts[item['product'] + ':' + item['period']];
         
-        chart.asks[chart.asks.length-1] = item['item']['ask'];
-        chart.bids[chart.bids.length-1] = item['item']['bid'];
-
         if (item['bar_end'])
         {
-            // Add new bar
+            // On Bar End
+            chart.asks[chart.asks.length-1] = item['item']['ask'];
+            chart.bids[chart.bids.length-1] = item['item']['bid'];
+            this.generateNextTimestamp(chart, item['timestamp']);
             chart.timestamps.push(chart.next_timestamp);
             chart.asks.push([null,null,null,null]);
             chart.bids.push([null,null,null,null]);
-
-            this.generateNextTimestamp(chart);
+        }
+        else if (item['timestamp'] >= chart.next_timestamp)
+        {
+            // If real timestamp ahead of chart timestamp
+            this.generateNextTimestamp(chart, item['timestamp']);
+            chart.asks[chart.asks.length-1] = item['item']['ask'];
+            chart.bids[chart.bids.length-1] = item['item']['bid'];
+        }
+        else
+        {
+            // Update Latest Bar
+            chart.asks[chart.asks.length-1] = item['item']['ask'];
+            chart.bids[chart.bids.length-1] = item['item']['bid'];
         }
 
         this.setState({ charts });

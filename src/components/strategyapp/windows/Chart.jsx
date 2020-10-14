@@ -1930,7 +1930,7 @@ class Chart extends Component
         for (let i = bids.length-1; i >= 0; i--)
         {
             c_bid = bids[i][3];
-            if (c_bid !== 0) break;
+            if (c_bid !== null) break;
         }
 
         const screen_pos = camera.convertWorldPosToScreenPos(
