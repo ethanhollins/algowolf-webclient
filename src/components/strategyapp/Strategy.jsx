@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import WindowWrapper from './WindowWrapper';
 import WindowShadow from './WindowShadow';
 import io from 'socket.io-client';
+import { faSolarSystem } from '@fortawesome/pro-light-svg-icons';
 
 class Strategy extends Component 
 {
@@ -13,13 +14,17 @@ class Strategy extends Component
     state = {
         sio: undefined,
         current_page: 0,
-        hide_shadows: false
+        hide_shadows: faSolarSystem,
+        log: [],
     }
 
     async componentDidMount()
     {
+        let { log } = this.state;
+        console.log(this.getStrategyInfo());
+        log = log.concat(this.getStrategyInfo().logs);
         const sio = this.handleSocket();
-        this.setState({ sio });
+        this.setState({ sio, log });
     }
 
     componentWillUnmount()
@@ -216,7 +221,12 @@ class Strategy extends Component
 
         socket.on('ongui', (data) =>
         {
-            if (data.type === 'create_drawings')
+            console.log(data);
+            if (data.type === 'create_drawing')
+            {
+                this.createDrawing(data.item.layer, data.item);
+            }
+            else if (data.type === 'create_drawings')
             {
                 for (let d of data.items)
                 {
@@ -237,6 +247,10 @@ class Strategy extends Component
             else if (data.type === 'delete_all_drawings')
             {
                 this.deleteAllDrawings();
+            }
+            else if (data.type === 'create_log')
+            {
+                this.createLog(data);
             }
         });
 
@@ -308,10 +322,8 @@ class Strategy extends Component
         }
     }
 
-    getDrawingIdx = (layer, id) =>
+    getDrawingIdx = (strategy, layer, id) =>
     {
-        let strategy = this.getStrategyInfo();
-
         if (strategy !== undefined)
         {
             const drawings = strategy.drawings[layer];
@@ -330,7 +342,12 @@ class Strategy extends Component
 
         if (strategy !== undefined)
         {
-            if (this.getDrawingIdx(layer, drawing.id) === undefined)
+            if (!(layer in strategy.drawings))
+            {
+                strategy.drawings[layer] = [];
+            }
+
+            if (this.getDrawingIdx(strategy, layer, drawing.id) === undefined)
             {
                 strategy.drawings[layer].push(drawing);
             } 
@@ -344,7 +361,7 @@ class Strategy extends Component
 
         if (strategy !== undefined)
         {
-            const idx = this.getDrawingIdx(layer, drawing_id);
+            const idx = this.getDrawingIdx(strategy, layer, drawing_id);
             if (idx !== undefined)
             {
                 strategy.drawings[layer].splice(idx, 1);
@@ -376,6 +393,13 @@ class Strategy extends Component
             strategy.drawings = {}
             this.props.updateStrategyInfo();
         }
+    }
+
+    createLog = (data) =>
+    {
+        let { log } = this.state;
+        log.push(data);
+        this.setState({ log });
     }
 
     getStrategyInfo = () =>
@@ -432,7 +456,7 @@ class Strategy extends Component
 
     getLog = () =>
     {
-        return [];
+        return this.state.log;
     }
 
     getCurrentTimestamp = () =>

@@ -2115,13 +2115,14 @@ class Chart extends Component
     {
         const timestamps = this.getTimestamps();
         // Return undefined if timestamp is greater than latest existing timestamp
-        if (!this.isBacktest() && ts >= this.getNextTimestamp())
+        if (!this.isBacktest() && ts >= this.getNextTimestamp() + this.getPeriodOffsetSeconds(this.getChart().period))
             return undefined
 
         const indicies = [...Array(timestamps.length).keys()]
         const idx = indicies.reduce(function(prev, curr) {
             return (
-                Math.abs(timestamps[curr] - ts) < Math.abs(timestamps[prev] - ts) ? curr : prev
+                (Math.abs(timestamps[curr] - ts) < Math.abs(timestamps[prev] - ts)) && 
+                timestamps[curr] <= ts ? curr : prev
             );
         });
 
@@ -2689,6 +2690,7 @@ class Chart extends Component
         const ohlc_data = await this.props.retrieveChartData(
             this.getBroker(), this.getProduct(), this.getPeriod(), start, end
         );
+        console.log(ohlc_data);
         this.props.addChart(
             this.getBroker(), this.getProduct(), this.getPeriod(), ohlc_data
         );

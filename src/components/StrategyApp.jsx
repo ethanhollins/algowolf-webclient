@@ -46,6 +46,7 @@ class StrategyApp extends Component
         this.onKeyDown = this.onKeyDown.bind(this);
         this.onKeyUp = this.onKeyUp.bind(this);
 
+        this.retrieveTransactions = this.retrieveTransactions.bind(this);
         this.retrieveChartData = this.retrieveChartData.bind(this);
 
         this.setAppContainerRef = elem => {
@@ -205,12 +206,16 @@ class StrategyApp extends Component
 
     generateStrategy()
     {
-        let { account } = this.state;
+        let { account, strategyInfo } = this.state;
 
         if ('metadata' in account)
         {
             const current_strategy = account.metadata.current_strategy;
-            if (account.metadata.open_strategies.includes(current_strategy))
+            if (!(current_strategy in strategyInfo))
+            {
+                return <React.Fragment />;
+            }
+            else if (account.metadata.open_strategies.includes(current_strategy))
             {
                 if (current_strategy.includes('/backtest/'))
                 {
@@ -466,7 +471,6 @@ class StrategyApp extends Component
     handleSocket()
     {
         const { REACT_APP_STREAM_URL } = process.env;
-        console.log(REACT_APP_STREAM_URL);
         const endpoint = `${REACT_APP_STREAM_URL}/user`
         const socket = io(endpoint, {
             transportOptions: {
@@ -561,7 +565,7 @@ class StrategyApp extends Component
         return await fetch(
             `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/transactions`,
             reqOptions
-        ).then(res => res.json());
+        ).then(res => res.json());  
     }
 
     async retrieveChartData(broker, product, period, from, to, tz)
@@ -690,10 +694,6 @@ class StrategyApp extends Component
         };
 
         this.generateMissingBars(charts[key]);
-        this.generateNextTimestamp(
-            charts[key], 
-            charts[key].timestamps[charts[key].timestamps.length-1] - this.getPeriodOffsetSeconds(charts[key].period)
-        );
 
         this.setState({ charts });
         return charts[key];
@@ -822,7 +822,6 @@ class StrategyApp extends Component
                 c_weekend = this.getWeekendDates(ts);
             }
         }
-        console.log('NEW: ' + ts);
         // Set Next Timestamp
         chart.next_timestamp = ts;
     }
@@ -832,8 +831,14 @@ class StrategyApp extends Component
         let { charts } = this.state;
         let chart = charts[item['product'] + ':' + item['period']];
         
+        if (chart.next_timestamp === null)
+        {
+            this.generateNextTimestamp(chart, item['timestamp']);
+        }
+
         if (item['bar_end'])
         {
+            console.log('END: ' + item['timestamp']);
             // On Bar End
             chart.asks[chart.asks.length-1] = item['item']['ask'];
             chart.bids[chart.bids.length-1] = item['item']['bid'];
@@ -844,6 +849,7 @@ class StrategyApp extends Component
         }
         else if (item['timestamp'] >= chart.next_timestamp)
         {
+            console.log('EXCEPT: ' + item['timestamp'])
             // If real timestamp ahead of chart timestamp
             this.generateNextTimestamp(chart, item['timestamp']);
             chart.asks[chart.asks.length-1] = item['item']['ask'];
@@ -983,20 +989,15 @@ class StrategyApp extends Component
     {
         for (let ind of chart_indicators)
         {
-            console.log(ind.type);
             if (ind.type in Indicators)
             {
-                console.log(1);
                 if (chart.product in Indicators[ind.type].timestamps)
                 {
-                    console.log(2);
                     for (let period in Indicators[ind.type].timestamps[chart.product])
                     {
-                        console.log(3);
                         Indicators[ind.type].timestamps[chart.product][period] = [];
                         Indicators[ind.type].asks[chart.product][period] = [];
                         Indicators[ind.type].bids[chart.product][period] = [];
-                        console.log(ind.type, chart.product, period);
                     }
                 }
             }
@@ -1445,7 +1446,7 @@ class StrategyApp extends Component
 
             if (!s_id.includes('/backtest/'))
             {
-                to_update.account = this.getCurrentAccount(s_id);
+                to_update[s_id].account = this.getCurrentAccount(s_id);
             }
 
             for (let i of toSave[s_id])
@@ -1479,12 +1480,12 @@ class StrategyApp extends Component
             if (status !== 200)
             {
                 // Re populate save with failed window IDs
-                for (let i of to_update[s_id])
+                for (let i of to_update[s_id].windows)
                 {
                     if (!result.hasOwnProperty(s_id))
-                        result[s_id] = [];
-                    if (!result[s_id].includes(i.id))
-                        result[s_id].push(i.id);
+                        result[s_id].windows = [];
+                    if (!result[s_id].windows.includes(i.id))
+                        result[s_id].windows.windows.push(i.id);
                 }
             }
         }
@@ -1504,12 +1505,12 @@ class StrategyApp extends Component
             if (status !== 200)
             {
                 // Re populate save with failed window IDs
-                for (let i of to_delete[s_id])
+                for (let i of to_delete[s_id].windows)
                 {
                     if (!result.hasOwnProperty(s_id))
-                        result[s_id] = [];
-                    if (!result[s_id].includes(i))
-                        result[s_id].push(i);
+                        result[s_id].windows = [];
+                    if (!result[s_id].windows.includes(i))
+                        result[s_id].windows.push(i);
                 }
             }
         }

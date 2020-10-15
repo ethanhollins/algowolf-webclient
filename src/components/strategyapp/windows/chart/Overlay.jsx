@@ -29,7 +29,7 @@ class Overlay extends Component
         // Iterate columns
         for (let i = 0; i < values.length; i++)
         {
-            ctx.lineWidth = 1.5;
+            ctx.lineWidth = 2;
             let current_pos = null;
 
             // Iterate rows

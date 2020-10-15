@@ -153,9 +153,9 @@ class Backtest extends Component
         return gen_windows;
     }
 
-    addChart = (product, period, ohlc_data) =>
+    addChart = (broker, product, period, ohlc_data) =>
     {
-        return this.props.addChart(this.props.id, product, period, ohlc_data)
+        return this.props.addChart(this.props.id, broker, product, period, ohlc_data)
     }
 
     getChart = (product, period) =>
