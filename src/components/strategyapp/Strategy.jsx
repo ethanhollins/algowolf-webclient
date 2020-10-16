@@ -22,7 +22,10 @@ class Strategy extends Component
     {
         let { log } = this.state;
         console.log(this.getStrategyInfo());
-        log = log.concat(this.getStrategyInfo().logs);
+
+        const loaded_logs = this.getStrategyInfo().logs;
+        if (loaded_logs !== undefined)
+            log = log.concat(loaded_logs);
         const sio = this.handleSocket();
         this.setState({ sio, log });
     }
