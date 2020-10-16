@@ -446,7 +446,8 @@ class StrategyApp extends Component
         {
             keys.push(e.keyCode);
             this.setState({ keys });
-            this.strategy.handleKeys();
+            if (this.strategy !== undefined)
+                this.strategy.handleKeys();
         }
 
     }
