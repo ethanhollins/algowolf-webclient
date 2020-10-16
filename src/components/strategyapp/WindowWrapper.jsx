@@ -122,6 +122,7 @@ class WindowWrapper extends Component
                 setCursor={this.setCursor}
     
                 // Window Props
+                connectChart={this.props.connectChart}
                 retrieveChartData={this.props.retrieveChartData}
                 addChart={this.props.addChart}
                 getChart={this.props.getChart}

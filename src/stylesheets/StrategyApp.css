@@ -789,7 +789,7 @@
     max-height: calc(100% - 35px);
     white-space: pre-wrap;
     overflow: auto;
-    font-size: 1.0em;
+    font-size: 0.9em;
     font-family: 'Courier New', Courier, monospace;
     line-height: 1.5em;
 }

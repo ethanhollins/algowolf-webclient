@@ -2687,10 +2687,10 @@ class Chart extends Component
             end = moment();
         }
 
+        this.props.connectChart(this.getBroker(), this.getProduct(), this.getPeriod());
         const ohlc_data = await this.props.retrieveChartData(
             this.getBroker(), this.getProduct(), this.getPeriod(), start, end
         );
-        console.log(ohlc_data);
         this.props.addChart(
             this.getBroker(), this.getProduct(), this.getPeriod(), ohlc_data
         );

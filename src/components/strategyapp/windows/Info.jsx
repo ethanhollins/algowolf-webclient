@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import moment from "moment-timezone";
 
 class Info extends Component
 {
@@ -25,7 +24,11 @@ class Info extends Component
 
     generateInfo()
     {
-        
+        // Get current hovered timestamp
+
+        // Generate default info, check settings for visible items
+
+        // Check for info at timestamp
     }
 }
 

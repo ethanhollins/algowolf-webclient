@@ -133,6 +133,7 @@ class Strategy extends Component
                             getLastHistoryAction={this.props.getLastHistoryAction}
                             deleteHistory={this.props.deleteHistory}
                             // Chart Functions
+                            connectChart={this.props.connectChart}
                             retrieveChartData={this.props.retrieveChartData}
                             addChart={this.props.addChart}
                             getChart={this.props.getChart}
