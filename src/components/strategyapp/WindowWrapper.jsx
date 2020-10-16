@@ -10,6 +10,8 @@ import {
 import _ from 'underscore';
 import Chart from './windows/Chart';
 import Log from './windows/Log';
+import Info from './windows/Info';
+import Dockable from './windows/Dockable';
 
 class WindowWrapper extends Component 
 {
@@ -144,11 +146,33 @@ class WindowWrapper extends Component
         }
         else if (this.state.info.type === 'log')
         {
-            return <Log
+            const sub_window = <Log
                 strategy_id={this.props.strategy_id}
                 item_id={this.state.info.id}
+                title={'Script Log'}
                 getLog={this.props.getLog}
-            />
+            />;
+
+            return <Dockable
+                strategy_id={this.props.strategy_id}
+                item_id={this.state.info.id}
+                window={sub_window}
+            />;
+        }
+        else if (this.state.info.type === 'info')
+        {
+            const sub_window = <Info
+                strategy_id={this.props.strategy_id}
+                item_id={this.state.info.id}
+                title={'Info'}
+                getInfo={this.props.getInfo}
+            />;
+
+            return <Dockable
+                strategy_id={this.props.strategy_id}
+                item_id={this.state.info.id}
+                window={sub_window}
+            />;
         }
 
         return <React.Fragment/>;
@@ -477,6 +501,9 @@ class WindowWrapper extends Component
         if (is_move)
         {
             is_move = false;
+
+            pos.x = Math.round(pos.x)
+            pos.y = Math.round(pos.y)
             const new_item = {
                 id: this.getItemId(),
                 action: 'move',
@@ -489,11 +516,13 @@ class WindowWrapper extends Component
             if (this.hasMoved(new_item))
                 this.props.addHistory(this.getStrategyId(), new_item);
 
-            this.setState({ is_move });
+            this.setState({ is_move, pos });
         }
         if (is_resize)
         {
             is_resize = false;
+            size.width = Math.round(size.width)
+            size.height = Math.round(size.height)
             const new_item = {
                 id: this.getItemId(),
                 action: 'resize',
@@ -506,7 +535,7 @@ class WindowWrapper extends Component
             if (this.hasResized(new_item))
                 this.props.addHistory(this.getStrategyId(), new_item);
 
-            this.setState({ is_resize });
+            this.setState({ is_resize, size });
         }
         this.props.hideShadows(false);
     }
@@ -607,10 +636,10 @@ class WindowWrapper extends Component
                 { x: scale.x, y: scale.y }, container_size, scale
             );
 
-            window_wrapper.style.left = parseInt(screen_pos.x) + "px";
-            window_wrapper.style.top = parseInt(screen_pos.y) + "px";
-            window_wrapper.style.width = parseInt(screen_size.x) + "px";
-            window_wrapper.style.height = parseInt(screen_size.y) + "px";
+            window_wrapper.style.left = Math.round(screen_pos.x) + "px";
+            window_wrapper.style.top = Math.round(screen_pos.y) + "px";
+            window_wrapper.style.width = Math.round(screen_size.x) + "px";
+            window_wrapper.style.height = Math.round(screen_size.y) + "px";
         }
         else
         {
@@ -626,10 +655,10 @@ class WindowWrapper extends Component
                 { x: Math.round(size.width), y: Math.round(size.height) }, container_size, scale
             );
 
-            window_wrapper.style.left = parseInt(screen_pos.x) + "px";
-            window_wrapper.style.top = parseInt(screen_pos.y) + "px";
-            window_wrapper.style.width = parseInt(screen_size.x) + "px";
-            window_wrapper.style.height = parseInt(screen_size.y) + "px";
+            window_wrapper.style.left = Math.round(screen_pos.x) + "px";
+            window_wrapper.style.top = Math.round(screen_pos.y) + "px";
+            window_wrapper.style.width = Math.round(screen_size.x) + "px";
+            window_wrapper.style.height = Math.round(screen_size.y) + "px";
         }
     }
 

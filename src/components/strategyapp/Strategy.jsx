@@ -16,6 +16,7 @@ class Strategy extends Component
         current_page: 0,
         hide_shadows: faSolarSystem,
         log: [],
+        info: {}
     }
 
     async componentDidMount()
@@ -146,8 +147,9 @@ class Strategy extends Component
                             getPositions={this.getPositions}
                             getOrders={this.getOrders}
                             getCurrentTimestamp={this.getCurrentTimestamp}
-                            // Log Functions
+                            // Other Window Functions
                             getLog={this.getLog}
+                            getInfo={this.getInfo}
                         />
                     )
                 }
@@ -254,6 +256,10 @@ class Strategy extends Component
             else if (data.type === 'create_log')
             {
                 this.createLog(data);
+            }
+            else if (data.type === 'create_info')
+            {
+                this.createInfo(data);
             }
         });
 
@@ -405,6 +411,17 @@ class Strategy extends Component
         this.setState({ log });
     }
 
+    createInfo = (data) =>
+    {
+        let { info } = this.state;
+        if (!(data.timestamp in info))
+        {
+            info[data.timestamp] = [];
+        }
+
+        info[data.timestamp].push(data.item);
+    }
+
     getStrategyInfo = () =>
     {
         const strategy_id = this.props.id;
@@ -460,6 +477,11 @@ class Strategy extends Component
     getLog = () =>
     {
         return this.state.log;
+    }
+
+    getInfo = () =>
+    {
+        return this.state.info;
     }
 
     getCurrentTimestamp = () =>

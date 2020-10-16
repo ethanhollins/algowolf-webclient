@@ -331,7 +331,7 @@ class StrategyToolbar extends Component
                 <React.Fragment>
 
                 <FontAwesomeIcon id='live_status' className='toolbox icon' icon={faCircle} />
-                <span id='live_status' className='toolbox label'>Strategy running</span>
+                <span id='live_status' className='toolbox label'>Strategy Running</span>
 
                 </React.Fragment>
             );
@@ -342,7 +342,7 @@ class StrategyToolbar extends Component
                 <React.Fragment>
 
                 <FontAwesomeIcon id='offline_status' className='toolbox icon' icon={faCircle} />
-                <span id='offline_status' className='toolbox label'>Strategy stopped</span>
+                <span id='offline_status' className='toolbox label'>Strategy Stopped</span>
 
                 </React.Fragment>
             );

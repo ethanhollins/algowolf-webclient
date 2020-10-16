@@ -16,13 +16,8 @@ class Log extends Component
     {
         return (
             <div className='log background'>
-                <div className='log header'>
-                    <span>Script Logs</span>
-                </div>
-                <div className='log body-background'>
-                    <div ref={this.setLogBodyRef} className='log body'>
-                        {this.generateLog()}
-                    </div>
+                <div ref={this.setLogBodyRef} className='log body'>
+                    {this.generateLog()}
                 </div>
             </div>
         );

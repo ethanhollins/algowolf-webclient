@@ -15,14 +15,9 @@ class Info extends Component
     render()
     {
         return (
-            <div className='log background'>
-                <div className='log header'>
-                    <span>Info</span>
-                </div>
-                <div className='info body-background'>
-                    <div ref={this.setInfoBodyRef} className='info body'>
-                        {this.generateInfo()}
-                    </div>
+            <div className='info background'>
+                <div ref={this.setInfoBodyRef} className='info body'>
+                    {this.generateInfo()}
                 </div>
             </div>
         );
