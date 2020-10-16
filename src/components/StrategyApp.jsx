@@ -824,8 +824,6 @@ class StrategyApp extends Component
         
         while (ts <= now)
         {
-            console.log(ts);
-            console.log(now);
             chart.timestamps.push(ts);
             chart.asks.push([null,null,null,null]);
             chart.bids.push([null,null,null,null]);
@@ -837,7 +835,6 @@ class StrategyApp extends Component
                 c_weekend = this.getWeekendDates(ts);
             }
         }
-        console.log('----');
         // Set Next Timestamp
         chart.next_timestamp = ts;
     }
@@ -860,11 +857,8 @@ class StrategyApp extends Component
                 }
             }
             
-            console.log(item['timestamp']);
-            console.log(chart.next_timestamp);
             if (item['bar_end'])
             {
-                console.log('END: ' + item['timestamp']);
                 // On Bar End
                 chart.asks[chart.asks.length-1] = item['item']['ask'];
                 chart.bids[chart.bids.length-1] = item['item']['bid'];
@@ -875,7 +869,6 @@ class StrategyApp extends Component
             }
             else if (item['timestamp'] >= chart.next_timestamp)
             {
-                console.log('EXCEPT: ' + item['timestamp'])
                 // If real timestamp ahead of chart timestamp
                 this.generateNextTimestamp(chart, item['timestamp']);
                 chart.asks[chart.asks.length-1] = item['item']['ask'];
