@@ -2687,7 +2687,9 @@ class Chart extends Component
             end = moment();
         }
 
-        this.props.connectChart(this.getBroker(), this.getProduct(), this.getPeriod());
+        if (!this.isBacktest())
+            this.props.connectChart(this.getBroker(), this.getProduct(), this.getPeriod());
+            
         const ohlc_data = await this.props.retrieveChartData(
             this.getBroker(), this.getProduct(), this.getPeriod(), start, end
         );
