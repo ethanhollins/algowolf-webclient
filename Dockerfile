@@ -11,7 +11,6 @@ COPY package-lock.json ./
 RUN npm config set "@fortawesome:registry" https://npm.fontawesome.com/
 RUN npm config set "//npm.fontawesome.com/:_authToken" 743E6677-8D1F-452F-B620-C719403539E7
 RUN npm ci --silent
-RUN npm install react-scripts@3.4.1 -g --silent
 
 # add app
 COPY . ./

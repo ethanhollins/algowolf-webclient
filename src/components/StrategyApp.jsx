@@ -1503,9 +1503,9 @@ class StrategyApp extends Component
                 for (let i of to_update[s_id].windows)
                 {
                     if (!result.hasOwnProperty(s_id))
-                        result[s_id].windows = [];
+                        result[s_id] = { windows: [] };
                     if (!result[s_id].windows.includes(i.id))
-                        result[s_id].windows.windows.push(i.id);
+                        result[s_id].windows.push(i.id);
                 }
             }
         }
@@ -1528,7 +1528,7 @@ class StrategyApp extends Component
                 for (let i of to_delete[s_id].windows)
                 {
                     if (!result.hasOwnProperty(s_id))
-                        result[s_id].windows = [];
+                        result[s_id] = { windows: [] };
                     if (!result[s_id].windows.includes(i))
                         result[s_id].windows.push(i);
                 }
