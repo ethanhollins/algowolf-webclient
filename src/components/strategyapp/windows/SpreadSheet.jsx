@@ -7,7 +7,7 @@ class Info extends Component
     {
         super(props);
 
-        this.updateInfo = this.updateInfo.bind(this);
+        this.onMouseMoveThrottled = this.onMouseMoveThrottled.bind(this);
 
         this.setInfoBodyRef = elem => {
             this.infoBody = elem;
@@ -23,16 +23,13 @@ class Info extends Component
         return (
             <div className='info background'>
                 <div ref={this.setInfoBodyRef} className='info body'>
-                    <div className='info header'>
-                        Chart Info
-                    </div>
                     {this.state.current_info}
                 </div>
             </div>
         );
     }
 
-    updateInfo = (mouse_pos) =>
+    getInfo = (mouse_pos) =>
     {
         // Get current hovered timestamp
         const top_window = this.props.getTopWindow(this.props.strategy_id, mouse_pos);
@@ -59,6 +56,9 @@ class Info extends Component
                         current_info.push(
                             <React.Fragment key={'chart'}>
                             
+                            <div className='info header'>
+                                Chart Info
+                            </div>
                             <div className='info row'>
                                 <div className='info item'>Time</div>
                                 <div className='info item right'>{time}</div>
@@ -92,11 +92,11 @@ class Info extends Component
                                     Strategy Info
                                 </div>
                             );
-                            for (let i=0; i < info[prices.timestamp].length; i++)
+                            for (let i=0; i < info[prices.timestamp]; i++)
                             {
                                 const item = info[prices.timestamp][i];
                                 current_info.push(
-                                    <div key={i} className='info row'>
+                                    <div className='info row'>
                                         <div className='info item'>{item.name}</div>
                                         <div className='info item right'>{item.value}</div>
                                     </div>
@@ -110,6 +110,11 @@ class Info extends Component
                 }
             }
         }
+    }
+
+    onMouseMoveThrottled(mouse_pos)
+    {
+        this.getInfo(mouse_pos);
     }
 }
 

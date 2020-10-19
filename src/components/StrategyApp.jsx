@@ -3,6 +3,7 @@ import Camera from './strategyapp/Camera';
 import Indicators from './strategyapp/Indicators';
 import io from 'socket.io-client';
 import moment from "moment-timezone";
+import _ from 'underscore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faPlus } from '@fortawesome/pro-light-svg-icons';
 import Strategy from './strategyapp/Strategy';
@@ -28,6 +29,7 @@ class StrategyApp extends Component
             width: 0, height: 0
         },
         scale: { x: 100, y: 100 },
+        mouse_pos: { x: 0, y: 0 },
         popup: null,
         hovered: {},
         toSave: [],
@@ -41,14 +43,17 @@ class StrategyApp extends Component
         super(props);
 
         this.update = this.update.bind(this);
+        this.onMouseMoveThrottled = _.throttle(this.onMouseMoveThrottled.bind(this), 20);
         this.onMouseUp = this.onMouseUp.bind(this);
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
         this.onKeyUp = this.onKeyUp.bind(this);
-
+        
+        this.updateInfo = this.updateInfo.bind(this);
         this.connectChart = this.connectChart.bind(this);
         this.retrieveTransactions = this.retrieveTransactions.bind(this);
         this.retrieveChartData = this.retrieveChartData.bind(this);
+        this.updateInputVariables = this.updateInputVariables.bind(this);
 
         this.setAppContainerRef = elem => {
             this.appContainer = elem;
@@ -71,6 +76,7 @@ class StrategyApp extends Component
     async componentDidMount()
     {
         this.updateWindowDimensions();
+        window.addEventListener("mousemove", this.onMouseMoveThrottled)
         window.addEventListener("mouseup", this.onMouseUp);
         window.addEventListener("resize", this.update);
         window.addEventListener("keydown", this.onKeyDown);
@@ -99,6 +105,7 @@ class StrategyApp extends Component
 
     componentWillUnmount()
     {
+        window.removeEventListener("mousemove", this.onMouseMoveThrottled);
         window.removeEventListener("mouseup", this.onMouseUp);
         window.removeEventListener("resize", this.update);
         window.removeEventListener("keydown", this.onKeyDown);
@@ -227,10 +234,12 @@ class StrategyApp extends Component
                         getAppContainer={this.getAppContainer}
                         convertScreenUnitToWorldUnit={this.convertScreenUnitToWorldUnit}
                         convertWorldUnitToScreenUnit={this.convertWorldUnitToScreenUnit}
+                        getMousePos={this.getMousePos}
                         getSize={this.getSize}
                         getScale={this.getScale}
                         getStrategyInfo={this.getStrategyInfo}
                         updateStrategyInfo={this.updateStrategyInfo}
+                        updateInfo={this.updateInfo}
                         getChartElement={this.getChartElement}
                         getCamera={this.getCamera}
                         getSio={this.getSio}
@@ -239,7 +248,9 @@ class StrategyApp extends Component
                         // Window Funcs
                         closeWindow={this.closeWindow}
                         windowExists={this.windowExists}
+                        getWindowById={this.getWindowById}
                         isTopWindow={this.isTopWindow}
+                        getTopWindow={this.getTopWindow}
                         setTopWindow={this.setTopWindow}
                         // History Functions
                         addHistory={this.addHistory}
@@ -272,10 +283,13 @@ class StrategyApp extends Component
                         getAppContainer={this.getAppContainer}
                         convertScreenUnitToWorldUnit={this.convertScreenUnitToWorldUnit}
                         convertWorldUnitToScreenUnit={this.convertWorldUnitToScreenUnit}
+                        getMousePos={this.getMousePos}
                         getSize={this.getSize}
                         getScale={this.getScale}
                         getStrategyInfo={this.getStrategyInfo}
                         updateStrategyInfo={this.updateStrategyInfo}
+                        updateInfo={this.updateInfo}
+                        updateInputVariables={this.updateInputVariables}
                         getChartElement={this.getChartElement}
                         getCamera={this.getCamera}
                         getSio={this.getSio}
@@ -284,7 +298,9 @@ class StrategyApp extends Component
                         // Window Funcs
                         closeWindow={this.closeWindow}
                         windowExists={this.windowExists}
+                        getWindowById={this.getWindowById}
                         isTopWindow={this.isTopWindow}
+                        getTopWindow={this.getTopWindow}
                         setTopWindow={this.setTopWindow}
                         // History Functions
                         addHistory={this.addHistory}
@@ -431,6 +447,47 @@ class StrategyApp extends Component
         }
     }
 
+    onMouseMoveThrottled(e)
+    {
+        let { mouse_pos } = this.state;
+        
+        let update_pos = false;
+        if (Math.abs(mouse_pos.x - e.clientX) >= 1 || 
+            Math.abs(mouse_pos.y - e.clientY) >= 1)
+        {
+            update_pos = true;
+            mouse_pos = { x: e.clientX, y: e.clientY };
+        }
+
+        const keys = this.getKeys();
+
+        if (!keys.includes(SPACEBAR) && this.is_loaded && update_pos)
+        {
+            for (let w of this.strategy.windows)
+            {
+                if (w.getInnerElement().onMouseMoveThrottled !== undefined)
+                {
+                    w.getInnerElement().onMouseMoveThrottled(mouse_pos);
+                }
+            }
+            this.setState({ mouse_pos });
+        }
+    }
+
+    updateInfo(mouse_pos)
+    {
+        if (this.is_loaded)
+        {
+            for (let w of this.strategy.windows)
+            {
+                if (w.getInnerElement().updateInfo !== undefined)
+                {
+                    w.getInnerElement().updateInfo(mouse_pos);
+                }
+            }
+        }
+    }
+
     onMouseUp(e)
     {
         const mouse_pos = {
@@ -571,6 +628,27 @@ class StrategyApp extends Component
         ).then(res => res.json());  
     }
 
+    async updateInputVariables(strategy_id, input_variables)
+    {
+        const { REACT_APP_API_URL } = process.env;
+        /** Retrieve strategy info */
+        const reqOptions = {
+            method: 'POST',
+            headers: this.props.getHeaders(),
+            credentials: 'include',
+            body: JSON.stringify({'input_variables': input_variables})
+        }
+
+        let res = await fetch(
+            `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/variables`,
+            reqOptions
+        ).then(res => res.json());
+
+        let strategy = this.getStrategyInfo(strategy_id);
+        strategy.input_variables = res.input_variables;
+        this.updateStrategyInfo();
+    }
+
     async retrieveChartData(broker, product, period, from, to, tz)
     {
         const { REACT_APP_API_URL } = process.env;
@@ -592,7 +670,11 @@ class StrategyApp extends Component
                 &to=${to.format('YYYY-MM-DDTHH:mm:ss')}Z\
                 &tz=${tz}`.replace(/\s/g, '');
                 return await fetch(uri, reqOptions)
-                    .then(res => res.json());
+                    .then(res => res.text())
+                    .then(res => {
+                        res = res.replace(/\bNaN\b/g, null);
+                        return JSON.parse(res);
+                    });
             }
             else
             {
@@ -602,7 +684,11 @@ class StrategyApp extends Component
                 &count=1000&tz=${tz}`.replace(/\s/g, '');
 
                 return await fetch(uri, reqOptions)
-                    .then(res => res.json());
+                    .then(res => res = res.text())
+                    .then(res => {
+                        res = res.replace(/\bNaN\b/g, null);
+                        return JSON.parse(res);
+                    });
             }
         }
         else
@@ -611,7 +697,11 @@ class StrategyApp extends Component
                 ${product}/${period}\
                 ?count=1000`.replace(/\s/g, '');
             return await fetch(uri, reqOptions)
-                .then(res => res.json());
+                .then(res => res = res.text())
+                .then(res => {
+                    res = res.replace(/\bNaN\b/g, null);
+                    return JSON.parse(res);
+                });
         }
     }
 
@@ -1125,6 +1215,21 @@ class StrategyApp extends Component
         for (let i = 0; i < strategy.windows.length; i++)
         {
             if (strategy.windows[i].id === item_id) return strategy.windows[i];
+        }
+        return undefined;
+    }
+
+    getWindowById = (item_id) =>
+    {
+        if (this.is_loaded)
+        {
+            for (let i of this.strategy.windows)
+            {
+                if (i.getItemId() === item_id)
+                {
+                    return i;
+                }
+            }
         }
         return undefined;
     }
@@ -1656,12 +1761,18 @@ class StrategyApp extends Component
         return strategy.account;
     }
 
+    getMousePos = () =>
+    {
+        return this.state.mouse_pos;
+    }
+
     getKeys = () =>
     {
         return this.state.keys;
     }
 }
 
+const SPACEBAR = 32;
 const WAIT_FOR_SAVE = 5;
 
 export default StrategyApp;

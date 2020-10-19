@@ -9,8 +9,6 @@ import {
 } from '@fortawesome/pro-light-svg-icons';
 import _ from 'underscore';
 import Chart from './windows/Chart';
-import Log from './windows/Log';
-import Info from './windows/Info';
 import Dockable from './windows/Dockable';
 
 class WindowWrapper extends Component 
@@ -34,6 +32,10 @@ class WindowWrapper extends Component
         this.setWindowWrapperRef = elem => {
             this.windowWrapper = elem;
         };
+
+        this.setInnerElementRef = elem => {
+            this.innerElement = elem;
+        }
 
         this.setCameraRef = elem => {
             this.camera = elem;
@@ -108,6 +110,7 @@ class WindowWrapper extends Component
         if (this.state.info.type === 'chart')
         {
             return (<Chart
+                ref={this.setInnerElementRef}
                 strategy_id={this.props.strategy_id}
                 item_id={this.state.info.id}
                 // Universal Props
@@ -117,6 +120,7 @@ class WindowWrapper extends Component
                 getWindowWorldPos={this.getWorldPos}
                 getWindowScreenPos={this.getScreenPos}
                 getWindowSize={this.getWorldSize}
+                getMousePos={this.props.getMousePos}
                 getKeys={this.props.getKeys}
                 getCursor={this.getCursor}
                 setCursor={this.setCursor}
@@ -140,6 +144,7 @@ class WindowWrapper extends Component
                 getCountDateFromDate={this.props.getCountDateFromDate}
                 getStrategyInfo={this.props.getStrategyInfo}
                 updateStrategyInfo={this.props.updateStrategyInfo}
+                updateInfo={this.props.updateInfo}
                 windowExists={this.props.windowExists}
                 isTopWindow={this.props.isTopWindow}
                 setPopup={this.props.setPopup}
@@ -147,32 +152,36 @@ class WindowWrapper extends Component
         }
         else if (this.state.info.type === 'log')
         {
-            const sub_window = <Log
-                strategy_id={this.props.strategy_id}
-                item_id={this.state.info.id}
-                title={'Script Log'}
-                getLog={this.props.getLog}
-            />;
-
             return <Dockable
+                ref={this.setInnerElementRef}
                 strategy_id={this.props.strategy_id}
                 item_id={this.state.info.id}
-                window={sub_window}
+                getElementType={this.getElementType}
+                getLog={this.props.getLog}
             />;
         }
         else if (this.state.info.type === 'info')
         {
-            const sub_window = <Info
+            return <Dockable
+                ref={this.setInnerElementRef}
                 strategy_id={this.props.strategy_id}
                 item_id={this.state.info.id}
-                title={'Info'}
+                getElementType={this.getElementType}
+                getMousePos={this.props.getMousePos}
+                getWindowById={this.props.getWindowById}
+                getTopWindow={this.props.getTopWindow}
                 getInfo={this.props.getInfo}
             />;
-
+        }
+        else if (this.state.info.type === 'control_panel')
+        {
             return <Dockable
+                ref={this.setInnerElementRef}
                 strategy_id={this.props.strategy_id}
                 item_id={this.state.info.id}
-                window={sub_window}
+                getElementType={this.getElementType}
+                getInputVariables={this.props.getInputVariables}
+                updateInputVariables={this.props.updateInputVariables}
             />;
         }
 
@@ -750,6 +759,16 @@ class WindowWrapper extends Component
     getItemId = () =>
     {
         return this.state.info.id;
+    }
+
+    getElementType = () =>
+    {
+        return this.state.info.type;
+    }
+
+    getInnerElement = () =>
+    {
+        return this.innerElement;
     }
 
     getWindowWrapper = () =>

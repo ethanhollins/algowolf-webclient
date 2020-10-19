@@ -46,7 +46,7 @@ class Log extends Component
                     .format('YYYY-MM-DD HH:mm:ss');
                 log.push(
                     <span className='log msg' key={i}>
-                        {time + ' : ' + messages[i].item}
+                        <span className='log timestamp'>{time + ' : '}</span>{messages[i].item}
                     </span>
                 )
             }

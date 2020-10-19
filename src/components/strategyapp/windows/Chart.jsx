@@ -3,7 +3,7 @@ import Camera from '../Camera';
 import Candlesticks from './chart/Candlesticks';
 import Overlay from './chart/Overlay';
 import Study from './chart/Study';
-import _, { before } from 'underscore';
+import _ from 'underscore';
 import moment from "moment-timezone";
 import Drawings from '../paths/Paths';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -18,23 +18,13 @@ class Chart extends Component
         pos: {
             x: -50, y: 0,
         },
-        mouse_pos: {
-            x: -1, y: -1
-        },
         scale: {
             x: 200.0, y:0.2,
         },
         intervals: {
             x: 0, y: 0
         },
-        prices: {
-            ohlc: [],
-            ohlc_color: null,
-            overlays: [],
-            overlay_colors: [],
-            studies: [],
-            study_colors: [],
-        },
+        prices: undefined,
         future_timestamps: [],
         is_down: false,
         is_move: false,
@@ -97,7 +87,7 @@ class Chart extends Component
 
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onMouseMove = _.throttle(this.onMouseMove.bind(this), 1);
-        this.onMoveThrottled = _.throttle(this.onMoveThrottled.bind(this), 20);
+        // this.onMoveThrottled = _.throttle(this.onMoveThrottled.bind(this), 20);
         this.onMouseUp = this.onMouseUp.bind(this);
         this.update = this.update.bind(this);
         this.onScroll = _.throttle(this.onScroll.bind(this), 20);
@@ -107,7 +97,7 @@ class Chart extends Component
     {
         window.addEventListener("mousedown", this.onMouseDown);
         window.addEventListener("mousemove", this.onMouseMove);
-        window.addEventListener("mousemove", this.onMoveThrottled);
+        // window.addEventListener("mousemove", this.onMoveThrottled);
 
         window.addEventListener("mouseup", this.onMouseUp);
         window.addEventListener("resize", this.update);
@@ -153,6 +143,10 @@ class Chart extends Component
             this.setPriceInterval();
             this.setTimeInterval();
         }
+
+        /* Get Price Info */
+        const mouse_pos = this.props.getMousePos();
+        this.getPriceInfo(mouse_pos);
 
         this._isinitialized = true;
     }
@@ -208,7 +202,7 @@ class Chart extends Component
         this._ismounted = false;
         window.removeEventListener("mousedown", this.onMouseDown);
         window.removeEventListener("mousemove", this.onMouseMove);
-        window.removeEventListener("mousemove", this.onMoveThrottled);
+        // window.removeEventListener("mousemove", this.onMoveThrottled);
 
         window.removeEventListener("mouseup", this.onMouseUp);
         window.removeEventListener("resize", this.update);
@@ -387,36 +381,17 @@ class Chart extends Component
         }
     }
 
-    onMoveThrottled(e)
+    onMouseMoveThrottled(mouse_pos)
     {
-        const keys = this.props.getKeys();
-        if (keys.includes(SPACEBAR)) return;
-
-        this.onCrosshairMove(e);
-        this.onBarHover(e);
-    }
-
-    onCrosshairMove(e)
-    {
-        let { mouse_pos } = this.state;
-        
-        let update_pos = false;
-        if (Math.abs(mouse_pos.x - e.clientX) >= 1 || 
-            Math.abs(mouse_pos.y - e.clientY) >= 1)
+        if (this.getChart() !== undefined)
         {
-            update_pos = true;
-            mouse_pos = { x: e.clientX, y: e.clientY };
+            this.getPriceInfo(mouse_pos);
+            this.onBarHover(mouse_pos);
         }
-
-        if (update_pos)
-            this.setState({ mouse_pos });
     }
 
-    onBarHover(e)
+    onBarHover(mouse_pos)
     {
-        const mouse_pos = {
-            x: e.clientX, y: e.clientY
-        }
         const top_offset = this.props.getTopOffset();
 
         if (this.getChart() !== undefined && this.isBacktest())
@@ -513,50 +488,50 @@ class Chart extends Component
 
     onScroll(e)
     {
-        const mouse_pos = {
-            x: e.clientX, y: e.clientY
-        };
-        let { pos, scale, is_scrolling } = this.state;
-        const dz = e.deltaY;
-        const speed = 0.1;
-
-        const camera = this.getCamera();
-        const chart_size = this.getChartSize();
-        const num_candles = camera.convertScreenUnitToWorldUnit(
-            { x: chart_size.width, y: 0 }, chart_size, scale
-        ).x;
-
-        // Check mouse within main segment bounds
-        const top_offset = this.props.getTopOffset();
-
-        let start_pos = this.getWindowSegmentStartPos(0);
-        let rect = {
-            x: start_pos.x,
-            y: start_pos.y + top_offset,
-            width: chart_size.width,
-            height: chart_size.height
-        }
-
-        if (this.isWithinBounds(rect, mouse_pos))
+        if (this.getChart() !== undefined)
         {
-            scale.x += (num_candles * speed * (dz / 100.0));
-            scale.x = this.clampScale(scale.x);
-            
-            const chart_properties = this.getChartProperties(this.getBids(), Math.floor(pos.x), scale);
-            scale.y = chart_properties.scale.y;
-
-            for (let study of this.studies)
-            {
-                study.setStudyProperties(study.getResult());
-            }
-
-            this.onCrosshairMove(e);
+            const mouse_pos = {
+                x: e.clientX, y: e.clientY
+            };
+            let { pos, scale, is_scrolling } = this.state;
+            const dz = e.deltaY;
+            const speed = 0.1;
     
-            this.setState({ pos, scale, is_scrolling });
-            this.setPriceInterval();
-            this.setTimeInterval();
+            const camera = this.getCamera();
+            const chart_size = this.getChartSize();
+            const num_candles = camera.convertScreenUnitToWorldUnit(
+                { x: chart_size.width, y: 0 }, chart_size, scale
+            ).x;
+    
+            // Check mouse within main segment bounds
+            const top_offset = this.props.getTopOffset();
+    
+            let start_pos = this.getWindowSegmentStartPos(0);
+            let rect = {
+                x: start_pos.x,
+                y: start_pos.y + top_offset,
+                width: chart_size.width,
+                height: chart_size.height
+            }
+    
+            if (this.isWithinBounds(rect, mouse_pos))
+            {
+                scale.x += (num_candles * speed * (dz / 100.0));
+                scale.x = this.clampScale(scale.x);
+                
+                const chart_properties = this.getChartProperties(this.getBids(), Math.floor(pos.x), scale);
+                scale.y = chart_properties.scale.y;
+    
+                for (let study of this.studies)
+                {
+                    study.setStudyProperties(study.getResult());
+                }
+    
+                this.setState({ pos, scale, is_scrolling });
+                this.setPriceInterval();
+                this.setTimeInterval();
+            }
         }
-
     }
 
     onContextMenu(e)
@@ -723,158 +698,161 @@ class Chart extends Component
     {
         if (this._isinitialized)
         {
-            const prices = this.getPriceInfo();
-            const overlays = this.getOverlays();
-            let overlay_info = [];
-            for (let i = 0; i < overlays.length; i++)
+            const prices = this.state.prices;
+            if (prices !== undefined)
             {
-                const overlay = overlays[i];
-
-                let value_elems = [];
-                if (prices.overlays.length > 0)
+                const overlays = this.getOverlays();
+                let overlay_info = [];
+                for (let i = 0; i < overlays.length; i++)
                 {
-                    for (let x = 0; x < prices.overlays[i].length; x++)
+                    const overlay = overlays[i];
+    
+                    let value_elems = [];
+                    if (prices.overlays.length > 0)
                     {
-                        for (let y = 0; y < prices.overlays[i][x].length; y++)
+                        for (let x = 0; x < prices.overlays[i].length; x++)
                         {
-                            let item = '';
-                            let price = prices.overlays[i][x][y];
-                            if (price === null || price === undefined) 
+                            for (let y = 0; y < prices.overlays[i][x].length; y++)
                             {
-                                price = '';
-                            }
-                            else
-                            {
-                                price = price.toFixed(5);
-                            }
-    
-                            if (y === 0) 
-                            {
-                                item = (
-                                    <React.Fragment>
-    
-                                    <span className='chart values period'>
-                                        {overlay.properties.periods[x]}
-                                    </span>
-                                    <span className='chart values price'>
-                                        {price}
-                                    </span>
-    
-                                    </React.Fragment>
+                                let item = '';
+                                let price = prices.overlays[i][x][y];
+                                if (price === null || price === undefined) 
+                                {
+                                    price = '';
+                                }
+                                else
+                                {
+                                    price = price.toFixed(5);
+                                }
+        
+                                if (y === 0) 
+                                {
+                                    item = (
+                                        <React.Fragment>
+        
+                                        <span className='chart values period'>
+                                            {overlay.properties.periods[x]}
+                                        </span>
+                                        <span className='chart values price'>
+                                            {price}
+                                        </span>
+        
+                                        </React.Fragment>
+                                    );
+                                }
+                                else
+                                {
+                                    item = (
+                                        <span className='chart values price'>
+                                            {price}
+                                        </span>
+                                    );
+                                }
+        
+                                value_elems.push(
+                                    <span key={x + '' + y}>{item}</span>
                                 );
                             }
-                            else
-                            {
-                                item = (
-                                    <span className='chart values price'>
-                                        {price}
-                                    </span>
-                                );
-                            }
-    
-                            value_elems.push(
-                                <span key={x + '' + y}>{item}</span>
-                            );
                         }
                     }
+    
+                    const name = overlay.type.substring(0,1).toUpperCase() + overlay.type.substring(1);
+                    overlay_info.push(
+                        <div key={i} className='chart group overlay' style={{top: (5 + (i+1) * 20) + 'px', left: '5px'}}>
+                            <span className='chart values type'>{name}</span>
+                            {value_elems}
+                        </div>
+                    );
                 }
-
-                const name = overlay.type.substring(0,1).toUpperCase() + overlay.type.substring(1);
-                overlay_info.push(
-                    <div key={i} className='chart group overlay' style={{top: (5 + (i+1) * 20) + 'px', left: '5px'}}>
-                        <span className='chart values type'>{name}</span>
-                        {value_elems}
-                    </div>
-                );
-            }
-
-            const studies = this.getStudies();
-            let study_info = [];
-            for (let i = 0; i < studies.length; i++)
-            {
-                const study = studies[i];
-                const start_pos = this.getChartSegmentStartPos(i+1);
-
-                let value_elems = [];
-                if (prices.studies.length > 0)
+    
+                const studies = this.getStudies();
+                let study_info = [];
+                for (let i = 0; i < studies.length; i++)
                 {
-                    for (let x = 0; x < prices.studies[i].length; x++)
+                    const study = studies[i];
+                    const start_pos = this.getChartSegmentStartPos(i+1);
+    
+                    let value_elems = [];
+                    if (prices.studies.length > 0)
                     {
-                        for (let y = 0; y < prices.studies[i][x].length; y++)
+                        for (let x = 0; x < prices.studies[i].length; x++)
                         {
-                            let item = '';
-                            let price = prices.studies[i][x][y];
-                            if (price === null || price === undefined) 
+                            for (let y = 0; y < prices.studies[i][x].length; y++)
                             {
-                                price = '';
-                            }
-                            else
-                            {
-                                price = price.toFixed(5);
-                            }
-
-                            if (y === 0) 
-                            {
-                                item = (
-                                    <React.Fragment>
-
-                                    <span className='chart values period'>
-                                        {study.properties.periods[x]}
-                                    </span>
-                                    <span className='chart values price'>
-                                        {price}
-                                    </span>
-
-                                    </React.Fragment>
+                                let item = '';
+                                let price = prices.studies[i][x][y];
+                                if (price === null || price === undefined) 
+                                {
+                                    price = '';
+                                }
+                                else
+                                {
+                                    price = price.toFixed(5);
+                                }
+    
+                                if (y === 0) 
+                                {
+                                    item = (
+                                        <React.Fragment>
+    
+                                        <span className='chart values period'>
+                                            {study.properties.periods[x]}
+                                        </span>
+                                        <span className='chart values price'>
+                                            {price}
+                                        </span>
+    
+                                        </React.Fragment>
+                                    );
+                                }
+                                else
+                                {
+                                    item = (
+                                        <span className='chart values price'>
+                                            {price}
+                                        </span>
+                                    );
+                                }
+    
+                                value_elems.push(
+                                    <span key={x + '' + y}>{item}</span>
                                 );
                             }
-                            else
-                            {
-                                item = (
-                                    <span className='chart values price'>
-                                        {price}
-                                    </span>
-                                );
-                            }
-
-                            value_elems.push(
-                                <span key={x + '' + y}>{item}</span>
-                            );
                         }
                     }
+    
+                    const name = study.type.substring(0,1).toUpperCase() + study.type.substring(1);
+                    study_info.push(
+                        <div key={i} className='chart group study' style={{top: (start_pos.y + 10) + 'px', left: '5px'}}>
+                            <span className='chart values type'>{name}</span>
+                            {value_elems}
+                        </div>
+                    );
                 }
-
-                const name = study.type.substring(0,1).toUpperCase() + study.type.substring(1);
-                study_info.push(
-                    <div key={i} className='chart group study' style={{top: (start_pos.y + 10) + 'px', left: '5px'}}>
-                        <span className='chart values type'>{name}</span>
-                        {value_elems}
+    
+                return (
+                    <React.Fragment>
+    
+                    <div className='chart group' style={{top: '5px', left: '5px'}}>
+                        <div className='chart product-btn'>{this.getProduct().replace('_', '')}</div>
+                        <div className='chart period-btn'>1m</div>
+                        <div>
+                            <span className='chart values type'>O</span>
+                            <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[0].toFixed(5)}</span>
+                            <span className='chart values type'>H</span>
+                            <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[1].toFixed(5)}</span>
+                            <span className='chart values type'>L</span>
+                            <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[2].toFixed(5)}</span>
+                            <span className='chart values type'>C</span>
+                            <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[3].toFixed(5)}</span>
+                        </div>
                     </div>
-                );
+                    {overlay_info}
+                    {study_info}
+    
+                    </React.Fragment>
+                )
             }
-
-            return (
-                <React.Fragment>
-
-                <div className='chart group' style={{top: '5px', left: '5px'}}>
-                    <div className='chart product-btn'>{this.getProduct().replace('_', '')}</div>
-                    <div className='chart period-btn'>1m</div>
-                    <div>
-                        <span className='chart values type'>O</span>
-                        <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[0].toFixed(5)}</span>
-                        <span className='chart values type'>H</span>
-                        <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[1].toFixed(5)}</span>
-                        <span className='chart values type'>L</span>
-                        <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[2].toFixed(5)}</span>
-                        <span className='chart values type'>C</span>
-                        <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[3].toFixed(5)}</span>
-                    </div>
-                </div>
-                {overlay_info}
-                {study_info}
-
-                </React.Fragment>
-            )
         }
     }
 
@@ -1043,10 +1021,11 @@ class Chart extends Component
         }
     }
 
-    getPriceInfo()
+    getPriceInfo(mouse_pos)
     {
-        const { pos, scale, mouse_pos } = this.state;
+        const { pos, scale } = this.state;
         let prices = {
+            timestamp: null,
             ohlc: [],
             ohlc_color: null,
             overlays: [],
@@ -1077,6 +1056,8 @@ class Chart extends Component
             x_pos = Math.floor(camera.convertScreenPosToWorldPos(mouse_pos, pos, chart_size, scale).x);
             x_pos = Math.max(x_pos, 1);
         }
+
+        prices.timestamp = this.getTimestampByPos(Math.floor(x_pos));
 
         // console.log(this.getOverlayValues(0));
         let isNext = true;
@@ -1158,7 +1139,9 @@ class Chart extends Component
         }
         prices.ohlc_color = `rgba(${prices.ohlc_color[0]}, ${prices.ohlc_color[1]}, ${prices.ohlc_color[2]}, 1.0)`;
 
-        return prices;
+        this.setState({ prices });
+
+        this.props.updateInfo(mouse_pos);
     }
 
     getNumZeroDecimals(x)
@@ -1698,7 +1681,7 @@ class Chart extends Component
 
     handleStudyHandles(ctx, start_pos, segment_size)
     {
-        let { mouse_pos } = this.state;
+        const mouse_pos = this.props.getMousePos();
         const top_offset = this.props.getTopOffset();
 
         // Draw Handle
@@ -1948,7 +1931,7 @@ class Chart extends Component
         const keys = this.props.getKeys();
         if (keys.includes(SPACEBAR)) return;
 
-        let { mouse_pos } = this.state;
+        const mouse_pos = this.props.getMousePos();
         const screen_pos = this.props.getScreenPos();
         const top_offset = this.props.getTopOffset() + screen_pos.y;
 
@@ -2337,6 +2320,11 @@ class Chart extends Component
         };
     }
 
+    getChartPrices = () =>
+    {
+        return this.state.prices;
+    }
+
     getContainer = () =>
     {
         return this.container;
@@ -2689,7 +2677,7 @@ class Chart extends Component
 
         if (!this.isBacktest())
             this.props.connectChart(this.getBroker(), this.getProduct(), this.getPeriod());
-            
+
         const ohlc_data = await this.props.retrieveChartData(
             this.getBroker(), this.getProduct(), this.getPeriod(), start, end
         );

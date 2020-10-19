@@ -9,6 +9,12 @@ class Strategy extends Component
     constructor(props)
     {
         super(props);
+
+        this.windows = [];
+
+        this.addWindowsRef = elem => {
+            this.windows.push(elem);
+        }
     }
 
     state = {
@@ -16,19 +22,16 @@ class Strategy extends Component
         current_page: 0,
         hide_shadows: faSolarSystem,
         log: [],
-        info: {}
+        info: {},
+        input_variables: {},
     }
 
     async componentDidMount()
     {
-        let { log } = this.state;
-        console.log(this.getStrategyInfo());
-
-        const loaded_logs = this.getStrategyInfo().logs;
-        if (loaded_logs !== undefined)
-            log = log.concat(loaded_logs);
+        this.getStrategyData();
+        
         const sio = this.handleSocket();
-        this.setState({ sio, log });
+        this.setState({ sio });
     }
 
     componentWillUnmount()
@@ -107,23 +110,29 @@ class Strategy extends Component
                     gen_windows.push(
                         <WindowWrapper
                             key={w.id}
+                            ref={this.addWindowsRef}
                             info={w}
                             strategy_id={this.props.id}
                             clone={this.props.clone}
                             getAppContainer={this.props.getAppContainer}
                             convertScreenUnitToWorldUnit={this.props.convertScreenUnitToWorldUnit}
                             convertWorldUnitToScreenUnit={this.props.convertWorldUnitToScreenUnit}
+                            getMousePos={this.props.getMousePos}
                             getSize={this.props.getSize}
                             getScale={this.props.getScale}
                             getChartElement={this.props.getChartElement}
                             getStrategyInfo={this.props.getStrategyInfo}
                             updateStrategyInfo={this.props.updateStrategyInfo}
+                            updateInfo={this.props.updateInfo}
+                            updateInputVariables={this.props.updateInputVariables}
                             getKeys={this.props.getKeys}
                             setPopup={this.props.setPopup}
                             // Window Funcs
                             closeWindow={this.props.closeWindow}
                             windowExists={this.props.windowExists}
+                            getWindowById={this.props.getWindowById}
                             isTopWindow={this.props.isTopWindow}
+                            getTopWindow={this.props.getTopWindow}
                             setTopWindow={this.props.setTopWindow}
                             moveWindow={this.props.moveWindow}
                             hideShadows={this.hideShadows}
@@ -151,6 +160,7 @@ class Strategy extends Component
                             // Other Window Functions
                             getLog={this.getLog}
                             getInfo={this.getInfo}
+                            getInputVariables={this.getInputVariables}
                         />
                     )
                 }
@@ -159,9 +169,27 @@ class Strategy extends Component
         return gen_windows;
     }
 
-    ontrade = (data) =>
+    getStrategyData()
     {
-        
+        let { log, info, input_variables } = this.state;
+
+        const strategy = this.getStrategyInfo();
+        // Get Logs
+        const loaded_logs = strategy.logs;
+        if (loaded_logs !== undefined)
+            log = log.concat(loaded_logs);
+
+        // Get Info
+        const loaded_info = strategy.info;
+        if (loaded_info !== undefined)
+            info = Object.assign({}, info, loaded_info);
+
+        // Get Control Panel
+        const loaded_input_variables = strategy.input_variables;
+        if (loaded_input_variables !== undefined)
+        input_variables = Object.assign({}, input_variables, loaded_input_variables);
+
+        this.setState({ log, info, input_variables });
     }
 
     uint8arrayToString = (myUint8Arr) =>
@@ -429,6 +457,11 @@ class Strategy extends Component
         return this.props.getStrategyInfo(strategy_id);
     }
 
+    getWindows = () =>
+    {
+        return this.windows;
+    }
+
     getDrawings = () =>
     {
         let strategy = this.getStrategyInfo();
@@ -483,6 +516,11 @@ class Strategy extends Component
     getInfo = () =>
     {
         return this.state.info;
+    }
+
+    getInputVariables = () =>
+    {
+        return this.state.input_variables;
     }
 
     getCurrentTimestamp = () =>
