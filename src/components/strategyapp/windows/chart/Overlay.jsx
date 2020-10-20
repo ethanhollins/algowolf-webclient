@@ -23,7 +23,6 @@ class Overlay extends Component
         const ohlc = this.props.getOhlcValues();
         const values = this.props.getValues(this.props.index);
         const properties = this.props.getProperties(this.props.index);
-
         // If empty values list, cancel drawing
         if (values.length === 0) return;
         // Iterate columns

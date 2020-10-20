@@ -476,7 +476,7 @@ class StrategyApp extends Component
 
     updateInfo(mouse_pos)
     {
-        if (this.is_loaded)
+        if (this.is_loaded && this.strategy !== null)
         {
             for (let w of this.strategy.windows)
             {

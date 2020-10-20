@@ -18,9 +18,16 @@ class Backtest extends Component
             positions: [],
             orders: [],
             drawings: {},
-            info: [],
+            info: {},
+            input_variables: {},
             log: [],
             hide_shadows: false
+        }
+
+        this.windows = [];
+
+        this.addWindowsRef = elem => {
+            this.windows.push(elem);
         }
     }
 
@@ -102,23 +109,28 @@ class Backtest extends Component
                     gen_windows.push(
                         <WindowWrapper
                             key={w.id}
+                            ref={this.addWindowsRef}
                             info={w}
                             strategy_id={this.props.id}
                             clone={this.props.clone}
                             getAppContainer={this.props.getAppContainer}
                             convertScreenUnitToWorldUnit={this.props.convertScreenUnitToWorldUnit}
                             convertWorldUnitToScreenUnit={this.props.convertWorldUnitToScreenUnit}
+                            getMousePos={this.props.getMousePos}
                             getSize={this.props.getSize}
                             getScale={this.props.getScale}
                             getChartElement={this.props.getChartElement}
                             getStrategyInfo={this.props.getStrategyInfo}
                             updateStrategyInfo={this.props.updateStrategyInfo}
+                            updateInfo={this.props.updateInfo}
                             getKeys={this.props.getKeys}
                             setPopup={this.props.setPopup}
                             // Window Funcs
                             closeWindow={this.props.closeWindow}
                             windowExists={this.props.windowExists}
+                            getWindowById={this.props.getWindowById}
                             isTopWindow={this.props.isTopWindow}
+                            getTopWindow={this.props.getTopWindow}
                             setTopWindow={this.props.setTopWindow}
                             moveWindow={this.props.moveWindow}
                             hideShadows={this.hideShadows}
@@ -145,6 +157,8 @@ class Backtest extends Component
                             setCurrentTimestamp={this.setCurrentTimestamp}
                             // Log Functions
                             getLog={this.getLog}
+                            getInfo={this.getInfo}
+                            getInputVariables={this.getInputVariables}
                         />
                     )
                 }
@@ -297,7 +311,7 @@ class Backtest extends Component
 
     handleCreateInfo = (info, trans) =>
     {
-        info.push(trans.item);
+        // info.push(trans.item);
     }
 
     handleCreateLog = (log, trans) =>
@@ -406,6 +420,16 @@ class Backtest extends Component
     getLog = () =>
     {
         return this.state.log;
+    }
+
+    getInfo = () =>
+    {
+        return this.state.info;
+    }
+
+    getInputVariables = () =>
+    {
+        return this.state.input_variables;
     }
 
     getCurrentTimestamp = () =>

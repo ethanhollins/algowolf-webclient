@@ -146,7 +146,11 @@ class Chart extends Component
 
         /* Get Price Info */
         const mouse_pos = this.props.getMousePos();
-        this.getPriceInfo(mouse_pos);
+
+        if (this.container !== null)
+        {
+            this.getPriceInfo(mouse_pos);
+        }
 
         this._isinitialized = true;
     }
@@ -457,7 +461,7 @@ class Chart extends Component
         }
         const top_offset = this.props.getTopOffset();
 
-        if (before_change !== null && this.isBacktest())
+        if (this._isinitialized && before_change !== null && this.isBacktest())
         {
             if (Math.abs(pos.x - before_change.x) < 1 && Math.abs(pos.y - before_change.y) < 1)
             {

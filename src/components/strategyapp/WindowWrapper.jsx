@@ -355,13 +355,16 @@ class WindowWrapper extends Component
 
     showWindowBtns(is_top)
     {
-        if (is_top)
+        if (this.windowBtns !== null)
         {
-            this.windowBtns.style.display = '';
-        }
-        else
-        {
-            this.windowBtns.style.display = 'none';
+            if (is_top)
+            {
+                this.windowBtns.style.display = '';
+            }
+            else
+            {
+                this.windowBtns.style.display = 'none';
+            }
         }
     }
 
