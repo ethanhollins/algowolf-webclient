@@ -1906,7 +1906,7 @@ class Chart extends Component
         const seg_size = this.getSegmentSize(0);
 
         const chart_drawings_layers = this.getProperties().drawing_layers;
-        const drawings = this.getDrawings();
+        let drawings = this.getDrawings();
 
         // Retrieve Account Drawings if running live tab
         if (!this.isBacktest())
@@ -1993,7 +1993,7 @@ class Chart extends Component
         const seg_size = this.getSegmentSize(0);
 
         const chart_drawings_layers = this.getProperties().drawing_layers;
-        const drawings = this.getDrawings();
+        let drawings = this.getDrawings();
 
         if (!this.isBacktest())
         {

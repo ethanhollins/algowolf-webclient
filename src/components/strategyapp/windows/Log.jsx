@@ -25,7 +25,7 @@ class Log extends Component
 
     generateLog()
     {
-        const messages = this.props.getLog();
+        let messages = this.props.getLog();
 
         // Retrieve Account Logs if running live tab
         if (!this.props.strategy_id.includes('/backtest/'))
