@@ -21,7 +21,7 @@ class Strategy extends Component
         sio: undefined,
         current_page: 0,
         hide_shadows: faSolarSystem,
-        log: [],
+        log: {},
         info: {},
         input_variables: {},
     }
@@ -125,7 +125,7 @@ class Strategy extends Component
                             updateStrategyInfo={this.props.updateStrategyInfo}
                             updateInfo={this.props.updateInfo}
                             updateInputVariables={this.props.updateInputVariables}
-                            getCurrentAccount={this.props.getCurrentAccount}
+                            getCurrentAccount={this.getCurrentAccount}
                             getKeys={this.props.getKeys}
                             setPopup={this.props.setPopup}
                             // Window Funcs
@@ -179,7 +179,7 @@ class Strategy extends Component
         // Get Logs
         const loaded_logs = strategy.logs;
         if (loaded_logs !== undefined)
-            log = log.concat(loaded_logs);
+            log = Object.assign({}, log, loaded_logs);
 
         // Get Info
         const loaded_info = strategy.info;
@@ -260,37 +260,37 @@ class Strategy extends Component
             console.log(data);
             if (data.type === 'create_drawing')
             {
-                this.createDrawing(data.item.layer, data.item);
+                this.createDrawing(data.account_id, data.item.layer, data.item);
             }
             else if (data.type === 'create_drawings')
             {
                 for (let d of data.items)
                 {
-                    this.createDrawing(data.layer, d);
+                    this.createDrawing(data.account_id, data.layer, d);
                 }
             }
             else if (data.type === 'delete_drawings')
             {
                 for (let d of data.items)
                 {
-                    this.deleteDrawing(data.layer, d);
+                    this.deleteDrawing(data.account_id, data.layer, d);
                 }
             }
             else if (data.type === 'delete_drawing_layer')
             {
-                this.deleteDrawingLayer(data.layer);
+                this.deleteDrawingLayer(data.account_id, data.layer);
             }
             else if (data.type === 'delete_all_drawings')
             {
-                this.deleteAllDrawings();
+                this.deleteAllDrawings(data.account_id);
             }
             else if (data.type === 'create_log')
             {
-                this.createLog(data);
+                this.createLog(data.account_id, data);
             }
             else if (data.type === 'create_info')
             {
-                this.createInfo(data);
+                this.createInfo(data.account_id, data);
             }
         });
 
@@ -362,40 +362,48 @@ class Strategy extends Component
         }
     }
 
-    getDrawingIdx = (strategy, layer, id) =>
+    getDrawingIdx = (strategy, account_id, layer, id) =>
     {
         if (strategy !== undefined)
         {
-            const drawings = strategy.drawings[layer];
-            for (let i = 0; i < drawings.length; i++)
+            if (account_id in strategy.drawings)
             {
-                const d = drawings[i];
-                if (d.id === id) return i;
+                const drawings = strategy.drawings[account_id][layer];
+                for (let i = 0; i < drawings.length; i++)
+                {
+                    const d = drawings[i];
+                    if (d.id === id) return i;
+                }
             }
         }
         return undefined
     }
 
-    createDrawing = (layer, drawing) =>
+    createDrawing = (account_id, layer, drawing) =>
     {
         let strategy = this.getStrategyInfo();
 
         if (strategy !== undefined)
         {
-            if (!(layer in strategy.drawings))
+            if (!(account_id in strategy.drawings))
             {
-                strategy.drawings[layer] = [];
+                strategy.drawings[account_id] = {};
             }
 
-            if (this.getDrawingIdx(strategy, layer, drawing.id) === undefined)
+            if (!(layer in strategy.drawings[account_id]))
             {
-                strategy.drawings[layer].push(drawing);
+                strategy.drawings[account_id][layer] = [];
+            }
+
+            if (this.getDrawingIdx(strategy, account_id, layer, drawing.id) === undefined)
+            {
+                strategy.drawings[account_id][layer].push(drawing);
             } 
             this.props.updateStrategyInfo();
         }
     }
 
-    deleteDrawing = (layer, drawing_id) =>
+    deleteDrawing = (account_id, layer, drawing_id) =>
     {
         let strategy = this.getStrategyInfo();
 
@@ -410,21 +418,24 @@ class Strategy extends Component
         }
     }
 
-    deleteDrawingLayer = (layer) =>
+    deleteDrawingLayer = (account_id, layer) =>
     {
         let strategy = this.getStrategyInfo();
 
         if (strategy !== undefined)
         {
-            if (layer in strategy.drawings)
+            if (account_id in strategy.drawings)
             {
-                delete strategy.drawings[layer];
+                if (layer in strategy.drawings[account_id])
+                {
+                    delete strategy.drawings[layer];
+                }
+                this.props.updateStrategyInfo();
             }
-            this.props.updateStrategyInfo();
         }
     }
 
-    deleteAllDrawings = () =>
+    deleteAllDrawings = (account_id) =>
     {
         let strategy = this.getStrategyInfo();
 
@@ -435,14 +446,20 @@ class Strategy extends Component
         }
     }
 
-    createLog = (data) =>
+    createLog = (account_id, data) =>
     {
         let { log } = this.state;
-        log.push(data);
+
+        if (!(account_id in log))
+        {
+            log[account_id] = [];
+        }
+
+        log[account_id].push(data);
         this.setState({ log });
     }
 
-    createInfo = (data) =>
+    createInfo = (account_id, data) =>
     {
         let { info } = this.state;
         if (!(data.timestamp in info))

@@ -2733,7 +2733,7 @@ class Chart extends Component
 
     getCurrentAccount = () =>
     {
-        return this.props.getCurrentAccount(this.getStrategyId());
+        return this.props.getCurrentAccount();
     }
 
     getProperties = () =>
