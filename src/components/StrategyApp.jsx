@@ -292,6 +292,7 @@ class StrategyApp extends Component
                         updateStrategyInfo={this.updateStrategyInfo}
                         updateInfo={this.updateInfo}
                         updateInputVariables={this.updateInputVariables}
+                        getCurrentAccount={this.getCurrentAccount}
                         getChartElement={this.getChartElement}
                         getCamera={this.getCamera}
                         getSio={this.getSio}
@@ -1805,7 +1806,15 @@ class StrategyApp extends Component
     getCurrentAccount = (strategy_id) =>
     {
         const strategy = this.getStrategyInfo(strategy_id);
-        return strategy.account;
+
+        if (strategy !== undefined)
+        {
+            return strategy.account;
+        }
+        else
+        {
+            return undefined;
+        }
     }
 
     getMousePos = () =>

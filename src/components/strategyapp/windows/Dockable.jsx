@@ -60,6 +60,7 @@ class Dockable extends Component
                 strategy_id={this.props.strategy_id}
                 item_id={this.props.item_id}
                 getLog={this.props.getLog}
+                getCurrentAccount={this.props.getCurrentAccount}
             />;
         }
         else if (type === 'info')
@@ -72,6 +73,7 @@ class Dockable extends Component
                 getWindowById={this.props.getWindowById}
                 getTopWindow={this.props.getTopWindow}
                 getInfo={this.props.getInfo}
+                getCurrentAccount={this.props.getCurrentAccount}
             />;
         }
         else if (type === 'control_panel')
@@ -82,6 +84,7 @@ class Dockable extends Component
                 item_id={this.props.item_id}
                 getInputVariables={this.props.getInputVariables}
                 updateInputVariables={this.props.updateInputVariables}
+                getCurrentAccount={this.props.getCurrentAccount}
             />
         }
     }

@@ -125,6 +125,7 @@ class Strategy extends Component
                             updateStrategyInfo={this.props.updateStrategyInfo}
                             updateInfo={this.props.updateInfo}
                             updateInputVariables={this.props.updateInputVariables}
+                            getCurrentAccount={this.props.getCurrentAccount}
                             getKeys={this.props.getKeys}
                             setPopup={this.props.setPopup}
                             // Window Funcs

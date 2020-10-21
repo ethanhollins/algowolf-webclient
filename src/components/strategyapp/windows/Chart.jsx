@@ -650,7 +650,7 @@ class Chart extends Component
             const mouse_pos = {
                 x: e.clientX, y: e.clientY
             };
-            let { pos, scale, is_scrolling } = this.state;
+            let { pos, scale, is_scrolling, auto_zoom } = this.state;
             const dz = e.deltaY;
             const speed = 0.1;
     
@@ -676,12 +676,15 @@ class Chart extends Component
                 scale.x += (scale.x * speed * (dz / 100.0));
                 scale.x = this.clampScale(scale.x);
                 
-                const chart_properties = this.getChartProperties(this.getBids(), Math.floor(pos.x), scale);
-                scale.y = chart_properties.scale.y;
-    
-                for (let study of this.studies)
+                if (auto_zoom)
                 {
-                    study.setStudyProperties(study.getResult());
+                    const chart_properties = this.getChartProperties(this.getBids(), Math.floor(pos.x), scale);
+                    scale.y = chart_properties.scale.y;
+        
+                    for (let study of this.studies)
+                    {
+                        study.setStudyProperties(study.getResult());
+                    }
                 }
     
                 this.setState({ pos, scale, is_scrolling });
@@ -1905,6 +1908,20 @@ class Chart extends Component
         const chart_drawings_layers = this.getProperties().drawing_layers;
         const drawings = this.getDrawings();
 
+        // Retrieve Account Drawings if running live tab
+        if (!this.isBacktest())
+        {
+            const current_account = this.getCurrentAccount;
+            if (current_account !== undefined && current_account in drawings)
+            {
+                drawings = drawings[current_account];
+            }
+            else
+            {
+                return;
+            }
+        }
+
         for (let layer of chart_drawings_layers)
         {
             if (!(layer in drawings)) continue;
@@ -1941,8 +1958,8 @@ class Chart extends Component
         
                         // Get Rotation and Scale
                         const rotation = this.degsToRads(d_props.properties.rotation);
-                        const drawing_scale = ((drawing.scale + d_props.properties.scale) * (1/scale.x));
-            
+                        const drawing_scale = 0.01 * d_props.properties.scale;
+                        
                         const width = drawing.size.width;
                         const height = drawing.size.height;
             
@@ -1977,6 +1994,19 @@ class Chart extends Component
 
         const chart_drawings_layers = this.getProperties().drawing_layers;
         const drawings = this.getDrawings();
+
+        if (!this.isBacktest())
+        {
+            const current_account = this.getCurrentAccount;
+            if (current_account !== undefined && current_account in drawings)
+            {
+                drawings = drawings[current_account];
+            }
+            else
+            {
+                return;
+            }
+        }
 
         for (let layer of chart_drawings_layers)
         {
@@ -2699,6 +2729,11 @@ class Chart extends Component
     windowExists = () =>
     {
         return this.props.windowExists(this.props.strategy_id, this.props.item_id);
+    }
+
+    getCurrentAccount = () =>
+    {
+        return this.props.getCurrentAccount(this.getStrategyId());
     }
 
     getProperties = () =>

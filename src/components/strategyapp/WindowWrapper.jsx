@@ -146,6 +146,7 @@ class WindowWrapper extends Component
                 getStrategyInfo={this.props.getStrategyInfo}
                 updateStrategyInfo={this.props.updateStrategyInfo}
                 updateInfo={this.props.updateInfo}
+                getCurrentAccount={this.props.getCurrentAccount}
                 windowExists={this.props.windowExists}
                 isTopWindow={this.props.isTopWindow}
                 setPopup={this.props.setPopup}
@@ -159,6 +160,7 @@ class WindowWrapper extends Component
                 item_id={this.state.info.id}
                 getElementType={this.getElementType}
                 getLog={this.props.getLog}
+                getCurrentAccount={this.props.getCurrentAccount}
             />;
         }
         else if (this.state.info.type === 'info')
@@ -172,6 +174,7 @@ class WindowWrapper extends Component
                 getWindowById={this.props.getWindowById}
                 getTopWindow={this.props.getTopWindow}
                 getInfo={this.props.getInfo}
+                getCurrentAccount={this.props.getCurrentAccount}
             />;
         }
         else if (this.state.info.type === 'control_panel')
@@ -183,6 +186,7 @@ class WindowWrapper extends Component
                 getElementType={this.getElementType}
                 getInputVariables={this.props.getInputVariables}
                 updateInputVariables={this.props.updateInputVariables}
+                getCurrentAccount={this.props.getCurrentAccount}
             />;
         }
 
