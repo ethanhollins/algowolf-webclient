@@ -147,7 +147,8 @@ class Strategy extends Component
                             addChart={this.props.addChart}
                             getChart={this.props.getChart}
                             updateChart={this.props.updateChart}
-                            getIndicator={this.props.getIndicator}
+                            findIndicator={this.props.findIndicator}
+                            createIndicator={this.props.createIndicator}
                             calculateIndicator={this.props.calculateIndicator}
                             resetIndicators={this.props.resetIndicators}
                             getPeriodOffsetSeconds={this.props.getPeriodOffsetSeconds}

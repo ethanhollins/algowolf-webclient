@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Camera from './strategyapp/Camera';
-import Indicators from './strategyapp/Indicators';
+import Indicator from './strategyapp/Indicator';
 import io from 'socket.io-client';
 import moment from "moment-timezone";
 import _ from 'underscore';
@@ -11,6 +11,7 @@ import StrategyToolbar from './strategyapp/StrategyToolbar';
 import Backtest from './strategyapp/Backtest';
 import BacktestToolbar from './strategyapp/BacktestToolbar';
 import Popup from './strategyapp/Popup';
+import { v4 as uuidv4 } from 'uuid';
 
 class StrategyApp extends Component
 {
@@ -25,6 +26,7 @@ class StrategyApp extends Component
         page: 0,
         charts: {},
         backtestCharts: {},
+        indicators: [],
         size: {
             width: 0, height: 0
         },
@@ -313,7 +315,8 @@ class StrategyApp extends Component
                         addChart={this.addChart}
                         getChart={this.getChart}
                         updateChart={this.updateChart}
-                        getIndicator={this.getIndicator}
+                        findIndicator={this.findIndicator}
+                        createIndicator={this.createIndicator}
                         calculateIndicator={this.calculateIndicator}
                         resetIndicators={this.resetIndicators}
                         getPeriodOffsetSeconds={this.getPeriodOffsetSeconds}
@@ -783,7 +786,8 @@ class StrategyApp extends Component
             timestamps: ohlc_data.ohlc.timestamps,
             asks: ohlc_data.ohlc.asks,
             bids: ohlc_data.ohlc.bids,
-            next_timestamp: null
+            next_timestamp: null,
+            queue: []
         };
 
         this.generateMissingBars(charts[key]);
@@ -936,6 +940,10 @@ class StrategyApp extends Component
 
         if (chart !== undefined)
         {
+            const id = uuidv4();
+            chart.queue.push(id);
+            while(chart.queue.indexOf(id) !== 0);
+
             if (chart.next_timestamp === null)
             {
                 if (!item['bar_end'])
@@ -971,7 +979,11 @@ class StrategyApp extends Component
                 chart.bids[chart.bids.length-1] = item['item']['bid'];
             }
     
+            this.calculateAllChartIndicators(chart);
+
             this.setState({ charts });
+
+            chart.queue.splice(0, 1);
         }
     }
 
@@ -1000,6 +1012,8 @@ class StrategyApp extends Component
 
         this.generateMissingBars(chart);
         this.filterChart(chart, true);
+
+        this.calculateAllChartIndicators(chart);
 
         this.setState({ charts });
     }
@@ -1079,57 +1093,90 @@ class StrategyApp extends Component
         return chart;
     }
 
-    getIndicator = (type, price, product, period) =>
+    findIndicator = (type, broker, product, period) =>
     {
-        return Indicators[type][price][product][period];
+        const { indicators } = this.state;
+        for (let ind of indicators)
+        {
+            if (
+                ind.type === type && 
+                ind.broker === broker &&
+                ind.product === product && 
+                ind.period === period
+            )
+            {
+                return ind;
+            }
+        }
+        return undefined;
     }
 
-    calculateIndicator = (chart, price, ind) =>
+    createIndicator = (type, broker, product, properties) =>
+    {
+        let { indicators } = this.state;
+        const ind = new Indicator[type](broker, product, properties);
+        indicators.push(ind);
+        this.setState({ indicators });
+        return ind;
+    }
+
+    calculateAllChartIndicators = (chart) =>
     {
         chart = this.filterChart(chart, false);
-        /**  Retreive indicator data */
-        Indicators[ind.type](
-            chart.product,
-            chart.filteredTimestamps, chart.filteredAsks, 
-            chart.filteredBids, ind.properties
-        );
-    }
 
-    resetIndicators = (chart, chart_indicators) =>
-    {
-        for (let ind of chart_indicators)
+        const { indicators } = this.state;
+        for (let ind of indicators)
         {
-            if (ind.type in Indicators)
+            if (ind.product === chart.product)
             {
-                if (chart.product in Indicators[ind.type].timestamps)
-                {
-                    for (let period in Indicators[ind.type].timestamps[chart.product])
-                    {
-                        Indicators[ind.type].timestamps[chart.product][period] = [];
-                        Indicators[ind.type].asks[chart.product][period] = [];
-                        Indicators[ind.type].bids[chart.product][period] = [];
-                    }
-                }
+                ind.calc(
+                    [...chart.filteredTimestamps], 
+                    [...chart.filteredAsks], 
+                    [...chart.filteredBids]
+                );
             }
         }
     }
 
-    getBacktestIndicator = (type, price, backtest_id, product, period) =>
-    {
-        return Indicators[type][price][backtest_id + '/' + product][period];
-    }
-
-
-    calculateBacktestIndicator = (backtest_id, chart, price, ind) =>
+    calculateIndicator = (ind, chart) =>
     {
         chart = this.filterChart(chart, false);
         /**  Retreive indicator data */
-        Indicators[ind.type](
-            backtest_id + '/' + chart.product,
-            chart.filteredTimestamps, chart.filteredAsks, 
-            chart.filteredBids, ind.properties
+        ind.calc(
+            [...chart.filteredTimestamps], 
+            [...chart.filteredAsks], 
+            [...chart.filteredBids]
         );
     }
+
+    resetIndicators = (chart) =>
+    {
+        const { indicators } = this.state;
+        for (let ind of indicators)
+        {
+            if (ind.product === chart.product)
+            {
+                ind.reset();
+            }
+        }
+    }
+
+    // getBacktestIndicator = (type, price, backtest_id, product, period) =>
+    // {
+    //     return Indicator[type][price][backtest_id + '/' + product][period];
+    // }
+
+
+    // calculateBacktestIndicator = (backtest_id, chart, price, ind) =>
+    // {
+    //     chart = this.filterChart(chart, false);
+    //     /**  Retreive indicator data */
+    //     Indicator[ind.type](
+    //         backtest_id + '/' + chart.product,
+    //         chart.filteredTimestamps, chart.filteredAsks, 
+    //         chart.filteredBids, ind.properties
+    //     );
+    // }
 
     async requestStrategyStatusUpdate(strategy_id, accounts, new_status)
     {

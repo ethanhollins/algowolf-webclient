@@ -58,6 +58,7 @@ class Indicators {
             cache_asks.push(ask);
             cache_bids.push(bid);
         }
+
     }
 
     static setIndicator = (ind, product, period) =>
@@ -118,7 +119,7 @@ class Indicators {
             if (i < min_bars || ohlc[i].every((x) => x === null))
                 return [null]
             
-            if (i-1 >= 0 && values[i-1][0] !== null)
+            if (i > 0 && values[i-1][0] !== null)
             {
                 const multi = 2 / (period + 1);
                 const prev_ema = values[i-1][0];
@@ -137,8 +138,6 @@ class Indicators {
                     ma / period
                 ) * 100000) / 100000];
             }
-
-            
         }
 
         Indicators.calc(Indicators.ema, product, period, min_bars, timestamps, asks, bids, get_value);

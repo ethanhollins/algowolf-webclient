@@ -34,7 +34,13 @@ class Chart extends Component
         first_load: true,
         is_scrolling: null,
         is_loading: false,
-        cursor: 'inherit'
+        auto_zoom: true,
+        cursor: 'inherit',
+        hovered: {
+            vert_axis: false,
+            horiz_axis: false,
+            bar: false
+        }
     }
 
     constructor(props)
@@ -127,14 +133,14 @@ class Chart extends Component
         for (let i = 0; i < overlays.length; i++)
         {
             const ind = overlays[i];
-            this.calculateIndicator(ind);
+            this.getIndicator(ind);
         }
 
         // Studies
         for (let i = 0; i < studies.length; i++)
         {
             const ind = studies[i];
-            this.calculateIndicator(ind);
+            this.getIndicator(ind);
         }
 
         if (this._ismounted)
@@ -144,20 +150,12 @@ class Chart extends Component
             this.setTimeInterval();
         }
 
-        /* Get Price Info */
-        const mouse_pos = this.props.getMousePos();
-
-        if (this.container !== null)
-        {
-            this.getPriceInfo(mouse_pos);
-        }
-
         this._isinitialized = true;
     }
 
     componentDidUpdate() 
     {
-        let { pos, scale, first_load, trans_x } = this.state;
+        let { pos, scale, first_load, trans_x, auto_zoom } = this.state;
 
         if (this.getChart() !== undefined)
         {
@@ -170,30 +168,33 @@ class Chart extends Component
                 scale = chart_properties.scale;
                 this.setState({ pos, scale, first_load });
             }
-            else if (trans_x === 0)
+            else if (auto_zoom)
             {
-                const num_steps = 3;
-                const c_scale = scale.y;
-                const scale_interval = (chart_properties.scale.y - c_scale) / Math.pow(num_steps, 2);
-                this.transitionScaleY(num_steps, scale_interval, c_scale, null, null, 0, this);
-            }
-            
-            for (let i = 0; i < this.studies.length; i++)
-            {
-                const study = this.studies[i];
-                const study_properties = study.getStudyProperties();
-                if (study.getScale().y === 0)
-                {
-                    study.setScaleY(study_properties.scale.y);
-                }
-                else if (study.getTransX() === 0)
+                if (trans_x === 0)
                 {
                     const num_steps = 3;
-                    const c_scale = study.getScale().y;
-                    const scale_interval = (study_properties.scale.y - c_scale) / Math.pow(num_steps, 2);
-                    const c_pos = study.getPos().y;
-                    const pos_interval = (study_properties.pos.y - c_pos) / Math.pow(num_steps, 2);
-                    this.transitionScaleY(num_steps, scale_interval, c_scale, pos_interval, c_pos, 0, study);
+                    const c_scale = scale.y;
+                    const scale_interval = (chart_properties.scale.y - c_scale) / Math.pow(num_steps, 2);
+                    this.transitionScaleY(num_steps, scale_interval, c_scale, null, null, 0, this);
+                }
+                
+                for (let i = 0; i < this.studies.length; i++)
+                {
+                    const study = this.studies[i];
+                    const study_properties = study.getStudyProperties();
+                    if (study.getScale().y === 0)
+                    {
+                        study.setScaleY(study_properties.scale.y);
+                    }
+                    else if (study.getTransX() === 0)
+                    {
+                        const num_steps = 3;
+                        const c_scale = study.getScale().y;
+                        const scale_interval = (study_properties.scale.y - c_scale) / Math.pow(num_steps, 2);
+                        const c_pos = study.getPos().y;
+                        const pos_interval = (study_properties.pos.y - c_pos) / Math.pow(num_steps, 2);
+                        this.transitionScaleY(num_steps, scale_interval, c_scale, pos_interval, c_pos, 0, study);
+                    }
                 }
             }
         }
@@ -229,6 +230,7 @@ class Chart extends Component
                     cursor: this.state.cursor
                 }}
                 onContextMenu={this.onContextMenu.bind(this)}
+                onDoubleClick={this.onDoubleClick.bind(this)}
             >
                 <div ref={this.setContextMenuRef} className='context-menu body'>
                     <div className='context-menu item separator' onClick={this.onContextMenuItem.bind(this)} name={'trade'}>
@@ -285,6 +287,15 @@ class Chart extends Component
         );
     }
 
+    onDoubleClick(e)
+    {
+        e.preventDefault();
+
+        let { auto_zoom } = this.state;
+        auto_zoom = true;
+        this.setState({ auto_zoom });
+    }
+
     onMouseDown(e)
     {
         const keys = this.props.getKeys();
@@ -300,7 +311,7 @@ class Chart extends Component
             { x: mouse_pos.x, y: mouse_pos.y - top_offset }
         ))
         {
-            let { is_down, is_move, pos, before_change } = this.state;
+            let { is_down, is_move, pos, before_change, hovered } = this.state;
     
             // Check mouse within main segment bounds
     
@@ -312,50 +323,59 @@ class Chart extends Component
                 width: segment_size.width,
                 height: segment_size.height
             }
-    
-            if (!keys.includes(SPACEBAR) && this.isWithinBounds(rect, mouse_pos))
+            
+            if (!keys.includes(SPACEBAR))
             {
-                e.preventDefault();
                 is_down = true;
-                is_move = true;
-                before_change = { x: pos.x, y: pos.y };
-            }
-    
-            // Check mouse within study bounds
-            const studies = this.getStudyComponents();
-            for (let i = 0; i < studies.length; i++)
-            {
-                let study = studies[i];
-                start_pos = this.getWindowSegmentStartPos(study.getWindowIndex());
-                segment_size = this.getSegmentSize(study.getWindowIndex());
-                rect = {
-                    x: start_pos.x,
-                    y: start_pos.y + top_offset,
-                    width: segment_size.width,
-                    height: segment_size.height
-                }
-
-                
-                const handle_rect = this.getHandleRect(start_pos, segment_size);
-                handle_rect.y += top_offset
-                if (this.isWithinBounds(handle_rect, mouse_pos))
+                if (!(hovered.horiz_axis || hovered.vert_axis))
                 {
-                    is_down = false;
-                    is_move = false;
-                    
-                    study.setIsResize(true);
-                    return
-                }
-                else if (this.isWithinBounds(rect, mouse_pos)) 
-                {
-                    e.preventDefault();
-                    is_down = true;
-                    study.setIsMove(true);
-                    this.setState({ is_down });
-                    return
+                    if (this.isWithinBounds(rect, mouse_pos))
+                    {
+                        e.preventDefault();
+                        is_move = true;
+                        before_change = { x: pos.x, y: pos.y };
+                    }
+                    else
+                    {
+                        // Check mouse within study bounds
+                        const studies = this.getStudyComponents();
+                        for (let i = 0; i < studies.length; i++)
+                        {
+                            let study = studies[i];
+                            start_pos = this.getWindowSegmentStartPos(study.getWindowIndex());
+                            segment_size = this.getSegmentSize(study.getWindowIndex());
+                            rect = {
+                                x: start_pos.x,
+                                y: start_pos.y + top_offset,
+                                width: segment_size.width,
+                                height: segment_size.height
+                            }
+            
+                            
+                            const handle_rect = this.getHandleRect(start_pos, segment_size);
+                            handle_rect.y += top_offset
+                            if (this.isWithinBounds(handle_rect, mouse_pos))
+                            {
+                                is_down = false;
+                                is_move = false;
+                                
+                                study.setIsResize(true);
+                                return
+                            }
+                            else if (this.isWithinBounds(rect, mouse_pos)) 
+                            {
+                                e.preventDefault();
+                                is_down = true;
+                                study.setIsMove(true);
+                                this.setState({ is_down });
+                                return
+                            }
+                        }
+                    }
                 }
             }
 
+            this.handleCursor(hovered, is_down);
             this.setState({ is_down, is_move, before_change });
         }
     }
@@ -365,58 +385,189 @@ class Chart extends Component
         const keys = this.props.getKeys();
         if (keys.includes(SPACEBAR)) return;
 
-        let { is_down, is_move } = this.state;
+        let { is_down, is_move, auto_zoom, hovered } = this.state;
 
         if (is_down)
         {
+            e.preventDefault();
+
             let { pos, scale } = this.state;
             const camera = this.getCamera();
-
             const screen_move = { x: e.movementX, y: e.movementY };
             let move = camera.convertScreenUnitToWorldUnit(
                 screen_move, this.getSegmentSize(0), scale
             );
             
-            pos.x += move.x;
-            if (is_move)
-                pos.y += move.y;
+            if (hovered.horiz_axis)
+            {
+                const speed = 0.5;
+                scale.x += (scale.x * speed * (screen_move.x / 100.0));
+                scale.x = this.clampScale(scale.x);
+                this.setTimeInterval();
 
-            this.setState({ pos, scale });
+                auto_zoom = false;
+            }
+            else if (hovered.vert_axis)
+            {
+                const speed = 0.3;
+                scale.y += (scale.y * speed * (screen_move.y / 100.0));
+                this.setPriceInterval();
+
+                auto_zoom = false;
+            }
+            else
+            {
+                pos.x += move.x;
+                if (is_move)
+                    pos.y += move.y;
+            }
+
+            this.setState({ pos, scale, auto_zoom });
         }
     }
 
     onMouseMoveThrottled(mouse_pos)
     {
-        if (this.getChart() !== undefined)
+        const { is_down } = this.state;
+        const keys = this.props.getKeys();
+        if (this.getChart() !== undefined && !keys.includes(SPACEBAR) && !is_down)
         {
-            this.getPriceInfo(mouse_pos);
-            this.onBarHover(mouse_pos);
+            const top_offset = this.props.getTopOffset();
+            const is_top = this.props.isTopWindow(
+                this.getStrategyId(), this.getItemId(), 
+                { x: mouse_pos.x, y: mouse_pos.y - top_offset }
+            );
+            let { hovered } = this.state;
+            let isChanged = false;
+
+            isChanged = isChanged || this.onBarHover(mouse_pos, is_top, hovered);
+            isChanged = isChanged || this.onVertAxisHover(mouse_pos, is_top, hovered);
+            isChanged = isChanged || this.onHorizAxisHover(mouse_pos, is_top, hovered);
+
+            if (isChanged)
+            {
+                this.handleCursor(hovered, is_down);
+            }
+
         }
     }
 
-    onBarHover(mouse_pos)
+    onVertAxisHover(mouse_pos, is_top, hovered)
     {
-        const top_offset = this.props.getTopOffset();
+        if (this.getChart() !== undefined && is_top)
+        {
+            const top_offset = this.props.getTopOffset();
+            const seg_size = this.getSegmentSize(0);
+            const start_pos = this.getWindowSegmentStartPos(0);
 
+            const canvas = this.getCanvas();
+            const ctx = canvas.getContext("2d");
+
+            const font_size = 10;
+            ctx.font = String(font_size) + 'pt trebuchet ms'; //Consolas
+            const text_width = ctx.measureText((0).toFixed(5)).width; // Get placeholder text width
+
+            mouse_pos = { x: mouse_pos.x, y: mouse_pos.y - top_offset };
+            const rect = {
+                x: start_pos.x + (seg_size.width - text_width),
+                y: start_pos.y,
+                width: seg_size.width,
+                height: seg_size.height
+            }
+            if (!hovered.vert_axis && this.isWithinBounds(rect, mouse_pos))
+            {
+                hovered.vert_axis = true;
+                return true;
+            }
+            else if (hovered.vert_axis && !this.isWithinBounds(rect, mouse_pos))
+            {
+                hovered.vert_axis = false;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    onHorizAxisHover(mouse_pos, is_top, hovered)
+    {
+        if (this.getChart() !== undefined && is_top)
+        {
+            const top_offset = this.props.getTopOffset();
+            const bottom_offset = this.getBottomOff();
+            const chart_size = this.getChartSize();
+            const start_pos = this.getWindowSegmentStartPos(0);
+            let { hovered } = this.state;
+
+            mouse_pos = { x: mouse_pos.x, y: mouse_pos.y - top_offset };
+            const rect = {
+                x: start_pos.x,
+                y: (start_pos.y + chart_size.height),
+                width: chart_size.width,
+                height: chart_size.height + bottom_offset
+            }
+            if (!hovered.horiz_axis && this.isWithinBounds(rect, mouse_pos))
+            {
+                hovered.horiz_axis = true;
+                return true;
+            }
+            else if (hovered.horiz_axis && !this.isWithinBounds(rect, mouse_pos))
+            {
+                hovered.horiz_axis = false;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    onBarHover(mouse_pos, is_top, hovered)
+    {
         if (this.getChart() !== undefined && this.isBacktest())
         {
-            if (this.props.isTopWindow(
-                this.getStrategyId(), this.getItemId(), 
-                { x: mouse_pos.x, y: mouse_pos.y - top_offset }
-            ))
+            if (is_top)
             {
                 const timestamp = this.isWithinBarBounds(mouse_pos);
-                if (timestamp !== null)
+                if (timestamp !== null && !hovered.bar)
                 {
-                    if (this.state.cursor !== 'pointer')
-                        this.setCursor('pointer');
+                    hovered.bar = true;
+                    return true;
                 }
-                else if (this.state.cursor === 'pointer')
+                else if (hovered.bar)
                 {
-                    this.setCursor('inherit');
+                    hovered.bar = false;
+                    return true;
                 }
             }
         }
+        return false;
+    }
+
+    handleCursor(hovered, is_down)
+    {
+        let { cursor } = this.state;
+
+        if (hovered.horiz_axis)
+        {
+            cursor = 'w-resize';
+        }
+        else if (hovered.vert_axis)
+        {
+            cursor = 'ns-resize';
+        }
+        else if (hovered.bar)
+        {
+            cursor = 'pointer';
+        }
+        else if (is_down)
+        {
+            cursor = 'grabbing';
+        }
+        else
+        {
+            cursor = 'inherit';
+        }
+
+        this.setState({ hovered, cursor });
     }
 
     onMouseUp(e)
@@ -430,7 +581,7 @@ class Chart extends Component
             studies[i].setIsMove(false);
         }
 
-        let { is_down, is_move, before_change, trans_x, pos, scale } = this.state;
+        let { is_down, is_move, before_change, trans_x, pos, scale, hovered } = this.state;
         is_down = false;
 
         if (is_move)
@@ -455,6 +606,8 @@ class Chart extends Component
                 }
             }
         }
+
+        this.handleCursor(hovered, is_down);
 
         const mouse_pos = {
             x: e.clientX, y: e.clientY
@@ -503,9 +656,9 @@ class Chart extends Component
     
             const camera = this.getCamera();
             const chart_size = this.getChartSize();
-            const num_candles = camera.convertScreenUnitToWorldUnit(
-                { x: chart_size.width, y: 0 }, chart_size, scale
-            ).x;
+            // const num_candles = camera.convertScreenUnitToWorldUnit(
+            //     { x: chart_size.width, y: 0 }, chart_size, scale
+            // ).x;
     
             // Check mouse within main segment bounds
             const top_offset = this.props.getTopOffset();
@@ -520,7 +673,7 @@ class Chart extends Component
     
             if (this.isWithinBounds(rect, mouse_pos))
             {
-                scale.x += (num_candles * speed * (dz / 100.0));
+                scale.x += (scale.x * speed * (dz / 100.0));
                 scale.x = this.clampScale(scale.x);
                 
                 const chart_properties = this.getChartProperties(this.getBids(), Math.floor(pos.x), scale);
@@ -702,7 +855,7 @@ class Chart extends Component
     {
         if (this._isinitialized)
         {
-            const prices = this.state.prices;
+            const prices = this.getPriceInfo();
             if (prices !== undefined)
             {
                 const overlays = this.getOverlays();
@@ -899,13 +1052,13 @@ class Chart extends Component
                 );
     
                 // Update chart with new data
+                this.props.resetIndicators(this.getChart());
                 this.props.updateChart(this.getProduct(), this.getPeriod(), data.ohlc);
 
                 for (let i = 0; i < this.studies.length; i++)
                 {
                     this.studies.resetResult();
                 }
-                this.props.resetIndicators(this.getChart(), this.getOverlays().concat(this.getStudies()));
                 // Allow new data loading
                 is_loading = false;
                 this.setState({ is_loading });
@@ -945,7 +1098,6 @@ class Chart extends Component
         const overlays = this.getOverlayComponents();
         for (let i = 0; i < overlays.length; i++)
         {
-            this.calculateIndicator(this.getOverlays()[i]);
             overlays[i].draw();
         }
 
@@ -981,7 +1133,6 @@ class Chart extends Component
         for (let i = 0; i < studies.length; i++)
         {
             let study = studies[i];
-            this.calculateIndicator(this.getStudies()[i]);
 
             start_pos = this.getChartSegmentStartPos(study.getWindowIndex());
             segment_size = this.getSegmentSize(study.getWindowIndex());
@@ -1025,9 +1176,10 @@ class Chart extends Component
         }
     }
 
-    getPriceInfo(mouse_pos)
+    getPriceInfo()
     {
         const { pos, scale } = this.state;
+        const mouse_pos = this.props.getMousePos();
         let prices = {
             timestamp: null,
             ohlc: [],
@@ -1063,7 +1215,6 @@ class Chart extends Component
 
         prices.timestamp = this.getTimestampByPos(Math.floor(x_pos));
 
-        // console.log(this.getOverlayValues(0));
         let isNext = true;
         while (isNext) 
         {
@@ -1143,9 +1294,7 @@ class Chart extends Component
         }
         prices.ohlc_color = `rgba(${prices.ohlc_color[0]}, ${prices.ohlc_color[1]}, ${prices.ohlc_color[2]}, 1.0)`;
 
-        this.setState({ prices });
-
-        this.props.updateInfo(mouse_pos);
+        return prices;
     }
 
     getNumZeroDecimals(x)
@@ -2102,7 +2251,11 @@ class Chart extends Component
     {
         const timestamps = this.getTimestamps();
         // Return undefined if timestamp is greater than latest existing timestamp
-        if (!this.isBacktest() && ts >= this.getNextTimestamp() + this.getPeriodOffsetSeconds(this.getChart().period))
+        if (
+            (!this.isBacktest() && 
+                ts >= this.getNextTimestamp() + this.getPeriodOffsetSeconds(this.getChart().period)) ||
+            ts < timestamps[0]
+        )
             return undefined
 
         const indicies = [...Array(timestamps.length).keys()]
@@ -2120,7 +2273,7 @@ class Chart extends Component
     {
         const timestamps = this.getAllTimestamps();
         // Return undefined if timestamp is greater than latest existing timestamp
-        if (ts > timestamps[timestamps.length-1])
+        if (ts > timestamps[timestamps.length-1] || ts < timestamps[0])
             return undefined
 
         const indicies = [...Array(timestamps.length).keys()]
@@ -2619,11 +2772,7 @@ class Chart extends Component
         for (let i = 0; i < overlays[idx].properties.periods.length; i++)
         {
             result.push(
-                this.props.getIndicator(
-                    overlays[idx].type, this.getPrice(), 
-                    this.getProduct(), 
-                    overlays[idx].properties.periods[i]
-                )
+                this.getIndicator(overlays[idx]).cache_bids
             );
         }
         return result;
@@ -2641,11 +2790,7 @@ class Chart extends Component
         for (let i = 0; i < studies[idx].properties.periods.length; i++)
         {
             result.push(
-                this.props.getIndicator(
-                    studies[idx].type, this.getPrice(), 
-                    this.getProduct(), 
-                    studies[idx].properties.periods[i]
-                )
+                this.getIndicator(studies[idx]).cache_bids
             );
         }
         return result;
@@ -2763,13 +2908,21 @@ class Chart extends Component
         this.setState({ cursor });
     }
 
-    calculateIndicator = (ind) =>
+    getIndicator = (ind_props) =>
     {
-        this.props.calculateIndicator(
-            this.getChart(),
-            this.getPrice(),
-            ind
+        const chart = this.getChart();
+        let ind = this.props.findIndicator(
+            ind_props.type, chart.broker, chart.product, ind_props.properties.periods[0]
         );
+        if (ind === undefined)
+        {
+            ind = this.props.createIndicator(
+                ind_props.type, chart.broker, chart.product, ind_props.properties
+            );
+
+            this.props.calculateIndicator(ind, chart);
+        }
+        return ind;
     }
 
     isBacktest = () =>
