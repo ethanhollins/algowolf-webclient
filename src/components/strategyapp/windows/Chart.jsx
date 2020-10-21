@@ -1911,7 +1911,7 @@ class Chart extends Component
         // Retrieve Account Drawings if running live tab
         if (!this.isBacktest())
         {
-            const current_account = this.getCurrentAccount;
+            const current_account = this.getCurrentAccount();
             if (current_account !== undefined && current_account in drawings)
             {
                 drawings = drawings[current_account];
@@ -1997,7 +1997,7 @@ class Chart extends Component
 
         if (!this.isBacktest())
         {
-            const current_account = this.getCurrentAccount;
+            const current_account = this.getCurrentAccount();
             if (current_account !== undefined && current_account in drawings)
             {
                 drawings = drawings[current_account];
