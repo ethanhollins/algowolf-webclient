@@ -885,42 +885,32 @@ class Chart extends Component
                                     price = price.toFixed(5);
                                 }
         
-                                if (y === 0) 
-                                {
-                                    item = (
-                                        <React.Fragment>
-        
-                                        <span className='chart values period'>
-                                            {overlay.properties.periods[x]}
-                                        </span>
-                                        <span className='chart values price'>
-                                            {price}
-                                        </span>
-        
-                                        </React.Fragment>
-                                    );
-                                }
-                                else
-                                {
-                                    item = (
-                                        <span className='chart values price'>
-                                            {price}
-                                        </span>
-                                    );
-                                }
+                                
+                                item = (
+                                    <span className='chart values price'>
+                                        {price}
+                                    </span>
+                                );
         
                                 value_elems.push(
-                                    <span key={x + '' + y}>{item}</span>
+                                    <div key={x + '-' + y}>{item}</div>
                                 );
                             }
                         }
                     }
     
                     const name = overlay.type.substring(0,1).toUpperCase() + overlay.type.substring(1);
+                    // const name = overlay.type.toUpperCase();
                     overlay_info.push(
-                        <div key={i} className='chart group overlay' style={{top: (5 + (i+1) * 20) + 'px', left: '5px'}}>
-                            <span className='chart values type'>{name}</span>
-                            {value_elems}
+                        <div key={i} className='chart overlay-item'>
+                            <div>
+                                <div className='chart values overlay-type'>
+                                    {name}
+                                </div>
+                                <div className='chart values price-group'>
+                                    {value_elems}
+                                </div>
+                            </div>
                         </div>
                     );
                 }
@@ -984,7 +974,7 @@ class Chart extends Component
                     const name = study.type.substring(0,1).toUpperCase() + study.type.substring(1);
                     study_info.push(
                         <div key={i} className='chart group study' style={{top: (start_pos.y + 10) + 'px', left: '5px'}}>
-                            <span className='chart values type'>{name}</span>
+                            <div className='chart values type'>{name}</div>
                             {value_elems}
                         </div>
                     );
@@ -993,21 +983,25 @@ class Chart extends Component
                 return (
                     <React.Fragment>
     
-                    <div className='chart group' style={{top: '5px', left: '5px'}}>
-                        <div className='chart product-btn'>{this.getProduct().replace('_', '')}</div>
-                        <div className='chart period-btn'>1m</div>
-                        <div>
-                            <span className='chart values type'>O</span>
-                            <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[0].toFixed(5)}</span>
-                            <span className='chart values type'>H</span>
-                            <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[1].toFixed(5)}</span>
-                            <span className='chart values type'>L</span>
-                            <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[2].toFixed(5)}</span>
-                            <span className='chart values type'>C</span>
-                            <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[3].toFixed(5)}</span>
+                    <div className='chart group'>
+                        <div className='chart ohlc-group'>
+                            <div className='chart product-btn'>{this.getProduct().replace('_', '')}</div>
+                            <div className='chart period-btn'>1m</div>
+                            <div>
+                                <span className='chart values ohlc-type'>O</span>
+                                <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[0].toFixed(5)}</span>
+                                <span className='chart values ohlc-type'>H</span>
+                                <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[1].toFixed(5)}</span>
+                                <span className='chart values ohlc-type'>L</span>
+                                <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[2].toFixed(5)}</span>
+                                <span className='chart values ohlc-type'>C</span>
+                                <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[3].toFixed(5)}</span>
+                            </div>
+                        </div>
+                        <div className='chart overlay-group'>
+                            {overlay_info}
                         </div>
                     </div>
-                    {overlay_info}
                     {study_info}
     
                     </React.Fragment>
@@ -1208,8 +1202,7 @@ class Chart extends Component
             this.props.isTopWindow(
                 this.getStrategyId(), this.getItemId(), 
                 {x: mouse_pos.x, y: mouse_pos.y - top_offset}
-            ) && 
-            this.getCursor() === 'inherit'
+            )
         )
         {
             x_pos = Math.floor(camera.convertScreenPosToWorldPos(mouse_pos, pos, chart_size, scale).x);

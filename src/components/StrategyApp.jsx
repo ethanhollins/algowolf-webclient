@@ -112,6 +112,8 @@ class StrategyApp extends Component
         window.removeEventListener("resize", this.update);
         window.removeEventListener("keydown", this.onKeyDown);
         window.removeEventListener("keyup", this.onKeyUp);
+
+        this.is_loaded = false;
     }
 
     render()
@@ -230,6 +232,7 @@ class StrategyApp extends Component
                 if (current_strategy.includes('/backtest/'))
                 {
                     return <Backtest
+                        key={current_strategy}
                         id={current_strategy}
                         ref={this.setStrategy}
                         clone={this.clone}
@@ -276,6 +279,7 @@ class StrategyApp extends Component
                 else
                 {
                     return <Strategy
+                        key={current_strategy}
                         id={current_strategy}
                         ref={this.setStrategy}
                         clone={this.clone}

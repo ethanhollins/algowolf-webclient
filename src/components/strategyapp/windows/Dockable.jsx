@@ -56,6 +56,7 @@ class Dockable extends Component
         if (type === 'log')
         {
             return <Log
+                key={this.props.item_id}
                 ref={this.setInnerWindowRef}
                 strategy_id={this.props.strategy_id}
                 item_id={this.props.item_id}
@@ -66,6 +67,7 @@ class Dockable extends Component
         else if (type === 'info')
         {
             return <Info
+                key={this.props.item_id}
                 ref={this.setInnerWindowRef}
                 strategy_id={this.props.strategy_id}
                 item_id={this.props.item_id}
@@ -79,6 +81,7 @@ class Dockable extends Component
         else if (type === 'control_panel')
         {
             return <ControlPanel
+                key={this.props.item_id}
                 ref={this.setInnerWindowRef}
                 strategy_id={this.props.strategy_id}
                 item_id={this.props.item_id}

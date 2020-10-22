@@ -29,7 +29,8 @@ class Strategy extends Component
     async componentDidMount()
     {
         this.getStrategyData();
-        
+        this.setCurrentAccount();
+
         const sio = this.handleSocket();
         this.setState({ sio });
     }
@@ -571,6 +572,17 @@ class Strategy extends Component
     }
 
     getCurrentAccount = () =>
+    {
+        const accounts = this.getAccounts();
+        let strategy = this.getStrategyInfo();
+
+        if (accounts !== undefined && accounts.length > 0)
+        {
+            return strategy.account;
+        }
+    }
+
+    setCurrentAccount = () =>
     {
         const accounts = this.getAccounts();
         let strategy = this.getStrategyInfo();
