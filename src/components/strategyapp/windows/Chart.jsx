@@ -2738,8 +2738,15 @@ class Chart extends Component
 
     getBroker = () =>
     {
-        const current_account = this.getCurrentAccount();
-        return this.getStrategy().brokers[current_account.split('.')[0]].broker;
+        if (this.isBacktest())
+        {
+            return this.getStrategy().broker;
+        }
+        else
+        {
+            const current_account = this.getCurrentAccount();
+            return this.getStrategy().brokers[current_account.split('.')[0]].broker;
+        }
     }
 
     getProduct = () => 

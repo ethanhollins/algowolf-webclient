@@ -144,8 +144,10 @@ class Backtest extends Component
                             addChart={this.addChart}
                             getChart={this.getChart}
                             updateChart={this.updateChart}
+                            findIndicator={this.findIndicator}
+                            createIndicator={this.createIndicator}
                             getIndicator={this.getIndicator}
-                            calculateIndicator={this.calculateIndicator}
+                            calculateIndicator={this.props.calculateIndicator}
                             resetIndicators={this.props.resetIndicators}
                             getPeriodOffsetSeconds={this.props.getPeriodOffsetSeconds}
                             getCountDate={this.props.getCountDate}
@@ -187,10 +189,20 @@ class Backtest extends Component
         return this.props.getIndicator(type, price, this.props.id, product, period)
     }
 
-    calculateIndicator = (chart, price, ind) =>
+    findIndicator = (type, broker, product, period) =>
     {
-        return this.props.calculateIndicator(this.props.id, chart, price, ind)
+        return this.props.findIndicator(this.props.id, type, broker, product, period);
     }
+
+    createIndicator = (type, broker, product, properties) =>
+    {
+        return this.props.createIndicator(this.props.id, type, broker, product, properties);
+    }
+
+    // calculateIndicator = (chart, price, ind) =>
+    // {
+    //     return this.props.calculateIndicator(this.props.id, chart, price, ind)
+    // }
 
     subscribe()
     {
@@ -441,6 +453,8 @@ class Backtest extends Component
     {
         this.handleTransactions(timestamp);
     }
+
+
 
 }
 

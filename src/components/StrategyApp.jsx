@@ -27,6 +27,7 @@ class StrategyApp extends Component
         charts: {},
         backtestCharts: {},
         indicators: [],
+        backtest_indicators: {},
         size: {
             width: 0, height: 0
         },
@@ -269,8 +270,10 @@ class StrategyApp extends Component
                         addChart={this.addBacktestChart}
                         getChart={this.getBacktestChart}
                         updateChart={this.updateBacktestChart}
+                        findIndicator={this.findBacktestIndicator}
+                        createIndicator={this.createBacktestIndicator}
                         getIndicator={this.getBacktestIndicator}
-                        calculateIndicator={this.calculateBacktestIndicator}
+                        calculateIndicator={this.calculateIndicator}
                         resetIndicators={this.resetIndicators}
                         getPeriodOffsetSeconds={this.getPeriodOffsetSeconds}
                         getCountDate={this.getCountDate}
@@ -475,10 +478,10 @@ class StrategyApp extends Component
         {
             for (let w of this.strategy.windows)
             {
-                // if (w.getInnerElement().onMouseMoveThrottled !== undefined)
-                // {
-                //     w.getInnerElement().onMouseMoveThrottled(mouse_pos);
-                // }
+                if (w.getInnerElement().onMouseMoveThrottled !== undefined)
+                {
+                    w.getInnerElement().onMouseMoveThrottled(mouse_pos);
+                }
             }
             this.setState({ mouse_pos });
         }
@@ -1134,6 +1137,43 @@ class StrategyApp extends Component
         const ind = new Indicator[type](broker, product, properties);
         indicators.push(ind);
         this.setState({ indicators });
+        return ind;
+    }
+
+    findBacktestIndicator = (backtest_id, type, broker, product, period) =>
+    {
+        const { backtest_indicators } = this.state;
+        if (backtest_id in backtest_indicators)
+        {
+            for (let ind of backtest_indicators[backtest_id])
+            {
+                if (
+                    ind.type === type && 
+                    ind.broker === broker &&
+                    ind.product === product && 
+                    ind.period === period
+                )
+                {
+                    return ind;
+                }
+            }
+
+        }
+        return undefined;
+    }
+
+    createBacktestIndicator = (backtest_id, type, broker, product, properties) =>
+    {
+        let { backtest_indicators } = this.state;
+
+        if (!(backtest_id in backtest_indicators))
+        {
+            backtest_indicators[backtest_id] = [];
+        }
+
+        const ind = new Indicator[type](broker, product, properties);
+        backtest_indicators[backtest_id].push(ind);
+        this.setState({ backtest_indicators });
         return ind;
     }
 
