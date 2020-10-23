@@ -1466,7 +1466,7 @@ class Chart extends Component
     getPriceFormat(offset)
     {
         if (offset < this.props.getPeriodOffsetSeconds("D"))
-            return 'DD MMM \'YY HH:mm';
+            return 'DD MMM \'YY  HH:mm';
         else if (offset < this.props.getPeriodOffsetSeconds("W"))
             return 'ddd d';
         else if (offset < this.props.getPeriodOffsetSeconds("Y"))
@@ -2738,7 +2738,8 @@ class Chart extends Component
 
     getBroker = () =>
     {
-        return this.getStrategy().broker;
+        const current_account = this.getCurrentAccount();
+        return this.getStrategy().brokers[current_account.split('.')[0]].broker;
     }
 
     getProduct = () => 

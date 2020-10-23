@@ -233,36 +233,55 @@ class StrategyToolbar extends Component
 
     generateAccounts = () =>
     {
-        const accounts = this.getAccounts();
+        const strategy = this.props.getStrategyInfo(this.props.getCurrentStrategy());
+        const brokers = this.getBrokers();
 
-        if (accounts !== undefined)
+        if (brokers !== undefined)
         {
+
             let current_account = this.getCurrentAccount();
 
             let account_elems = [];
             let class_name;
-            for (let acc of accounts)
+            for (let broker_id of brokers)
             {
-                if (acc === current_account)
-                {
-                    class_name = 'toolbox dropdown-item selected';
-                }
-                else
-                {
-                    class_name = 'toolbox dropdown-item ';
-                }
+                const accounts = this.getAccounts(broker_id);
+                const broker_name = strategy.brokers[broker_id].name;
 
-                account_elems.push(
-                    <div key={acc} className={class_name} onClick={this.onAccountsDropdownItem} name={acc}>
-                        <span className='toolbox left'>{this.getAccountDisplayName(acc)}</span>
-                    </div>
-                );
+                if (broker_name !== null)
+                {
+                    account_elems.push(
+                        <div key={broker_id} className='toolbox dropdown-header'>
+                            {broker_name}
+                        </div>
+                    );
+                }
+                for (let acc of accounts)
+                {
+                    const account_id = broker_id + '.' + acc;
+                    if (account_id === current_account)
+                    {
+                        class_name = 'toolbox dropdown-item selected';
+                    }
+                    else
+                    {
+                        class_name = 'toolbox dropdown-item ';
+                    }
+                            
+                    account_elems.push(
+                        <div key={acc} className={class_name} onClick={this.onAccountsDropdownItem} name={account_id}>
+                            <span className='toolbox left'>{this.getAccountDisplayName(acc)}</span>
+                        </div>
+                    );
+                }
             }
 
             return (
                 <React.Fragment>
     
-                <span className='toolbox label right-space'>{this.getAccountDisplayName(current_account)}</span>
+                <span className='toolbox label right-space'>
+                    {current_account !== undefined ? this.getAccountDisplayName(current_account.split('.')[1]) : ''}
+                </span>
                 <div className='toolbox item btn' onClick={this.onAccountsDropdown}>
                     <FontAwesomeIcon className='toolbox selection-icon' icon={faChevronDown} />
                 </div>
@@ -352,17 +371,20 @@ class StrategyToolbar extends Component
     onScriptSwitch = () =>
     {
         let current_account = this.getCurrentAccount();
-        const is_running = this.getScriptStatus(current_account);
-
+        
         if (current_account !== undefined)
         {
+            const broker_id = current_account.split('.')[0];
+            const account_id = current_account.split('.')[1];
+
+            const is_running = this.getScriptStatus(current_account);
             if (is_running)
             {
-                this.props.stopScript(current_account);
+                this.props.stopScript(broker_id, account_id);
             }
             else
             {
-                this.props.startScript(current_account);
+                this.props.startScript(broker_id, account_id);
             }
         }
     }
@@ -542,42 +564,58 @@ class StrategyToolbar extends Component
         }
     }
 
-    getAccounts = () =>
+    getBrokers = () =>
     {
         const strategy = this.props.getStrategyInfo(this.props.getCurrentStrategy());
 
         if (strategy !== undefined)
         {
-            let accounts = Object.keys(strategy.accounts);
-            let start = accounts.splice(accounts.indexOf('papertrader'), 1);
+            let accounts = Object.keys(strategy.brokers);
+            let start = accounts.splice(accounts.indexOf(this.props.getCurrentStrategy()), 1);
             return start.concat(accounts.sort());
+        }
+    }
+
+    getAccounts = (broker_id) =>
+    {
+        const strategy = this.props.getStrategyInfo(this.props.getCurrentStrategy());
+
+        if (strategy !== undefined)
+        {
+            return Object.keys(strategy.brokers[broker_id].accounts);
         }
     }
 
     getCurrentAccount = () =>
     {
-        const accounts = this.getAccounts();
         const strategy = this.props.getStrategyInfo(this.props.getCurrentStrategy());
 
-        if (accounts !== undefined && accounts.length > 0)
+        if (strategy !== undefined)
         {
-            let current_account = strategy.account;
-            if (!accounts.includes(current_account))
+            let current = strategy.account.split('.');
+            if (current.length >= 2)
             {
-                return undefined;
+                const broker_id = current[0];
+                const current_account = current[1];
+                const accounts = this.getAccounts(broker_id);
+                if (accounts !== undefined && accounts.includes(current_account))
+                {
+                    return strategy.account;
+                }
             }
-
-            return current_account;
         }
     }
 
-    getScriptStatus = (account_id) =>
+    getScriptStatus = (current_account) =>
     {
         const strategy = this.props.getStrategyInfo(this.props.getCurrentStrategy());
 
-        if (strategy !== undefined && account_id !== undefined)
+        if (strategy !== undefined && current_account !== undefined)
         {
-            return strategy.accounts[account_id]['strategy_status'];
+            current_account = current_account.split('.');
+            const broker_id = current_account[0];
+            const account_id = current_account[1];
+            return strategy.brokers[broker_id].accounts[account_id]['strategy_status'];
         }
 
         return null;

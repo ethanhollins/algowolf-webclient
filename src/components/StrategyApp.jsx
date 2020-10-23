@@ -53,6 +53,7 @@ class StrategyApp extends Component
         
         this.updateInfo = this.updateInfo.bind(this);
         this.connectChart = this.connectChart.bind(this);
+        this.retrieveStrategies = this.retrieveStrategies.bind(this);
         this.retrieveTransactions = this.retrieveTransactions.bind(this);
         this.retrieveChartData = this.retrieveChartData.bind(this);
         this.updateInputVariables = this.updateInputVariables.bind(this);
@@ -292,6 +293,7 @@ class StrategyApp extends Component
                         getMousePos={this.getMousePos}
                         getSize={this.getSize}
                         getScale={this.getScale}
+                        retrieveStrategies={this.retrieveStrategies}
                         getStrategyInfo={this.getStrategyInfo}
                         updateStrategyInfo={this.updateStrategyInfo}
                         updateInfo={this.updateInfo}
@@ -473,10 +475,10 @@ class StrategyApp extends Component
         {
             for (let w of this.strategy.windows)
             {
-                if (w.getInnerElement().onMouseMoveThrottled !== undefined)
-                {
-                    w.getInnerElement().onMouseMoveThrottled(mouse_pos);
-                }
+                // if (w.getInnerElement().onMouseMoveThrottled !== undefined)
+                // {
+                //     w.getInnerElement().onMouseMoveThrottled(mouse_pos);
+                // }
             }
             this.setState({ mouse_pos });
         }
@@ -846,7 +848,7 @@ class StrategyApp extends Component
     {
         const { sio } = this.state;
         sio.emit('subscribe', {
-            strategy_id: this.getCurrentStrategy(),
+            broker_id: this.getCurrentStrategy(),
             field: 'ontick',
             items: {
                 [product]: [period]
@@ -1183,17 +1185,18 @@ class StrategyApp extends Component
     //     );
     // }
 
-    async requestStrategyStatusUpdate(strategy_id, accounts, new_status)
+    async requestStrategyStatusUpdate(strategy_id, broker_id, accounts, new_status)
     {
         const { REACT_APP_API_URL } = process.env;
         const reqOptions = {
             method: 'POST',
             headers: this.props.getHeaders(),
-            credentials: 'include'
+            credentials: 'include',
+            body: JSON.stringify({ accounts: accounts })
         }
 
         let res = await fetch(
-            `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/${new_status}?accounts=${accounts.join(',')}`,
+            `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/${new_status}/${broker_id}`,
             reqOptions
         );
 
@@ -1202,7 +1205,10 @@ class StrategyApp extends Component
         if (res.status === 200)
         {
             res = await res.json();
-            strategyInfo[res.strategy_id].accounts = res.accounts;
+            if ('brokers' in res)
+            {
+                strategyInfo[strategy_id].brokers = res.brokers;
+            }
             this.setState({ strategyInfo });
         }
         
@@ -1238,25 +1244,25 @@ class StrategyApp extends Component
         return strategyInfo[strategy_id].accounts[account_id];
     }
 
-    async startScript(account_id)
+    async startScript(broker_id, account_id)
     {
-        this.toolbar.setStatusMsg('Starting strategy...');
+        // this.toolbar.setStatusMsg('Starting strategy...');
 
         const { account, strategyInfo } = this.state;
         const strategy_id = account.metadata.current_strategy;
         await this.requestStrategyStatusUpdate(
-            strategy_id, [account_id], 'start'
+            strategy_id, broker_id, [account_id], 'start'
         );
     }
 
-    async stopScript(account_id)
+    async stopScript(broker_id, account_id)
     {
-        this.toolbar.setStatusMsg('Stopping strategy...');
+        // this.toolbar.setStatusMsg('Stopping strategy...');
 
         const { account, strategyInfo } = this.state;
         const strategy_id = account.metadata.current_strategy;
         await this.requestStrategyStatusUpdate(
-            strategy_id, [account_id], 'stop'
+            strategy_id, broker_id, [account_id], 'stop'
         );
     }
 

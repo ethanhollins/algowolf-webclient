@@ -28,6 +28,8 @@ class Strategy extends Component
 
     async componentDidMount()
     {
+        await this.props.retrieveStrategies([this.props.id]);
+
         this.getStrategyData();
         this.setCurrentAccount();
 
@@ -42,19 +44,26 @@ class Strategy extends Component
     }
 
     render() {
-        return (
-            <React.Fragment>
-            
-            <div className='shadow container'>
-                {this.generateShadows()}
-            </div>
-
-            <div className='window container'>
-                {this.generateWindows()}
-            </div>
-            
-            </React.Fragment>
-        );
+        if (this.getCurrentAccount() !== undefined)
+        {
+            return (
+                <React.Fragment>
+                
+                <div className='shadow container'>
+                    {this.generateShadows()}
+                </div>
+    
+                <div className='window container'>
+                    {this.generateWindows()}
+                </div>
+                
+                </React.Fragment>
+            );
+        }
+        else
+        {
+            return <React.Fragment />;
+        }
     }
 
     generateShadows()
@@ -258,7 +267,6 @@ class Strategy extends Component
 
         socket.on('ongui', (data) =>
         {
-            console.log(data);
             if (data.type === 'create_drawing')
             {
                 this.createDrawing(data.account_id, data.item.layer, data.item);
@@ -293,6 +301,10 @@ class Strategy extends Component
             {
                 this.createInfo(data.account_id, data);
             }
+            else if (data.type === 'activation')
+            {
+                this.setActivation(data);
+            }
         });
 
         return socket;
@@ -301,13 +313,17 @@ class Strategy extends Component
     subscribe()
     {
         const { sio } = this.state;
-        sio.emit(
-            'subscribe', 
-            {
-                'strategy_id': this.props.id,
-                'field': 'ontrade'
-            }
-        );
+        let strategy = this.getStrategyInfo();
+        for (let broker_id in strategy.brokers)
+        {
+            sio.emit(
+                'subscribe', 
+                {
+                    'broker_id': broker_id,
+                    'field': 'ontrade'
+                }
+            );
+        }
     }
 
     hideShadows = (hide_shadows) =>
@@ -315,10 +331,7 @@ class Strategy extends Component
         this.setState({ hide_shadows });
     }
 
-    handleKeys = () =>
-    {
-
-    }
+    handleKeys = () => {}
 
     addPosition = (position) =>
     {
@@ -326,7 +339,9 @@ class Strategy extends Component
 
         if (strategy !== undefined)
         {
-            strategy.positions.push(position);
+            const broker_id = this.getCurrentAccount().split('.')[0];
+            
+            strategy.brokers[broker_id].positions.push(position);
             this.props.updateStrategyInfo();
         }
     }
@@ -337,11 +352,13 @@ class Strategy extends Component
 
         if (strategy !== undefined)
         {
-            for (let j = 0; j < strategy.positions.length; j++)
+            const broker_id = this.getCurrentAccount().split('.')[0];
+
+            for (let j = 0; j < strategy.brokers[broker_id].positions.length; j++)
             {
-                if (strategy.positions[j].order_id === position.order_id)
+                if (strategy.brokers[broker_id].positions[j].order_id === position.order_id)
                 {
-                    strategy.positions[j] = position;
+                    strategy.brokers[broker_id].positions[j] = position;
                 }
             }
             this.props.updateStrategyInfo();
@@ -354,10 +371,12 @@ class Strategy extends Component
 
         if (strategy !== undefined)
         {
-            for (let j = 0; j < strategy.positions.length; j++)
+            const broker_id = this.getCurrentAccount().split('.')[0];
+
+            for (let j = 0; j < strategy.brokers[broker_id].positions.length; j++)
             {
-                if (strategy.positions[j].order_id === position.order_id)
-                    strategy.positions.splice(j, 1);
+                if (strategy.brokers[broker_id].positions[j].order_id === position.order_id)
+                    strategy.brokers[broker_id].positions.splice(j, 1);
             }
             this.props.updateStrategyInfo();
         }
@@ -471,6 +490,20 @@ class Strategy extends Component
         info[data.timestamp].push(data.item);
     }
 
+    setActivation = (data) =>
+    {
+        let strategy = this.getStrategyInfo();
+
+        if (strategy !== undefined)
+        {
+            for (let account_id in data.accounts)
+            {
+                strategy.brokers[data.broker_id].accounts[account_id].strategy_status = data.accounts[account_id];
+            }
+            this.props.updateStrategyInfo();
+        }
+    }
+
     getStrategyInfo = () =>
     {
         const strategy_id = this.props.id;
@@ -490,15 +523,18 @@ class Strategy extends Component
 
     getPositions = () =>
     {
-        const current_account = this.getCurrentAccount();
         let strategy = this.getStrategyInfo();
         let positions = [];
 
-        if (current_account !== undefined)
+        if (strategy !== undefined)
         {
-            for (let pos of strategy.positions)
+            let current_account = this.getCurrentAccount();
+            const broker_id = current_account.split('.')[0];
+            const account_id = current_account.split('.')[1];
+
+            for (let pos of strategy.brokers[broker_id].positions)
             {
-                if (pos.account_id === current_account)
+                if (pos.account_id === account_id)
                 {
                     positions.push(pos);
                 }
@@ -510,15 +546,18 @@ class Strategy extends Component
 
     getOrders = () =>
     {
-        const current_account = this.getCurrentAccount();
         let strategy = this.getStrategyInfo();
         let orders = [];
 
-        if (current_account !== undefined)
+        if (strategy !== undefined)
         {
-            for (let order of strategy.orders)
+            let current_account = this.getCurrentAccount();
+            const broker_id = current_account.split('.')[0];
+            const account_id = current_account.split('.')[1];
+
+            for (let order of strategy.brokers[broker_id].orders)
             {
-                if (order.account_id === current_account)
+                if (order.account_id === account_id)
                 {
                     orders.push(order);
                 }
@@ -559,44 +598,58 @@ class Strategy extends Component
         }
     }
 
-    getAccounts = () =>
+    getBrokers = () =>
+    {
+        const strategy = this.getStrategyInfo();
+
+        if (strategy !== undefined)
+        {
+            let accounts = Object.keys(strategy.brokers);
+            let start = accounts.splice(accounts.indexOf(this.props.id), 1);
+            return start.concat(accounts.sort());
+        }
+    }
+
+    getAccounts = (broker_id) =>
     {
         let strategy = this.getStrategyInfo();
 
         if (strategy !== undefined)
         {
-            let accounts = Object.keys(strategy.accounts);
-            let start = accounts.splice(accounts.indexOf('papertrader'), 1);
-            return start.concat(accounts.sort());
+            return Object.keys(strategy.brokers[broker_id].accounts);
         }
     }
 
     getCurrentAccount = () =>
     {
-        const accounts = this.getAccounts();
-        let strategy = this.getStrategyInfo();
+        const strategy = this.getStrategyInfo();
+        const brokers = this.getBrokers();
 
-        if (accounts !== undefined && accounts.length > 0)
+        if (brokers !== undefined)
         {
-            return strategy.account;
+            let current = strategy.account.split('.');
+            if (current.length >= 2)
+            {
+                const broker_id = current[0];
+                const current_account = current[1];
+                const accounts = this.getAccounts(broker_id);
+                if (accounts !== undefined && accounts.includes(current_account))
+                {
+                    return strategy.account;
+                }
+            }
         }
     }
 
     setCurrentAccount = () =>
     {
-        const accounts = this.getAccounts();
-        let strategy = this.getStrategyInfo();
+        let current_account = this.getCurrentAccount();
 
-        if (accounts !== undefined && accounts.length > 0)
+        if (current_account === undefined)
         {
-            let current_account = strategy.account;
-            if (!accounts.includes(current_account))
-            {
-                current_account = accounts[0];
-                this.switchAccount(current_account);
-            }
-
-            return current_account;
+            let strategy = this.getStrategyInfo();
+            strategy.account = this.props.id + '.papertrader';
+            this.props.updateStrategyInfo();
         }
     }
 
