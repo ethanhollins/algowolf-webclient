@@ -638,6 +638,16 @@ class StrategyApp extends Component
         ).then(res => res.json());  
     }
 
+    async updatePositions(broker_id)
+    {
+
+    }
+
+    async updateOrders(broker_id)
+    {
+
+    }
+
     async updateInputVariables(strategy_id, input_variables)
     {
         const { REACT_APP_API_URL } = process.env;

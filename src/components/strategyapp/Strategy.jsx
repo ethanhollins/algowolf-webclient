@@ -28,7 +28,8 @@ class Strategy extends Component
 
     async componentDidMount()
     {
-        await this.props.retrieveStrategies([this.props.id]);
+        // await this.props.updatePositions();
+        // await this.props.updateOrders();
 
         this.getStrategyData();
         this.setCurrentAccount();
