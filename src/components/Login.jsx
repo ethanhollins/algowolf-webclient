@@ -76,15 +76,20 @@ class Login extends Component
                             <input type="submit" id="submit" className="login input" value="LOGIN"/>
                         </div>
     
-                        <div className="login field center">
+                        {/* <div className="login field center">
                             <span>Forgot <a href='/login#'>Username/Password</a>?</span>
-                        </div>
+                        </div> */}
     
                         <div className="login field center">
                             <span className='error' ref={this.setErrorMsgRef}></span>
                         </div>
                     </form>
                     {/* <span>Create an Account</span> */}
+
+                    {/* <div className='promo container'>
+                        
+                    </div> */}
+
                 </div>
             )
         }

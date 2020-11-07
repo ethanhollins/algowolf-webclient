@@ -19,6 +19,7 @@ label, input {
     justify-content: center;
     flex-shrink: 0;
     width: 50%;
+    max-width: 360px;
     height: 100%;
     margin-bottom: 75px;
 }
@@ -63,6 +64,7 @@ label, input {
     border: 1px solid rgb(240,240,240);
     border-radius: 30px;
     background-color: rgb(240,240,240);
+    color: rgb(80,80,80);
     margin-top: 5px;
     padding-left: 55px;
     padding-right: 20px;
@@ -71,6 +73,7 @@ label, input {
 #submit {
     margin-top: 30px;
     padding-left: 0;
+    padding-right: 0;
     background-color: #ffa801;
     color: #FFF;
     font-size: 1.1em;
@@ -104,4 +107,16 @@ label, input {
 .error {
     color: #F00 !important;
 }
+
+/* 
+ * PROMO CSS 
+ */
+
+.promo.container {
+    width: 360px;
+    height: 100%;
+    margin-left: 30px;
+}
+
+
 
