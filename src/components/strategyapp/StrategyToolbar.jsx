@@ -298,8 +298,9 @@ class StrategyToolbar extends Component
     {
         let current_account = this.getCurrentAccount();
         const is_running = this.getScriptStatus(current_account);
+        const is_loaded = this.props.getStrategyComponent().isLoaded(current_account);
 
-        if (is_running === null)
+        if (is_running === null || !is_loaded)
         {
             return <React.Fragment />;
         }
@@ -371,8 +372,9 @@ class StrategyToolbar extends Component
     onScriptSwitch = () =>
     {
         let current_account = this.getCurrentAccount();
+        const is_loaded = this.props.getStrategyComponent().isLoaded(current_account);
         
-        if (current_account !== undefined)
+        if (is_loaded && current_account !== undefined)
         {
             const broker_id = current_account.split('.')[0];
             const account_id = current_account.split('.')[1];
@@ -384,7 +386,8 @@ class StrategyToolbar extends Component
             }
             else
             {
-                this.props.startScript(broker_id, account_id);
+                const input_variables = this.props.getStrategyComponent().getAllCurrentInputVariables();
+                this.props.startScript(broker_id, account_id, input_variables);
             }
         }
     }
@@ -556,10 +559,12 @@ class StrategyToolbar extends Component
     switchAccount = (account_id) =>
     {
         const strategy = this.props.getStrategyInfo(this.props.getCurrentStrategy());
+        const strategy_component = this.props.getStrategyComponent();
         
         if (strategy !== undefined)
         {
             strategy.account = account_id;
+            strategy_component.retrieveAccountInfo(account_id);
             this.props.updateStrategyInfo();
         }
     }

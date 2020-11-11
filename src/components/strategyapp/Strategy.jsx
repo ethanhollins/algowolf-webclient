@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import WindowWrapper from './WindowWrapper';
 import WindowShadow from './WindowShadow';
 import io from 'socket.io-client';
-import { faSolarSystem } from '@fortawesome/pro-light-svg-icons';
 
 class Strategy extends Component 
 {
@@ -12,6 +11,9 @@ class Strategy extends Component
 
         this.windows = [];
 
+        this.retrieveAccountInfo = this.retrieveAccountInfo.bind(this);
+        this.setCurrentAccount = this.setCurrentAccount.bind(this);
+
         this.addWindowsRef = elem => {
             this.windows.push(elem);
         }
@@ -20,10 +22,13 @@ class Strategy extends Component
     state = {
         sio: undefined,
         current_page: 0,
-        hide_shadows: faSolarSystem,
-        log: {},
+        hide_shadows: false,
+        loaded: [],
+        drawings: {},
+        logs: {},
         info: {},
         input_variables: {},
+        variables_preset: {}
     }
 
     async componentDidMount()
@@ -31,10 +36,11 @@ class Strategy extends Component
         // await this.props.updatePositions();
         // await this.props.updateOrders();
 
-        this.getStrategyData();
-        this.setCurrentAccount();
+        await this.setCurrentAccount();
+        this.setCurrentGlobalVariablesPreset();
 
         const sio = this.handleSocket();
+
         this.setState({ sio });
     }
 
@@ -134,8 +140,6 @@ class Strategy extends Component
                             getChartElement={this.props.getChartElement}
                             getStrategyInfo={this.props.getStrategyInfo}
                             updateStrategyInfo={this.props.updateStrategyInfo}
-                            updateInfo={this.props.updateInfo}
-                            updateInputVariables={this.props.updateInputVariables}
                             getCurrentAccount={this.getCurrentAccount}
                             getKeys={this.props.getKeys}
                             setPopup={this.props.setPopup}
@@ -173,36 +177,19 @@ class Strategy extends Component
                             // Other Window Functions
                             getLog={this.getLog}
                             getInfo={this.getInfo}
-                            getInputVariables={this.getInputVariables}
+                            updateInfo={this.props.updateInfo}
+                            getGlobalInputVariables={this.getGlobalInputVariables}
+                            getCurrentGlobalVariablesPreset={this.getCurrentGlobalVariablesPreset}
+                            getLocalInputVariables={this.getLocalInputVariables}
+                            getCurrentLocalVariablesPreset={this.getCurrentLocalVariablesPreset}
+                            updateInputVariables={this.updateInputVariables}
+                            isLoaded={this.isLoaded}
                         />
                     )
                 }
             }
         }
         return gen_windows;
-    }
-
-    getStrategyData()
-    {
-        let { log, info, input_variables } = this.state;
-
-        const strategy = this.getStrategyInfo();
-        // Get Logs
-        const loaded_logs = strategy.logs;
-        if (loaded_logs !== undefined)
-            log = Object.assign({}, log, loaded_logs);
-
-        // Get Info
-        const loaded_info = strategy.info;
-        if (loaded_info !== undefined)
-            info = Object.assign({}, info, loaded_info);
-
-        // Get Control Panel
-        const loaded_input_variables = strategy.input_variables;
-        if (loaded_input_variables !== undefined)
-        input_variables = Object.assign({}, input_variables, loaded_input_variables);
-
-        this.setState({ log, info, input_variables });
     }
 
     uint8arrayToString = (myUint8Arr) =>
@@ -279,29 +266,29 @@ class Strategy extends Component
                     this.createDrawing(data.account_id, data.layer, d);
                 }
             }
-            else if (data.type === 'delete_drawings')
-            {
-                for (let d of data.items)
-                {
-                    this.deleteDrawing(data.account_id, data.layer, d);
-                }
-            }
-            else if (data.type === 'delete_drawing_layer')
-            {
-                this.deleteDrawingLayer(data.account_id, data.layer);
-            }
-            else if (data.type === 'delete_all_drawings')
-            {
-                this.deleteAllDrawings(data.account_id);
-            }
+            // else if (data.type === 'delete_drawings')
+            // {
+            //     for (let d of data.items)
+            //     {
+            //         this.deleteDrawing(data.account_id, data.layer, d);
+            //     }
+            // }
+            // else if (data.type === 'delete_drawing_layer')
+            // {
+            //     this.deleteDrawingLayer(data.account_id, data.layer);
+            // }
+            // else if (data.type === 'delete_all_drawings')
+            // {
+            //     this.deleteAllDrawings(data.account_id);
+            // }
             else if (data.type === 'create_log')
             {
                 this.createLog(data.account_id, data);
             }
-            else if (data.type === 'create_info')
-            {
-                this.createInfo(data.account_id, data);
-            }
+            // else if (data.type === 'create_info')
+            // {
+            //     this.createInfo(data.account_id, data);
+            // }
             else if (data.type === 'activation')
             {
                 this.setActivation(data);
@@ -383,45 +370,69 @@ class Strategy extends Component
         }
     }
 
-    getDrawingIdx = (strategy, account_id, layer, id) =>
+    getDrawingIdx = (drawings, account_id, layer, id) =>
     {
-        if (strategy !== undefined)
+
+        if (account_id in drawings)
         {
-            if (account_id in strategy.drawings)
+            const drawings = drawings[account_id][layer];
+            for (let i = 0; i < drawings.length; i++)
             {
-                const drawings = strategy.drawings[account_id][layer];
-                for (let i = 0; i < drawings.length; i++)
-                {
-                    const d = drawings[i];
-                    if (d.id === id) return i;
-                }
+                const d = drawings[i];
+                if (d.id === id) return i;
             }
         }
         return undefined
     }
 
+    setDrawings = (account_id, data) =>
+    {
+        let { drawings } = this.state;
+
+        if (!(account_id in drawings))
+        {
+            drawings[account_id] = {};
+        }
+
+        for (let layer in data)
+        {
+            if (!(layer in drawings[account_id]))
+            {
+                drawings[account_id][layer] = [];
+            }
+
+            for (let drawing of data[layer])
+            {
+                if (this.getDrawingIdx(drawings, account_id, layer, drawing.id) === undefined)
+                {
+                    drawings[account_id][layer].push(drawing);
+                } 
+            }
+        }
+
+        this.setState({ drawings });
+    }
+
     createDrawing = (account_id, layer, drawing) =>
     {
-        let strategy = this.getStrategyInfo();
+        let { drawings } = this.state;
 
-        if (strategy !== undefined)
+        if (!(account_id in drawings))
         {
-            if (!(account_id in strategy.drawings))
-            {
-                strategy.drawings[account_id] = {};
-            }
-
-            if (!(layer in strategy.drawings[account_id]))
-            {
-                strategy.drawings[account_id][layer] = [];
-            }
-
-            if (this.getDrawingIdx(strategy, account_id, layer, drawing.id) === undefined)
-            {
-                strategy.drawings[account_id][layer].push(drawing);
-            } 
-            this.props.updateStrategyInfo();
+            drawings[account_id] = {};
         }
+
+        if (!(layer in drawings[account_id]))
+        {
+            drawings[account_id][layer] = [];
+        }
+
+        if (this.getDrawingIdx(drawings, account_id, layer, drawing.id) === undefined)
+        {
+            drawings[account_id][layer].push(drawing);
+        }
+
+        this.setState({ drawings });
     }
 
     deleteDrawing = (account_id, layer, drawing_id) =>
@@ -467,17 +478,29 @@ class Strategy extends Component
         }
     }
 
-    createLog = (account_id, data) =>
+    setLogs = (account_id, data) =>
     {
-        let { log } = this.state;
+        let { logs } = this.state;
 
-        if (!(account_id in log))
+        if (!(account_id in logs))
         {
-            log[account_id] = [];
+            logs[account_id] = [];
         }
 
-        log[account_id].push(data);
-        this.setState({ log });
+        logs[account_id] += data;
+        this.setState({ logs });
+    }
+
+    createLog = (account_id, data) =>
+    {
+        let { logs } = this.state;
+
+        if (!(account_id in logs))
+        {
+            logs[account_id] = [];
+        }
+        logs[account_id].push(data);
+        this.setState({ logs });
     }
 
     createInfo = (account_id, data) =>
@@ -514,12 +537,6 @@ class Strategy extends Component
     getWindows = () =>
     {
         return this.windows;
-    }
-
-    getDrawings = () =>
-    {
-        let strategy = this.getStrategyInfo();
-        return strategy.drawings;
     }
 
     getPositions = () =>
@@ -568,19 +585,59 @@ class Strategy extends Component
         return orders;
     }
 
+    getDrawings = () =>
+    {
+        let current_account = this.getCurrentAccount();
+        if (current_account in this.state.drawings)
+        {
+            return this.state.drawings[current_account];
+        }
+        
+        return {};
+    }
+
     getLog = () =>
     {
-        return this.state.log;
+        let current_account = this.getCurrentAccount();
+        
+        if (current_account in this.state.logs)
+        {
+            return this.state.logs[current_account];
+        }
+        return {};
     }
 
     getInfo = () =>
     {
-        return this.state.info;
+        let current_account = this.getCurrentAccount();
+        
+        if (current_account in this.state.info)
+        {
+            return this.state.info[current_account];
+        }
+        return {};
     }
 
-    getInputVariables = () =>
+    getGlobalInputVariables = () =>
     {
-        return this.state.input_variables;
+        const strategy = this.getStrategyInfo();
+        
+        if (strategy.input_variables !== undefined)
+        {
+            return strategy.input_variables;
+        }
+        return {};
+    }
+
+    getLocalInputVariables = () =>
+    {
+        let current_account = this.getCurrentAccount();
+        
+        if (current_account in this.state.input_variables)
+        {
+            return this.state.input_variables[current_account];
+        }
+        return {};
     }
 
     getCurrentTimestamp = () =>
@@ -642,7 +699,7 @@ class Strategy extends Component
         }
     }
 
-    setCurrentAccount = () =>
+    async setCurrentAccount()
     {
         let current_account = this.getCurrentAccount();
 
@@ -652,6 +709,138 @@ class Strategy extends Component
             strategy.account = this.props.id + '.papertrader';
             this.props.updateStrategyInfo();
         }
+
+        await this.retrieveAccountInfo(current_account);
+    }
+
+    getAllCurrentInputVariables = () =>
+    {
+        const global_preset = this.getCurrentGlobalVariablesPreset();
+        const local_preset = this.getCurrentLocalVariablesPreset();
+        
+        return Object.assign({}, 
+            this.getGlobalInputVariables()[global_preset], 
+            this.getLocalInputVariables()[local_preset]
+        );
+    }
+
+    updateInputVariables = (local_variables, global_variables) =>
+    {
+        // Update Strategy Variables
+        this.props.updateStrategyInputVariables(this.props.id, global_variables);
+
+        // Update Account Variables
+        let { accounts } = this.state;
+        const current_account = this.getCurrentAccount();
+        const broker_id = current_account.split('.')[0];
+        const account_id = current_account.split('.')[1];
+        const local_result = this.props.updateAccountInputVariables(this.props.id, broker_id, account_id, local_variables);
+
+        for (let name in local_result)
+        {
+            accounts[current_account].input_variables[name] = local_result[name];
+        }
+        this.setState({ accounts });
+    }
+
+    setLocalInputVariables = (account_id, data) =>
+    {
+        let { input_variables } = this.state;
+        input_variables[account_id] = data;
+        this.setState({ input_variables });
+    }
+
+    getCurrentGlobalVariablesPreset = () =>
+    {
+        const strategy = this.getStrategyInfo();
+
+        if (strategy !== undefined && strategy.variables_preset !== undefined)
+        {
+            return strategy.variables_preset;
+        }
+    }
+
+    setCurrentGlobalVariablesPreset = () =>
+    {
+        let preset = this.getCurrentGlobalVariablesPreset();
+
+        if (preset === undefined)
+        {
+            let strategy = this.getStrategyInfo();
+            if (Object.keys(strategy.input_variables).length > 0)
+            {
+                strategy.variables_preset = Object.keys(strategy.input_variables)[0];
+            }
+            this.props.updateStrategyInfo();
+        }
+    }
+
+    getCurrentLocalVariablesPreset = () =>
+    {
+        let current_account = this.getCurrentAccount();
+        
+        if (current_account in this.state.variables_preset)
+        {
+            return this.state.variables_preset[current_account];
+        }
+    }
+
+    setCurrentLocalVariablesPreset = () =>
+    {
+        let { variables_preset } = this.state;
+
+        let preset = this.getCurrentLocalVariablesPreset();
+        if (preset === undefined)
+        {
+            const input_variables = this.getLocalInputVariables();
+            if (Object.keys(input_variables).length > 0)
+            {
+                let current_account = this.getCurrentAccount();
+                variables_preset[current_account] = Object.keys(input_variables)[0];
+                this.setState({ variables_preset });
+            }
+        }
+    }
+
+    switchLocalVariablesPreset = (account_id, data) =>
+    {
+        let { variables_preset } = this.state;
+        variables_preset[account_id] = data;
+        this.setState({ variables_preset });
+    }
+
+    async retrieveAccountInfo(account_code)
+    {
+        let { loaded } = this.state;
+
+        if (!loaded.includes(account_code))
+        {
+            const broker_id = account_code.split('.')[0];
+            const account_id = account_code.split('.')[1];
+            const account_info = await this.props.retrieveAccountInfo(this.props.id, broker_id, account_id);
+    
+            // Set Account Info
+            if (account_info.drawings !== undefined)
+                this.setDrawings(account_code, account_info.drawings);
+            if (account_info.logs !== undefined)
+                this.setLogs(account_code, account_info.logs);
+            if (account_info.logs !== undefined)
+                this.setLogs(account_code, account_info.logs);
+            if (account_info.input_variables !== undefined)
+                this.setLocalInputVariables(account_code, account_info.input_variables);
+            if (account_info.preset !== undefined)
+                this.switchLocalVariablesPreset(account_code, account_info.preset);
+            else
+                this.setCurrentLocalVariablesPreset();
+    
+            loaded.push(account_code);
+            this.setState({ loaded });
+        }
+    }
+
+    isLoaded = () =>
+    {
+        return this.state.loaded.includes(this.getCurrentAccount());
     }
 
 }

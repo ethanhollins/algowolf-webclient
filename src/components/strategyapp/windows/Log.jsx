@@ -26,20 +26,7 @@ class Log extends Component
     generateLog()
     {
         let messages = this.props.getLog();
-
         // Retrieve Account Logs if running live tab
-        if (!this.props.strategy_id.includes('/backtest/'))
-        {
-            const current_account = this.props.getCurrentAccount();
-            if (current_account !== undefined && current_account in messages)
-            {
-                messages = messages[current_account];
-            }
-            else
-            {
-                return [];
-            }
-        }
 
         let log = [];
         let last_ts;

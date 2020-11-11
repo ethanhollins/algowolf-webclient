@@ -85,9 +85,13 @@ class Dockable extends Component
                 ref={this.setInnerWindowRef}
                 strategy_id={this.props.strategy_id}
                 item_id={this.props.item_id}
-                getInputVariables={this.props.getInputVariables}
+                getGlobalInputVariables={this.props.getGlobalInputVariables}
+                getCurrentGlobalVariablesPreset={this.props.getCurrentGlobalVariablesPreset}
+                getLocalInputVariables={this.props.getLocalInputVariables}
+                getCurrentLocalVariablesPreset={this.props.getCurrentLocalVariablesPreset}
                 updateInputVariables={this.props.updateInputVariables}
                 getCurrentAccount={this.props.getCurrentAccount}
+                isLoaded={this.props.isLoaded}
             />
         }
     }

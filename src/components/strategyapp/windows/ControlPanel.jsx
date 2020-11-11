@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronDown } from '@fortawesome/pro-light-svg-icons';
 
 class ControlPanel extends Component
 {
@@ -63,10 +65,21 @@ class ControlPanel extends Component
         }
     }
 
+    getInputVariables = () =>
+    {
+        const global_preset = this.props.getCurrentGlobalVariablesPreset();
+        const local_preset = this.props.getCurrentLocalVariablesPreset();
+        return Object.assign(
+            {}, this.props.getLocalInputVariables()[local_preset],
+            this.props.getGlobalInputVariables()[global_preset]
+            
+        );
+    }
+
     onVariableChange(e)
     {
         let { changed } = this.state;
-        const input_variables = this.props.getInputVariables();
+        const input_variables = this.getInputVariables();
         
         const name = e.target.getAttribute('name');
         let value = e.target.value;
@@ -115,7 +128,7 @@ class ControlPanel extends Component
         let { changed } = this.state;
         changed = {};
 
-        const input_variables = this.props.getInputVariables();
+        const input_variables = this.getInputVariables();
         for (let i of this.inputs)
         {
             i.value = input_variables[i.getAttribute('name')].value;
@@ -127,12 +140,27 @@ class ControlPanel extends Component
     update()
     {
         let { changed } = this.state;
-        let input_variables = this.props.getInputVariables();
+        const global_preset = this.props.getCurrentGlobalVariablesPreset();
+        const global_variables = this.props.getGlobalInputVariables()[global_preset];
+        const local_preset = this.props.getCurrentLocalVariablesPreset();
+        const local_variables = this.props.getLocalInputVariables()[local_preset];
+
         for (let name in changed)
         {
-            input_variables[name].value = changed[name];
+            if (name in local_variables)
+            {
+                local_variables[name].value = changed[name];
+            }
+            else if (name in global_variables)
+            {
+                global_variables[name].value = changed[name];
+            }
         }
-        this.props.updateInputVariables(this.props.strategy_id, input_variables);
+
+        this.props.updateInputVariables(
+            { [local_preset]: local_variables }, 
+            { [global_preset]: global_variables }
+        );
 
         changed = {};
         this.setState({ changed });
@@ -141,11 +169,17 @@ class ControlPanel extends Component
     getItems = () =>
     {
         const { changed } = this.state;
-        const input_variables = this.props.getInputVariables();
 
-        let items = [];
-        if (input_variables !== undefined)
+        const input_variables = this.getInputVariables();
+        const global_preset = this.props.getCurrentGlobalVariablesPreset();
+        const local_preset = this.props.getCurrentLocalVariablesPreset();
+        const is_loaded = this.props.isLoaded();
+
+        let local_items = [];
+        let global_items = [];
+        if (input_variables !== undefined && is_loaded)
         {
+            let elem;
             for (let name in input_variables)
             {
                 let item = input_variables[name];
@@ -160,7 +194,7 @@ class ControlPanel extends Component
                 }
                 if (item.type === 'header')
                 {
-                    items.push(
+                    elem = (
                         <div key={name} className='info header'>
                             {name}
                         </div>
@@ -198,7 +232,7 @@ class ControlPanel extends Component
                     if (item.properties.max !== undefined)
                         max = item.properties.max
 
-                    items.push(
+                    elem = (
                         <div key={name} className='info row'>
                             <div className='control-panel item left'>{name}</div>
                             <div className='control-panel item right'>
@@ -214,11 +248,48 @@ class ControlPanel extends Component
                         </div>
                     );
                 }
+                if (item.scope === 'local')
+                {
+                    local_items.push(elem);
+                }
+                else
+                {
+                    global_items.push(elem);
+                }
             }
-
         };
-        
-        return items
+
+        // Compile result
+        let result = [];
+        if (local_items.length > 0)
+        {
+            result.push(
+                <React.Fragment key={'local_items'}>
+                <div className='control-panel scope-body'>
+                    <div className='control-panel scope-header'>Account</div>
+                    <div className='control-panel scope-dropdown'>
+                        {local_preset}<FontAwesomeIcon className='control-panel scope-dropdown-icon' icon={faChevronDown} />
+                    </div>
+                </div>
+                {local_items}
+                </React.Fragment>
+            );
+        }
+        if(global_items.length > 0)
+        {
+            result.push(
+                <React.Fragment key={'global_items'}>
+                <div className='control-panel scope-body'>
+                    <div className='control-panel scope-header'>Strategy</div>
+                    <div className='control-panel scope-dropdown'>
+                        {global_preset}<FontAwesomeIcon className='control-panel scope-dropdown-icon' icon={faChevronDown} />
+                    </div>
+                </div>
+                {global_items}  
+                </React.Fragment>
+            );
+        }
+        return result;
     }
 }
 

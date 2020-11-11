@@ -55,9 +55,11 @@ class StrategyApp extends Component
         this.updateInfo = this.updateInfo.bind(this);
         this.connectChart = this.connectChart.bind(this);
         this.retrieveStrategies = this.retrieveStrategies.bind(this);
+        this.retrieveAccountInfo = this.retrieveAccountInfo.bind(this);
         this.retrieveTransactions = this.retrieveTransactions.bind(this);
         this.retrieveChartData = this.retrieveChartData.bind(this);
-        this.updateInputVariables = this.updateInputVariables.bind(this);
+        this.updateStrategyInputVariables = this.updateStrategyInputVariables.bind(this);
+        this.updateAccountInputVariables = this.updateAccountInputVariables.bind(this);
 
         this.setAppContainerRef = elem => {
             this.appContainer = elem;
@@ -297,10 +299,12 @@ class StrategyApp extends Component
                         getSize={this.getSize}
                         getScale={this.getScale}
                         retrieveStrategies={this.retrieveStrategies}
+                        retrieveAccountInfo={this.retrieveAccountInfo}
                         getStrategyInfo={this.getStrategyInfo}
                         updateStrategyInfo={this.updateStrategyInfo}
                         updateInfo={this.updateInfo}
-                        updateInputVariables={this.updateInputVariables}
+                        updateStrategyInputVariables={this.updateStrategyInputVariables}
+                        updateAccountInputVariables={this.updateAccountInputVariables}
                         getCurrentAccount={this.getCurrentAccount}
                         getChartElement={this.getChartElement}
                         getCamera={this.getCamera}
@@ -350,7 +354,7 @@ class StrategyApp extends Component
     {
         const current_strategy = this.getCurrentStrategy();
 
-        if (current_strategy !== undefined)
+        if (current_strategy !== undefined && this.strategy !== undefined)
         {
             if (current_strategy.includes('/backtest/'))
             {
@@ -369,6 +373,7 @@ class StrategyApp extends Component
                     ref={this.setToolbarRef}
                     getCurrentStrategy={this.getCurrentStrategy}
                     updateStrategyInfo={this.updateStrategyInfo}
+                    getStrategyComponent={this.getStrategyComponent}
                     getStrategyInfo={this.getStrategyInfo}
                     startScript={this.startScript.bind(this)}
                     stopScript={this.stopScript.bind(this)}
@@ -625,6 +630,25 @@ class StrategyApp extends Component
         this.setState({ strategyInfo });
     }
 
+    async retrieveAccountInfo(strategy_id, broker_id, account_id)
+    {
+        const { REACT_APP_API_URL } = process.env;
+
+        /** Retrieve strategy info */
+        const reqOptions = {
+            method: 'GET',
+            headers: this.props.getHeaders(),
+            credentials: 'include'
+        }
+
+        const res = await fetch(
+            `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/${broker_id}/${account_id}`,
+            reqOptions
+        ).then(res => res.json());
+
+        return res
+    }
+
     async retrieveTransactions(strategy_id)
     {
         const { REACT_APP_API_URL } = process.env;
@@ -651,7 +675,7 @@ class StrategyApp extends Component
 
     }
 
-    async updateInputVariables(strategy_id, input_variables)
+    async updateStrategyInputVariables(strategy_id, input_variables)
     {
         const { REACT_APP_API_URL } = process.env;
         /** Retrieve strategy info */
@@ -659,7 +683,7 @@ class StrategyApp extends Component
             method: 'POST',
             headers: this.props.getHeaders(),
             credentials: 'include',
-            body: JSON.stringify({'input_variables': input_variables})
+            body: JSON.stringify(input_variables)
         }
 
         let res = await fetch(
@@ -668,8 +692,30 @@ class StrategyApp extends Component
         ).then(res => res.json());
 
         let strategy = this.getStrategyInfo(strategy_id);
-        strategy.input_variables = res.input_variables;
+        for (let name in res.input_variables)
+        {
+            strategy.input_variables[name] = res.input_variables[name];
+        }
         this.updateStrategyInfo();
+    }
+
+    async updateAccountInputVariables(strategy_id, broker_id, account_id, input_variables)
+    {
+        const { REACT_APP_API_URL } = process.env;
+        /** Retrieve strategy info */
+        const reqOptions = {
+            method: 'POST',
+            headers: this.props.getHeaders(),
+            credentials: 'include',
+            body: JSON.stringify(input_variables)
+        }
+
+        let res = await fetch(
+            `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/variables/${broker_id}/${account_id}`,
+            reqOptions
+        ).then(res => res.json());
+
+        return res.input_variables;
     }
 
     async retrieveChartData(broker, product, period, from, to, tz)
@@ -1235,14 +1281,14 @@ class StrategyApp extends Component
     //     );
     // }
 
-    async requestStrategyStatusUpdate(strategy_id, broker_id, accounts, new_status)
+    async requestStrategyStatusUpdate(strategy_id, broker_id, body, new_status)
     {
         const { REACT_APP_API_URL } = process.env;
         const reqOptions = {
             method: 'POST',
             headers: this.props.getHeaders(),
             credentials: 'include',
-            body: JSON.stringify({ accounts: accounts })
+            body: JSON.stringify(body)
         }
 
         let res = await fetch(
@@ -1294,14 +1340,24 @@ class StrategyApp extends Component
         return strategyInfo[strategy_id].accounts[account_id];
     }
 
-    async startScript(broker_id, account_id)
+    getStrategyComponent = () =>
+    {
+        return this.strategy;
+    }
+
+    async startScript(broker_id, account_id, input_variables)
     {
         // this.toolbar.setStatusMsg('Starting strategy...');
 
-        const { account, strategyInfo } = this.state;
+        const { account } = this.state;
         const strategy_id = account.metadata.current_strategy;
         await this.requestStrategyStatusUpdate(
-            strategy_id, broker_id, [account_id], 'start'
+            strategy_id, broker_id, 
+            { 
+                accounts: [account_id],
+                input_variables: input_variables
+            }, 
+            'start'
         );
     }
 
@@ -1309,10 +1365,12 @@ class StrategyApp extends Component
     {
         // this.toolbar.setStatusMsg('Stopping strategy...');
 
-        const { account, strategyInfo } = this.state;
+        const { account } = this.state;
         const strategy_id = account.metadata.current_strategy;
         await this.requestStrategyStatusUpdate(
-            strategy_id, broker_id, [account_id], 'stop'
+            strategy_id, broker_id, 
+            { accounts: [account_id] }, 
+            'stop'
         );
     }
 

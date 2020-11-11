@@ -886,6 +886,29 @@
     overflow-x: hidden;
 }
 
+.control-panel.scope-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px 5px 10px;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+.control-panel.scope-dropdown {
+    font-size: 0.9em;
+}
+
+.control-panel.scope-dropdown-icon {
+    width: 10px;
+    height: 10px;
+    padding-left: 7px;
+    cursor: pointer;
+}
+
+.control-panel.scope-header {
+    text-decoration: underline #f39c12;
+}
+
 .control-panel.body {
     padding: 2px;
 }

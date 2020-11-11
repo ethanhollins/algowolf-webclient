@@ -184,9 +184,13 @@ class WindowWrapper extends Component
                 strategy_id={this.props.strategy_id}
                 item_id={this.state.info.id}
                 getElementType={this.getElementType}
-                getInputVariables={this.props.getInputVariables}
+                getGlobalInputVariables={this.props.getGlobalInputVariables}
+                getCurrentGlobalVariablesPreset={this.props.getCurrentGlobalVariablesPreset}
+                getLocalInputVariables={this.props.getLocalInputVariables}
+                getCurrentLocalVariablesPreset={this.props.getCurrentLocalVariablesPreset}
                 updateInputVariables={this.props.updateInputVariables}
                 getCurrentAccount={this.props.getCurrentAccount}
+                isLoaded={this.props.isLoaded}
             />;
         }
 
