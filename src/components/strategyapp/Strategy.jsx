@@ -375,10 +375,10 @@ class Strategy extends Component
 
         if (account_id in drawings)
         {
-            const drawings = drawings[account_id][layer];
-            for (let i = 0; i < drawings.length; i++)
+            const layer_drawings = drawings[account_id][layer];
+            for (let i = 0; i < layer_drawings.length; i++)
             {
-                const d = drawings[i];
+                const d = layer_drawings[i];
                 if (d.id === id) return i;
             }
         }
@@ -487,7 +487,7 @@ class Strategy extends Component
             logs[account_id] = [];
         }
 
-        logs[account_id] += data;
+        logs[account_id] = logs[account_id].concat(data);
         this.setState({ logs });
     }
 
@@ -822,8 +822,6 @@ class Strategy extends Component
             // Set Account Info
             if (account_info.drawings !== undefined)
                 this.setDrawings(account_code, account_info.drawings);
-            if (account_info.logs !== undefined)
-                this.setLogs(account_code, account_info.logs);
             if (account_info.logs !== undefined)
                 this.setLogs(account_code, account_info.logs);
             if (account_info.input_variables !== undefined)

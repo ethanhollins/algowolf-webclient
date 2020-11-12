@@ -298,7 +298,7 @@ class StrategyToolbar extends Component
     {
         let current_account = this.getCurrentAccount();
         const is_running = this.getScriptStatus(current_account);
-        const is_loaded = this.props.getStrategyComponent().isLoaded(current_account);
+        const is_loaded = this.props.getStrategyComponent().isLoaded();
 
         if (is_running === null || !is_loaded)
         {
@@ -372,7 +372,7 @@ class StrategyToolbar extends Component
     onScriptSwitch = () =>
     {
         let current_account = this.getCurrentAccount();
-        const is_loaded = this.props.getStrategyComponent().isLoaded(current_account);
+        const is_loaded = this.props.getStrategyComponent().isLoaded();
         
         if (is_loaded && current_account !== undefined)
         {

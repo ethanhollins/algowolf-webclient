@@ -1901,20 +1901,6 @@ class Chart extends Component
         const chart_drawings_layers = this.getProperties().drawing_layers;
         let drawings = this.getDrawings();
 
-        // Retrieve Account Drawings if running live tab
-        if (!this.isBacktest())
-        {
-            const current_account = this.getCurrentAccount();
-            if (current_account !== undefined && current_account in drawings)
-            {
-                drawings = drawings[current_account];
-            }
-            else
-            {
-                return;
-            }
-        }
-
         for (let layer of chart_drawings_layers)
         {
             if (!(layer in drawings)) continue;
