@@ -632,7 +632,6 @@ class Strategy extends Component
     getLocalInputVariables = () =>
     {
         let current_account = this.getCurrentAccount();
-        
         if (current_account in this.state.input_variables)
         {
             return this.state.input_variables[current_account];
@@ -653,6 +652,7 @@ class Strategy extends Component
         {
             strategy.account = account_id;
             this.props.updateStrategyInfo();
+            this.setCurrentLocalVariablesPreset();
         }
     }
 

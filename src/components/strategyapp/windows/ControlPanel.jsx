@@ -171,6 +171,7 @@ class ControlPanel extends Component
         const { changed } = this.state;
 
         const input_variables = this.getInputVariables();
+        const current_account = this.props.getCurrentAccount();
         const global_preset = this.props.getCurrentGlobalVariablesPreset();
         const local_preset = this.props.getCurrentLocalVariablesPreset();
         const is_loaded = this.props.isLoaded();
@@ -195,7 +196,7 @@ class ControlPanel extends Component
                 if (item.type === 'header')
                 {
                     elem = (
-                        <div key={name} className='info header'>
+                        <div key={current_account + name} className='info header'>
                             {name}
                         </div>
                     );
@@ -233,7 +234,7 @@ class ControlPanel extends Component
                         max = item.properties.max
 
                     elem = (
-                        <div key={name} className='info row'>
+                        <div key={current_account + name} className='info row'>
                             <div className='control-panel item left'>{name}</div>
                             <div className='control-panel item right'>
                                 {icon}
@@ -264,7 +265,7 @@ class ControlPanel extends Component
         if (local_items.length > 0)
         {
             result.push(
-                <React.Fragment key={'local_items'}>
+                <React.Fragment key={current_account + local_preset + '-local'}>
                 <div className='control-panel scope-body'>
                     <div className='control-panel scope-header'>Account</div>
                     <div className='control-panel scope-dropdown'>
@@ -278,7 +279,7 @@ class ControlPanel extends Component
         if(global_items.length > 0)
         {
             result.push(
-                <React.Fragment key={'global_items'}>
+                <React.Fragment key={current_account + global_preset + '-global'}>
                 <div className='control-panel scope-body'>
                     <div className='control-panel scope-header'>Strategy</div>
                     <div className='control-panel scope-dropdown'>
