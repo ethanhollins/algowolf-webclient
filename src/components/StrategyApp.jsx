@@ -25,6 +25,7 @@ class StrategyApp extends Component
         orders: [],
         page: 0,
         charts: {},
+        chart_queues: {},
         backtestCharts: {},
         indicators: [],
         backtest_indicators: {},
@@ -119,6 +120,18 @@ class StrategyApp extends Component
         window.removeEventListener("keyup", this.onKeyUp);
 
         this.is_loaded = false;
+    }
+
+    componentDidUpdate()
+    {
+        let { chart_queues } = this.state;
+        for (let key in chart_queues)
+        {
+            if (chart_queues[key].length > 0)
+            {
+                this.handleChartUpdate(chart_queues[key][0]);
+            }
+        }
     }
 
     render()
@@ -577,7 +590,7 @@ class StrategyApp extends Component
 
         socket.on('ontick', (data) =>
         {
-            this.handleChartUpdate(data);
+            this.addToChartQueue(data);
         });
 
         return socket;
@@ -851,8 +864,7 @@ class StrategyApp extends Component
             timestamps: ohlc_data.ohlc.timestamps,
             asks: ohlc_data.ohlc.asks,
             bids: ohlc_data.ohlc.bids,
-            next_timestamp: null,
-            queue: []
+            next_timestamp: null
         };
 
         this.generateMissingBars(charts[key]);
@@ -1025,56 +1037,77 @@ class StrategyApp extends Component
         chart.next_timestamp = ts;
     }
 
-    handleChartUpdate = (item) =>
+    addToChartQueue = (item) =>
     {
-        let { charts } = this.state;
-        let chart = charts[item['broker'] + ':' + item['product'] + ':' + item['period']];
+        const key = item['broker'] + ':' + item['product'] + ':' + item['period'];
 
-        const id = uuidv4();
-        chart.queue.push(id);
-        while(chart === undefined || chart.queue.indexOf(id) !== 0);
-
-        if (chart.next_timestamp === null)
+        let { chart_queues } = this.state;
+        if (!(key in chart_queues))
         {
-            if (!item['bar_end'])
-            {
-                this.generateNextTimestamp(
-                    chart, 
-                    item['timestamp'] - this.getPeriodOffsetSeconds(item['period'])
-                );
-            }
-        }
-        
-        if (item['bar_end'])
-        {
-            // On Bar End
-            chart.asks[chart.asks.length-1] = item['item']['ask'];
-            chart.bids[chart.bids.length-1] = item['item']['bid'];
-            this.generateNextTimestamp(chart, item['timestamp']);
-            chart.timestamps.push(chart.next_timestamp);
-            chart.asks.push([null,null,null,null]);
-            chart.bids.push([null,null,null,null]);
-        }
-        else if (item['timestamp'] >= chart.next_timestamp)
-        {
-            // If real timestamp ahead of chart timestamp
-            this.generateNextTimestamp(chart, item['timestamp']);
-            chart.asks[chart.asks.length-1] = item['item']['ask'];
-            chart.bids[chart.bids.length-1] = item['item']['bid'];
-        }
-        else if (!(item['timestamp'] < chart.next_timestamp - this.getPeriodOffsetSeconds(item['period'])))
-        {
-            // Update Latest Bar
-            chart.asks[chart.asks.length-1] = item['item']['ask'];
-            chart.bids[chart.bids.length-1] = item['item']['bid'];
+            chart_queues[key] = [];
         }
 
-        this.calculateAllChartIndicators(chart);
-
-        this.setState({ charts });
-
-        chart.queue.splice(0, 1);
+        // const id = uuidv4();
+        chart_queues[key].push(item);
+        this.setState({ chart_queues });
     }
+
+    handleChartUpdate = (item) => 
+    {
+        let { charts, chart_queues } = this.state;
+        const key = item['broker'] + ':' + item['product'] + ':' + item['period'];
+        let chart = charts[key];
+        let queue = chart_queues[key];
+
+        if (chart !== undefined)
+        {
+            if (chart.next_timestamp === null)
+            {
+                if (!item['bar_end'])
+                {
+                    this.generateNextTimestamp(
+                        chart, 
+                        item['timestamp'] - this.getPeriodOffsetSeconds(item['period'])
+                    );
+                }
+            }
+            
+            if (item['bar_end'])
+            {
+                // On Bar End
+                chart.asks[chart.asks.length-1] = item['item']['ask'];
+                chart.bids[chart.bids.length-1] = item['item']['bid'];
+                this.generateNextTimestamp(chart, item['timestamp']);
+                chart.timestamps.push(chart.next_timestamp);
+                chart.asks.push([null,null,null,null]);
+                chart.bids.push([null,null,null,null]);
+            }
+            else if (item['timestamp'] >= chart.next_timestamp)
+            {
+                // If real timestamp ahead of chart timestamp
+                this.generateNextTimestamp(chart, item['timestamp']);
+                chart.asks[chart.asks.length-1] = item['item']['ask'];
+                chart.bids[chart.bids.length-1] = item['item']['bid'];
+            }
+            else if (!(item['timestamp'] < chart.next_timestamp - this.getPeriodOffsetSeconds(item['period'])))
+            {
+                // Update Latest Bar
+                chart.asks[chart.asks.length-1] = item['item']['ask'];
+                chart.bids[chart.bids.length-1] = item['item']['bid'];
+            }
+    
+            this.calculateAllChartIndicators(chart);
+            queue.splice(0, 1);
+            
+            this.setState({ charts, chart_queues });
+    
+        }
+    }
+
+    // handleChartUpdate = (item) =>
+    // {
+        
+    // }
 
     updateChart = (broker, product, period, ohlc_data) =>
     {
