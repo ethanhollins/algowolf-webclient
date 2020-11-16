@@ -11,6 +11,7 @@ import StrategyToolbar from './strategyapp/StrategyToolbar';
 import Backtest from './strategyapp/Backtest';
 import BacktestToolbar from './strategyapp/BacktestToolbar';
 import Popup from './strategyapp/Popup';
+import { ReactSVG } from 'react-svg';
 import { v4 as uuidv4 } from 'uuid';
 
 class StrategyApp extends Component
@@ -39,7 +40,8 @@ class StrategyApp extends Component
         toSave: [],
         history: [],
         undone: [],
-        lastChange: null
+        lastChange: null,
+        show_load_screen: true
     }
 
     constructor(props)
@@ -136,13 +138,18 @@ class StrategyApp extends Component
 
     render()
     {
-        const { checkLogin } = this.state;
+        const { checkLogin, show_load_screen } = this.state;
         if (checkLogin && this.props.getUserId() !== null)
         {
             return (
                 <div className='main container'>
-    
-                <div className='chart_app'>
+
+                {this.showLoadScreen()}
+
+                <div 
+                    className='chart_app' 
+                    style={ show_load_screen ? {'display': 'none'} : {} }
+                >
                     <div 
                         ref={this.setAppContainerRef}
                         className='app container'
@@ -183,7 +190,7 @@ class StrategyApp extends Component
                     />
                     
                 </div>
-    
+                
                 </div>
             );
         }
@@ -205,6 +212,22 @@ class StrategyApp extends Component
     onDragStart(e)
     {
         e.preventDefault();
+    }
+
+    showLoadScreen = () =>
+    {
+        const { show_load_screen } = this.state;
+
+        return (
+            <div className='main load'>
+                <div className='main load-item'>
+                    <div>
+                        <ReactSVG className='main load-img' src="./wolf-logo.svg" />
+                    </div>
+                    {/* <div className='main load-text'>Loading...</div> */}
+                </div>
+            </div>
+        )
     }
 
     generateStrategyTabs = () =>
@@ -325,6 +348,7 @@ class StrategyApp extends Component
                         getSio={this.getSio}
                         getKeys={this.getKeys}
                         setPopup={this.setPopup}
+                        setShowLoadScreen={this.setShowLoadScreen}
                         // Window Funcs
                         closeWindow={this.closeWindow}
                         windowExists={this.windowExists}
@@ -497,7 +521,7 @@ class StrategyApp extends Component
         {
             for (let w of this.strategy.windows)
             {
-                if (w.getInnerElement().onMouseMoveThrottled !== undefined)
+                if (w !== null && w.getInnerElement() !== null && w.getInnerElement().onMouseMoveThrottled !== undefined)
                 {
                     w.getInnerElement().onMouseMoveThrottled(mouse_pos);
                 }
@@ -1286,7 +1310,7 @@ class StrategyApp extends Component
         const { indicators } = this.state;
         for (let ind of indicators)
         {
-            if (ind.product === chart.product)
+            if (ind.broker === chart.broker && ind.product === chart.product)
             {
                 ind.calc(
                     [...chart.filteredTimestamps], 
@@ -1999,6 +2023,11 @@ class StrategyApp extends Component
     getKeys = () =>
     {
         return this.state.keys;
+    }
+
+    setShowLoadScreen = (show_load_screen) =>
+    {
+        this.setState({ show_load_screen });
     }
 }
 

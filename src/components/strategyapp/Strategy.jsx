@@ -42,6 +42,8 @@ class Strategy extends Component
         const sio = this.handleSocket();
 
         this.setState({ sio });
+
+        this.props.setShowLoadScreen(false);
     }
 
     componentWillUnmount()
@@ -80,8 +82,9 @@ class Strategy extends Component
         let gen_windows = [];
 
         const strategy_info = this.props.getStrategyInfo(this.props.id);
+        const current_account = this.getCurrentAccount();
         let i = '';
-        if (!hide_shadows && strategy_info !== undefined)
+        if (!hide_shadows && strategy_info !== undefined && current_account !== undefined)
         {
             for (i in strategy_info.windows)
             {
@@ -115,8 +118,9 @@ class Strategy extends Component
         let gen_windows = [];
 
         const strategy_info = this.props.getStrategyInfo(this.props.id);
+        const current_account = this.getCurrentAccount();
         let i = '';
-        if (strategy_info !== undefined)
+        if (strategy_info !== undefined && current_account !== undefined)
         {
             for (i in strategy_info.windows)
             {
@@ -126,7 +130,7 @@ class Strategy extends Component
                 {
                     gen_windows.push(
                         <WindowWrapper
-                            key={w.id}
+                            key={w.id + '-' + current_account}
                             ref={this.addWindowsRef}
                             info={w}
                             strategy_id={this.props.id}

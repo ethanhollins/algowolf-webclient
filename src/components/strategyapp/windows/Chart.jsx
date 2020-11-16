@@ -2953,7 +2953,7 @@ class Chart extends Component
             ind = this.props.createIndicator(
                 ind_props.type, chart.broker, chart.product, ind_props.properties
             );
-
+            
             this.props.calculateIndicator(ind, chart);
         }
         return ind;
