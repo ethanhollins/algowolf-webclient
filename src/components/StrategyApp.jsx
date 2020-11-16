@@ -53,6 +53,7 @@ class StrategyApp extends Component
         this.onKeyUp = this.onKeyUp.bind(this);
         
         this.updateInfo = this.updateInfo.bind(this);
+        this.loadChart = this.loadChart.bind(this);
         this.connectChart = this.connectChart.bind(this);
         this.retrieveStrategies = this.retrieveStrategies.bind(this);
         this.retrieveAccountInfo = this.retrieveAccountInfo.bind(this);
@@ -842,9 +843,7 @@ class StrategyApp extends Component
     {
         let { charts } = this.state;
 
-        // this.connectChart(broker, product, period);
-
-        const key = product + ':' + period;
+        const key = broker + ':' + product + ':' + period;
         charts[key] = {
             broker: broker,
             product: product,
@@ -887,10 +886,10 @@ class StrategyApp extends Component
         return backtestCharts[backtest_id][key];
     }
 
-    getChart = (product, period) =>
+    getChart = (broker, product, period) =>
     {
         const { charts } = this.state;
-        return charts[product + ':' + period];
+        return charts[broker + ':' + product + ':' + period];
     }
 
     getBacktestChart = (backtest_id, product, period) =>
@@ -903,11 +902,38 @@ class StrategyApp extends Component
         return backtestCharts[backtest_id][product + ':' + period];
     }
 
-    connectChart(broker, product, period)
+    async loadChart(broker_id, product)
+    {
+        const { REACT_APP_API_URL } = process.env;
+        const reqOptions = {
+            method: 'POST',
+            headers: this.props.getHeaders(),
+            credentials: 'include',
+            body: JSON.stringify({
+                'items': [product]
+            })
+        }
+
+        const endpoint = `${REACT_APP_API_URL}/v1/strategy/${broker_id}/charts`;
+        let res = await fetch(endpoint, reqOptions)
+        
+        if (res.status === 200)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    connectChart(broker_id, product, period)
     {
         const { sio } = this.state;
+
+        this.loadChart(broker_id, product);
         sio.emit('subscribe', {
-            broker_id: this.getCurrentStrategy(),
+            broker_id: broker_id,
             field: 'ontick',
             items: {
                 [product]: [period]
@@ -1002,61 +1028,58 @@ class StrategyApp extends Component
     handleChartUpdate = (item) =>
     {
         let { charts } = this.state;
-        let chart = charts[item['product'] + ':' + item['period']];
+        let chart = charts[item['broker'] + ':' + item['product'] + ':' + item['period']];
 
-        if (chart !== undefined)
+        const id = uuidv4();
+        chart.queue.push(id);
+        while(chart === undefined || chart.queue.indexOf(id) !== 0);
+
+        if (chart.next_timestamp === null)
         {
-            const id = uuidv4();
-            chart.queue.push(id);
-            while(chart.queue.indexOf(id) !== 0);
-
-            if (chart.next_timestamp === null)
+            if (!item['bar_end'])
             {
-                if (!item['bar_end'])
-                {
-                    this.generateNextTimestamp(
-                        chart, 
-                        item['timestamp'] - this.getPeriodOffsetSeconds(item['period'])
-                    );
-                }
+                this.generateNextTimestamp(
+                    chart, 
+                    item['timestamp'] - this.getPeriodOffsetSeconds(item['period'])
+                );
             }
-            
-            if (item['bar_end'])
-            {
-                // On Bar End
-                chart.asks[chart.asks.length-1] = item['item']['ask'];
-                chart.bids[chart.bids.length-1] = item['item']['bid'];
-                this.generateNextTimestamp(chart, item['timestamp']);
-                chart.timestamps.push(chart.next_timestamp);
-                chart.asks.push([null,null,null,null]);
-                chart.bids.push([null,null,null,null]);
-            }
-            else if (item['timestamp'] >= chart.next_timestamp)
-            {
-                // If real timestamp ahead of chart timestamp
-                this.generateNextTimestamp(chart, item['timestamp']);
-                chart.asks[chart.asks.length-1] = item['item']['ask'];
-                chart.bids[chart.bids.length-1] = item['item']['bid'];
-            }
-            else
-            {
-                // Update Latest Bar
-                chart.asks[chart.asks.length-1] = item['item']['ask'];
-                chart.bids[chart.bids.length-1] = item['item']['bid'];
-            }
-    
-            this.calculateAllChartIndicators(chart);
-
-            this.setState({ charts });
-
-            chart.queue.splice(0, 1);
         }
+        
+        if (item['bar_end'])
+        {
+            // On Bar End
+            chart.asks[chart.asks.length-1] = item['item']['ask'];
+            chart.bids[chart.bids.length-1] = item['item']['bid'];
+            this.generateNextTimestamp(chart, item['timestamp']);
+            chart.timestamps.push(chart.next_timestamp);
+            chart.asks.push([null,null,null,null]);
+            chart.bids.push([null,null,null,null]);
+        }
+        else if (item['timestamp'] >= chart.next_timestamp)
+        {
+            // If real timestamp ahead of chart timestamp
+            this.generateNextTimestamp(chart, item['timestamp']);
+            chart.asks[chart.asks.length-1] = item['item']['ask'];
+            chart.bids[chart.bids.length-1] = item['item']['bid'];
+        }
+        else if (!(item['timestamp'] < chart.next_timestamp - this.getPeriodOffsetSeconds(item['period'])))
+        {
+            // Update Latest Bar
+            chart.asks[chart.asks.length-1] = item['item']['ask'];
+            chart.bids[chart.bids.length-1] = item['item']['bid'];
+        }
+
+        this.calculateAllChartIndicators(chart);
+
+        this.setState({ charts });
+
+        chart.queue.splice(0, 1);
     }
 
-    updateChart = (product, period, ohlc_data) =>
+    updateChart = (broker, product, period, ohlc_data) =>
     {
         let { charts } = this.state;
-        const chart = charts[product + ':' + period];
+        const chart = charts[broker + ':' + product + ':' + period];
 
         const dup = ohlc_data.timestamps.filter((val) =>
         {

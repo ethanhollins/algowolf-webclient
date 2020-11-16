@@ -1050,7 +1050,7 @@ class Chart extends Component
     
                 // Update chart with new data
                 this.props.resetIndicators(this.getChart());
-                this.props.updateChart(this.getProduct(), this.getPeriod(), data.ohlc);
+                this.props.updateChart(this.getBroker(), this.getProduct(), this.getPeriod(), data.ohlc);
 
                 for (let i = 0; i < this.studies.length; i++)
                 {
@@ -2715,6 +2715,16 @@ class Chart extends Component
         return this.props.getCurrentAccount();
     }
 
+    getBrokerId = () =>
+    {
+        return this.getCurrentAccount().split('.')[0];
+    }
+
+    getAccountId = () =>
+    {
+        return this.getCurrentAccount().split('.')[1];
+    }
+
     getProperties = () =>
     {
         return this.props.getWindowInfo(
@@ -2730,8 +2740,7 @@ class Chart extends Component
         }
         else
         {
-            const current_account = this.getCurrentAccount();
-            return this.getStrategy().brokers[current_account.split('.')[0]].broker;
+            return this.getStrategy().brokers[this.getBrokerId()].broker;
         }
     }
 
@@ -2847,7 +2856,9 @@ class Chart extends Component
         }
 
         if (!this.isBacktest())
-            this.props.connectChart(this.getBroker(), this.getProduct(), this.getPeriod());
+        {
+            this.props.connectChart(this.getBrokerId(), this.getProduct(), this.getPeriod());
+        }
 
         const ohlc_data = await this.props.retrieveChartData(
             this.getBroker(), this.getProduct(), this.getPeriod(), start, end
@@ -2860,6 +2871,7 @@ class Chart extends Component
     getChart = () =>
     {   
         return this.props.getChart(
+            this.getBroker(),
             this.getProduct(),
             this.getPeriod()
         );
