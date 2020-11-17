@@ -121,9 +121,11 @@ class Chart extends Component
             this.limit(properties.start, properties.end);
         }
 
+        console.log('chart before');
         /* Initialize Chart */
         if (this.getChart() === undefined)
             await this.addChart();
+        console.log('chart created');
 
         /* Initialize Indicators */
         const overlays = this.getOverlays();
@@ -1012,9 +1014,9 @@ class Chart extends Component
 
     update()
     {   
-        this.updateCanvas();
         if (this.getChart() && this._isinitialized)
         {
+            this.updateCanvas();
             this.updateChart();
             this.updateItems();
         }
@@ -1175,6 +1177,8 @@ class Chart extends Component
 
     getPriceInfo()
     {
+        if (this.getChart() === undefined) return undefined;
+
         const { pos, scale } = this.state;
         const mouse_pos = this.props.getMousePos();
         let prices = {

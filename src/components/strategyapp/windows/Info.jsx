@@ -44,9 +44,9 @@ class Info extends Component
             if (window !== undefined && window.getElementType() === 'chart')
             {
                 const chart = window.getInnerElement();
-                if (chart !== undefined)
+                if (chart !== undefined && chart !== null)
                 {
-                    const prices = chart.getChartPrices();
+                    const prices = chart.getPriceInfo();
 
                     if (prices !== undefined)
                     {

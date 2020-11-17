@@ -224,7 +224,7 @@ class StrategyApp extends Component
                     <div>
                         <ReactSVG className='main load-img' src="./wolf-logo.svg" />
                     </div>
-                    {/* <div className='main load-text'>Loading...</div> */}
+                    {/* <div className='main load-text'>Loading</div> */}
                 </div>
             </div>
         )
@@ -519,14 +519,22 @@ class StrategyApp extends Component
 
         if (!keys.includes(SPACEBAR) && this.is_loaded && update_pos)
         {
+            this.setState({ mouse_pos });
             for (let w of this.strategy.windows)
             {
-                if (w !== null && w.getInnerElement() !== null && w.getInnerElement().onMouseMoveThrottled !== undefined)
+                if (w !== null && w.getInnerElement() !== null)
                 {
-                    w.getInnerElement().onMouseMoveThrottled(mouse_pos);
+                    if (w.getInnerElement().onMouseMoveThrottled !== undefined)
+                    {
+                        w.getInnerElement().onMouseMoveThrottled(mouse_pos);
+                    }
+                    else if (w.getInnerElement().updateInfo !== undefined)
+                    {
+                        w.getInnerElement().updateInfo(mouse_pos);
+                    }
                 }
+                
             }
-            this.setState({ mouse_pos });
         }
     }
 
@@ -905,7 +913,7 @@ class StrategyApp extends Component
             backtestCharts[backtest_id] = {}
         }
 
-        const key = product + ':' + period;
+        const key = broker + ':' + product + ':' + period;
         backtestCharts[backtest_id][key] = {
             broker: broker,
             product: product,
@@ -928,14 +936,14 @@ class StrategyApp extends Component
         return charts[broker + ':' + product + ':' + period];
     }
 
-    getBacktestChart = (backtest_id, product, period) =>
+    getBacktestChart = (backtest_id, broker, product, period) =>
     {
         let { backtestCharts } = this.state;
         if (!(backtest_id in backtestCharts))
         {
             backtestCharts[backtest_id] = {}
         }
-        return backtestCharts[backtest_id][product + ':' + period];
+        return backtestCharts[backtest_id][broker + ':' + product + ':' + period];
     }
 
     async loadChart(broker_id, product)
@@ -1300,6 +1308,8 @@ class StrategyApp extends Component
         const ind = new Indicator[type](broker, product, properties);
         backtest_indicators[backtest_id].push(ind);
         this.setState({ backtest_indicators });
+
+        console.log(backtest_indicators);
         return ind;
     }
 

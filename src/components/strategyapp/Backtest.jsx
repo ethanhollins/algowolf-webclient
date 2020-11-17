@@ -122,6 +122,7 @@ class Backtest extends Component
                             getChartElement={this.props.getChartElement}
                             getStrategyInfo={this.props.getStrategyInfo}
                             updateStrategyInfo={this.props.updateStrategyInfo}
+                            getCurrentAccount={this.getCurrentAccount}
                             updateInfo={this.props.updateInfo}
                             getKeys={this.props.getKeys}
                             setPopup={this.props.setPopup}
@@ -160,7 +161,13 @@ class Backtest extends Component
                             // Log Functions
                             getLog={this.getLog}
                             getInfo={this.getInfo}
-                            getInputVariables={this.getInputVariables}
+                            updateInfo={this.props.updateInfo}
+                            getGlobalInputVariables={this.getGlobalInputVariables}
+                            getCurrentGlobalVariablesPreset={this.getCurrentGlobalVariablesPreset}
+                            getLocalInputVariables={this.getLocalInputVariables}
+                            getCurrentLocalVariablesPreset={this.getCurrentLocalVariablesPreset}
+                            updateInputVariables={this.updateInputVariables}
+                            isLoaded={this.isLoaded}
                         />
                     )
                 }
@@ -174,9 +181,9 @@ class Backtest extends Component
         return this.props.addChart(this.props.id, broker, product, period, ohlc_data)
     }
 
-    getChart = (product, period) =>
+    getChart = (broker, product, period) =>
     {
-        return this.props.getChart(this.props.id, product, period)
+        return this.props.getChart(this.props.id, broker, product, period)
     }
 
     updateChart = (product, period, ohlc_data) =>
@@ -454,7 +461,70 @@ class Backtest extends Component
         this.handleTransactions(timestamp);
     }
 
+    getCurrentAccount = () =>
+    {
+        return 'BACKTEST.ACCOUNT_1';
+    }
 
+    async setCurrentAccount()
+    {
+        
+    }
+
+    getGlobalInputVariables = () =>
+    {
+        return {};
+    }
+
+    getLocalInputVariables = () =>
+    {
+        return {};
+    }
+
+    getAllCurrentInputVariables = () =>
+    {
+        return {};
+    }
+
+    updateInputVariables = (local_variables, global_variables) =>
+    {
+        
+    }
+
+    setLocalInputVariables = (account_id, data) =>
+    {
+        
+    }
+
+    getCurrentGlobalVariablesPreset = () =>
+    {
+        return 'Preset 1';
+    }
+
+    setCurrentGlobalVariablesPreset = () =>
+    {
+        
+    }
+
+    getCurrentLocalVariablesPreset = () =>
+    {
+        return 'Preset 1';
+    }
+
+    setCurrentLocalVariablesPreset = () =>
+    {
+        
+    }
+
+    switchLocalVariablesPreset = (account_id, data) =>
+    {
+        
+    }
+
+    isLoaded = () =>
+    {
+        return true;
+    }
 
 }
 
