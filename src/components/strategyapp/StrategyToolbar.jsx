@@ -595,7 +595,7 @@ class StrategyToolbar extends Component
     {
         const strategy = this.props.getStrategyInfo(this.props.getCurrentStrategy());
 
-        if (strategy !== undefined)
+        if (strategy !== undefined && strategy.account !== undefined)
         {
             let current = strategy.account.split('.');
             if (current.length >= 2)

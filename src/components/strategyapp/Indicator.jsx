@@ -73,13 +73,14 @@ class Indicator {
 
 class sma extends Indicator
 {
-    constructor(broker, product, properties)
+    constructor(broker, product, chart_period, properties)
     {
         super();
 
         this.type = 'sma';
         this.broker = broker;
         this.product = product;
+        this.chart_period = chart_period;
         this.properties = properties;
         this.period = properties.periods[0];
         this.min_bars = this.period;
@@ -108,13 +109,14 @@ class sma extends Indicator
 
 class ema extends Indicator
 {
-    constructor(broker, product, properties)
+    constructor(broker, product, chart_period, properties)
     {
         super();
 
         this.type = 'ema';
         this.broker = broker;
         this.product = product;
+        this.chart_period = chart_period;
         this.properties = properties;
         this.period = properties.periods[0];
         this.min_bars = this.period;
@@ -154,13 +156,14 @@ class ema extends Indicator
 
 class donch extends Indicator
 {
-    constructor(broker, product, properties)
+    constructor(broker, product, chart_period, properties)
     {
         super();
 
         this.type = 'donch';
         this.broker = broker;
         this.product = product;
+        this.chart_period = chart_period;
         this.properties = properties;
         this.period = properties.periods[0];
         this.min_bars = this.period;

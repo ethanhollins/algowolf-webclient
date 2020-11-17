@@ -687,7 +687,7 @@ class Strategy extends Component
         const strategy = this.getStrategyInfo();
         const brokers = this.getBrokers();
 
-        if (brokers !== undefined)
+        if (brokers !== undefined && strategy.account !== undefined)
         {
             let current = strategy.account.split('.');
             if (current.length >= 2)
@@ -706,15 +706,15 @@ class Strategy extends Component
     async setCurrentAccount()
     {
         let current_account = this.getCurrentAccount();
+        let strategy = this.getStrategyInfo();
 
         if (current_account === undefined)
         {
-            let strategy = this.getStrategyInfo();
             strategy.account = this.props.id + '.papertrader';
             this.props.updateStrategyInfo();
         }
 
-        await this.retrieveAccountInfo(current_account);
+        await this.retrieveAccountInfo(strategy.account);
     }
 
     getAllCurrentInputVariables = () =>

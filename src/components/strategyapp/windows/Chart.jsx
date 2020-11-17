@@ -988,7 +988,7 @@ class Chart extends Component
                     <div className='chart group'>
                         <div className='chart ohlc-group'>
                             <div className='chart product-btn'>{this.getProduct().replace('_', '')}</div>
-                            <div className='chart period-btn'>1m</div>
+                            <div className='chart period-btn'>{this.getPeriod()}</div>
                             <div>
                                 <span className='chart values ohlc-type'>O</span>
                                 <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[0].toFixed(5)}</span>
@@ -2950,12 +2950,12 @@ class Chart extends Component
     {
         const chart = this.getChart();
         let ind = this.props.findIndicator(
-            ind_props.type, chart.broker, chart.product, ind_props.properties.periods[0]
+            ind_props.type, chart.broker, chart.product, chart.period, ind_props.properties.periods[0]
         );
         if (ind === undefined)
         {
             ind = this.props.createIndicator(
-                ind_props.type, chart.broker, chart.product, ind_props.properties
+                ind_props.type, chart.broker, chart.product, chart.period, ind_props.properties
             );
             
             this.props.calculateIndicator(ind, chart);

@@ -196,12 +196,12 @@ class Backtest extends Component
         return this.props.getIndicator(type, price, this.props.id, product, period)
     }
 
-    findIndicator = (type, broker, product, period) =>
+    findIndicator = (type, broker, product, chart_period, period) =>
     {
         return this.props.findIndicator(this.props.id, type, broker, product, period);
     }
 
-    createIndicator = (type, broker, product, properties) =>
+    createIndicator = (type, broker, product, chart_period, properties) =>
     {
         return this.props.createIndicator(this.props.id, type, broker, product, properties);
     }
