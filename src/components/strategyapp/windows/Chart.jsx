@@ -2100,11 +2100,11 @@ class Chart extends Component
         const mouse_pos = this.props.getMousePos();
         const screen_pos = this.props.getScreenPos();
         const top_offset = this.props.getTopOffset() + screen_pos.y;
-
+        
         if (
             this.props.isTopWindow(
                 this.getStrategyId(), this.getItemId(), 
-                {x: mouse_pos.x, y: mouse_pos.y - top_offset}
+                {x: mouse_pos.x, y: mouse_pos.y - this.props.getTopOffset()}
             )
         )
         {
@@ -2127,14 +2127,15 @@ class Chart extends Component
                 pos = this.state.pos;
                 scale = this.state.scale;
             }
+
+            const left_offset = screen_pos.x;
             const mouse_world_pos = camera.convertScreenPosToWorldPos(
                 { 
-                    x: mouse_pos.x, 
+                    x: mouse_pos.x - left_offset, 
                     y: mouse_pos.y - seg_start.y - window_seg_start.y - this.props.getTopOffset() 
                 }, pos, seg_size, scale
             );
                 
-            const left_offset = screen_pos.x;
             if (mouse_pos.x < left_offset ||
                 mouse_pos.x > chart_size.width + left_offset ||
                 mouse_pos.y < top_offset ||
@@ -2159,7 +2160,7 @@ class Chart extends Component
             let c_y = 0;
             while (c_y < chart_size.height + this.getBottomOff())
             {
-                ctx.fillRect(Math.round(snap_x - left_offset), c_y, 1, line_width);
+                ctx.fillRect(Math.round(snap_x), c_y, 1, line_width);
                 c_y += line_width + line_space;
             }
     

@@ -71,13 +71,44 @@ class Indicator {
     }
 }
 
-class sma extends Indicator
+/**
+ *  Overlays
+ */ 
+
+// Bolinger Bands
+class boll extends Indicator
 {
     constructor(broker, product, chart_period, properties)
     {
         super();
 
-        this.type = 'sma';
+        this.type = 'boll';
+        this.broker = broker;
+        this.product = product;
+        this.chart_period = chart_period;
+        this.properties = properties;
+        this.period = properties.periods[0];
+        this.min_bars = this.period;
+
+        this.cache_ts = [];
+        this.cache_asks = [];
+        this.cache_bids = [];
+    }
+
+    get_value(i, ohlc, values)
+    {
+
+    }
+}
+
+// Dochian Bands
+class donch extends Indicator
+{
+    constructor(broker, product, chart_period, properties)
+    {
+        super();
+
+        this.type = 'donch';
         this.broker = broker;
         this.product = product;
         this.chart_period = chart_period;
@@ -94,19 +125,23 @@ class sma extends Indicator
     {
         // Validation Check
         if (i < this.min_bars || ohlc[i].every((x) => x === null))
-            return [null]
-            
-        let ma = 0
+        {
+            return [null, null]
+        }
+
+        let high_low = [0,0]
         for (let j = 0; j < this.period; j++)
         {
-            ma = ma + ohlc[i - j][3];
+            if (high_low[0] === 0 || ohlc[i-j-1][1] > high_low[0])
+                high_low[0] = ohlc[i-j-1][1]
+            if (high_low[1] === 0 || ohlc[i-j-1][2] < high_low[1])
+                high_low[1] = ohlc[i-j-1][2]
         }
-        return [Math.round((
-            ma / this.period
-        ) * 100000) / 100000];
+        return high_low;
     }
 }
 
+// Exponential Moving Average
 class ema extends Indicator
 {
     constructor(broker, product, chart_period, properties)
@@ -154,13 +189,40 @@ class ema extends Indicator
     }
 }
 
-class donch extends Indicator
+// Moving Average Envelope
+class mae extends Indicator
 {
     constructor(broker, product, chart_period, properties)
     {
         super();
 
-        this.type = 'donch';
+        this.type = 'boll';
+        this.broker = broker;
+        this.product = product;
+        this.chart_period = chart_period;
+        this.properties = properties;
+        this.period = properties.periods[0];
+        this.min_bars = this.period;
+
+        this.cache_ts = [];
+        this.cache_asks = [];
+        this.cache_bids = [];
+    }
+
+    get_value(i, ohlc, values)
+    {
+
+    }
+}
+
+// Simple Moving Average
+class sma extends Indicator
+{
+    constructor(broker, product, chart_period, properties)
+    {
+        super();
+
+        this.type = 'sma';
         this.broker = broker;
         this.product = product;
         this.chart_period = chart_period;
@@ -177,23 +239,51 @@ class donch extends Indicator
     {
         // Validation Check
         if (i < this.min_bars || ohlc[i].every((x) => x === null))
-        {
-            return [null, null]
-        }
-
-        let high_low = [0,0]
+            return [null]
+            
+        let ma = 0
         for (let j = 0; j < this.period; j++)
         {
-            if (high_low[0] === 0 || ohlc[i-j-1][1] > high_low[0])
-                high_low[0] = ohlc[i-j-1][1]
-            if (high_low[1] === 0 || ohlc[i-j-1][2] < high_low[1])
-                high_low[1] = ohlc[i-j-1][2]
+            ma = ma + ohlc[i - j][3];
         }
-        return high_low;
+        return [Math.round((
+            ma / this.period
+        ) * 100000) / 100000];
+    }
+}
+
+
+/**
+ *  Studies
+ */ 
+
+// Average True Range
+class atr extends Indicator
+{
+    constructor(broker, product, chart_period, properties)
+    {
+        super();
+
+        this.type = 'boll';
+        this.broker = broker;
+        this.product = product;
+        this.chart_period = chart_period;
+        this.properties = properties;
+        this.period = properties.periods[0];
+        this.min_bars = this.period;
+
+        this.cache_ts = [];
+        this.cache_asks = [];
+        this.cache_bids = [];
+    }
+
+    get_value(i, ohlc, values)
+    {
+
     }
 }
 
 
 export default {
-    sma, ema, donch
+    boll, donch, ema, mae, sma, atr
 };
