@@ -1182,6 +1182,8 @@ class Chart extends Component
             { x: mouse_pos.x, y: mouse_pos.y - this.props.getTopOffset() }
         );
 
+        let x_pos = 1;
+        let my_timestamp = this.getTimestamps()[this.getTimestamps().length];
         if (top_window_id !== null)
         {
             const top_window = this.props.getWindowById(top_window_id);
@@ -1210,106 +1212,107 @@ class Chart extends Component
                 );
 
                 const timestamp = top_chart.getTimestampByPos(Math.floor(mouse_world_pos.x));
-                let x_pos = this.getTimestamps().length - this.getAllTimestampsIdx(timestamp);
+                const timestamp_idx = this.getAllTimestampsIdx(timestamp);
+                x_pos = this.getTimestamps().length - timestamp_idx;
                 x_pos = Math.max(x_pos, 1);
-                const my_timestamp = this.getAllTimestamps()[x_pos];
+                my_timestamp = this.getAllTimestamps()[timestamp_idx];
+            }
+        }
 
-                let prices = {
-                    timestamp: my_timestamp,
-                    ohlc: [],
-                    ohlc_color: null,
-                    overlays: [],
-                    overlay_colors: [],
-                    studies: [],
-                    study_colors: [],
-                };
-        
-        
-                const overlays = this.getOverlays();
-                const studies = this.getStudies();
-        
-                let isNext = true;
-                while (isNext) 
+        let prices = {
+            timestamp: my_timestamp,
+            ohlc: [],
+            ohlc_color: null,
+            overlays: [],
+            overlay_colors: [],
+            studies: [],
+            study_colors: [],
+        };
+
+
+        const overlays = this.getOverlays();
+        const studies = this.getStudies();
+
+        let isNext = true;
+        while (isNext) 
+        {
+            isNext = false;
+            prices.ohlc = this.getOhlcByPos(x_pos);
+            if (prices.ohlc === undefined)
+            {
+                x_pos = 1;
+                isNext = true;
+            }
+            else if (prices.ohlc[0] === 0 || prices.ohlc[0] === null) 
+            {
+                x_pos += 1;
+                isNext = true;
+            }
+
+            let result = [];
+            // Overlays
+            result = [];
+            for (let i = 0; i < overlays.length; i++)
+            {
+                if (this.getOverlayValues(i)[0].length > 0)
                 {
-                    isNext = false;
-                    prices.ohlc = this.getOhlcByPos(x_pos);
-                    if (prices.ohlc === undefined)
+                    const value = this.getOverlayValueByPos(i, x_pos);
+                    for (let j = 0; j < value.length; j++)
                     {
-                        x_pos = 1;
-                        isNext = true;
-                    }
-                    else if (prices.ohlc[0] === 0 || prices.ohlc[0] === null) 
-                    {
-                        x_pos += 1;
-                        isNext = true;
-                    }
-        
-                    let result = [];
-                    // Overlays
-                    result = [];
-                    for (let i = 0; i < overlays.length; i++)
-                    {
-                        if (this.getOverlayValues(i)[0].length > 0)
+                        if (value[j] === undefined || value[j].some(x => x === undefined))
                         {
-                            const value = this.getOverlayValueByPos(i, x_pos);
-                            for (let j = 0; j < value.length; j++)
-                            {
-                                if (value[j] === undefined || value[j].some(x => x === undefined))
-                                {
-                                    x_pos = 1;
-                                    isNext = true;
-                                }
-                            }
-                            result.push(value);
-                        }
-                        else
-                        {
-                            return prices;
+                            x_pos = 1;
+                            isNext = true;
                         }
                     }
-                    prices.overlays = result;
-                    // Studies
-                    result = [];
-                    for (let i = 0; i < studies.length; i++)
-                    {
-                        if (this.getStudyValues(i)[0].length > 0)
-                        {
-                            const value = this.getStudyValueByPos(i, x_pos);
-                            for (let j = 0; j < value.length; j++)
-                            {
-                                if (value[j] === undefined || value[j].some(x => x === undefined))
-                                {
-                                    x_pos = 1;
-                                    isNext = true;
-                                }
-                            }
-                            result.push(value);
-                        }
-                        else
-                        {
-                            return prices;
-                        }
-                    }
-                    prices.studies = result;
-                }
-        
-                if (prices.ohlc[0] > prices.ohlc[3])
-                {
-                    prices.ohlc_color = this.getWindowInfo().properties.bars.bodyShort
+                    result.push(value);
                 }
                 else
                 {
-                    prices.ohlc_color = this.getWindowInfo().properties.bars.bodyLong
+                    return prices;
                 }
-                if (prices.ohlc_color.every(x => x === 255))
-                {
-                    prices.ohlc_color = [0,0,0];
-                }
-                prices.ohlc_color = `rgba(${prices.ohlc_color[0]}, ${prices.ohlc_color[1]}, ${prices.ohlc_color[2]}, 1.0)`;
-        
-                return prices;
             }
+            prices.overlays = result;
+            // Studies
+            result = [];
+            for (let i = 0; i < studies.length; i++)
+            {
+                if (this.getStudyValues(i)[0].length > 0)
+                {
+                    const value = this.getStudyValueByPos(i, x_pos);
+                    for (let j = 0; j < value.length; j++)
+                    {
+                        if (value[j] === undefined || value[j].some(x => x === undefined))
+                        {
+                            x_pos = 1;
+                            isNext = true;
+                        }
+                    }
+                    result.push(value);
+                }
+                else
+                {
+                    return prices;
+                }
+            }
+            prices.studies = result;
         }
+
+        if (prices.ohlc[0] > prices.ohlc[3])
+        {
+            prices.ohlc_color = this.getWindowInfo().properties.bars.bodyShort
+        }
+        else
+        {
+            prices.ohlc_color = this.getWindowInfo().properties.bars.bodyLong
+        }
+        if (prices.ohlc_color.every(x => x === 255))
+        {
+            prices.ohlc_color = [0,0,0];
+        }
+        prices.ohlc_color = `rgba(${prices.ohlc_color[0]}, ${prices.ohlc_color[1]}, ${prices.ohlc_color[2]}, 1.0)`;
+
+        return prices;
     }
 
     getNumZeroDecimals(x)
@@ -2153,6 +2156,8 @@ class Chart extends Component
                 if (top_seg_idx > 0)
                 {
                     const top_study = top_chart.getStudyComponents()[top_seg_idx-1];
+                    if (top_study === undefined) return;
+
                     top_pos = { x: top_chart.state.pos.x, y: top_study.getPos().y};
                     top_scale = { x: top_chart.state.scale.x, y: top_study.getScale().y};
 
