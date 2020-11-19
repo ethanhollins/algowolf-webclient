@@ -1175,125 +1175,141 @@ class Chart extends Component
     {
         if (this.getChart() === undefined) return undefined;
 
-        const { pos, scale } = this.state;
         const mouse_pos = this.props.getMousePos();
-        let prices = {
-            timestamp: null,
-            ohlc: [],
-            ohlc_color: null,
-            overlays: [],
-            overlay_colors: [],
-            studies: [],
-            study_colors: [],
-        };
 
-        const camera = this.getCamera();
-        const chart_size = this.getChartSize();
+        const top_window_id = this.props.getTopWindow(
+            this.props.strategy_id, 
+            { x: mouse_pos.x, y: mouse_pos.y - this.props.getTopOffset() }
+        );
 
-        const screen_pos = this.props.getScreenPos();
-        const top_offset = this.props.getTopOffset() + screen_pos.y;
-
-        const overlays = this.getOverlays();
-        const studies = this.getStudies();
-        let x_pos = 1;
-
-        if (
-            mouse_pos !== null &&
-            this.props.isTopWindow(
-                this.getStrategyId(), this.getItemId(), 
-                {x: mouse_pos.x, y: mouse_pos.y - this.props.getTopOffset()}
+        if (top_window_id !== null)
+        {
+            const top_window = this.props.getWindowById(top_window_id);
+            const top_chart = top_window.getInnerElement();
+    
+            if (
+                top_chart !== undefined && 
+                top_window.getElementType()  === 'chart' && 
+                top_chart.getChart() !== undefined
             )
-        )
-        {
-            x_pos = Math.floor(camera.convertScreenPosToWorldPos(
-                { x: mouse_pos.x - screen_pos.x, y: mouse_pos.y - screen_pos.y}, 
-                pos, chart_size, scale
-            ).x);
-            x_pos = Math.max(x_pos, 1);
-        }
-
-        prices.timestamp = this.getTimestampByPos(Math.floor(x_pos));
-
-        let isNext = true;
-        while (isNext) 
-        {
-            isNext = false;
-            prices.ohlc = this.getOhlcByPos(x_pos);
-            if (prices.ohlc === undefined)
             {
-                x_pos = 1;
-                isNext = true;
-            }
-            else if (prices.ohlc[0] === 0 || prices.ohlc[0] === null) 
-            {
-                x_pos += 1;
-                isNext = true;
-            }
+                const top_pos = top_chart.state.pos;
+                const top_scale = top_chart.state.scale;
+                const top_seg_idx = top_chart.getSegment(mouse_pos);
+                const top_seg_size = top_chart.getSegmentSize(top_seg_idx);
+                const top_seg_start = top_chart.getChartSegmentStartPos(top_seg_idx);
+                const top_window_seg_start = top_chart.getWindowSegmentStartPos(0);
+                const top_screen_pos = top_chart.getScreenPos();
+                const camera = top_chart.getCamera();
 
-            let result = [];
-            // Overlays
-            result = [];
-            for (let i = 0; i < overlays.length; i++)
-            {
-                if (this.getOverlayValues(i)[0].length > 0)
+                const mouse_world_pos = camera.convertScreenPosToWorldPos(
+                    { 
+                        x: mouse_pos.x - top_screen_pos.x, 
+                        y: mouse_pos.y - top_seg_start.y - top_window_seg_start.y - this.props.getTopOffset() 
+                    }, top_pos, top_seg_size, top_scale
+                );
+
+                const timestamp = top_chart.getTimestampByPos(Math.floor(mouse_world_pos.x));
+                let x_pos = this.getTimestamps().length - this.getAllTimestampsIdx(timestamp);
+                x_pos = Math.max(x_pos, 1);
+                const my_timestamp = this.getAllTimestamps()[x_pos];
+
+                let prices = {
+                    timestamp: my_timestamp,
+                    ohlc: [],
+                    ohlc_color: null,
+                    overlays: [],
+                    overlay_colors: [],
+                    studies: [],
+                    study_colors: [],
+                };
+        
+        
+                const overlays = this.getOverlays();
+                const studies = this.getStudies();
+        
+                let isNext = true;
+                while (isNext) 
                 {
-                    const value = this.getOverlayValueByPos(i, x_pos);
-                    for (let j = 0; j < value.length; j++)
+                    isNext = false;
+                    prices.ohlc = this.getOhlcByPos(x_pos);
+                    if (prices.ohlc === undefined)
                     {
-                        if (value[j] === undefined || value[j].some(x => x === undefined))
+                        x_pos = 1;
+                        isNext = true;
+                    }
+                    else if (prices.ohlc[0] === 0 || prices.ohlc[0] === null) 
+                    {
+                        x_pos += 1;
+                        isNext = true;
+                    }
+        
+                    let result = [];
+                    // Overlays
+                    result = [];
+                    for (let i = 0; i < overlays.length; i++)
+                    {
+                        if (this.getOverlayValues(i)[0].length > 0)
                         {
-                            x_pos = 1;
-                            isNext = true;
+                            const value = this.getOverlayValueByPos(i, x_pos);
+                            for (let j = 0; j < value.length; j++)
+                            {
+                                if (value[j] === undefined || value[j].some(x => x === undefined))
+                                {
+                                    x_pos = 1;
+                                    isNext = true;
+                                }
+                            }
+                            result.push(value);
+                        }
+                        else
+                        {
+                            return prices;
                         }
                     }
-                    result.push(value);
+                    prices.overlays = result;
+                    // Studies
+                    result = [];
+                    for (let i = 0; i < studies.length; i++)
+                    {
+                        if (this.getStudyValues(i)[0].length > 0)
+                        {
+                            const value = this.getStudyValueByPos(i, x_pos);
+                            for (let j = 0; j < value.length; j++)
+                            {
+                                if (value[j] === undefined || value[j].some(x => x === undefined))
+                                {
+                                    x_pos = 1;
+                                    isNext = true;
+                                }
+                            }
+                            result.push(value);
+                        }
+                        else
+                        {
+                            return prices;
+                        }
+                    }
+                    prices.studies = result;
+                }
+        
+                if (prices.ohlc[0] > prices.ohlc[3])
+                {
+                    prices.ohlc_color = this.getWindowInfo().properties.bars.bodyShort
                 }
                 else
                 {
-                    return prices;
+                    prices.ohlc_color = this.getWindowInfo().properties.bars.bodyLong
                 }
-            }
-            prices.overlays = result;
-            // Studies
-            result = [];
-            for (let i = 0; i < studies.length; i++)
-            {
-                if (this.getStudyValues(i)[0].length > 0)
+                if (prices.ohlc_color.every(x => x === 255))
                 {
-                    const value = this.getStudyValueByPos(i, x_pos);
-                    for (let j = 0; j < value.length; j++)
-                    {
-                        if (value[j] === undefined || value[j].some(x => x === undefined))
-                        {
-                            x_pos = 1;
-                            isNext = true;
-                        }
-                    }
-                    result.push(value);
+                    prices.ohlc_color = [0,0,0];
                 }
-                else
-                {
-                    return prices;
-                }
+                prices.ohlc_color = `rgba(${prices.ohlc_color[0]}, ${prices.ohlc_color[1]}, ${prices.ohlc_color[2]}, 1.0)`;
+        
+                return prices;
             }
-            prices.studies = result;
         }
-
-        if (prices.ohlc[0] > prices.ohlc[3])
-        {
-            prices.ohlc_color = this.getWindowInfo().properties.bars.bodyShort
-        }
-        else
-        {
-            prices.ohlc_color = this.getWindowInfo().properties.bars.bodyLong
-        }
-        if (prices.ohlc_color.every(x => x === 255))
-        {
-            prices.ohlc_color = [0,0,0];
-        }
-        prices.ohlc_color = `rgba(${prices.ohlc_color[0]}, ${prices.ohlc_color[1]}, ${prices.ohlc_color[2]}, 1.0)`;
-
-        return prices;
     }
 
     getNumZeroDecimals(x)

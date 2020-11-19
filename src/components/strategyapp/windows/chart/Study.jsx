@@ -289,7 +289,7 @@ class Study extends Component
                         }
 
                         current_pos = camera.convertWorldPosToScreenPos(
-                            { x: x_pos, y: i_val },
+                            { x: x_pos, y: Math.round(i_val * 100000) / 100000 },
                             pos, size, scale
                         );
 
