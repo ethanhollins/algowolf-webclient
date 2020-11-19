@@ -226,86 +226,90 @@ class Study extends Component
 
 
         // Iterate columns
-        for (let i = 0; i < values.length; i++) 
+        try
         {
-            ctx.lineWidth = 1.5;
-            let current_pos = null;
-            
-            result.push([...Array(ohlc.length)].map(x=>Array(values[i][0].length)));
-            // Iterate rows
-            for (let y = 0; y < values[i][0].length; y++)
+            for (let i = 0; i < values.length; i++) 
             {
-                let c_x = -1;
-                const color = properties.colors[i][y];
-                let is_future = false;
-
-                ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 1.0)`;
-                ctx.beginPath();
-
-                for (let x = 0; x < ohlc.length; x++) 
+                ctx.lineWidth = 1.5;
+                let current_pos = null;
+                
+                result.push([...Array(ohlc.length)].map(x=>Array(values[i][0].length)));
+                // Iterate rows
+                for (let y = 0; y < values[i][0].length; y++)
                 {
-                    if (ohlc[x][0] !== null) c_x += 1;
-                    if (x === 0) c_x = 0;
+                    let c_x = -1;
+                    const color = properties.colors[i][y];
+                    let is_future = false;
 
-                    let x_pos = (ohlc.length - x)+0.5;
-                    if (x_pos > pos.x + scale.x+1 || current_pos === null)
+                    ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 1.0)`;
+                    ctx.beginPath();
+
+                    for (let x = 0; x < ohlc.length; x++) 
                     {
-                        if (ohlc[x][0] !== null && values[i][c_x][y] !== null)
+                        if (ohlc[x][0] !== null) c_x += 1;
+                        if (x === 0) c_x = 0;
+
+                        let x_pos = (ohlc.length - x)+0.5;
+                        if (x_pos > pos.x + scale.x+1 || current_pos === null)
                         {
-                            // Move to first position
-                            current_pos = camera.convertWorldPosToScreenPos(
-                                { x: x_pos, y: values[i][c_x][y] },
-                                pos, size, scale
-                            );
+                            if (ohlc[x][0] !== null && values[i][c_x][y] !== null)
+                            {
+                                // Move to first position
+                                current_pos = camera.convertWorldPosToScreenPos(
+                                    { x: x_pos, y: values[i][c_x][y] },
+                                    pos, size, scale
+                                );
+                                ctx.moveTo(
+                                    current_pos.x + start_pos.x,
+                                    current_pos.y + start_pos.y
+                                );
+                            }
+                            continue
+                        }
+                        
+                        if (values[i][c_x] === undefined) continue;
+
+                        let i_val = values[i][c_x][y];
+                        if (i_val === null || ohlc === undefined || ohlc[x][0] === null)
+                        {
+                            result[i][x][y] = null;
+                            continue;
+                        }
+                        result[i][x][y] = i_val;
+
+                        if (!is_future && current_timestamp !== null && timestamps[x] > current_timestamp)
+                        {
+                            is_future = true;
+                            ctx.stroke();
+                            ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.2)`;
+                            ctx.beginPath();
                             ctx.moveTo(
                                 current_pos.x + start_pos.x,
                                 current_pos.y + start_pos.y
                             );
                         }
-                        continue
-                    }
-                    
-                    if (values[i][c_x] === undefined) continue;
 
-                    let i_val = values[i][c_x][y];
-                    if (i_val === null || ohlc === undefined || ohlc[x][0] === null)
-                    {
-                        result[i][x][y] = null;
-                        continue;
-                    }
-                    result[i][x][y] = i_val;
+                        current_pos = camera.convertWorldPosToScreenPos(
+                            { x: x_pos, y: i_val },
+                            pos, size, scale
+                        );
 
-                    if (!is_future && current_timestamp !== null && timestamps[x] > current_timestamp)
-                    {
-                        is_future = true;
-                        ctx.stroke();
-                        ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.2)`;
-                        ctx.beginPath();
-                        ctx.moveTo(
-                            current_pos.x + start_pos.x,
+                        ctx.lineTo(
+                            current_pos.x + start_pos.x, 
                             current_pos.y + start_pos.y
                         );
+                        if (x_pos < pos.x-1) break;
+
                     }
-
-                    current_pos = camera.convertWorldPosToScreenPos(
-                        { x: x_pos, y: i_val },
-                        pos, size, scale
-                    );
-
-                    ctx.lineTo(
-                        current_pos.x + start_pos.x, 
-                        current_pos.y + start_pos.y
-                    );
-                    if (x_pos < pos.x-1) break;
-
+                    ctx.stroke();
                 }
-                ctx.stroke();
             }
+            
+            this.setState({ result });
+            if(setProperties) this.setStudyProperties(result);
         }
+        catch (e) {}
 
-        this.setState({ result });
-
-        if(setProperties) this.setStudyProperties(result);
     }
 
     drawPriceGrid(ctx)

@@ -148,7 +148,9 @@ class WindowWrapper extends Component
                 updateInfo={this.props.updateInfo}
                 getCurrentAccount={this.props.getCurrentAccount}
                 windowExists={this.props.windowExists}
+                getWindowById={this.props.getWindowById}
                 isTopWindow={this.props.isTopWindow}
+                getTopWindow={this.props.getTopWindow}
                 setPopup={this.props.setPopup}
             />)
         }
