@@ -224,7 +224,6 @@ class Study extends Component
         // If empty values list, cancel drawing
         if (values.length === 0) return;
 
-
         // Iterate columns
         try
         {

@@ -355,7 +355,8 @@ class Chart extends Component
             
                             
                             const handle_rect = this.getHandleRect(start_pos, segment_size);
-                            handle_rect.y += top_offset
+                            handle_rect.x += start_pos.x;
+                            handle_rect.y += top_offset;
                             if (this.isWithinBounds(handle_rect, mouse_pos))
                             {
                                 is_down = false;
@@ -867,7 +868,7 @@ class Chart extends Component
                 let overlay_info = [];
                 for (let i = 0; i < overlays.length; i++)
                 {
-                    // const overlay = overlays[i];
+                    const overlay = overlays[i];
                     const name = this.getOverlayDisplayName(i);
     
                     let value_elems = [];
@@ -887,10 +888,14 @@ class Chart extends Component
                                 {
                                     price = price.toFixed(5);
                                 }
-        
+
+                                const color = overlay.properties.colors[x][y];
                                 
                                 item = (
-                                    <span className='chart values price'>
+                                    <span 
+                                        className='chart values price'
+                                        style={{color: `rgb(${color})`}}
+                                    >
                                         {price}
                                     </span>
                                 );
@@ -943,30 +948,17 @@ class Chart extends Component
                                 {
                                     price = price.toFixed(5);
                                 }
-    
-                                if (y === 0) 
-                                {
-                                    item = (
-                                        <React.Fragment>
-    
-                                        <span className='chart values period'>
-                                            {study.properties.periods[x]}
-                                        </span>
-                                        <span className='chart values price'>
-                                            {price}
-                                        </span>
-    
-                                        </React.Fragment>
-                                    );
-                                }
-                                else
-                                {
-                                    item = (
-                                        <span className='chart values price'>
-                                            {price}
-                                        </span>
-                                    );
-                                }
+
+                                const color = study.properties.colors[x][y];
+                                
+                                item = (
+                                    <span 
+                                        className='chart values price'
+                                        style={{color: `rgb(${color})`}}
+                                    >
+                                        {price}
+                                    </span>
+                                );
     
                                 value_elems.push(
                                     <span key={x + '' + y}>{item}</span>
@@ -1058,7 +1050,7 @@ class Chart extends Component
 
                 for (let i = 0; i < this.studies.length; i++)
                 {
-                    this.studies.resetResult();
+                    this.studies[i].resetResult();
                 }
                 // Allow new data loading
                 is_loading = false;
@@ -1131,11 +1123,13 @@ class Chart extends Component
         // Reset Transform
         ctx.setTransform(1.0, 0, 0, 1.0, 0, 0);
 
+        let window_start_pos;
         for (let i = 0; i < studies.length; i++)
         {
             let study = studies[i];
-
             start_pos = this.getChartSegmentStartPos(study.getWindowIndex());
+            window_start_pos = this.getWindowSegmentStartPos(0);
+
             segment_size = this.getSegmentSize(study.getWindowIndex());
 
             this.defineClip(ctx, start_pos, segment_size);
@@ -1149,7 +1143,7 @@ class Chart extends Component
             // Restore context
             ctx.restore(); 
 
-            this.handleStudyHandles(ctx, start_pos, segment_size);
+            this.handleStudyHandles(ctx, window_start_pos, start_pos, segment_size);
         }
 
         this.drawTimes(ctx, time_data);
@@ -1207,11 +1201,14 @@ class Chart extends Component
             mouse_pos !== null &&
             this.props.isTopWindow(
                 this.getStrategyId(), this.getItemId(), 
-                {x: mouse_pos.x, y: mouse_pos.y - top_offset}
+                {x: mouse_pos.x, y: mouse_pos.y - this.props.getTopOffset()}
             )
         )
         {
-            x_pos = Math.floor(camera.convertScreenPosToWorldPos(mouse_pos, pos, chart_size, scale).x);
+            x_pos = Math.floor(camera.convertScreenPosToWorldPos(
+                { x: mouse_pos.x - screen_pos.x, y: mouse_pos.y - screen_pos.y}, 
+                pos, chart_size, scale
+            ).x);
             x_pos = Math.max(x_pos, 1);
         }
 
@@ -1834,17 +1831,21 @@ class Chart extends Component
         }
     }
 
-    handleStudyHandles(ctx, start_pos, segment_size)
+    handleStudyHandles(ctx, window_start_pos, start_pos, segment_size)
     {
         const mouse_pos = this.props.getMousePos();
         const top_offset = this.props.getTopOffset();
 
         // Draw Handle
         const rect = this.getHandleRect(start_pos, segment_size);
+        let window_rect = { 
+            x: rect.x + window_start_pos.x, y: rect.y + window_start_pos.y, 
+            width: rect.width, height: rect.height 
+        };
         const handle_middle_off = Math.round(rect.width/3);
 
         if (
-            this.isWithinBounds(rect, { x: mouse_pos.x, y: mouse_pos.y - top_offset }) &&
+            this.isWithinBounds(window_rect, { x: mouse_pos.x, y: mouse_pos.y - top_offset }) &&
             !this.props.getKeys().includes(SPACEBAR)
         )
         {
@@ -2103,7 +2104,10 @@ class Chart extends Component
         const screen_pos = this.getScreenPos();
         const top_offset = this.props.getTopOffset() + screen_pos.y;
         
-        const top_window_id = this.props.getTopWindow(this.props.strategy_id, mouse_pos);
+        const top_window_id = this.props.getTopWindow(
+            this.props.strategy_id, 
+            { x: mouse_pos.x, y: mouse_pos.y - this.props.getTopOffset() }
+        );
 
         if (top_window_id !== null)
         {
@@ -2127,6 +2131,8 @@ class Chart extends Component
                 const chart_size = this.getChartSize();
                 const seg_size = this.getSegmentSize(top_seg_idx);
         
+                if (mouse_pos.y > top_offset + top_chart_size.height) return;
+
                 let top_pos, top_scale, pos, scale = undefined;
                 if (top_seg_idx > 0)
                 {

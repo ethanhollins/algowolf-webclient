@@ -90,7 +90,7 @@ class boll extends Indicator
         this.period = properties.periods[0];
         this.min_bars = this.period;
 
-        this.display_name = `BOLL (${this.period}, ${this.properties.StdDev})`;
+        this.display_name = `BOLL\n${this.period}, ${this.properties.StdDev}`;
 
         this.cache_ts = [];
         this.cache_asks = [];
@@ -145,7 +145,7 @@ class donch extends Indicator
         this.period = properties.periods[0];
         this.min_bars = this.period;
 
-        this.display_name = `DONCH (${this.period})`;
+        this.display_name = `DONCH\n${this.period}`;
 
         this.cache_ts = [];
         this.cache_asks = [];
@@ -187,7 +187,7 @@ class ema extends Indicator
         this.period = properties.periods[0];
         this.min_bars = this.period;
 
-        this.display_name = `EMA (${this.period})`;
+        this.display_name = `EMA ${this.period}`;
 
         this.cache_ts = [];
         this.cache_asks = [];
@@ -237,7 +237,7 @@ class mae extends Indicator
         this.period = properties.periods[0];
         this.min_bars = this.period;
 
-        this.display_name = `MAE (${this.period}, ${this.properties.Percent})`;
+        this.display_name = `MAE\n${this.period}, ${this.properties.Percent}`;
 
         this.cache_ts = [];
         this.cache_asks = [];
@@ -292,7 +292,7 @@ class sma extends Indicator
         this.period = properties.periods[0];
         this.min_bars = this.period;
 
-        this.display_name = `SMA (${this.period})`;
+        this.display_name = `SMA ${this.period}`;
         
         this.cache_ts = [];
         this.cache_asks = [];
@@ -336,7 +336,7 @@ class atr extends Indicator
         this.period = properties.periods[0];
         this.min_bars = this.period;
 
-        this.display_name = `ATR (${this.period})`;
+        this.display_name = `ATR ${this.period}`;
 
         this.cache_ts = [];
         this.cache_asks = [];
