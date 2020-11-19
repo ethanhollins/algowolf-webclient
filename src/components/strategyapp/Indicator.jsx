@@ -90,6 +90,8 @@ class boll extends Indicator
         this.period = properties.periods[0];
         this.min_bars = this.period;
 
+        this.display_name = `BOLL (${this.period}, ${this.properties.StdDev})`;
+
         this.cache_ts = [];
         this.cache_asks = [];
         this.cache_bids = [];
@@ -97,7 +99,34 @@ class boll extends Indicator
 
     get_value(i, ohlc, values)
     {
+        // Validation Check
+        if (i < this.min_bars || ohlc[i].every((x) => x === null))
+        {
+            return [null, null]
+        }
 
+        const std_dev = this.properties.StdDev;
+
+        // Calc mean
+        let mean = 0;
+        for (let j = 0; j < this.period; j++)
+        {
+            mean += ohlc[i-j][3];
+        }
+        mean /= this.period;
+
+        // Calc Standard Deviation
+        let d_sum = 0;
+        for (let j = 0; j < this.period; j++)
+        {
+            d_sum += Math.pow(ohlc[i-j][3] - mean, 2);
+        }
+        let sd = Math.sqrt(d_sum/this.period);
+
+        return [
+            mean + sd * std_dev,
+            mean - sd * std_dev
+        ];
     }
 }
 
@@ -115,6 +144,8 @@ class donch extends Indicator
         this.properties = properties;
         this.period = properties.periods[0];
         this.min_bars = this.period;
+
+        this.display_name = `DONCH (${this.period})`;
 
         this.cache_ts = [];
         this.cache_asks = [];
@@ -156,6 +187,8 @@ class ema extends Indicator
         this.period = properties.periods[0];
         this.min_bars = this.period;
 
+        this.display_name = `EMA (${this.period})`;
+
         this.cache_ts = [];
         this.cache_asks = [];
         this.cache_bids = [];
@@ -196,13 +229,15 @@ class mae extends Indicator
     {
         super();
 
-        this.type = 'boll';
+        this.type = 'mae';
         this.broker = broker;
         this.product = product;
         this.chart_period = chart_period;
         this.properties = properties;
         this.period = properties.periods[0];
         this.min_bars = this.period;
+
+        this.display_name = `MAE (${this.period}, ${this.properties.Percent})`;
 
         this.cache_ts = [];
         this.cache_asks = [];
@@ -211,7 +246,34 @@ class mae extends Indicator
 
     get_value(i, ohlc, values)
     {
+        // Validation Check
+        if (i < this.min_bars || ohlc[i].every((x) => x === null))
+            return [null, null, null]
+    
+        const percent = this.properties.Percent / 100;
 
+        let ema;
+        if (i > 0 && values[i-1][0] !== null)
+        {
+            const multi = 2 / (this.period + 1);
+            const prev_ema = values[i-1][0];
+
+            ema = (ohlc[i][3] - prev_ema) * multi + prev_ema;
+        }
+        else
+        {
+            let ma = 0
+            for (let j = 0; j < this.period; j++)
+            {
+                ma = ma + ohlc[i - j][3];
+            }
+            ema = ma / this.period;
+        }
+
+        const off = ema * percent;
+        return [
+            ema, ema + off, ema - off
+        ];
     }
 }
 
@@ -230,6 +292,8 @@ class sma extends Indicator
         this.period = properties.periods[0];
         this.min_bars = this.period;
 
+        this.display_name = `SMA (${this.period})`;
+        
         this.cache_ts = [];
         this.cache_asks = [];
         this.cache_bids = [];
@@ -264,13 +328,15 @@ class atr extends Indicator
     {
         super();
 
-        this.type = 'boll';
+        this.type = 'atr';
         this.broker = broker;
         this.product = product;
         this.chart_period = chart_period;
         this.properties = properties;
         this.period = properties.periods[0];
         this.min_bars = this.period;
+
+        this.display_name = `ATR (${this.period})`;
 
         this.cache_ts = [];
         this.cache_asks = [];
@@ -279,7 +345,69 @@ class atr extends Indicator
 
     get_value(i, ohlc, values)
     {
+        // Validation Check
+        if (i < this.min_bars || ohlc[i].every((x) => x === null))
+            return [null]
 
+        let atr;
+        if (values[i-1][0] !== null)
+        {
+            const prev_close = ohlc[i-1][3];
+            const high = ohlc[i][1];
+            const low = ohlc[i][2];
+
+            const prev_atr = values[i-1][0];
+
+            let tr;
+            if (prev_close > high)
+            {
+                tr = prev_close - low;
+            }
+            else if (prev_close < low)
+            {
+                tr = high - prev_close
+            }
+            else
+            {
+                tr = high - low
+            }
+
+            atr = (prev_atr * (this.period-1) + tr) / this.period;
+        }
+        else
+        {
+            let tr_sum = 0;
+            for (let j = this.period-1; j >= 0; j--)
+            {
+                if (j === this.period-1)
+                {
+                    tr_sum += ohlc[i-j][1] - ohlc[i-j][2];
+                }
+                else
+                {
+                    const prev_close = ohlc[i-j-1][3];
+                    const high = ohlc[i-j][1];
+                    const low = ohlc[i-j][2];
+
+                    if (prev_close > high)
+                    {
+                        tr_sum += prev_close - low;
+                    }
+                    else if (prev_close < low)
+                    {
+                        tr_sum += high - prev_close
+                    }
+                    else
+                    {
+                        tr_sum += high - low
+                    }
+                }
+            }
+
+            atr = tr_sum / this.period;
+        }
+
+        return [atr];
     }
 }
 

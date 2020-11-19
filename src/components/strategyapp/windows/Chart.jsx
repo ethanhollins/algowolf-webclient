@@ -867,7 +867,8 @@ class Chart extends Component
                 let overlay_info = [];
                 for (let i = 0; i < overlays.length; i++)
                 {
-                    const overlay = overlays[i];
+                    // const overlay = overlays[i];
+                    const name = this.getOverlayDisplayName(i);
     
                     let value_elems = [];
                     if (prices.overlays.length > 0)
@@ -901,7 +902,7 @@ class Chart extends Component
                         }
                     }
     
-                    const name = overlay.type.substring(0,1).toUpperCase() + overlay.type.substring(1);
+                    // const name = overlay.type.substring(0,1).toUpperCase() + overlay.type.substring(1);
                     // const name = overlay.type.toUpperCase();
                     overlay_info.push(
                         <div key={i} className='chart overlay-item'>
@@ -922,6 +923,7 @@ class Chart extends Component
                 for (let i = 0; i < studies.length; i++)
                 {
                     const study = studies[i];
+                    const name = this.getStudyDisplayName(i);
                     const start_pos = this.getChartSegmentStartPos(i+1);
     
                     let value_elems = [];
@@ -973,7 +975,7 @@ class Chart extends Component
                         }
                     }
     
-                    const name = study.type.substring(0,1).toUpperCase() + study.type.substring(1);
+                    // const name = study.display_name;
                     study_info.push(
                         <div key={i} className='chart group study' style={{top: (start_pos.y + 10) + 'px', left: '5px'}}>
                             <div className='chart values type'>{name}</div>
@@ -2825,6 +2827,13 @@ class Chart extends Component
         return this.getProperties().price;
     }
 
+    getOverlayDisplayName = (idx) =>
+    {
+        const overlay = this.getOverlays()[idx];
+        return this.getIndicator(overlay).display_name;
+
+    }
+
     getOverlayProperties = (idx) =>
     {
         return this.getProperties().overlays[idx].properties;
@@ -2841,6 +2850,13 @@ class Chart extends Component
             );
         }
         return result;
+    }
+
+    getStudyDisplayName = (idx) =>
+    {
+        const study = this.getStudies()[idx];
+        return this.getIndicator(study).display_name;
+
     }
 
     getStudyProperties = (idx) =>
