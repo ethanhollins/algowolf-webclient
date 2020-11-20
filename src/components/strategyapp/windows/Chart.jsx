@@ -2799,7 +2799,7 @@ class Chart extends Component
     {
         if (this.isBacktest())
         {
-            return this.getStrategy().broker;
+            return this.getStrategy().properties.broker;
         }
         else
         {

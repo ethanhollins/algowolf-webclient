@@ -1312,7 +1312,6 @@ class StrategyApp extends Component
         backtest_indicators[backtest_id].push(ind);
         this.setState({ backtest_indicators });
 
-        console.log(backtest_indicators);
         return ind;
     }
 
