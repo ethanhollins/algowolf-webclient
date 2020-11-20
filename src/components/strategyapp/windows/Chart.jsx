@@ -1191,6 +1191,7 @@ class Chart extends Component
     
             if (
                 top_chart !== undefined && 
+                top_chart !== null && 
                 top_window.getElementType()  === 'chart' && 
                 top_chart.getChart() !== undefined
             )
@@ -2135,6 +2136,7 @@ class Chart extends Component
     
             if (
                 top_chart !== undefined && 
+                top_chart !== null && 
                 top_window.getElementType()  === 'chart' && 
                 top_chart.getChart() !== undefined
             )
