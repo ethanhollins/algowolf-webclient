@@ -281,6 +281,8 @@ class Chart extends Component
                     getLimit={this.getLimit}
                     getTimestamps={this.getTimestamps}
                     getCurrentTimestamp={this.getCurrentTimestamp}
+                    getPeriod={this.getPeriod}
+                    getPeriodOffsetSeconds={this.getPeriodOffsetSeconds}
                     getWindowInfo={this.getWindowInfo}
                 />
                 {this.generateOverlays()}
@@ -626,10 +628,13 @@ class Chart extends Component
                     { x: mouse_pos.x, y: mouse_pos.y - top_offset }
                 ))
                 {
+                    const period_offset = this.getPeriodOffsetSeconds(this.getPeriod());
+                    this.props.setSelectedOffset(period_offset);
+
                     const timestamp = this.isWithinBarBounds(mouse_pos);
                     if (timestamp !== null)
                     {
-                        this.props.setCurrentTimestamp(timestamp);
+                        this.props.setCurrentTimestamp(timestamp + period_offset);
                     }
                 }
             }
@@ -808,6 +813,8 @@ class Chart extends Component
                         getLimit={this.getLimit}
                         getTimestamps={this.getTimestamps}
                         getCurrentTimestamp={this.getCurrentTimestamp}
+                        getPeriod={this.getPeriod}
+                        getPeriodOffsetSeconds={this.getPeriodOffsetSeconds}
                     />
                 );
             }
@@ -848,6 +855,8 @@ class Chart extends Component
                         getLimit={this.getLimit}
                         getTimestamps={this.getTimestamps}
                         getCurrentTimestamp={this.getCurrentTimestamp}
+                        getPeriod={this.getPeriod}
+                        getPeriodOffsetSeconds={this.getPeriodOffsetSeconds}
                         resizePortion={this.resizePortion}
                     />
                 );
@@ -1413,7 +1422,7 @@ class Chart extends Component
         else return dt;
     }
 
-    getPeriodOffsetSeconds(period)
+    getPeriodOffsetSeconds = (period) =>
     {
         return this.props.getPeriodOffsetSeconds(period);
     }

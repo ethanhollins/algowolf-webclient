@@ -21,7 +21,8 @@ class Backtest extends Component
             info: {},
             input_variables: {},
             log: [],
-            hide_shadows: false
+            hide_shadows: false,
+            selected_offset: null,
         }
 
         this.windows = [];
@@ -158,6 +159,7 @@ class Backtest extends Component
                             getOrders={this.getOrders}
                             getCurrentTimestamp={this.getCurrentTimestamp}
                             setCurrentTimestamp={this.setCurrentTimestamp}
+                            setSelectedOffset={this.setSelectedOffset}
                             // Log Functions
                             getLog={this.getLog}
                             getInfo={this.getInfo}
@@ -231,16 +233,17 @@ class Backtest extends Component
     handleKeys = () =>
     {
         const keys = this.props.getKeys();
+        const { selected_offset } = this.state;
         
         if (keys.includes(ARROW_RIGHT))
         {
             const { current_timestamp } = this.state;
-            this.handleTransactions(current_timestamp + this.props.getPeriodOffsetSeconds('M1'));
+            this.handleTransactions(current_timestamp + selected_offset);
         }
         if (keys.includes(ARROW_LEFT))
         {
             const { current_timestamp } = this.state;
-            this.handleTransactions(current_timestamp - this.props.getPeriodOffsetSeconds('M1'));
+            this.handleTransactions(current_timestamp - selected_offset);
         }
     }
 
@@ -524,6 +527,11 @@ class Backtest extends Component
     isLoaded = () =>
     {
         return true;
+    }
+
+    setSelectedOffset = (selected_offset) =>
+    {
+        this.setState({ selected_offset });
     }
 
 }

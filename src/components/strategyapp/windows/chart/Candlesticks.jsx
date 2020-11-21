@@ -18,6 +18,7 @@ class Candlesticks extends Component
         const size = this.props.getSegmentSize(0);
         
         const current_timestamp = this.props.getCurrentTimestamp();
+        const period_offset = this.props.getPeriodOffsetSeconds(this.props.getPeriod());
         const ohlc = this.props.getBids();
         const timestamps = this.props.getTimestamps();
         const info = this.props.getWindowInfo();
@@ -48,7 +49,7 @@ class Candlesticks extends Component
             
             // Colors
             let opacity;
-            if (current_timestamp !== null && timestamps[i] > current_timestamp)
+            if (current_timestamp !== null && timestamps[i] + period_offset > current_timestamp)
             {
                 opacity = 0.2;
             }

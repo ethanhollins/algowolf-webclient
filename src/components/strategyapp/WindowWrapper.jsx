@@ -22,7 +22,7 @@ class WindowWrapper extends Component
             is_move: false,
             is_resize: false,
             keys: [],
-            before_change: null
+            before_change: 60
         }
 
         this.setWindowBtnsRef = elem => {
@@ -109,6 +109,7 @@ class WindowWrapper extends Component
     {
         if (this.state.info.type === 'chart')
         {
+            // console.log(this.props);
             return (<Chart
                 ref={this.setInnerElementRef}
                 strategy_id={this.props.strategy_id}
@@ -152,6 +153,7 @@ class WindowWrapper extends Component
                 isTopWindow={this.props.isTopWindow}
                 getTopWindow={this.props.getTopWindow}
                 setPopup={this.props.setPopup}
+                setSelectedOffset={this.props.setSelectedOffset}
             />)
         }
         else if (this.state.info.type === 'log')

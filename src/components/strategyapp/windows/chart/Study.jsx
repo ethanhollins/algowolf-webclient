@@ -216,6 +216,7 @@ class Study extends Component
 
         const size = this.props.getSegmentSize(this.getWindowIndex());
         const current_timestamp = this.props.getCurrentTimestamp();
+        const period_offset = this.props.getPeriodOffsetSeconds(this.props.getPeriod());
         const timestamps = this.props.getTimestamps();
         const ohlc = this.props.getOhlcValues();
         const values = this.props.getValues(this.props.index);
@@ -276,7 +277,7 @@ class Study extends Component
                         }
                         result[i][x][y] = i_val;
 
-                        if (!is_future && current_timestamp !== null && timestamps[x] > current_timestamp)
+                        if (!is_future && current_timestamp !== null && timestamps[x] + period_offset > current_timestamp)
                         {
                             is_future = true;
                             ctx.stroke();

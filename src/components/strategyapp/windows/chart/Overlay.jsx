@@ -19,6 +19,7 @@ class Overlay extends Component
         const size = this.props.getSegmentSize(0);
         
         const current_timestamp = this.props.getCurrentTimestamp();
+        const period_offset = this.props.getPeriodOffsetSeconds(this.props.getPeriod());
         const timestamps = this.props.getTimestamps();
         const ohlc = this.props.getOhlcValues();
         const values = this.props.getValues(this.props.index);
@@ -68,7 +69,7 @@ class Overlay extends Component
                         let i_val = values[i][c_x][y];
                         if (i_val === null || ohlc === undefined || ohlc[x][0] === null) continue;
     
-                        if (!is_future && current_timestamp !== null && timestamps[x] > current_timestamp)
+                        if (!is_future && current_timestamp !== null && timestamps[x] + period_offset > current_timestamp)
                         {
                             is_future = true;
                             ctx.stroke();
