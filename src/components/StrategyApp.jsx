@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
 import Camera from './strategyapp/Camera';
 import Indicator from './strategyapp/Indicator';
 import io from 'socket.io-client';
@@ -12,7 +13,6 @@ import Backtest from './strategyapp/Backtest';
 import BacktestToolbar from './strategyapp/BacktestToolbar';
 import Popup from './strategyapp/Popup';
 import { ReactSVG } from 'react-svg';
-import { v4 as uuidv4 } from 'uuid';
 
 class StrategyApp extends Component
 {
@@ -409,6 +409,7 @@ class StrategyApp extends Component
             {
                 return <StrategyToolbar 
                     ref={this.setToolbarRef}
+                    history={this.props.history}
                     getCurrentStrategy={this.getCurrentStrategy}
                     updateStrategyInfo={this.updateStrategyInfo}
                     getStrategyComponent={this.getStrategyComponent}
@@ -2050,4 +2051,4 @@ class StrategyApp extends Component
 const SPACEBAR = 32;
 const WAIT_FOR_SAVE = 5;
 
-export default StrategyApp;
+export default withRouter(StrategyApp);

@@ -1196,36 +1196,39 @@ class Chart extends Component
         if (top_window_id !== null)
         {
             const top_window = this.props.getWindowById(top_window_id);
-            const top_chart = top_window.getInnerElement();
-    
-            if (
-                top_chart !== undefined && 
-                top_chart !== null && 
-                top_window.getElementType()  === 'chart' && 
-                top_chart.getChart() !== undefined
-            )
+            if (top_window !== undefined)
             {
-                const top_pos = top_chart.state.pos;
-                const top_scale = top_chart.state.scale;
-                const top_seg_idx = top_chart.getSegment(mouse_pos);
-                const top_seg_size = top_chart.getSegmentSize(top_seg_idx);
-                const top_seg_start = top_chart.getChartSegmentStartPos(top_seg_idx);
-                const top_window_seg_start = top_chart.getWindowSegmentStartPos(0);
-                const top_screen_pos = top_chart.getScreenPos();
-                const camera = top_chart.getCamera();
-
-                const mouse_world_pos = camera.convertScreenPosToWorldPos(
-                    { 
-                        x: mouse_pos.x - top_screen_pos.x, 
-                        y: mouse_pos.y - top_seg_start.y - top_window_seg_start.y - this.props.getTopOffset() 
-                    }, top_pos, top_seg_size, top_scale
-                );
-
-                const timestamp = top_chart.getTimestampByPos(Math.floor(mouse_world_pos.x));
-                const timestamp_idx = this.getAllTimestampsIdx(timestamp);
-                x_pos = this.getTimestamps().length - timestamp_idx;
-                x_pos = Math.max(x_pos, 1);
-                my_timestamp = this.getAllTimestamps()[timestamp_idx];
+                const top_chart = top_window.getInnerElement();
+        
+                if (
+                    top_chart !== undefined && 
+                    top_chart !== null && 
+                    top_window.getElementType()  === 'chart' && 
+                    top_chart.getChart() !== undefined
+                )
+                {
+                    const top_pos = top_chart.state.pos;
+                    const top_scale = top_chart.state.scale;
+                    const top_seg_idx = top_chart.getSegment(mouse_pos);
+                    const top_seg_size = top_chart.getSegmentSize(top_seg_idx);
+                    const top_seg_start = top_chart.getChartSegmentStartPos(top_seg_idx);
+                    const top_window_seg_start = top_chart.getWindowSegmentStartPos(0);
+                    const top_screen_pos = top_chart.getScreenPos();
+                    const camera = top_chart.getCamera();
+    
+                    const mouse_world_pos = camera.convertScreenPosToWorldPos(
+                        { 
+                            x: mouse_pos.x - top_screen_pos.x, 
+                            y: mouse_pos.y - top_seg_start.y - top_window_seg_start.y - this.props.getTopOffset() 
+                        }, top_pos, top_seg_size, top_scale
+                    );
+    
+                    const timestamp = top_chart.getTimestampByPos(Math.floor(mouse_world_pos.x));
+                    const timestamp_idx = this.getAllTimestampsIdx(timestamp);
+                    x_pos = this.getTimestamps().length - timestamp_idx;
+                    x_pos = Math.max(x_pos, 1);
+                    my_timestamp = this.getAllTimestamps()[timestamp_idx];
+                }
             }
         }
 
@@ -2141,147 +2144,150 @@ class Chart extends Component
         if (top_window_id !== null)
         {
             const top_window = this.props.getWindowById(top_window_id);
-            const top_chart = top_window.getInnerElement();
-    
-            if (
-                top_chart !== undefined && 
-                top_chart !== null && 
-                top_window.getElementType()  === 'chart' && 
-                top_chart.getChart() !== undefined
-            )
+            if (top_window !== undefined)
             {
-                const top_chart_size = top_chart.getChartSize();
-                const top_seg_idx = top_chart.getSegment(mouse_pos);
-                const top_seg_size = top_chart.getSegmentSize(top_seg_idx);
-                const top_seg_start = top_chart.getChartSegmentStartPos(top_seg_idx);
-                const top_window_seg_start = top_chart.getWindowSegmentStartPos(0);
-                const top_screen_pos = top_chart.getScreenPos();
-                const camera = top_chart.getCamera();
-
-                const chart_size = this.getChartSize();
-                const seg_size = this.getSegmentSize(top_seg_idx);
+                const top_chart = top_window.getInnerElement();
         
-                if (mouse_pos.y > top_offset + top_chart_size.height) return;
-
-                let top_pos, top_scale, pos, scale = undefined;
-                if (top_seg_idx > 0)
+                if (
+                    top_chart !== undefined && 
+                    top_chart !== null && 
+                    top_window.getElementType()  === 'chart' && 
+                    top_chart.getChart() !== undefined
+                )
                 {
-                    const top_study = top_chart.getStudyComponents()[top_seg_idx-1];
-                    if (top_study === undefined) return;
-
-                    top_pos = { x: top_chart.state.pos.x, y: top_study.getPos().y};
-                    top_scale = { x: top_chart.state.scale.x, y: top_study.getScale().y};
-
-                    const study = this.getStudyComponents()[top_seg_idx-1];
-                    pos = { x: this.state.pos.x, y: study.getPos().y};
-                    scale = { x: this.state.scale.x, y: study.getScale().y};
-                }
-                else
-                {
-                    top_pos = top_chart.state.pos;
-                    top_scale = top_chart.state.scale;
-
-                    pos = this.state.pos;
-                    scale = this.state.scale;
-                }
+                    const top_chart_size = top_chart.getChartSize();
+                    const top_seg_idx = top_chart.getSegment(mouse_pos);
+                    const top_seg_size = top_chart.getSegmentSize(top_seg_idx);
+                    const top_seg_start = top_chart.getChartSegmentStartPos(top_seg_idx);
+                    const top_window_seg_start = top_chart.getWindowSegmentStartPos(0);
+                    const top_screen_pos = top_chart.getScreenPos();
+                    const camera = top_chart.getCamera();
     
-                // const left_offset = screen_pos.x;
-                const mouse_world_pos = camera.convertScreenPosToWorldPos(
-                    { 
-                        x: mouse_pos.x - top_screen_pos.x, 
-                        y: mouse_pos.y - top_seg_start.y - top_window_seg_start.y - this.props.getTopOffset() 
-                    }, top_pos, top_seg_size, top_scale
-                );
-
-                const timestamp = top_chart.getTimestampByPos(Math.floor(mouse_world_pos.x))
-                const timestamp_idx = this.getAllTimestampsIdx(timestamp);
-                const my_timestamp = this.getAllTimestamps()[timestamp_idx];
-                const snap_x = camera.convertWorldPosToScreenPos(
-                    { x: this.getTimestamps().length - timestamp_idx + 0.5, y: 0},
-                    pos, seg_size, scale
-                ).x;
-                
-                // Font settings
-                const font_size = 10;
-                ctx.font = String(font_size) + 'pt trebuchet ms'; //Consolas
-                ctx.textAlign = 'right';
-                
-                const line_width = 5;
-                const line_space = 4;
-
-                // Handle Time Line
-                ctx.fillStyle = '#787878';
+                    const chart_size = this.getChartSize();
+                    const seg_size = this.getSegmentSize(top_seg_idx);
+            
+                    if (mouse_pos.y > top_offset + top_chart_size.height) return;
     
-                let c_y = 0;
-                while (c_y < chart_size.height + this.getBottomOff())
-                {
-                    ctx.fillRect(Math.round(snap_x), c_y, 1, line_width);
-                    c_y += line_width + line_space;
-                }
-
-                // Box Settings
-                ctx.fillStyle = 'rgb(80,80,80)';
-        
-                const tz = 'Australia/Melbourne';
-                const time = moment.utc(
-                    my_timestamp*1000
-                ).tz(tz).format(top_chart.getCurrentPriceFormat());
-                const box_height = Math.round(3/4 * (font_size) + 12);
-                let text_size = ctx.measureText(time);
-                let box_width = Math.round((text_size.width + 12)/2)*2+1;
-    
-                // Font settings
-                ctx.textAlign = 'left';
-    
-                ctx.fillRect(
-                    Math.round(snap_x - box_width/2),
-                    Math.round(chart_size.height - box_height + this.getBottomOff()), 
-                    box_width,
-                    box_height
-                );
-    
-                ctx.fillStyle = 'rgb(255, 255, 255)';
-                ctx.fillText(
-                    time, 
-                    Math.round(snap_x - text_size.width/2), 
-                    Math.round(
-                        chart_size.height - box_height/2 + (3/4 * (font_size/2)) + this.getBottomOff()
-                    )
-                );
-
-                // Handle Price Line
-                if (top_window_id === this.getItemId())
-                {
-                    ctx.fillStyle = '#787878';
-    
-                    let c_x = 0;
-                    while (c_x < chart_size.width)
+                    let top_pos, top_scale, pos, scale = undefined;
+                    if (top_seg_idx > 0)
                     {
-                        ctx.fillRect(c_x, Math.round(mouse_pos.y - top_offset), line_width, 1);
-                        c_x += line_width + line_space;
+                        const top_study = top_chart.getStudyComponents()[top_seg_idx-1];
+                        if (top_study === undefined) return;
+    
+                        top_pos = { x: top_chart.state.pos.x, y: top_study.getPos().y};
+                        top_scale = { x: top_chart.state.scale.x, y: top_study.getScale().y};
+    
+                        const study = this.getStudyComponents()[top_seg_idx-1];
+                        pos = { x: this.state.pos.x, y: study.getPos().y};
+                        scale = { x: this.state.scale.x, y: study.getScale().y};
                     }
-
+                    else
+                    {
+                        top_pos = top_chart.state.pos;
+                        top_scale = top_chart.state.scale;
+    
+                        pos = this.state.pos;
+                        scale = this.state.scale;
+                    }
+        
+                    // const left_offset = screen_pos.x;
+                    const mouse_world_pos = camera.convertScreenPosToWorldPos(
+                        { 
+                            x: mouse_pos.x - top_screen_pos.x, 
+                            y: mouse_pos.y - top_seg_start.y - top_window_seg_start.y - this.props.getTopOffset() 
+                        }, top_pos, top_seg_size, top_scale
+                    );
+    
+                    const timestamp = top_chart.getTimestampByPos(Math.floor(mouse_world_pos.x))
+                    const timestamp_idx = this.getAllTimestampsIdx(timestamp);
+                    const my_timestamp = this.getAllTimestamps()[timestamp_idx];
+                    const snap_x = camera.convertWorldPosToScreenPos(
+                        { x: this.getTimestamps().length - timestamp_idx + 0.5, y: 0},
+                        pos, seg_size, scale
+                    ).x;
+                    
+                    // Font settings
+                    const font_size = 10;
+                    ctx.font = String(font_size) + 'pt trebuchet ms'; //Consolas
+                    ctx.textAlign = 'right';
+                    
+                    const line_width = 5;
+                    const line_space = 4;
+    
+                    // Handle Time Line
+                    ctx.fillStyle = '#787878';
+        
+                    let c_y = 0;
+                    while (c_y < chart_size.height + this.getBottomOff())
+                    {
+                        ctx.fillRect(Math.round(snap_x), c_y, 1, line_width);
+                        c_y += line_width + line_space;
+                    }
+    
                     // Box Settings
                     ctx.fillStyle = 'rgb(80,80,80)';
-                    
-                    // Draw Prices Box
-                    text_size = ctx.measureText(String(mouse_world_pos.y.toFixed(5)));
-                    box_width = Math.round((text_size.width + 12)/2)*2+1;
-                    ctx.textAlign = 'right';
+            
+                    const tz = 'Australia/Melbourne';
+                    const time = moment.utc(
+                        my_timestamp*1000
+                    ).tz(tz).format(top_chart.getCurrentPriceFormat());
+                    const box_height = Math.round(3/4 * (font_size) + 12);
+                    let text_size = ctx.measureText(time);
+                    let box_width = Math.round((text_size.width + 12)/2)*2+1;
+        
+                    // Font settings
+                    ctx.textAlign = 'left';
+        
                     ctx.fillRect(
-                        Math.round(chart_size.width - box_width), 
-                        Math.round(mouse_pos.y - top_offset - box_height/2),
+                        Math.round(snap_x - box_width/2),
+                        Math.round(chart_size.height - box_height + this.getBottomOff()), 
                         box_width,
                         box_height
                     );
-            
+        
                     ctx.fillStyle = 'rgb(255, 255, 255)';
-            
                     ctx.fillText(
-                        mouse_world_pos.y.toFixed(5), 
-                        top_chart_size.width - 7, 
-                        Math.round(mouse_pos.y - top_offset + (3/4 * (font_size/2)))
+                        time, 
+                        Math.round(snap_x - text_size.width/2), 
+                        Math.round(
+                            chart_size.height - box_height/2 + (3/4 * (font_size/2)) + this.getBottomOff()
+                        )
                     );
+    
+                    // Handle Price Line
+                    if (top_window_id === this.getItemId())
+                    {
+                        ctx.fillStyle = '#787878';
+        
+                        let c_x = 0;
+                        while (c_x < chart_size.width)
+                        {
+                            ctx.fillRect(c_x, Math.round(mouse_pos.y - top_offset), line_width, 1);
+                            c_x += line_width + line_space;
+                        }
+    
+                        // Box Settings
+                        ctx.fillStyle = 'rgb(80,80,80)';
+                        
+                        // Draw Prices Box
+                        text_size = ctx.measureText(String(mouse_world_pos.y.toFixed(5)));
+                        box_width = Math.round((text_size.width + 12)/2)*2+1;
+                        ctx.textAlign = 'right';
+                        ctx.fillRect(
+                            Math.round(chart_size.width - box_width), 
+                            Math.round(mouse_pos.y - top_offset - box_height/2),
+                            box_width,
+                            box_height
+                        );
+                
+                        ctx.fillStyle = 'rgb(255, 255, 255)';
+                
+                        ctx.fillText(
+                            mouse_world_pos.y.toFixed(5), 
+                            top_chart_size.width - 7, 
+                            Math.round(mouse_pos.y - top_offset + (3/4 * (font_size/2)))
+                        );
+                    }
                 }
             }
         }

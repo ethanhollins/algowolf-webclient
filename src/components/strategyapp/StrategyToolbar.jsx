@@ -5,11 +5,14 @@ import {
 } from '@fortawesome/pro-solid-svg-icons';
 import { 
     faBars,  faChartLine, faChartPie, faPlay, faStop,
-    faLightbulb, faCode, faHistory, faChevronRight, faChevronDown, faTools, faExpandArrowsAlt, faLink, faExpandAlt, faToolbox
+    faLightbulb, faCode, faHistory, faChevronRight, faChevronDown, 
+    faTools, faExpandArrowsAlt, faLink, faExpandAlt, faToolbox,
+     faUser as faUserRegular
 } from '@fortawesome/pro-regular-svg-icons';
 import { 
     faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
     faFileInvoice, faChartBar, faTicketAlt, faLayerGroup, faUser,
+    faSignOut, faHandshakeAlt, faChessPawn,
 } from '@fortawesome/pro-light-svg-icons';
 
 class StrategyToolbar extends Component
@@ -18,6 +21,12 @@ class StrategyToolbar extends Component
     {
         super(props);
 
+        this.setMenuElem = elem => {
+            this.menuElem = elem;
+        }
+        this.setMenuDropdown = elem => {
+            this.menuDropdown = elem;
+        }
         this.setAccountsElem = elem => {
             this.accountsElem = elem;
         }
@@ -74,8 +83,34 @@ class StrategyToolbar extends Component
         return (
             <div className='toolbox body noselect' onDragStart={this.onDragStart}>
                 <div>
-                    <div className='toolbox item row'>
-                        <FontAwesomeIcon className='toolbox icon' icon={faBars} />
+                    <div className='toolbox item'>
+                        <div ref={this.setMenuElem} className='toolbox item row btn' onClick={this.onMenuDropdown}>
+                            <FontAwesomeIcon className='toolbox standalone-icon' icon={faBars} />
+                        </div>
+                        <div ref={this.setMenuDropdown} className='toolbox dropdown' style={{display: 'none'}}>
+                            <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='brokers'>
+                                <span className='toolbox left'>
+                                    <FontAwesomeIcon icon={faHandshakeAlt} className='toolbox left-icon' /><span>My Brokers</span>
+                                </span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
+                            </div>
+                            <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='strategies'>
+                                <span className='toolbox left'>
+                                    <FontAwesomeIcon icon={faChessPawn} className='toolbox left-icon' /><span>My Strategies</span>
+                                </span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
+                            </div>
+                            <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='account'>
+                                <span className='toolbox left'>
+                                    <FontAwesomeIcon icon={faUser} className='toolbox left-icon' /><span>Account Settings</span>
+                                </span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
+                            </div>
+                            <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='logout'>
+                                <span className='toolbox left'>Logout</span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faSignOut} className='toolbox right-icon' /></span>
+                            </div>
+                        </div>
                     </div>
                     <div ref={this.setAccountsElem} className='toolbox item row'>
                         <FontAwesomeIcon className='toolbox icon small black' icon={faUser} />
@@ -94,27 +129,27 @@ class StrategyToolbar extends Component
                             <span className='toolbox label'>Charts</span>
                         </div>
                         <div ref={this.setChartsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
-                            <div onClick={this.onChartsDropdownItem} name='cryptocurrencies'>
+                            <div className='dropdown-item' onClick={this.onChartsDropdownItem} name='cryptocurrencies'>
                                 <span className='toolbox left'>Cryptocurrencies</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onChartsDropdownItem} name='currencies'>
+                            <div className='dropdown-item' onClick={this.onChartsDropdownItem} name='currencies'>
                                 <span className='toolbox left'>Currencies</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onChartsDropdownItem} name='stocks'>
+                            <div className='dropdown-item' onClick={this.onChartsDropdownItem} name='stocks'>
                                 <span className='toolbox left'>Stocks</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onChartsDropdownItem} name='indicies'>
+                            <div className='dropdown-item' onClick={this.onChartsDropdownItem} name='indicies'>
                                 <span className='toolbox left'>Indicies</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onChartsDropdownItem} name='futures'>
+                            <div className='dropdown-item' onClick={this.onChartsDropdownItem} name='futures'>
                                 <span className='toolbox left'>Futures</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onChartsDropdownItem} name='bonds'>
+                            <div className='dropdown-item' onClick={this.onChartsDropdownItem} name='bonds'>
                                 <span className='toolbox left'>Bonds</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
@@ -126,13 +161,13 @@ class StrategyToolbar extends Component
                             <span className='toolbox label'>Stats</span>
                         </div>
                         <div ref={this.setStatsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
-                            <div onClick={this.onStatsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onStatsDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faChartBar} className='toolbox left-icon' /><span>Graphs</span>
                                 </span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onStatsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onStatsDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faFileInvoice} className='toolbox left-icon' /><span>Reports</span>
                                 </span>
@@ -146,37 +181,37 @@ class StrategyToolbar extends Component
                             <span className='toolbox label'>Utilities</span>
                         </div>
                         <div ref={this.setUtilsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
-                            <div onClick={this.onUtilsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onUtilsDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faSort} className='toolbox left-icon' /><span>Positions/Orders</span>
                                 </span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onUtilsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onUtilsDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faTicketAlt} className='toolbox left-icon' /><span>Ticket</span>
                                 </span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onUtilsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onUtilsDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faReceipt} className='toolbox left-icon' /><span>Transactions</span>
                                 </span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onUtilsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onUtilsDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faSlidersVSquare} className='toolbox left-icon' /><span>Control Center</span>
                                 </span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onUtilsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onUtilsDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faLayerGroup} className='toolbox left-icon' /><span>Drawing Layers</span>
                                 </span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onUtilsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onUtilsDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faCodeLight} className='toolbox left-icon' /><span>Script Editor</span>
                                 </span>
@@ -190,22 +225,22 @@ class StrategyToolbar extends Component
                             <span className='toolbox label'>Tools</span>
                         </div>
                         <div ref={this.setToolsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
-                            <div onClick={this.onToolsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onToolsDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faExpandArrowsAlt} className='toolbox left-icon' /><span>Move</span>
                                 </span>
                             </div>
-                            <div onClick={this.onToolsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onToolsDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faLink} className='toolbox left-icon' /><span>Link</span>
                                 </span>
                             </div>
-                            <div onClick={this.onToolsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onToolsDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faExpandAlt} className='toolbox left-icon' /><span>Resize</span>
                                 </span>
                             </div>
-                            <div onClick={this.onToolsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onToolsDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faToolbox} className='toolbox left-icon' /><span>Toolbox</span>
                                 </span>
@@ -392,6 +427,20 @@ class StrategyToolbar extends Component
         }
     }
 
+    onMenuDropdown = (e) =>
+    {
+        if (this.menuDropdown.style.display === 'none')
+        {
+            this.menuDropdown.style.display = 'block';
+            const btn_rect = this.menuElem.getBoundingClientRect();
+            this.menuDropdown.style.left = parseInt(btn_rect.x) + 'px';
+        }
+        else
+        {
+            this.menuDropdown.style.display = 'none';
+        }
+    }
+
     onAccountsDropdown = (e) =>
     {
         if (this.accountsDropdown.style.display === 'none')
@@ -476,6 +525,39 @@ class StrategyToolbar extends Component
         }
     }
 
+    onMenuDropdownItem = (e) =>
+    {
+        this.menuDropdown.style.display = 'none';
+
+        const name = e.target.getAttribute('name');
+
+        if (name === 'brokers')
+        {
+            const popup = {
+                type: 'chart-settings',
+                size: {
+                    width: 60,
+                    height: 75
+                },
+                opened: 'general'
+            }
+            this.props.setPopup(popup);
+        }
+        else if (name === 'strategies')
+        {
+
+        }
+        else if (name === 'account')
+        {
+            
+        }
+        else if (name === 'logout')
+        {
+            this.props.history.push('/logout');
+        }
+        
+    }
+
     onAccountsDropdownItem = (e) =>
     {
         this.accountsDropdown.style.display = 'none';
@@ -529,6 +611,11 @@ class StrategyToolbar extends Component
 
     closeTemporaryWindows(mouse_pos)
     {
+        if (this.menuDropdown.style.display !== 'none')
+        {
+            if (!this.props.isWithinBounds(this.menuDropdown.getBoundingClientRect(), mouse_pos))
+                this.menuDropdown.style.display = 'none';
+        }
         if (this.accountsDropdown.style.display !== 'none')
         {
             if (!this.props.isWithinBounds(this.accountsDropdown.getBoundingClientRect(), mouse_pos))

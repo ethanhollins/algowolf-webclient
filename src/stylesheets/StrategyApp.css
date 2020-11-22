@@ -223,6 +223,10 @@
     margin-right: 5px;
 }
 
+.toolbox.standalone-icon {
+    height: 18px;
+}
+
 .toolbox.icon.small {
     height: 16px;
     margin-right: 8px;
@@ -245,10 +249,10 @@
     cursor: context-menu;
     top: 30px;
     border: 1px solid rgb(220,220,220);
-    border-radius: 2px;
+    border-radius: 5px;
     background-color: #FFF;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    box-shadow: 1px 1px 2px rgb(220,220,220);
+    box-shadow: 0px 1px 4px rgb(220,220,220);
     z-index: 31;
 }
 
@@ -313,6 +317,13 @@
     height: 15px;
     transform: translateX(0px);
     transition: transform 0.2s ease-out;
+}
+
+.toolbox.right-icon.large {
+    width: 20px;
+    height: 20px;
+    margin-left: 30px;
+    color: rgb(120,120,120);
 }
 
 .toolbox.dropdown > div:hover .toolbox.right-icon {
@@ -539,7 +550,7 @@
 }
 
 .popup.header {
-    width: 100%;
+    width: calc(100% - 30px);
     padding: 20px 0px 20px 30px;
     font-size: 1.5em;
     font-weight: 600;
@@ -1143,7 +1154,8 @@
     position: absolute;
     width: 200px;
     background-color: #FFF;
-    border-radius: 2px;
+    border-radius: 5px;
+    border: 1px solid rgb(220,220,220);
     box-shadow: 0px 1px 4px rgb(220,220,220);
     overflow: hidden;
     color: rgb(80,80,80);
