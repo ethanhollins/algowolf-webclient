@@ -440,7 +440,7 @@ class tr extends Indicator
             return [null]
 
         let tr_sum = 0;
-        for (let j = this.period-1; j >= 0; j--)
+        for (let j = 0; j < this.period; j++)
         {
             const prev_close = ohlc[i-j-1][3];
             const high = ohlc[i-j][1];
