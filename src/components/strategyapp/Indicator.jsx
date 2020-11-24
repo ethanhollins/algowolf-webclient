@@ -411,7 +411,62 @@ class atr extends Indicator
     }
 }
 
+// Modified Average True Range
+class tr extends Indicator
+{
+    constructor(broker, product, chart_period, properties)
+    {
+        super();
+
+        this.type = 'tr';
+        this.broker = broker;
+        this.product = product;
+        this.chart_period = chart_period;
+        this.properties = properties;
+        this.period = properties.periods[0];
+        this.min_bars = this.period+1;
+
+        this.display_name = `ATR ${this.period}`;
+
+        this.cache_ts = [];
+        this.cache_asks = [];
+        this.cache_bids = [];
+    }
+
+    get_value(i, ohlc, values)
+    {
+        // Validation Check
+        if (i < this.min_bars || ohlc[i].every((x) => x === null))
+            return [null]
+
+        let tr_sum = 0;
+        for (let j = this.period-1; j >= 0; j--)
+        {
+            const prev_close = ohlc[i-j-1][3];
+            const high = ohlc[i-j][1];
+            const low = ohlc[i-j][2];
+
+            if (prev_close > high)
+            {
+                tr_sum += prev_close - low;
+            }
+            else if (prev_close < low)
+            {
+                tr_sum += high - prev_close
+            }
+            else
+            {
+                tr_sum += high - low
+            }
+        }
+
+        atr = tr_sum / this.period;
+
+        return [atr];
+    }
+}
+
 
 export default {
-    boll, donch, ema, mae, sma, atr
+    boll, donch, ema, mae, sma, atr, tr
 };
