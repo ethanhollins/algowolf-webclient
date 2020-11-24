@@ -724,18 +724,21 @@ class Chart extends Component
 
         const name = e.target.getAttribute('name');
         
-        // const popup = {
-        //     type: 'chart-settings',
-        //     size: {
-        //         width: 60,
-        //         height: 75
-        //     },
-        //     opened: undefined,
-        //     properties: {
-        //         item_id: this.getItemId()
-        //     }
-        // }
-        // this.props.setPopup(popup);
+        if (name === 'settings')
+        {
+            const popup = {
+                type: 'chart-settings',
+                size: {
+                    width: 60,
+                    height: 75
+                },
+                opened: undefined,
+                properties: {
+                    item_id: this.getItemId()
+                }
+            }
+            this.props.setPopup(popup);
+        }
     }
 
     clampScale = (x) =>
@@ -2147,7 +2150,10 @@ class Chart extends Component
             if (top_window !== undefined)
             {
                 const top_chart = top_window.getInnerElement();
-        
+                
+                // console.log(top_chart);
+                // console.log(top_window.getElementType());
+
                 if (
                     top_chart !== undefined && 
                     top_chart !== null && 

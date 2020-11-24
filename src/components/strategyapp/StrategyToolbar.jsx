@@ -6,13 +6,12 @@ import {
 import { 
     faBars,  faChartLine, faChartPie, faPlay, faStop,
     faLightbulb, faCode, faHistory, faChevronRight, faChevronDown, 
-    faTools, faExpandArrowsAlt, faLink, faExpandAlt, faToolbox,
-     faUser as faUserRegular
+    faTools, faExpandArrowsAlt, faLink, faExpandAlt, faToolbox
 } from '@fortawesome/pro-regular-svg-icons';
 import { 
     faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
     faFileInvoice, faChartBar, faTicketAlt, faLayerGroup, faUser,
-    faSignOut, faHandshakeAlt, faChessPawn,
+    faSignOut, faHandshakeAlt, faChessPawn
 } from '@fortawesome/pro-light-svg-icons';
 
 class StrategyToolbar extends Component
@@ -89,23 +88,18 @@ class StrategyToolbar extends Component
                         </div>
                         <div ref={this.setMenuDropdown} className='toolbox dropdown' style={{display: 'none'}}>
                             <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='brokers'>
-                                <span className='toolbox left'>
-                                    <FontAwesomeIcon icon={faHandshakeAlt} className='toolbox left-icon' /><span>My Brokers</span>
-                                </span>
+                                <span className='toolbox left'>My Brokers</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
                             <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='strategies'>
-                                <span className='toolbox left'>
-                                    <FontAwesomeIcon icon={faChessPawn} className='toolbox left-icon' /><span>My Strategies</span>
-                                </span>
+                                <span className='toolbox left'>My Strategies</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
                             <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='account'>
-                                <span className='toolbox left'>
-                                    <FontAwesomeIcon icon={faUser} className='toolbox left-icon' /><span>Account Settings</span>
-                                </span>
+                                <span className='toolbox left'>Account Settings</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
+                            <div className='dropdown-separator'></div>
                             <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='logout'>
                                 <span className='toolbox left'>Logout</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faSignOut} className='toolbox right-icon' /></span>
@@ -534,22 +528,35 @@ class StrategyToolbar extends Component
         if (name === 'brokers')
         {
             const popup = {
-                type: 'chart-settings',
+                type: 'broker-settings',
                 size: {
                     width: 60,
                     height: 75
-                },
-                opened: 'general'
+                }
             }
             this.props.setPopup(popup);
         }
         else if (name === 'strategies')
         {
-
+            const popup = {
+                type: 'strategy-settings',
+                size: {
+                    width: 60,
+                    height: 75
+                }
+            }
+            this.props.setPopup(popup);
         }
         else if (name === 'account')
         {
-            
+            const popup = {
+                type: 'account-settings',
+                size: {
+                    width: 60,
+                    height: 75
+                }
+            }
+            this.props.setPopup(popup);
         }
         else if (name === 'logout')
         {

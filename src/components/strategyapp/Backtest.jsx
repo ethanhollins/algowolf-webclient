@@ -252,6 +252,18 @@ class Backtest extends Component
         positions.push(trans.item.new);
     }
 
+    handleCreatePositionFromOrder = (positions, orders, trans) =>
+    {
+        for (let i = 0; i < orders.length; i++)
+        {
+            if (orders[i].order_id === trans.item.prev.order_id)
+            {
+                orders.splice(i, 1);
+            }
+        }
+        positions.push(trans.item.new);
+    }
+
     handleClosePosition = (positions, trans) =>
     {
         for (let i = 0; i < positions.length; i++)
@@ -369,9 +381,11 @@ class Backtest extends Component
                 switch (t.type)
                 {
                     case 'marketentry':
+                        this.handleCreatePosition(positions, t);
+                        break;
                     case 'limitentry':
                     case 'stopentry':
-                        this.handleCreatePosition(positions, t);
+                        this.handleCreatePositionFromOrder(positions, orders, t);
                         break;
                     case 'limitorder':
                     case 'stoporder':

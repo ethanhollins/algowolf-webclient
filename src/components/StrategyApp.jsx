@@ -58,6 +58,7 @@ class StrategyApp extends Component
         this.updateInfo = this.updateInfo.bind(this);
         this.loadChart = this.loadChart.bind(this);
         this.connectChart = this.connectChart.bind(this);
+        this.retrieveAllBrokers = this.retrieveAllBrokers.bind(this);
         this.retrieveStrategies = this.retrieveStrategies.bind(this);
         this.retrieveAccountInfo = this.retrieveAccountInfo.bind(this);
         this.retrieveTransactions = this.retrieveTransactions.bind(this);
@@ -183,8 +184,10 @@ class StrategyApp extends Component
                         setPopup={this.setPopup}
                         setPopupOpened={this.setPopupOpened}
                         getSize={this.getSize}
+                        retrieveAllBrokers={this.retrieveAllBrokers}
                         getStrategyId={this.getStrategyId}
                         getStrategyInfo={this.getStrategyInfo}
+                        getAllStrategyInfo={this.getAllStrategyInfo}
                         updateStrategyInfo={this.updateStrategyInfo}
                         setHovered={this.setHovered}
                     />
@@ -408,6 +411,7 @@ class StrategyApp extends Component
             else
             {
                 return <StrategyToolbar 
+                    key={current_strategy}
                     ref={this.setToolbarRef}
                     history={this.props.history}
                     getCurrentStrategy={this.getCurrentStrategy}
@@ -648,6 +652,21 @@ class StrategyApp extends Component
 
         this.setState({ account });
         return account;
+    }
+
+    async retrieveAllBrokers()
+    {
+        const { REACT_APP_API_URL } = process.env;
+        const reqOptions = {
+            method: 'GET',
+            headers: this.props.getHeaders(),
+            credentials: 'include'
+        }
+
+        return await fetch(
+            `${REACT_APP_API_URL}/broker`,
+            reqOptions
+        ).then(res => res.json())
     }
 
     async retrieveStrategies(strategy_ids)
@@ -1431,6 +1450,11 @@ class StrategyApp extends Component
         return strategyInfo[strategy_id];
     }
 
+    getAllStrategyInfo = () =>
+    {
+        return this.state.strategyInfo;
+    }
+
     getStrategyAccountStatus = (strategy_id, account_id) =>
     {
         const { strategyInfo } = this.state;
@@ -1488,7 +1512,7 @@ class StrategyApp extends Component
         {
             for (let i of this.strategy.windows)
             {
-                if (i.getItemId() === item_id)
+                if (i !== null && i.getItemId() === item_id)
                 {
                     return i;
                 }

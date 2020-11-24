@@ -8,7 +8,7 @@ import {
 } from '@fortawesome/pro-light-svg-icons';
 import ColorSwatch from './ColorSwatch';
 
-class Popup extends Component
+class ChartSettings extends Component
 {
 
     componentDidMount()
@@ -309,4 +309,4 @@ class Popup extends Component
     }
 }
 
-export default Popup;
+export default ChartSettings;

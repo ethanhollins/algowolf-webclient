@@ -134,6 +134,7 @@ class Strategy extends Component
                             ref={this.addWindowsRef}
                             info={w}
                             strategy_id={this.props.id}
+                            removeWindowsRef={this.removeWindowsRef}
                             clone={this.props.clone}
                             getAppContainer={this.props.getAppContainer}
                             convertScreenUnitToWorldUnit={this.props.convertScreenUnitToWorldUnit}
@@ -843,6 +844,11 @@ class Strategy extends Component
     isLoaded = () =>
     {
         return this.state.loaded.includes(this.getCurrentAccount());
+    }
+
+    removeWindowsRef = (elem) =>
+    {
+        this.windows.splice(this.windows.indexOf(elem), 1);
     }
 
 }

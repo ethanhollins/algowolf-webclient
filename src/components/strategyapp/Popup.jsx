@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 import ChartSettings from './popups/ChartSettings';
+import BrokerSettings from './popups/BrokerSettings';
+import StrategySettings from './popups/StrategySettings';
+import AccountSettings from './popups/AccountSettings';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faChevronRight, faPlus
@@ -45,10 +48,12 @@ class Popup extends Component
                 ref={this.setPopupBody} className='popup body' 
                 onMouseEnter={this.setMainHoverOn} onMouseLeave={this.setMainHoverOff}
             >
+
                 {this.generatePopup()}
                 <div className='popup close'>
                     <FontAwesomeIcon icon={faTimes} className='popup close-icon' onClick={this.close} />
                 </div>
+                
             </div>
         );
     }
@@ -88,17 +93,61 @@ class Popup extends Component
             const popup = this.props.getPopup();
             this.handleBody();
 
-            if (popup.type === 'windows-charts')
+            // if (popup.type === 'windows-charts')
+            // {
+            //     return this.generateWindowsCharts();
+            // }
+            // else if (popup.type === 'windows-stats')
+            // {
+            //     return this.generateWindowsStats();
+            // }
+            // else if (popup.type === 'general-settings')
+            // {
+            //     return this.generateGeneralSettings();
+            // }
+            if (popup.type === 'broker-settings')
             {
-                return this.generateWindowsCharts();
+                return <BrokerSettings 
+                    getPopup={this.props.getPopup}
+                    onChangeCategory={this.onChangeCategory}
+                    changeCategory={this.changeCategory}
+                    getWindowInfo={this.props.getWindowInfo}
+                    retrieveAllBrokers={this.props.retrieveAllBrokers}
+                    getStrategyId={this.props.getStrategyId}
+                    getStrategyInfo={this.props.getStrategyInfo}
+                    updateStrategyInfo={this.props.updateStrategyInfo}
+                    setHoverOn={this.setHoverOn}
+                    setHoverOff={this.setHoverOff}
+                />
             }
-            else if (popup.type === 'windows-stats')
+            else if (popup.type === 'strategy-settings')
             {
-                return this.generateWindowsStats();
+                return <StrategySettings 
+                    getPopup={this.props.getPopup}
+                    onChangeCategory={this.onChangeCategory}
+                    changeCategory={this.changeCategory}
+                    getWindowInfo={this.props.getWindowInfo}
+                    getStrategyId={this.props.getStrategyId}
+                    getStrategyInfo={this.props.getStrategyInfo}
+                    getAllStrategyInfo={this.props.getAllStrategyInfo}
+                    updateStrategyInfo={this.props.updateStrategyInfo}
+                    setHoverOn={this.setHoverOn}
+                    setHoverOff={this.setHoverOff}
+                />
             }
-            else if (popup.type === 'general-settings')
+            else if (popup.type === 'account-settings')
             {
-                return this.generateGeneralSettings();
+                return <AccountSettings 
+                    getPopup={this.props.getPopup}
+                    onChangeCategory={this.onChangeCategory}
+                    changeCategory={this.changeCategory}
+                    getWindowInfo={this.props.getWindowInfo}
+                    getStrategyId={this.props.getStrategyId}
+                    getStrategyInfo={this.props.getStrategyInfo}
+                    updateStrategyInfo={this.props.updateStrategyInfo}
+                    setHoverOn={this.setHoverOn}
+                    setHoverOff={this.setHoverOff}
+                />
             }
             else if (popup.type === 'chart-settings')
             {
@@ -114,14 +163,14 @@ class Popup extends Component
                     setHoverOff={this.setHoverOff}
                 />
             }
-            else if (popup.type === 'chart-indicators')
-            {
-                return this.generateChartIndicators();
-            }
-            else if (popup.type === 'welcome')
-            {
-                return this.generateWelcome();
-            }
+            // else if (popup.type === 'chart-indicators')
+            // {
+            //     return this.generateChartIndicators();
+            // }
+            // else if (popup.type === 'welcome')
+            // {
+            //     return this.generateWelcome();
+            // }
 
         }
         else if (this.getPopupElem() !== undefined)

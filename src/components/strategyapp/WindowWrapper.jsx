@@ -77,6 +77,8 @@ class WindowWrapper extends Component
         window.removeEventListener("resize", this.onResize);
 
         window.removeEventListener("mousemove", this.onMouseMoveThrottled);
+
+        this.props.removeWindowsRef(this);
     }
 
     render() {

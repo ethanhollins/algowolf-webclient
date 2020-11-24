@@ -20,7 +20,12 @@ class ColorSwatch extends React.Component {
         }
         else
         {
-            color = this.hexToRgb(hex);
+            // color = this.hexToRgb(hex);
+            color = {
+                r: hex[0],
+                g: hex[1],
+                b: hex[2]
+            }
         }
         color.a = '1';
 
