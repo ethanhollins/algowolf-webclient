@@ -12,16 +12,20 @@ class BrokerSettings extends Component
 {
 
     state = {
-        mode: 'edit',
+        modes: {},
         brokers: {},
-        change_key: false
+        show: {}
     }
 
     async componentDidMount()
     {
-        let { brokers } = this.state;
+        let { modes, brokers } = this.state;
         brokers = await this.props.retrieveAllBrokers();
-        this.setState({ brokers });
+        for (let broker_id in brokers)
+        {
+            modes[broker_id] = 'edit';
+        }
+        this.setState({ modes, brokers });
 
         const popup = this.props.getPopup();
         if (popup.opened === undefined)
@@ -59,17 +63,26 @@ class BrokerSettings extends Component
 
     onChangeCategory = (e) =>
     {
-        const { mode } = this.state;
-        if (mode !== 'add')
-        {
-            this.setMode('edit');
-            return this.props.onChangeCategory(e);
-        }
+        return this.props.onChangeCategory(e);
+    }
+
+    onConnect(e)
+    {
+        let { brokers } = this.state;
+        const broker_id = this.props.getPopup().opened;
+        
+        // Call Api Connect EPT
+
+        brokers[broker_id].connected = true;
+        brokers[broker_id].accounts = [
+            'ABCD', 'EFGH', 'IJKL'
+        ];
+        this.setState({ brokers });
     }
 
     getBrokers = () =>
     {
-        const { brokers } = this.state;
+        const { modes, brokers } = this.state;
         
         let result = [];
         if (brokers !== undefined)
@@ -77,6 +90,12 @@ class BrokerSettings extends Component
             for (let broker_id in brokers)
             {
                 const broker_info = brokers[broker_id];
+                let broker_name = broker_info.name;
+                if (modes[broker_id] === 'add')
+                {
+                    broker_name += '*';
+                }
+
 
                 if (broker_info.name !== null)
                 {
@@ -84,7 +103,7 @@ class BrokerSettings extends Component
                         <div key={broker_id} className={'popup category-btn' + this.isSelected(broker_id)} onClick={this.onChangeCategory} name={broker_id}>
                             <div className='popup category-left'>
                                 <ReactSVG className='popup category-left-logo' src={`./${broker_info.broker}_logo.svg`} />
-                                <span className='popup category-left-name'>{broker_info.name}</span>
+                                <span className='popup category-left-name'>{broker_name}</span>
                             </div>
                             <div className='popup category-right'><FontAwesomeIcon icon={faChevronRight} className='popup category-icon' /></div>
                         </div>
@@ -97,7 +116,7 @@ class BrokerSettings extends Component
 
     addBroker = () =>
     {
-        let { brokers, mode } = this.state;
+        let { brokers, modes } = this.state;
         let default_name = 'My Broker';
         let count = 0;
         while (default_name in brokers)
@@ -111,113 +130,279 @@ class BrokerSettings extends Component
             is_demo: true,
             name: default_name,
         }
-        mode = 'add';
+        modes[default_name] = 'add';
+
         this.props.changeCategory(default_name);
-        this.setState({ brokers, mode });
+        this.setState({ brokers, modes });
+    }
+
+    getEditMode = (selected) =>
+    {
+        const { brokers } = this.state;
+        const broker_info = brokers[selected];
+
+        return (
+            <React.Fragment key={selected}>
+                
+            <div className='popup row'>
+                <div className='popup input'>
+                    <div className='popup title'>Name</div>
+                    <input 
+                        className='popup text-input'
+                        defaultValue={broker_info.name}
+                        onChange={this.onTextInputChange.bind(this)} 
+                        name='name'
+                    />
+                </div>
+            </div>
+            <div className='popup row'>
+                <div id='popup_demo_selector'>
+                    <div 
+                        id='popup_demo_left' 
+                        className={'disabled ' + this.isItemSelected(false, broker_info.is_demo)}
+                        onClick={this.setIsDemo.bind(this)}
+                        name='live'
+                    >
+                        Live
+                    </div>
+                    <div 
+                        id='popup_demo_right' 
+                        className={'disabled ' + this.isItemSelected(true, broker_info.is_demo)}
+                        onClick={this.setIsDemo.bind(this)}
+                        name='demo'
+                    >
+                        Demo
+                    </div>
+                </div>
+            </div>
+            <div className='popup column'>
+                {/* <div className='popup title underline'>Broker</div> */}
+                <div id='popup_broker_selector'>
+                    <div 
+                        className={'popup broker disabled ' + this.isItemSelected('oanda', broker_info.broker)}
+                        onClick={this.setBroker.bind(this)}
+                        name='oanda'
+                    >
+                        <ReactSVG className='popup broker-logo' src="./oanda_logo.svg" />
+                        <div className='popup broker-text'>Oanda</div>
+                    </div>
+                    <div 
+                        className={'popup broker disabled ' + this.isItemSelected('ig', broker_info.broker)}
+                        onClick={this.setBroker.bind(this)}
+                        name='ig'
+                    >
+                        <ReactSVG className='popup broker-logo' src="./ig_logo.svg" />
+                        <div className='popup broker-text'>IG Markets</div>
+                    </div>
+                </div>
+            </div>
+            <div className='popup row'>
+                <div className='popup input'>
+                    <div className='popup title'>API Key</div>
+                    <div className='popup key'>****************************************</div><div className='popup key-btn'>Change</div>
+                </div>
+            </div>
+            <div className='popup row'>
+                <div className='popup center'>
+                    <div className='popup broker-btn'>Connect</div>
+                </div>
+            </div>
+            <div className='popup row'>
+                <div className='popup title underline'>Accounts</div>
+            </div>
+
+            </React.Fragment>
+        );
+    }
+
+    getAddMode = (selected) =>
+    {
+        const { brokers } = this.state;
+        const broker_info = brokers[selected];
+
+        let stage_one_elem;
+        if (broker_info.broker !== undefined)
+        {
+            if (broker_info.broker === 'oanda')
+            {
+                stage_one_elem = (
+                    <div key={selected + '_one'} className='popup row'>
+                        <div className='popup input'>
+                            <div className='popup title'>API Key</div>
+                            <input className='popup text-input' onChange={this.onTextInputChange.bind(this)} name='key' />
+                        </div>
+                    </div>
+                );
+            }
+            else if (broker_info.broker === 'ig')
+            {
+                stage_one_elem = (
+                    <React.Fragment key={selected + '_one'}>
+
+                    <div className='popup row'>
+                        <div className='popup input'>
+                            <div className='popup title'>Username</div>
+                            <input className='popup text-input' onChange={this.onTextInputChange.bind(this)} name='username' />
+                        </div>
+                    </div>
+                    <div className='popup row'>
+                        <div className='popup input'>
+                            <div className='popup title'>Password</div>
+                            <input className='popup text-input' onChange={this.onTextInputChange.bind(this)} name='password' />
+                        </div>
+                    </div>
+                    <div className='popup row'>
+                        <div className='popup input'>
+                            <div className='popup title'>API Key</div>
+                            <input className='popup text-input' onChange={this.onTextInputChange.bind(this)} name='key' />
+                        </div>
+                    </div>
+
+                    </React.Fragment>
+                );
+            }
+        }
+        else
+        {
+            stage_one_elem = (
+                <div key={selected + '_one'} className='popup row'>
+                    <div className='popup center'>Select your broker...</div>
+                </div>
+            );
+        }
+
+        let stage_two_elem;
+        if (broker_info.connected === true)
+        {
+            let account_elems = [];
+            for (let account_id of broker_info.accounts)
+            {
+                // Account elems with checkbox for selection and nickname input box
+                account_elems.push(
+                    <div key={account_id} className='popup account-item'>
+
+                        <div>
+                            <label className='popup checkbox'>
+                                <input type='checkbox' />
+                                <div className='checkmark'></div>
+                            </label>
+                            <div>{account_id}</div>
+                        </div>
+                        <div className='popup input small'>
+                            <input 
+                                placeholder='Nickname'
+                                className='popup text-input'
+                                // onChange={this.onTextInputChange.bind(this)} 
+                                name='nickname'
+                            />
+                        </div>
+
+                    </div>
+                );
+            }
+
+            stage_two_elem = (
+                <div key={selected + '_two'} className='popup column'>
+                    <div className='popup title underline'>Accounts</div>
+                    <div className='popup account-list'>
+                        {account_elems}
+                    </div>
+                </div>
+            );
+        }
+        else if (broker_info.broker !== undefined)
+        {
+            stage_two_elem = (
+                <div key={selected + '_two'} className='popup row'>
+                    <div className='popup center' onClick={this.onConnect.bind(this)}>
+                        <div className='popup broker-btn'>Connect</div>
+                    </div>
+                </div>
+            );
+        }
+
+
+
+        return (
+            <React.Fragment key={selected + '_main'}>
+                
+            <div className='popup row'>
+                <div className='popup input'>
+                    <div className='popup title'>Name</div>
+                    <input 
+                        className='popup text-input'
+                        defaultValue={broker_info.name}
+                        onChange={this.onTextInputChange.bind(this)} 
+                        name='name'
+                    />
+                </div>
+            </div>
+            <div className='popup row'>
+                <div id='popup_demo_selector'>
+                    <div 
+                        id='popup_demo_left' 
+                        className={this.isItemSelected(false, broker_info.is_demo)}
+                        onClick={this.setIsDemo.bind(this)}
+                        name='live'
+                    >
+                        Live
+                    </div>
+                    <div 
+                        id='popup_demo_right' 
+                        className={this.isItemSelected(true, broker_info.is_demo)}
+                        onClick={this.setIsDemo.bind(this)}
+                        name='demo'
+                    >
+                        Demo
+                    </div>
+                </div>
+            </div>
+            <div className='popup column'>
+                {/* <div className='popup title underline'>Broker</div> */}
+                <div id='popup_broker_selector'>
+                    <div 
+                        className={'popup broker ' + this.isItemSelected('oanda', broker_info.broker)}
+                        onClick={this.setBroker.bind(this)}
+                        name='oanda'
+                    >
+                        <ReactSVG className='popup broker-logo' src="./oanda_logo.svg" />
+                        <div className='popup broker-text'>Oanda</div>
+                    </div>
+                    <div 
+                        className={'popup broker' + this.isItemSelected('ig', broker_info.broker)}
+                        onClick={this.setBroker.bind(this)}
+                        name='ig'
+                    >
+                        <ReactSVG className='popup broker-logo' src="./ig_logo.svg" />
+                        <div className='popup broker-text'>IG Markets</div>
+                    </div>
+                </div>
+            </div>
+            {stage_one_elem}
+            {stage_two_elem}
+            
+
+            </React.Fragment>
+        );
     }
 
     getItems = () =>
     {
-        const { brokers, change_key, mode } = this.state;
+        const { brokers, modes } = this.state;
         const selected = this.getSelected();
 
         if (selected in brokers)
         {
-            const broker_info = brokers[selected];
-
-            let key_elem;
-            if (change_key || mode === 'add')
+            const mode = modes[selected];
+            
+            if (mode === 'add')
             {
-                key_elem = (
-                    <div className='popup input'>
-                        <div className='popup title'>API Key</div>
-                        <input className='popup text-input' onChange={this.onTextInputChange.bind(this)} name='key' />
-                    </div>
-                );
+                return this.getAddMode(selected);
             }
-            else
+            else if (mode === 'edit')
             {
-                key_elem = (
-                    <div className='popup input'>
-                        <div className='popup title'>API Key</div>
-                        <div className='popup key'>****************************************</div><div className='popup key-btn'>Change</div>
-                    </div>
-                );
+                return this.getEditMode(selected);
             }
-
-            return (
-                <React.Fragment key={selected}>
-                    
-                <div className='popup row'>
-                    <div className='popup input'>
-                        <div className='popup title'>Name</div>
-                        <input 
-                            className='popup text-input'
-                            defaultValue={broker_info.name}
-                            onChange={this.onTextInputChange.bind(this)} 
-                            name='name'
-                        />
-                    </div>
-                </div>
-                <div className='popup row'>
-                    <div id='popup_demo_selector'>
-                        <div 
-                            id='popup_demo_left' 
-                            className={this.isItemSelected(false, broker_info.is_demo)}
-                            onClick={this.setIsDemo.bind(this)}
-                            name='live'
-                        >
-                            Live
-                        </div>
-                        <div 
-                            id='popup_demo_right' 
-                            className={this.isItemSelected(true, broker_info.is_demo)}
-                            onClick={this.setIsDemo.bind(this)}
-                            name='demo'
-                        >
-                            Demo
-                        </div>
-                    </div>
-                </div>
-                <div className='popup column'>
-                    {/* <div className='popup title underline'>Broker</div> */}
-                    <div id='popup_broker_selector'>
-                        <div 
-                            className={'popup broker' + this.isItemSelected('oanda', broker_info.broker)}
-                            onClick={this.setBroker.bind(this)}
-                            name='oanda'
-                        >
-                            <ReactSVG className='popup broker-logo' src="./oanda_logo.svg" />
-                            <div className='popup broker-text'>Oanda</div>
-                        </div>
-                        <div 
-                            className={'popup broker' + this.isItemSelected('ig', broker_info.broker)}
-                            onClick={this.setBroker.bind(this)}
-                            name='ig'
-                        >
-                            <ReactSVG className='popup broker-logo' src="./ig_logo.svg" />
-                            <div className='popup broker-text'>IG Markets</div>
-                        </div>
-                    </div>
-                </div>
-                <div className='popup row'>
-                    {key_elem}
-                </div>
-                <div className='popup row'>
-                    <div className='popup center'>
-                        <div className='popup broker-btn'>Connect</div>
-                    </div>
-                </div>
-                <div className='popup row'>
-                    <div className='popup title underline'>Accounts</div>
-                </div>
-
-                </React.Fragment>
-            );
-        }
-        else
-        {
-
         }
     }
 
@@ -239,17 +424,20 @@ class BrokerSettings extends Component
     {
         if (search === match)
         {
-            return ' selected' + this.isDisabled();
+            return ' selected';
         }
         else
         {
-            return '' + this.isDisabled();
+            return '';
         }
     }
 
     isDisabled()
     {
-        if (this.state.mode === 'edit')
+        const popup = this.props.getPopup();
+        const { modes } = this.state;
+
+        if (modes[popup.opened] === 'edit')
         {
             return ' disabled';
         }
@@ -291,9 +479,11 @@ class BrokerSettings extends Component
         this.setState({ brokers });
     }
 
-    setMode(mode)
+    setMode(broker_id, new_mode)
     {
-        this.setState({ mode });
+        let { modes } = this.state;
+        modes[broker_id] = new_mode;
+        this.setState({ modes });
     }
 }
 
