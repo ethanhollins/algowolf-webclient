@@ -13,8 +13,7 @@ class BrokerSettings extends Component
 
     state = {
         modes: {},
-        brokers: {},
-        show: {}
+        brokers: {}
     }
 
     async componentDidMount()
@@ -66,18 +65,87 @@ class BrokerSettings extends Component
         return this.props.onChangeCategory(e);
     }
 
-    onConnect(e)
+    async onConnect(e)
     {
-        let { brokers } = this.state;
+        let { modes, brokers } = this.state;
         const broker_id = this.props.getPopup().opened;
-        
-        // Call Api Connect EPT
 
-        brokers[broker_id].connected = true;
-        brokers[broker_id].accounts = [
-            'ABCD', 'EFGH', 'IJKL'
-        ];
-        this.setState({ brokers });
+        // Call Api Connect EPT
+        const { REACT_APP_API_URL } = process.env;
+        const reqOptions = {
+            method: 'POST',
+            headers: this.props.getHeaders(),
+            credentials: 'include',
+            body: JSON.stringify(
+                Object.assign({}, { broker_id: broker_id }, brokers[broker_id])
+            )
+        }
+
+        const res = await fetch(
+            `${REACT_APP_API_URL}/broker`,
+            reqOptions
+        );
+
+        const data = await res.json();
+        if (res.status === 200)
+        {
+            brokers[broker_id] = data;
+            modes[broker_id] = 'edit';
+    
+            this.setState({ brokers });
+        }
+        else
+        {
+            return data.message;
+        }
+
+    }
+
+    async onSave(e)
+    {
+        let { modes, brokers } = this.state;
+        const broker_id = this.props.getPopup().opened;
+
+        // Call Api Connect EPT
+        const { REACT_APP_API_URL } = process.env;
+        const reqOptions = {
+            method: 'PUT',
+            headers: this.props.getHeaders(),
+            credentials: 'include',
+            body: JSON.stringify(
+                Object.assign({}, { broker_id: broker_id }, brokers[broker_id])
+            )
+        }
+
+        const res = await fetch(
+            `${REACT_APP_API_URL}/broker`,
+            reqOptions
+        );
+
+        const data = await res.json();
+        if (res.status === 200)
+        {
+            brokers[broker_id] = data;
+            modes[broker_id] = 'edit';
+            this.setState({ brokers });
+        }
+        else
+        {
+            return data.message;
+        }
+    }
+
+    onEditBtn(e)
+    {
+        let { modes, brokers } = this.state;
+        const broker_id = this.props.getPopup().opened;
+
+        brokers[broker_id].key = '';
+        brokers[broker_id].password = '';
+        brokers[broker_id].connected = false;
+        modes[broker_id] = 'add';
+
+        this.setState({ modes, brokers });
     }
 
     getBrokers = () =>
@@ -114,32 +182,139 @@ class BrokerSettings extends Component
         return result;
     }
 
+    createId = () =>
+    {
+        let result = '';
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        const characters_length = characters.length;
+        const id_length = 6;
+        for (let i = 0; i < id_length; i++)
+        {
+            result += characters.charAt(Math.floor(Math.random() * characters_length));
+        }
+        return result;
+    }
+
     addBroker = () =>
     {
         let { brokers, modes } = this.state;
         let default_name = 'My Broker';
-        let count = 0;
-        while (default_name in brokers)
+        let broker_id = this.createId();
+        while (broker_id in brokers)
         {
-            count += 1;
-            default_name = `My Broker ${count}`;
+            broker_id = this.createId();
         }
 
-        brokers[default_name] = {
+        brokers[broker_id] = {
             key: '',
             is_demo: true,
             name: default_name,
         }
-        modes[default_name] = 'add';
+        modes[broker_id] = 'add';
 
-        this.props.changeCategory(default_name);
+        this.props.changeCategory(broker_id);
         this.setState({ brokers, modes });
     }
 
-    getEditMode = (selected) =>
+    getEditMode = (mode, selected) =>
     {
         const { brokers } = this.state;
         const broker_info = brokers[selected];
+
+        let stage_one_elem;
+        if (broker_info.broker === 'oanda')
+        {
+            stage_one_elem = (
+                <div key={selected + '_one'} className='popup row'>
+                    <div className='popup input'>
+                        <div className='popup form-title'>Access Token</div>
+                        <div className='popup text-read'>****************************************</div>
+                    </div>
+                </div>
+            );
+        }
+        else if (broker_info.broker === 'ig')
+        {
+            stage_one_elem = (
+                <React.Fragment key={selected + '_one'}>
+
+                <div className='popup row'>
+                    <div className='popup input'>
+                        <div className='popup form-title'>Username</div>
+                        <div className='popup text-read'>{broker_info.username}</div>
+                    </div>
+                </div>
+                <div className='popup row'>
+                    <div className='popup input'>
+                        <div className='popup form-title'>Password</div>
+                        <div className='popup text-read'>{'*'.repeat(broker_info.password.length)}</div>
+                    </div>
+                </div>
+                <div className='popup row'>
+                    <div className='popup input'>
+                        <div className='popup form-title'>Access Token</div>
+                        <div className='popup text-read'>****************************************</div>
+                    </div>
+                </div>
+
+                </React.Fragment>
+            );
+        }
+
+        let stage_two_elem;
+
+        if (broker_info.accounts !== undefined)
+        {
+            let account_elems = [];
+            for (let account_id in broker_info.accounts)
+            {
+                const account_info = broker_info.accounts[account_id];
+
+                // Account elems with checkbox for selection and nickname input box
+                account_elems.push(
+                    <div key={account_id} className='popup account-item'>
+
+                        <div>
+                            <label className='popup checkbox'>
+                                <input 
+                                    type='checkbox' 
+                                    defaultChecked={account_info.active}
+                                    onChange={this.onCheckboxInputChange.bind(this)}
+                                    name={account_id}
+                                />
+                                <div className='checkmark'></div>
+                            </label>
+                            <div>{account_id}</div>
+                        </div>
+                        <div className='popup input small'>
+                            <input 
+                                placeholder='Nickname'
+                                className='popup text-input'
+                                defaultValue={account_info.nickname}
+                                onChange={this.onNicknameInputChange.bind(this)} 
+                                name={account_id}
+                            />
+                        </div>
+
+                    </div>
+                );
+            }
+
+            stage_two_elem = (
+                <div key={selected + '_two'} className='popup column'>
+                    <div className='popup title underline'>Select Accounts</div>
+                    <div className='popup account-list'>
+                        {account_elems}
+                    </div>
+                </div>
+            );
+        }
+
+        let apply_and_save_class = 'popup broker-btn';
+        if (mode === 'edit')
+        {
+            apply_and_save_class += ' disabled';
+        }
 
         return (
             <React.Fragment key={selected}>
@@ -196,19 +371,18 @@ class BrokerSettings extends Component
                     </div>
                 </div>
             </div>
-            <div className='popup row'>
-                <div className='popup input'>
-                    <div className='popup title'>API Key</div>
-                    <div className='popup key'>****************************************</div><div className='popup key-btn'>Change</div>
-                </div>
-            </div>
+            {stage_one_elem}
+            {stage_two_elem}
             <div className='popup row'>
                 <div className='popup center'>
-                    <div className='popup broker-btn'>Connect</div>
+                    <div className='popup broker-btn' onClick={this.onEditBtn.bind(this)}>Edit</div>
+                    <div 
+                        className={apply_and_save_class}
+                        onClick={this.onSave.bind(this)}
+                    >
+                        Apply & Save
+                    </div>
                 </div>
-            </div>
-            <div className='popup row'>
-                <div className='popup title underline'>Accounts</div>
             </div>
 
             </React.Fragment>
@@ -226,12 +400,21 @@ class BrokerSettings extends Component
             if (broker_info.broker === 'oanda')
             {
                 stage_one_elem = (
-                    <div key={selected + '_one'} className='popup row'>
+                    <React.Fragment key={selected + '_one'}>
+
+                    <div className='popup row'>
                         <div className='popup input'>
-                            <div className='popup title'>API Key</div>
+                            <div className='popup form-title'>Acess Token</div>
                             <input className='popup text-input' onChange={this.onTextInputChange.bind(this)} name='key' />
                         </div>
                     </div>
+                    <div className='popup row'>
+                        <div className='popup center' onClick={this.onConnect.bind(this)}>
+                            <div className='popup broker-btn'>Connect</div>
+                        </div>
+                    </div>
+
+                    </React.Fragment>
                 );
             }
             else if (broker_info.broker === 'ig')
@@ -241,20 +424,31 @@ class BrokerSettings extends Component
 
                     <div className='popup row'>
                         <div className='popup input'>
-                            <div className='popup title'>Username</div>
-                            <input className='popup text-input' onChange={this.onTextInputChange.bind(this)} name='username' />
+                            <div className='popup form-title'>Username</div>
+                            <input 
+                                className='popup text-input' defaultValue={broker_info.username} 
+                                onChange={this.onTextInputChange.bind(this)} name='username' 
+                            />
                         </div>
                     </div>
                     <div className='popup row'>
                         <div className='popup input'>
-                            <div className='popup title'>Password</div>
-                            <input className='popup text-input' onChange={this.onTextInputChange.bind(this)} name='password' />
+                            <div className='popup form-title'>Password</div>
+                            <input 
+                                className='popup text-input' type='password'
+                                onChange={this.onTextInputChange.bind(this)} name='password' 
+                            />
                         </div>
                     </div>
                     <div className='popup row'>
                         <div className='popup input'>
-                            <div className='popup title'>API Key</div>
+                            <div className='popup form-title'>Acess Token</div>
                             <input className='popup text-input' onChange={this.onTextInputChange.bind(this)} name='key' />
+                        </div>
+                    </div>
+                    <div className='popup row'>
+                        <div className='popup center' onClick={this.onConnect.bind(this)}>
+                            <div className='popup broker-btn'>Connect</div>
                         </div>
                     </div>
 
@@ -270,58 +464,6 @@ class BrokerSettings extends Component
                 </div>
             );
         }
-
-        let stage_two_elem;
-        if (broker_info.connected === true)
-        {
-            let account_elems = [];
-            for (let account_id of broker_info.accounts)
-            {
-                // Account elems with checkbox for selection and nickname input box
-                account_elems.push(
-                    <div key={account_id} className='popup account-item'>
-
-                        <div>
-                            <label className='popup checkbox'>
-                                <input type='checkbox' />
-                                <div className='checkmark'></div>
-                            </label>
-                            <div>{account_id}</div>
-                        </div>
-                        <div className='popup input small'>
-                            <input 
-                                placeholder='Nickname'
-                                className='popup text-input'
-                                // onChange={this.onTextInputChange.bind(this)} 
-                                name='nickname'
-                            />
-                        </div>
-
-                    </div>
-                );
-            }
-
-            stage_two_elem = (
-                <div key={selected + '_two'} className='popup column'>
-                    <div className='popup title underline'>Accounts</div>
-                    <div className='popup account-list'>
-                        {account_elems}
-                    </div>
-                </div>
-            );
-        }
-        else if (broker_info.broker !== undefined)
-        {
-            stage_two_elem = (
-                <div key={selected + '_two'} className='popup row'>
-                    <div className='popup center' onClick={this.onConnect.bind(this)}>
-                        <div className='popup broker-btn'>Connect</div>
-                    </div>
-                </div>
-            );
-        }
-
-
 
         return (
             <React.Fragment key={selected + '_main'}>
@@ -379,8 +521,6 @@ class BrokerSettings extends Component
                 </div>
             </div>
             {stage_one_elem}
-            {stage_two_elem}
-            
 
             </React.Fragment>
         );
@@ -399,9 +539,9 @@ class BrokerSettings extends Component
             {
                 return this.getAddMode(selected);
             }
-            else if (mode === 'edit')
+            else if (mode === 'edit' || mode === 'unsaved')
             {
-                return this.getEditMode(selected);
+                return this.getEditMode(mode, selected);
             }
         }
     }
@@ -472,11 +612,43 @@ class BrokerSettings extends Component
     {
         const attr = e.target.getAttribute('name');
         const value = e.target.value;
-        const popup = this.props.getPopup();
+        const broker_id = this.props.getPopup().opened;
         
-        let { brokers } = this.state;
-        brokers[popup.opened][attr] = value;
-        this.setState({ brokers });
+        let { modes, brokers } = this.state;
+        brokers[broker_id][attr] = value;
+
+        if (modes[broker_id] === 'edit')
+        {
+            modes[broker_id] = 'unsaved';
+        }
+
+        this.setState({ modes, brokers });
+    }
+    
+    onNicknameInputChange(e)
+    {
+        const value = e.target.value;
+        const account_id = e.target.getAttribute('name');
+        const broker_id = this.props.getPopup().opened;
+        
+        let { modes, brokers } = this.state;
+        brokers[broker_id].accounts[account_id].nickname = value;
+        modes[broker_id] = 'unsaved';
+
+        this.setState({ modes, brokers });
+    }
+
+    onCheckboxInputChange(e)
+    {
+        const checked = e.target.checked;
+        const account_id = e.target.getAttribute('name');
+        const broker_id = this.props.getPopup().opened;
+
+        let { modes, brokers } = this.state;
+        brokers[broker_id].accounts[account_id].active = checked;
+        modes[broker_id] = 'unsaved';
+
+        this.setState({ modes, brokers });
     }
 
     setMode(broker_id, new_mode)

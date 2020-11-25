@@ -109,6 +109,7 @@ class Popup extends Component
             {
                 return <BrokerSettings 
                     getPopup={this.props.getPopup}
+                    getHeaders={this.props.getHeaders}
                     onChangeCategory={this.onChangeCategory}
                     changeCategory={this.changeCategory}
                     getWindowInfo={this.props.getWindowInfo}

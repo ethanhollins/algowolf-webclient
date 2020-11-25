@@ -174,6 +174,7 @@ class StrategyApp extends Component
                     <div className='toolbox_shadow'/> 
 
                     <Popup
+                        getHeaders={this.props.getHeaders}
                         addWindow={this.addWindow}
                         windowExists={this.windowExists}
                         isWithinBounds={this.isWithinBounds}
