@@ -19,7 +19,7 @@ class Candlesticks extends Component
         
         const current_timestamp = this.props.getCurrentTimestamp();
         const period_offset = this.props.getPeriodOffsetSeconds(this.props.getPeriod());
-        const ohlc = this.props.getBids();
+        const ohlc = this.props.getOhlc();
         const timestamps = this.props.getTimestamps();
         const info = this.props.getWindowInfo();
 

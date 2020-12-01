@@ -161,8 +161,8 @@ class Chart extends Component
 
         if (this.getChart() !== undefined)
         {
-            const bids = this.getBids();
-            const chart_properties = this.getChartProperties(bids, Math.floor(pos.x), scale);
+            const ohlc = this.getOhlc();
+            const chart_properties = this.getChartProperties(ohlc, Math.floor(pos.x), scale);
             if (first_load)
             {
                 first_load = false;
@@ -272,6 +272,7 @@ class Chart extends Component
                     ref={this.setCandlesticksRef}
                     getAsks={this.getAsks}
                     getBids={this.getBids}
+                    getOhlc={this.getOhlc}
                     getCamera={this.getCamera}
                     getCanvas={this.getCanvas}
                     getPos={this.getPos}
@@ -602,7 +603,7 @@ class Chart extends Component
             }
             else
             {
-                const chart_properties = this.getChartProperties(this.getBids(), Math.floor(pos.x), scale);
+                const chart_properties = this.getChartProperties(this.getOhlc(), Math.floor(pos.x), scale);
                 scale.y = chart_properties.scale.y;
 
                 for (let study of this.studies)
@@ -686,7 +687,7 @@ class Chart extends Component
                 
                 if (auto_zoom)
                 {
-                    const chart_properties = this.getChartProperties(this.getBids(), Math.floor(pos.x), scale);
+                    const chart_properties = this.getChartProperties(this.getOhlc(), Math.floor(pos.x), scale);
                     scale.y = chart_properties.scale.y;
         
                     for (let study of this.studies)
@@ -804,7 +805,7 @@ class Chart extends Component
                         ref={this.addOverlayRef}
                         index={i}
                         getValues={this.getOverlayValues}
-                        getOhlcValues={this.getBids}
+                        getOhlcValues={this.getOhlc}
                         getFilteredOffset={this.getFilteredOffset}
                         getProperties={this.getOverlayProperties}
                         getCamera={this.getCamera}
@@ -841,7 +842,7 @@ class Chart extends Component
                         ref={this.addStudyRef}
                         index={i}
                         getValues={this.getStudyValues}
-                        getOhlcValues={this.getBids}
+                        getOhlcValues={this.getOhlc}
                         getFilteredOffset={this.getFilteredOffset}
                         getProperties={this.getStudyProperties}
                         getTimestamps={this.getTimestamps}
@@ -1032,7 +1033,7 @@ class Chart extends Component
     {
         let { pos, scale, is_loading } = this.state;
         const ts = this.getTimestamps();
-        const ohlc = this.getBids();
+        const ohlc = this.getOhlc();
 
         if (!is_loading && pos.x + scale.x > ohlc.length)
         {
@@ -1587,7 +1588,7 @@ class Chart extends Component
         const seg_size = this.getSegmentSize(0);
 
         const off = this.getPeriodOffsetSeconds(this.getPeriod());
-        const ohlc = this.getBids();
+        const ohlc = this.getOhlc();
         const timestamps = this.getTimestamps().concat(this.state.future_timestamps);
 
         const { pos, scale, intervals } = this.state;
@@ -2066,16 +2067,16 @@ class Chart extends Component
         const { pos, scale } = this.state;
         const seg_size = this.getSegmentSize(0);
         const camera = this.getCamera();
-        const bids = this.getBids();
-        let c_bid = undefined;
-        for (let i = bids.length-1; i >= 0; i--)
+        const ohlc = this.getOhlc();
+        let c_close = undefined;
+        for (let i = ohlc.length-1; i >= 0; i--)
         {
-            c_bid = bids[i][3];
-            if (c_bid !== 0 && c_bid !== null) break;
+            c_close = ohlc[i][3];
+            if (c_close !== 0 && c_close !== null) break;
         }
 
         const screen_pos = camera.convertWorldPosToScreenPos(
-            { x: 0, y: c_bid }, pos, seg_size, scale
+            { x: 0, y: c_close }, pos, seg_size, scale
         );
 
         // Properties
@@ -2086,7 +2087,7 @@ class Chart extends Component
         ctx.font = String(font_size) + 'pt trebuchet ms'; //Consolas
         ctx.textAlign = 'right';
 
-        const text_size = ctx.measureText(String(c_bid.toFixed(5)));
+        const text_size = ctx.measureText(String(c_close.toFixed(5)));
         const box_height = Math.round(3/4 * (font_size) + 12);
         const box_width = Math.round(text_size.width + 12);
 
@@ -2100,7 +2101,7 @@ class Chart extends Component
         ctx.fillStyle = 'rgb(255, 255, 255)';
 
         ctx.fillText(
-            c_bid.toFixed(5), 
+            c_close.toFixed(5), 
             seg_size.width - 7, 
             Math.round(screen_pos.y + (3/4 * (font_size/2)))
         );
@@ -2111,17 +2112,17 @@ class Chart extends Component
         const { pos, scale } = this.state;
         const seg_size = this.getSegmentSize(0);
         const camera = this.getCamera();
-        const bids = this.getBids();
+        const ohlc = this.getOhlc();
 
-        let c_bid = 0;
-        for (let i = bids.length-1; i >= 0; i--)
+        let c_close = 0;
+        for (let i = ohlc.length-1; i >= 0; i--)
         {
-            c_bid = bids[i][3];
-            if (c_bid !== null) break;
+            c_close = ohlc[i][3];
+            if (c_close !== null) break;
         }
 
         const screen_pos = camera.convertWorldPosToScreenPos(
-            { x: 0, y: c_bid }, pos, seg_size, scale
+            { x: 0, y: c_close }, pos, seg_size, scale
         );
 
         // Properties
@@ -2471,8 +2472,8 @@ class Chart extends Component
     getOhlcByPos = (x) =>
     {
         x = Math.floor(x);
-        const bids = this.getBids();
-        return bids[bids.length-x];
+        const ohlc = this.getOhlc();
+        return ohlc[ohlc.length-x];
     }
 
     getOverlayValueByPos = (idx, x) =>
@@ -2895,8 +2896,9 @@ class Chart extends Component
         let result = [];
         for (let i = 0; i < overlays[idx].properties.periods.length; i++)
         {
+            const price_type = this.getPrice();
             result.push(
-                this.getIndicator(overlays[idx]).cache_bids
+                this.getIndicator(overlays[idx])['cache_' + price_type]
             );
         }
         return result;
@@ -2920,8 +2922,9 @@ class Chart extends Component
         let result = [];
         for (let i = 0; i < studies[idx].properties.periods.length; i++)
         {
+            const price_type = this.getPrice();
             result.push(
-                this.getIndicator(studies[idx]).cache_bids
+                this.getIndicator(studies[idx])['cache_' + price_type]
             );
         }
         return result;
@@ -2997,9 +3000,19 @@ class Chart extends Component
         return this.getChart().asks;
     }
 
-    getBids = ()  =>
+    getMids = () =>
+    {
+        return this.getChart().mids;
+    }
+
+    getBids = () =>
     {
         return this.getChart().bids;
+    }
+
+    getOhlc = () =>
+    {
+        return this.getChart()[this.getPrice()];
     }
 
     getFilteredOffset = ()  =>

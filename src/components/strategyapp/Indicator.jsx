@@ -2,20 +2,22 @@
 class Indicator {
     /* Overlays */
 
-    calc = (timestamps, asks, bids) =>
+    calc = (timestamps, asks, mids, bids) =>
     {
         this.cache_asks.splice(0, this.min_bars-1);
+        this.cache_mids.splice(0, this.min_bars-1);
         this.cache_bids.splice(0, this.min_bars-1);
 
         // Calculate new values before
         let start = undefined;
-        let ask, bid = undefined;
+        let ask, mid, bid = undefined;
         if (this.cache_ts.length > 0)
         {
             start = timestamps.filter((x) => x < this.cache_ts[0]).length;
             for (let i = start-1; i > 0; i--)
             {
                 ask = this.get_value(i, asks, this.cache_asks);
+                mid = this.get_value(i, mids, this.cache_mids);
                 bid = this.get_value(i, bids, this.cache_bids);
 
                 if (ask[0] !== null || asks[i].every((x) => x === null))
@@ -23,6 +25,7 @@ class Indicator {
                     this.cache_ts.unshift(timestamps[i]);
                 }
                 this.cache_asks.unshift(ask);
+                this.cache_mids.unshift(mid);
                 this.cache_bids.unshift(bid);
             }
         }
@@ -34,6 +37,7 @@ class Indicator {
             if (!(asks[start].every((x) => x === null)) || asks[start][0] !== null)
             {
                 this.cache_asks[start] = this.get_value(start, asks, this.cache_asks);
+                this.cache_mids[start] = this.get_value(start, mids, this.cache_mids);
                 this.cache_bids[start] = this.get_value(start, bids, this.cache_bids);
                 break;
             }
@@ -53,12 +57,14 @@ class Indicator {
         for (let i = start; i < timestamps.length; i++) 
         {
             ask = this.get_value(i, asks, this.cache_asks);
+            mid = this.get_value(i, mids, this.cache_mids);
             bid = this.get_value(i, bids, this.cache_bids);
             if (ask[0] !== null || asks[i].every((x) => x === null))
             {
                 this.cache_ts.push(timestamps[i]);
             }
             this.cache_asks.push(ask);
+            this.cache_mids.push(mid);
             this.cache_bids.push(bid);
         }
     }
@@ -67,6 +73,7 @@ class Indicator {
     {
         this.cache_ts = [];
         this.cache_asks = [];
+        this.cache_mids = [];
         this.cache_bids = [];
     }
 }
@@ -94,6 +101,7 @@ class boll extends Indicator
 
         this.cache_ts = [];
         this.cache_asks = [];
+        this.cache_mids = [];
         this.cache_bids = [];
     }
 
@@ -149,6 +157,7 @@ class donch extends Indicator
 
         this.cache_ts = [];
         this.cache_asks = [];
+        this.cache_mids = [];
         this.cache_bids = [];
     }
 
@@ -191,6 +200,7 @@ class ema extends Indicator
 
         this.cache_ts = [];
         this.cache_asks = [];
+        this.cache_mids = [];
         this.cache_bids = [];
     }
 
@@ -241,6 +251,7 @@ class mae extends Indicator
 
         this.cache_ts = [];
         this.cache_asks = [];
+        this.cache_mids = [];
         this.cache_bids = [];
     }
 
@@ -296,6 +307,7 @@ class sma extends Indicator
         
         this.cache_ts = [];
         this.cache_asks = [];
+        this.cache_mids = [];
         this.cache_bids = [];
     }
 
@@ -340,6 +352,7 @@ class atr extends Indicator
 
         this.cache_ts = [];
         this.cache_asks = [];
+        this.cache_mids = [];
         this.cache_bids = [];
     }
 
@@ -430,6 +443,7 @@ class tr extends Indicator
 
         this.cache_ts = [];
         this.cache_asks = [];
+        this.cache_mids = [];
         this.cache_bids = [];
     }
 

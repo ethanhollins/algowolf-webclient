@@ -916,6 +916,7 @@ class StrategyApp extends Component
             period: period,
             timestamps: ohlc_data.ohlc.timestamps,
             asks: ohlc_data.ohlc.asks,
+            mids: ohlc_data.ohlc.mids,
             bids: ohlc_data.ohlc.bids,
             next_timestamp: null
         };
@@ -941,6 +942,7 @@ class StrategyApp extends Component
             period: period,
             timestamps: ohlc_data.ohlc.timestamps,
             asks: ohlc_data.ohlc.asks,
+            mids: ohlc_data.ohlc.mids,
             bids: ohlc_data.ohlc.bids,
             next_timestamp: null
         };
@@ -1014,12 +1016,14 @@ class StrategyApp extends Component
         let result = {
             timestamps: [],
             asks: [],
+            mids: [],
             bids: []
         };
         for (let i = 0; i < chart.timestamps.length; i++)
         {
             const next_ts = chart.timestamps[i];
             const ask = chart.asks[i];
+            const mid = chart.mids[i];
             const bid = chart.bids[i];
             
             while (ts <= next_ts)
@@ -1035,11 +1039,13 @@ class StrategyApp extends Component
                 if (ts !== next_ts)
                 {
                     result.asks.push([null, null, null, null]);
+                    result.mids.push([null, null, null, null]);
                     result.bids.push([null, null, null, null]);
                 }
                 else
                 {
                     result.asks.push(ask);
+                    result.mids.push(mid);
                     result.bids.push(bid);
                 }
                 ts += off;
@@ -1047,6 +1053,7 @@ class StrategyApp extends Component
         }
         chart.timestamps = result.timestamps;
         chart.asks = result.asks;
+        chart.mids = result.mids;
         chart.bids = result.bids;
         return chart;
     }
@@ -1077,6 +1084,7 @@ class StrategyApp extends Component
         {
             chart.timestamps.push(ts);
             chart.asks.push([null,null,null,null]);
+            chart.mids.push([null,null,null,null]);
             chart.bids.push([null,null,null,null]);
 
             ts += off
@@ -1129,10 +1137,12 @@ class StrategyApp extends Component
             {
                 // On Bar End
                 chart.asks[chart.asks.length-1] = item['item']['ask'];
+                chart.mids[chart.mids.length-1] = item['item']['mid'];
                 chart.bids[chart.bids.length-1] = item['item']['bid'];
                 this.generateNextTimestamp(chart, item['timestamp']);
                 chart.timestamps.push(chart.next_timestamp);
                 chart.asks.push([null,null,null,null]);
+                chart.mids.push([null,null,null,null]);
                 chart.bids.push([null,null,null,null]);
             }
             else if (item['timestamp'] >= chart.next_timestamp)
@@ -1140,12 +1150,14 @@ class StrategyApp extends Component
                 // If real timestamp ahead of chart timestamp
                 this.generateNextTimestamp(chart, item['timestamp']);
                 chart.asks[chart.asks.length-1] = item['item']['ask'];
+                chart.mids[chart.mids.length-1] = item['item']['mid'];
                 chart.bids[chart.bids.length-1] = item['item']['bid'];
             }
             else if (!(item['timestamp'] < chart.next_timestamp - this.getPeriodOffsetSeconds(item['period'])))
             {
                 // Update Latest Bar
                 chart.asks[chart.asks.length-1] = item['item']['ask'];
+                chart.mids[chart.mids.length-1] = item['item']['mid'];
                 chart.bids[chart.bids.length-1] = item['item']['bid'];
             }
     
@@ -1176,13 +1188,17 @@ class StrategyApp extends Component
             ...ohlc_data.timestamps.slice(0,ohlc_data.timestamps.length-dup.length),
             ...chart.timestamps
         ];
-        chart.bids = [
-            ...ohlc_data.bids.slice(0, ohlc_data.bids.length-dup.length), 
-            ...chart.bids
-        ];
         chart.asks = [
             ...ohlc_data.asks.slice(0, ohlc_data.asks.length-dup.length), 
             ...chart.asks
+        ];
+        chart.mids = [
+            ...ohlc_data.mids.slice(0, ohlc_data.mids.length-dup.length), 
+            ...chart.mids
+        ];
+        chart.bids = [
+            ...ohlc_data.bids.slice(0, ohlc_data.bids.length-dup.length), 
+            ...chart.bids
         ];
 
         this.generateMissingBars(chart);
@@ -1207,13 +1223,17 @@ class StrategyApp extends Component
             ...ohlc_data.timestamps.slice(0,ohlc_data.timestamps.length-dup.length),
             ...chart.timestamps
         ];
-        chart.bids = [
-            ...ohlc_data.bids.slice(0, ohlc_data.bids.length-dup.length), 
-            ...chart.bids
-        ];
         chart.asks = [
             ...ohlc_data.asks.slice(0, ohlc_data.asks.length-dup.length), 
             ...chart.asks
+        ];
+        chart.mids = [
+            ...ohlc_data.mids.slice(0, ohlc_data.mids.length-dup.length), 
+            ...chart.mids
+        ];
+        chart.bids = [
+            ...ohlc_data.bids.slice(0, ohlc_data.bids.length-dup.length), 
+            ...chart.bids
         ];
 
         this.generateMissingBars(chart);
@@ -1228,6 +1248,7 @@ class StrategyApp extends Component
         let ts = chart.timestamps[i];
         let filteredTimestamps = [];
         let filteredAsks = [];
+        let filteredMids = [];
         let filteredBids = [];
         let until;
 
@@ -1237,6 +1258,7 @@ class StrategyApp extends Component
 
             chart.filteredTimestamps = [];
             chart.filteredAsks = [];
+            chart.filteredMids = [];
             chart.filteredBids = [];
         }
         else
@@ -1246,10 +1268,11 @@ class StrategyApp extends Component
 
         while (ts > until && i >= 0)
         {
-            if (chart.asks[i][0] !== null && chart.bids[i][0] !== null)
+            if (chart.asks[i][0] !== null && chart.mids[i][0] !== null && chart.bids[i][0] !== null)
             {
                 filteredTimestamps.unshift(ts)
                 filteredAsks.unshift(chart.asks[i])
+                filteredMids.unshift(chart.mids[i])
                 filteredBids.unshift(chart.bids[i])
             }
             i--;
@@ -1257,11 +1280,17 @@ class StrategyApp extends Component
         }
         chart.filteredTimestamps = chart.filteredTimestamps.concat(filteredTimestamps);
         chart.filteredAsks = chart.filteredAsks.concat(filteredAsks);
+        chart.filteredMids = chart.filteredMids.concat(filteredMids);
         chart.filteredBids = chart.filteredBids.concat(filteredBids);
 
-        if (chart.asks[chart.asks.length-1][0] !== null && chart.bids[chart.bids.length-1][0] !== null)
+        if (
+            chart.asks[chart.asks.length-1][0] !== null && 
+            chart.mids[chart.mids.length-1][0] !== null && 
+            chart.bids[chart.bids.length-1][0] !== null
+        )
         {
             chart.filteredAsks[chart.filteredAsks.length-1] = chart.asks[chart.asks.length-1];
+            chart.filteredMids[chart.filteredMids.length-1] = chart.mids[chart.mids.length-1];
             chart.filteredBids[chart.filteredBids.length-1] = chart.bids[chart.bids.length-1];
         }
 
@@ -1352,6 +1381,7 @@ class StrategyApp extends Component
                 ind.calc(
                     [...chart.filteredTimestamps], 
                     [...chart.filteredAsks], 
+                    [...chart.filteredMids],
                     [...chart.filteredBids]
                 );
             }
@@ -1365,6 +1395,7 @@ class StrategyApp extends Component
         ind.calc(
             [...chart.filteredTimestamps], 
             [...chart.filteredAsks], 
+            [...chart.filteredMids],
             [...chart.filteredBids]
         );
     }
