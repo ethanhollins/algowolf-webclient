@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import WindowWrapper from './WindowWrapper';
 import WindowShadow from './WindowShadow';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChartLine } from '@fortawesome/pro-light-svg-icons';
 
 class Backtest extends Component 
 {
@@ -58,7 +60,8 @@ class Backtest extends Component
 
     generateShadows()
     {
-        const { current_page, hide_shadows } = this.state;
+        const { hide_shadows } = this.state;
+        const current_page = this.props.getPage();
 
         let gen_windows = [];
 
@@ -93,7 +96,7 @@ class Backtest extends Component
 
     generateWindows()
     {
-        const { current_page } = this.state;
+        const current_page = this.props.getPage();
 
         let gen_windows = [];
 
@@ -113,6 +116,7 @@ class Backtest extends Component
                             ref={this.addWindowsRef}
                             info={w}
                             strategy_id={this.props.id}
+                            removeWindowsRef={this.removeWindowsRef}
                             clone={this.props.clone}
                             getAppContainer={this.props.getAppContainer}
                             convertScreenUnitToWorldUnit={this.props.convertScreenUnitToWorldUnit}
@@ -175,7 +179,23 @@ class Backtest extends Component
                 }
             }
         }
-        return gen_windows;
+
+        if (gen_windows.length === 0)
+        {
+            return (
+                <div className='window message'>
+                    <div>This page has no open windows!</div>
+                    <div>
+                        <div>Try adding a chart</div>
+                        <FontAwesomeIcon className='window message-icon' icon={faChartLine} />
+                    </div>
+                </div>
+            );
+        }
+        else
+        {
+            return gen_windows;
+        }
     }
 
     addChart = (broker, product, period, ohlc_data) =>
@@ -546,6 +566,11 @@ class Backtest extends Component
     setSelectedOffset = (selected_offset) =>
     {
         this.setState({ selected_offset });
+    }
+
+    removeWindowsRef = (elem) =>
+    {
+        this.windows.splice(this.windows.indexOf(elem), 1);
     }
 
 }

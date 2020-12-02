@@ -11,7 +11,7 @@ import {
 import { 
     faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
     faFileInvoice, faChartBar, faTicketAlt, faLayerGroup, faUser,
-    faSignOut, faHandshakeAlt, faChessPawn
+    faSignOut
 } from '@fortawesome/pro-light-svg-icons';
 
 class StrategyToolbar extends Component

@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 import moment from "moment-timezone";
 import _ from 'underscore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTimes, faPlus } from '@fortawesome/pro-light-svg-icons';
+import { faTimes, faPlus, faMinus, faAngleRight, faAngleLeft } from '@fortawesome/pro-light-svg-icons';
 import Strategy from './strategyapp/Strategy';
 import StrategyToolbar from './strategyapp/StrategyToolbar';
 import Backtest from './strategyapp/Backtest';
@@ -69,6 +69,9 @@ class StrategyApp extends Component
         this.setAppContainerRef = elem => {
             this.appContainer = elem;
         };
+        this.setPagesRef = elem => {
+            this.pages = elem;
+        }
         this.setCameraRef = elem =>
         {
             this.camera = elem;
@@ -149,8 +152,16 @@ class StrategyApp extends Component
 
                 <div 
                     className='chart_app' 
-                    style={ show_load_screen ? {'display': 'none'} : {} }
+                    style={ show_load_screen ? {display: 'none'} : {} }
                 >
+                    <div
+                        ref={this.setPagesRef}
+                        className='app pages'
+                    >
+                        {this.generatePages()}
+                        
+                    </div>
+
                     <div 
                         ref={this.setAppContainerRef}
                         className='app container'
@@ -223,7 +234,10 @@ class StrategyApp extends Component
         const { show_load_screen } = this.state;
 
         return (
-            <div className='main load'>
+            <div 
+                className='main load'
+                style={ !show_load_screen ? {display: 'none'} : {} }
+            >
                 <div className='main load-item'>
                     <div>
                         <ReactSVG className='main load-img' src="./wolf-logo.svg" />
@@ -232,6 +246,96 @@ class StrategyApp extends Component
                 </div>
             </div>
         )
+    }
+
+    generatePages = () =>
+    {
+        let { account, strategyInfo } = this.state;
+
+        if ('metadata' in account)
+        {
+            const current_strategy = account.metadata.current_strategy;
+            if (!(current_strategy in strategyInfo))
+            {
+                return <React.Fragment />;
+            }
+            else if (account.metadata.open_strategies.includes(current_strategy))
+            {
+                const strategy = strategyInfo[current_strategy];
+                let current_page = strategy.current_page;
+                if (current_page === undefined)
+                {
+                    current_page = 0;
+                }
+
+                const width = 100 / strategy.pages;
+
+                let page_items = [];
+                for (let i = 0; i < strategy.pages; i++)
+                {
+                    let item_class = 'page item-inner';
+                    if (i === current_page)
+                    {
+                        item_class += ' selected';
+                    }
+                    page_items.push(
+                        <div 
+                            key={i}
+                            className='page item'
+                            style={{
+                                width: `calc(${width}% - 10px)`
+                            }}
+                            name={i}
+                            onClick={this.gotoPage.bind(this)}
+                        >
+                            <div className={item_class}></div>
+                        </div>
+                    );
+                }
+
+                let arrow_left_class = 'page icon';
+                if (current_page === 0)
+                {
+                    arrow_left_class += ' disabled';
+                }
+                let arrow_right_class = 'page icon';
+                if (current_page === strategy.pages - 1)
+                {
+                    arrow_right_class += ' disabled';
+                }
+                let add_page_class = 'page icon';
+                if (strategy.pages === 10)
+                {
+                    add_page_class += ' disabled';
+                }
+
+                return (
+                    <React.Fragment>
+
+                    <div className='page item-group'>
+                        {page_items}
+                    </div>
+
+                    <div className='page tools-group'>
+                        <div className={arrow_left_class} onClick={this.pageLeft.bind(this)}>
+                            <FontAwesomeIcon className='page icon-inner' icon={faAngleLeft} />
+                        </div>
+                        <div className={arrow_right_class} onClick={this.pageRight.bind(this)}>
+                            <FontAwesomeIcon className='page icon-inner' icon={faAngleRight} />
+                        </div>
+                        <div className='page icon' onClick={this.deletePage.bind(this)}>
+                            <FontAwesomeIcon className='page icon-inner' icon={faMinus} />
+                        </div>
+                        <div className={add_page_class} onClick={this.addPage.bind(this)}>
+                            <FontAwesomeIcon className='page icon-inner' icon={faPlus} />
+                        </div>
+                    </div>
+
+                    </React.Fragment>
+                );
+            }
+        }
+
     }
 
     generateStrategyTabs = () =>
@@ -294,6 +398,7 @@ class StrategyApp extends Component
                         getCamera={this.getCamera}
                         getSio={this.getSio}
                         getKeys={this.getKeys}
+                        getPage={this.getPage}
                         setPopup={this.setPopup}
                         // Window Funcs
                         closeWindow={this.closeWindow}
@@ -351,6 +456,7 @@ class StrategyApp extends Component
                         getCamera={this.getCamera}
                         getSio={this.getSio}
                         getKeys={this.getKeys}
+                        getPage={this.getPage}
                         setPopup={this.setPopup}
                         setShowLoadScreen={this.setShowLoadScreen}
                         // Window Funcs
@@ -1318,7 +1424,6 @@ class StrategyApp extends Component
 
     createIndicator = (type, broker, product, chart_period, properties) =>
     {
-        console.log(broker, product, properties);
         let { indicators } = this.state;
         const ind = new Indicator[type](broker, product, chart_period, properties);
         indicators.push(ind);
@@ -1723,6 +1828,70 @@ class StrategyApp extends Component
         let { popup } = this.state;
         popup.opened = opened
         this.setState({ popup });
+    }
+
+    gotoPage(e)
+    {
+        const page = e.target.getAttribute('name');
+        const strategy = this.getCurrentStrategy()
+        let { strategyInfo } = this.state;
+        strategyInfo[strategy].current_page = parseInt(page);
+
+        this.setState({ strategyInfo });
+    }
+
+    pageRight()
+    {
+        const strategy = this.getCurrentStrategy()
+        let { strategyInfo } = this.state;
+        if (strategyInfo[strategy].current_page === undefined)
+        {
+            strategyInfo[strategy].current_page = 0;
+        }
+
+        strategyInfo[strategy].current_page += 1;
+        this.setState({ strategyInfo });
+    }
+
+    pageLeft()
+    {
+        const strategy = this.getCurrentStrategy()
+        let { strategyInfo } = this.state;
+        if (strategyInfo[strategy].current_page === undefined)
+        {
+            strategyInfo[strategy].current_page = 0;
+        }
+
+        strategyInfo[strategy].current_page -= 1;
+        this.setState({ strategyInfo });
+    }
+
+    addPage()
+    {
+        const strategy = this.getCurrentStrategy()
+        let { strategyInfo } = this.state;
+        strategyInfo[strategy].pages = Math.min(strategyInfo[strategy].pages + 1, 10);
+
+        this.setState({ strategyInfo });
+    }
+
+    deletePage()
+    {
+        // Iteratively delete windows associated with current page
+        // decrement all page numbers above current page number
+        // decrement pages
+    }
+
+    getPage = () => 
+    {
+        const strategy = this.getCurrentStrategy()
+        let { strategyInfo } = this.state;
+        if (strategyInfo[strategy].current_page === undefined)
+        {
+            strategyInfo[strategy].current_page = 0;
+        }
+
+        return strategyInfo[strategy].current_page;
     }
 
     setHovered = (name, is_hovered) =>

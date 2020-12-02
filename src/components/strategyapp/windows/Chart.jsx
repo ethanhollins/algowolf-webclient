@@ -39,7 +39,8 @@ class Chart extends Component
         hovered: {
             vert_axis: false,
             horiz_axis: false,
-            bar: false
+            bar: false,
+            study_handle: false
         }
     }
 
@@ -329,12 +330,20 @@ class Chart extends Component
                 height: segment_size.height
             }
             
+            const studies = this.getStudyComponents();
             if (!keys.includes(SPACEBAR))
             {
                 is_down = true;
                 if (!(hovered.horiz_axis || hovered.vert_axis))
                 {
-                    if (this.isWithinBounds(rect, mouse_pos))
+                    if (hovered.study_handle !== false)
+                    {
+                        is_down = false;
+                        is_move = false;
+                        
+                        studies[hovered.study_handle].setIsResize(true);
+                    }
+                    else if (this.isWithinBounds(rect, mouse_pos))
                     {
                         e.preventDefault();
                         is_move = true;
@@ -343,7 +352,6 @@ class Chart extends Component
                     else
                     {
                         // Check mouse within study bounds
-                        const studies = this.getStudyComponents();
                         for (let i = 0; i < studies.length; i++)
                         {
                             let study = studies[i];
@@ -356,19 +364,7 @@ class Chart extends Component
                                 height: segment_size.height
                             }
             
-                            
-                            const handle_rect = this.getHandleRect(start_pos, segment_size);
-                            handle_rect.x += start_pos.x;
-                            handle_rect.y += top_offset;
-                            if (this.isWithinBounds(handle_rect, mouse_pos))
-                            {
-                                is_down = false;
-                                is_move = false;
-                                
-                                study.setIsResize(true);
-                                return
-                            }
-                            else if (this.isWithinBounds(rect, mouse_pos)) 
+                            if (this.isWithinBounds(rect, mouse_pos)) 
                             {
                                 e.preventDefault();
                                 is_down = true;
@@ -449,6 +445,7 @@ class Chart extends Component
             isChanged = isChanged || this.onBarHover(mouse_pos, is_top, hovered);
             isChanged = isChanged || this.onVertAxisHover(mouse_pos, is_top, hovered);
             isChanged = isChanged || this.onHorizAxisHover(mouse_pos, is_top, hovered);
+            isChanged = isChanged || this.onStudyHandleHover(mouse_pos, is_top, hovered);
 
             if (isChanged)
             {
@@ -480,6 +477,7 @@ class Chart extends Component
                 width: seg_size.width,
                 height: seg_size.height
             }
+
             if (!hovered.vert_axis && this.isWithinBounds(rect, mouse_pos))
             {
                 hovered.vert_axis = true;
@@ -533,7 +531,7 @@ class Chart extends Component
             if (is_top)
             {
                 const timestamp = this.isWithinBarBounds(mouse_pos);
-                if (timestamp !== null && !hovered.bar)
+                if (timestamp !== null)
                 {
                     hovered.bar = true;
                     return true;
@@ -542,6 +540,42 @@ class Chart extends Component
                 {
                     hovered.bar = false;
                     return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    onStudyHandleHover(mouse_pos, is_top, hovered)
+    {
+        if (this.getChart() !== undefined)
+        {
+            if (is_top)
+            {
+                for (let i = 0; i < this.getStudyComponents().length; i++)
+                {
+                    const start_pos = this.getChartSegmentStartPos(i+1);
+                    const segment_size = this.getSegmentSize(i+1);
+                    const window_start_pos = this.getWindowSegmentStartPos(0);
+                    const chart_size = this.getChartSize();
+                    const top_offset = this.props.getTopOffset();
+    
+                    const rect = this.getHandleRect(start_pos, chart_size, segment_size);
+                    let window_rect = { 
+                        x: rect.x + window_start_pos.x, y: rect.y + window_start_pos.y + top_offset, 
+                        width: rect.width, height: rect.height 
+                    };
+    
+                    if (!hovered.study_handle && this.isWithinBounds(window_rect, mouse_pos))
+                    {
+                        hovered.study_handle = i;
+                        return true;
+                    }
+                    else if (hovered.study_handle !== false && !this.isWithinBounds(window_rect, mouse_pos))
+                    {
+                        hovered.study_handle = false;
+                        return true;
+                    }
                 }
             }
         }
@@ -563,6 +597,10 @@ class Chart extends Component
         else if (hovered.bar)
         {
             cursor = 'pointer';
+        }
+        else if (hovered.study_handle !== false)
+        {
+            cursor = 'ns-resize';
         }
         else if (is_down)
         {
@@ -1853,11 +1891,11 @@ class Chart extends Component
         }
     }
 
-    getHandleRect(start_pos, segment_size)
+    getHandleRect(start_pos, chart_size, segment_size)
     {
         // Size Vars
-        const handle_width = Math.min(segment_size.width/10, 21);
-        const handle_height = Math.min(segment_size.height/15, 6);
+        const handle_width = Math.min(chart_size.width/10, 21);
+        const handle_height = Math.min(chart_size.height/15, 6);
         // Position Vars
         const handle_x = Math.round(segment_size.width/2 - handle_width/2) + 0.5;
         const handle_y = Math.round(start_pos.y) - (handle_height-1)/2;
@@ -1870,10 +1908,11 @@ class Chart extends Component
     handleStudyHandles(ctx, window_start_pos, start_pos, segment_size)
     {
         const mouse_pos = this.props.getMousePos();
+        const chart_size = this.getChartSize();
         const top_offset = this.props.getTopOffset();
 
         // Draw Handle
-        const rect = this.getHandleRect(start_pos, segment_size);
+        const rect = this.getHandleRect(start_pos, chart_size, segment_size);
         let window_rect = { 
             x: rect.x + window_start_pos.x, y: rect.y + window_start_pos.y, 
             width: rect.width, height: rect.height 
@@ -1893,11 +1932,6 @@ class Chart extends Component
 
             ctx.fillStyle = `rgba(255, 255, 255, 1.0)`;
             ctx.fillRect(rect.x + handle_middle_off/2, Math.round(start_pos.y), rect.width - handle_middle_off, 1);
-
-            if (this.getCursor() === 'inherit')
-            {
-                this.setCursor('ns-resize');
-            }
         }
         else
         {
@@ -1909,11 +1943,6 @@ class Chart extends Component
 
             ctx.fillStyle = `rgba(180, 180, 180, 1.0)`;
             ctx.fillRect(rect.x + handle_middle_off/2, Math.round(start_pos.y), rect.width - handle_middle_off, 1);
-            
-            if (this.getCursor() === 'ns-resize')
-            {
-                this.setCursor('inherit');
-            }
         }
     }
 
@@ -2436,9 +2465,10 @@ class Chart extends Component
         if (seg_idx === 0)
         {
             const seg_size = this.getSegmentSize(seg_idx);
+            const seg_start = this.getWindowSegmentStartPos(seg_idx);
     
             const world_pos = camera.convertScreenPosToWorldPos(
-                { x: mouse_pos.x, y: mouse_pos.y - top_offset }, pos, seg_size, scale
+                { x: mouse_pos.x - seg_start.x, y: mouse_pos.y - seg_start.y - top_offset }, pos, seg_size, scale
             )
             const ohlc = this.getOhlcByPos(world_pos.x);
 

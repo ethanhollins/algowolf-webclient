@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-class SpreadSheet extends Component
+class Report extends Component
 {
 
     render()
@@ -11,4 +11,4 @@ class SpreadSheet extends Component
    
 }
 
-export default SpreadSheet;
+export default Report;

@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import WindowWrapper from './WindowWrapper';
 import WindowShadow from './WindowShadow';
 import io from 'socket.io-client';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChartLine } from '@fortawesome/pro-light-svg-icons';
 
 class Strategy extends Component 
 {
@@ -21,7 +23,6 @@ class Strategy extends Component
 
     state = {
         sio: undefined,
-        current_page: 0,
         hide_shadows: false,
         loaded: [],
         drawings: {},
@@ -77,7 +78,8 @@ class Strategy extends Component
 
     generateShadows()
     {
-        const { current_page, hide_shadows } = this.state;
+        const { hide_shadows } = this.state;
+        const current_page = this.props.getPage();
 
         let gen_windows = [];
 
@@ -113,7 +115,7 @@ class Strategy extends Component
 
     generateWindows()
     {
-        const { current_page } = this.state;
+        const current_page = this.props.getPage();
 
         let gen_windows = [];
 
@@ -194,7 +196,23 @@ class Strategy extends Component
                 }
             }
         }
-        return gen_windows;
+
+        if (gen_windows.length === 0)
+        {
+            return (
+                <div className='window message'>
+                    <div>This page has no open windows!</div>
+                    <div>
+                        <div>Try adding a chart</div>
+                        <FontAwesomeIcon className='window message-icon' icon={faChartLine} />
+                    </div>
+                </div>
+            );
+        }
+        else
+        {
+            return gen_windows;
+        }
     }
 
     uint8arrayToString = (myUint8Arr) =>
