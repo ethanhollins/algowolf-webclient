@@ -1479,7 +1479,7 @@
 
 .control-panel.background {
     width: 100%;
-    height: calc(100% - (35px + 30px));
+    height: calc(100% - (28px + 30px));
     overflow-y: auto;
     overflow-x: hidden;
 }
