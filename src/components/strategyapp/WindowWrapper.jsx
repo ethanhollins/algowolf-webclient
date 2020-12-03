@@ -199,6 +199,15 @@ class WindowWrapper extends Component
                 isLoaded={this.props.isLoaded}
             />;
         }
+        else if (this.state.info.type === 'report')
+        {
+            return <Dockable
+                ref={this.setInnerElementRef}
+                strategy_id={this.props.strategy_id}
+                item_id={this.state.info.id}
+                getElementType={this.getElementType}
+            />;
+        }
 
         return <React.Fragment/>;
     }

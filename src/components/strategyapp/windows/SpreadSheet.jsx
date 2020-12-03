@@ -5,7 +5,7 @@ class SpreadSheet extends Component
 
     render()
     {
-        return;
+        return <React.Fragment />;
     }
 
    

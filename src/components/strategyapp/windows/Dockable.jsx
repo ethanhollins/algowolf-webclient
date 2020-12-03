@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import Log from './Log';
 import Info from './Info';
 import ControlPanel from './ControlPanel';
+import Report from './Report';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faScroll, faInfoCircle, faSlidersVSquare, faFileInvoice } from '@fortawesome/pro-regular-svg-icons';
 
 class Dockable extends Component
 {
@@ -25,7 +28,7 @@ class Dockable extends Component
         return (
             <div className='dockable background'>
                 <div className='dockable header'>
-                    <span>{this.generateTitle()}</span>
+                    {this.generateTitle()}
                 </div>
                 {this.generateInnerWindow()}
             </div>
@@ -38,15 +41,47 @@ class Dockable extends Component
         
         if (type === 'log')
         {
-            return 'Script Log';
+            return (
+                <React.Fragment>
+
+                <FontAwesomeIcon icon={faScroll} className='dockable icon' />
+                <span>Script Log</span>
+
+                </React.Fragment>
+            );
         }
         else if (type === 'info')
         {
-            return 'Info';
+            return (
+                <React.Fragment>
+
+                <FontAwesomeIcon icon={faInfoCircle} className='dockable icon' />
+                <span>Info</span>
+                
+                </React.Fragment>
+            );
         }
         else if (type === 'control_panel')
         {
-            return 'Control Panel';
+            return (
+                <React.Fragment>
+
+                <FontAwesomeIcon icon={faSlidersVSquare} className='dockable icon' />
+                <span>Control Panel</span>
+                
+                </React.Fragment>
+            );
+        }
+        else if (type === 'report')
+        {
+            return (
+                <React.Fragment>
+
+                <FontAwesomeIcon icon={faFileInvoice} className='dockable icon' />
+                <span>Report</span>
+                
+                </React.Fragment>
+            );
         }
     }
 
@@ -92,6 +127,15 @@ class Dockable extends Component
                 updateInputVariables={this.props.updateInputVariables}
                 getCurrentAccount={this.props.getCurrentAccount}
                 isLoaded={this.props.isLoaded}
+            />
+        }
+        else if (type === 'report')
+        {
+            return <Report 
+                key={this.props.item_id}
+                ref={this.setInnerWindowRef}
+                strategy_id={this.props.strategy_id}
+                item_id={this.props.item_id}
             />
         }
     }
