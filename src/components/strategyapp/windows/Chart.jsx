@@ -1032,8 +1032,8 @@ class Chart extends Component
     
                     <div className='chart group'>
                         <div className='chart ohlc-group'>
-                            <div className='chart product-btn'>{this.getProduct().replace('_', '')}</div>
-                            <div className='chart period-btn'>{this.getPeriod()}</div>
+                            <div className='chart product-btn' onClick={this.props.notAvailable}>{this.getProduct().replace('_', '')}</div>
+                            <div className='chart period-btn' onClick={this.props.notAvailable}>{this.getPeriod()}</div>
                             <div>
                                 <span className='chart values ohlc-type'>O</span>
                                 <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[0].toFixed(5)}</span>
@@ -2004,9 +2004,9 @@ class Chart extends Component
                     // Handle Misc Drawings
                     else
                     {
+
                         if (!(d_props.type in Drawings)) continue;
                         const drawing = Drawings[d_props.type]();
-        
                         // Get Rotation and Scale
                         const rotation = this.degsToRads(d_props.properties.rotation);
                         const drawing_scale = 0.01 * d_props.properties.scale;
@@ -2045,19 +2045,6 @@ class Chart extends Component
 
         const chart_drawings_layers = this.getProperties().drawing_layers;
         let drawings = this.getDrawings();
-
-        if (!this.isBacktest())
-        {
-            const current_account = this.getCurrentAccount();
-            if (current_account !== undefined && current_account in drawings)
-            {
-                drawings = drawings[current_account];
-            }
-            else
-            {
-                return;
-            }
-        }
 
         for (let layer of chart_drawings_layers)
         {

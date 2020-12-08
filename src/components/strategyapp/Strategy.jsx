@@ -14,6 +14,7 @@ class Strategy extends Component
         this.windows = [];
 
         this.retrieveAccountInfo = this.retrieveAccountInfo.bind(this);
+        this.retrieveReport = this.retrieveReport.bind(this);
         this.setCurrentAccount = this.setCurrentAccount.bind(this);
 
         this.addWindowsRef = elem => {
@@ -157,6 +158,7 @@ class Strategy extends Component
                             isTopWindow={this.props.isTopWindow}
                             getTopWindow={this.props.getTopWindow}
                             setTopWindow={this.props.setTopWindow}
+                            retrieveReport={this.retrieveReport}
                             moveWindow={this.props.moveWindow}
                             hideShadows={this.hideShadows}
                             // History Functions
@@ -289,21 +291,14 @@ class Strategy extends Component
                     this.createDrawing(data.account_id, data.layer, d);
                 }
             }
-            // else if (data.type === 'delete_drawings')
-            // {
-            //     for (let d of data.items)
-            //     {
-            //         this.deleteDrawing(data.account_id, data.layer, d);
-            //     }
-            // }
-            // else if (data.type === 'delete_drawing_layer')
-            // {
-            //     this.deleteDrawingLayer(data.account_id, data.layer);
-            // }
-            // else if (data.type === 'delete_all_drawings')
-            // {
-            //     this.deleteAllDrawings(data.account_id);
-            // }
+            else if (data.type === 'clear_drawing_layer')
+            {
+                this.clearDrawingLayer(data.account_id, data.layer);
+            }
+            else if (data.type === 'clear_all_drawings')
+            {
+                this.clearAllDrawings(data.account_id);
+            }
             else if (data.type === 'create_log')
             {
                 this.createLog(data.account_id, data);
@@ -473,31 +468,23 @@ class Strategy extends Component
         }
     }
 
-    deleteDrawingLayer = (account_id, layer) =>
+    clearDrawingLayer = (account_id, layer) =>
     {
-        let strategy = this.getStrategyInfo();
+        let { drawings } = this.state;
 
-        if (strategy !== undefined)
+        if (account_id in drawings && layer in drawings[account_id])
         {
-            if (account_id in strategy.drawings)
-            {
-                if (layer in strategy.drawings[account_id])
-                {
-                    delete strategy.drawings[layer];
-                }
-                this.props.updateStrategyInfo();
-            }
+            drawings[account_id][layer] = [];
         }
     }
 
-    deleteAllDrawings = (account_id) =>
+    clearAllDrawings = (account_id) =>
     {
-        let strategy = this.getStrategyInfo();
+        let { drawings } = this.state;
 
-        if (strategy !== undefined)
+        if (account_id in drawings)
         {
-            strategy.drawings = {}
-            this.props.updateStrategyInfo();
+            drawings[account_id] = {};
         }
     }
 
@@ -857,6 +844,15 @@ class Strategy extends Component
             loaded.push(account_code);
             this.setState({ loaded });
         }
+    }
+
+    async retrieveReport(name)
+    {
+        const account_code = this.getCurrentAccount();
+        const broker_id = account_code.split('.')[0];
+        const account_id = account_code.split('.')[1];
+
+        return await this.props.retrieveReport(this.props.id, broker_id, account_id, name);
     }
 
     isLoaded = () =>

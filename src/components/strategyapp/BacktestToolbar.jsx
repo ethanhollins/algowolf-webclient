@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-    faBars,  faChartLine, faChartPie, 
-    faLightbulb, faCode, faHistory, faChevronRight, faTools, faExpandArrowsAlt, faLink, faExpandAlt, faToolbox
+    faBars,  faChartLine, faChartPie,
+    faLightbulb, faCode, faHistory, faChevronRight,
+    faTools, faExpandArrowsAlt, faLink, faExpandAlt
 } from '@fortawesome/pro-regular-svg-icons';
 import { 
     faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
-    faFileInvoice, faChartBar, faTicketAlt, faLayerGroup
+    faFileInvoice, faChartBar, faTicketAlt, faLayerGroup,
+    faSignOut
 } from '@fortawesome/pro-light-svg-icons';
 
 class BacktestToolbar extends Component
@@ -15,6 +17,18 @@ class BacktestToolbar extends Component
     {
         super(props);
 
+        this.setMenuElem = elem => {
+            this.menuElem = elem;
+        }
+        this.setMenuDropdown = elem => {
+            this.menuDropdown = elem;
+        }
+        this.setChartsElem = elem => {
+            this.chartsElem = elem;
+        }
+        this.setChartsDropdown = elem => {
+            this.chartsDropdown = elem;
+        }
         this.setStatsElem = elem => {
             this.statsElem = elem;
         }
@@ -46,8 +60,29 @@ class BacktestToolbar extends Component
         return (
             <div className='toolbox body noselect' onDragStart={this.onDragStart}>
                 <div>
-                    <div className='toolbox item row'>
-                        <FontAwesomeIcon className='toolbox icon' icon={faBars} />
+                    <div className='toolbox item'>
+                        <div ref={this.setMenuElem} className='toolbox item row btn' onClick={this.onMenuDropdown}>
+                            <FontAwesomeIcon className='toolbox standalone-icon' icon={faBars} />
+                        </div>
+                        <div ref={this.setMenuDropdown} className='toolbox dropdown' style={{display: 'none'}}>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem} name='brokers'>
+                                <span className='toolbox left'>My Brokers</span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
+                            </div>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem} name='strategies'>
+                                <span className='toolbox left'>My Strategies</span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
+                            </div>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem} name='account'>
+                                <span className='toolbox left'>Account Settings</span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
+                            </div>
+                            <div className='dropdown-separator'></div>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem} name='logout'>
+                                <span className='toolbox left'>Logout</span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faSignOut} className='toolbox right-icon' /></span>
+                            </div>
+                        </div>
                     </div>
                     <div className='toolbox item'>
                         <div ref={this.setChartsElem} className='toolbox item row btn' onClick={this.onChartsDropdown}>
@@ -55,27 +90,27 @@ class BacktestToolbar extends Component
                             <span className='toolbox label'>Charts</span>
                         </div>
                         <div ref={this.setChartsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
-                            <div onClick={this.onChartsDropdownItem} name='cryptocurrencies'>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem} name='cryptocurrencies'>
                                 <span className='toolbox left'>Cryptocurrencies</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onChartsDropdownItem} name='currencies'>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem} name='currencies'>
                                 <span className='toolbox left'>Currencies</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onChartsDropdownItem} name='stocks'>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem} name='stocks'>
                                 <span className='toolbox left'>Stocks</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onChartsDropdownItem} name='indicies'>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem} name='indicies'>
                                 <span className='toolbox left'>Indicies</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onChartsDropdownItem} name='futures'>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem} name='futures'>
                                 <span className='toolbox left'>Futures</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onChartsDropdownItem} name='bonds'>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem} name='bonds'>
                                 <span className='toolbox left'>Bonds</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
@@ -87,13 +122,13 @@ class BacktestToolbar extends Component
                             <span className='toolbox label'>Stats</span>
                         </div>
                         <div ref={this.setStatsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
-                            <div onClick={this.onStatsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faChartBar} className='toolbox left-icon' /><span>Graphs</span>
                                 </span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onStatsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faFileInvoice} className='toolbox left-icon' /><span>Reports</span>
                                 </span>
@@ -107,37 +142,37 @@ class BacktestToolbar extends Component
                             <span className='toolbox label'>Utilities</span>
                         </div>
                         <div ref={this.setUtilsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
-                            <div onClick={this.onUtilsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faSort} className='toolbox left-icon' /><span>Positions/Orders</span>
                                 </span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onUtilsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faTicketAlt} className='toolbox left-icon' /><span>Ticket</span>
                                 </span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onUtilsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faReceipt} className='toolbox left-icon' /><span>Transactions</span>
                                 </span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onUtilsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faSlidersVSquare} className='toolbox left-icon' /><span>Control Center</span>
                                 </span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onUtilsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faLayerGroup} className='toolbox left-icon' /><span>Drawing Layers</span>
                                 </span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
                             </div>
-                            <div onClick={this.onUtilsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faCodeLight} className='toolbox left-icon' /><span>Script Editor</span>
                                 </span>
@@ -151,38 +186,32 @@ class BacktestToolbar extends Component
                             <span className='toolbox label'>Tools</span>
                         </div>
                         <div ref={this.setToolsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
-                            <div onClick={this.onToolsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faExpandArrowsAlt} className='toolbox left-icon' /><span>Move</span>
                                 </span>
                             </div>
-                            <div onClick={this.onToolsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faLink} className='toolbox left-icon' /><span>Link</span>
                                 </span>
                             </div>
-                            <div onClick={this.onToolsDropdownItem}>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
                                 <span className='toolbox left'>
                                     <FontAwesomeIcon icon={faExpandAlt} className='toolbox left-icon' /><span>Resize</span>
                                 </span>
-                            </div>
-                            <div onClick={this.onToolsDropdownItem}>
-                                <span className='toolbox left'>
-                                    <FontAwesomeIcon icon={faToolbox} className='toolbox left-icon' /><span>Toolbox</span>
-                                </span>
-                                <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
                             </div>
                         </div>
                     </div>
                     <div className='toolbox separator' />
                     <div className='toolbox item'>
-                        <div ref={this.setScriptElem} className='toolbox item row btn'>
+                        <div ref={this.setScriptElem} className='toolbox item row btn' onClick={this.onNotAvailableItem}>
                             <FontAwesomeIcon className='toolbox icon blue_btn' icon={faCode} />
                             <span className='toolbox label'>Script</span>
                         </div>
                     </div>
                     <div className='toolbox item'>
-                        <div ref={this.setBacktestElem} className='toolbox item row btn'>
+                        <div ref={this.setBacktestElem} className='toolbox item row btn' onClick={this.onNotAvailableItem}>
                             <FontAwesomeIcon className='toolbox icon blue_btn' icon={faHistory} />
                             <span className='toolbox label'>Backtest</span>
                         </div>
@@ -190,6 +219,34 @@ class BacktestToolbar extends Component
                 </div>
             </div> 
         );
+    }
+
+    onMenuDropdown = (e) =>
+    {
+        if (this.menuDropdown.style.display === 'none')
+        {
+            this.menuDropdown.style.display = 'block';
+            const btn_rect = this.menuElem.getBoundingClientRect();
+            this.menuDropdown.style.left = parseInt(btn_rect.x) + 'px';
+        }
+        else
+        {
+            this.menuDropdown.style.display = 'none';
+        }
+    }
+
+    onChartsDropdown = (e) =>
+    {
+        if (this.chartsDropdown.style.display === 'none')
+        {
+            this.chartsDropdown.style.display = 'block';
+            const btn_rect = this.chartsElem.getBoundingClientRect();
+            this.chartsDropdown.style.left = parseInt(btn_rect.x) + 'px';
+        }
+        else
+        {
+            this.chartsDropdown.style.display = 'none';
+        }
     }
 
     onStatsDropdown = (e) =>
@@ -263,8 +320,44 @@ class BacktestToolbar extends Component
         this.toolsDropdown.style.display = 'none';
     }
 
+    onNotAvailableItem = (e) =>
+    {
+        const popup = {
+            type: 'not-available',
+            size: {
+                width: 30,
+                height: 30
+            }
+        }
+        this.props.setPopup(popup);
+    }
+
+    onNotAvailableDropdownItem = (e) =>
+    {
+        e.target.parentNode.style.display = 'none';
+        
+        const popup = {
+            type: 'not-available',
+            size: {
+                width: 30,
+                height: 30
+            }
+        }
+        this.props.setPopup(popup);
+    }
+
     closeTemporaryWindows(mouse_pos)
     {
+        if (this.menuDropdown.style.display !== 'none')
+        {
+            if (!this.props.isWithinBounds(this.menuDropdown.getBoundingClientRect(), mouse_pos))
+                this.menuDropdown.style.display = 'none';
+        }
+        if (this.chartsDropdown.style.display !== 'none')
+        {
+            if (!this.props.isWithinBounds(this.chartsDropdown.getBoundingClientRect(), mouse_pos))
+                this.chartsDropdown.style.display = 'none';
+        }
         if (this.statsDropdown.style.display !== 'none')
         {
             if (!this.props.isWithinBounds(this.statsDropdown.getBoundingClientRect(), mouse_pos))

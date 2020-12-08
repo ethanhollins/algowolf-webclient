@@ -94,9 +94,9 @@ class WindowWrapper extends Component
                 <div ref={this.setWindowBtnsRef} className='window btns'>
                     <div>
                         <FontAwesomeIcon className='window item small' icon={faSquare} onClick={this.onMaximise} />
-                        <FontAwesomeIcon className='window item small' icon={faWindowMaximize} onClick={this.onPopout} />
-                        <FontAwesomeIcon className='window item' icon={faMinus} onClick={this.onMinimize} />
-                        <FontAwesomeIcon className='window item' icon={faTimes} onClick={this.onClose} />
+                        <FontAwesomeIcon className='window item small' icon={faWindowMaximize} onClick={this.notAvailable} />
+                        <FontAwesomeIcon className='window item' icon={faMinus} onClick={this.notAvailable} />
+                        <FontAwesomeIcon className='window item' icon={faTimes} onClick={this.notAvailable} />
                     </div>
                 </div>
                 <Camera
@@ -127,6 +127,7 @@ class WindowWrapper extends Component
                 getKeys={this.props.getKeys}
                 getCursor={this.getCursor}
                 setCursor={this.setCursor}
+                notAvailable={this.notAvailable}
     
                 // Window Props
                 connectChart={this.props.connectChart}
@@ -205,7 +206,9 @@ class WindowWrapper extends Component
                 ref={this.setInnerElementRef}
                 strategy_id={this.props.strategy_id}
                 item_id={this.state.info.id}
+                info={this.state.info}
                 getElementType={this.getElementType}
+                retrieveReport={this.props.retrieveReport}
             />;
         }
 
@@ -697,6 +700,18 @@ class WindowWrapper extends Component
             window_wrapper.style.width = Math.round(screen_size.x) + "px";
             window_wrapper.style.height = Math.round(screen_size.y) + "px";
         }
+    }
+
+    notAvailable = (e) =>
+    {
+        const popup = {
+            type: 'not-available',
+            size: {
+                width: 30,
+                height: 30
+            }
+        }
+        this.props.setPopup(popup);
     }
 
     getAppContainerSize = () =>

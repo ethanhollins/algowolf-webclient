@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-class AccountSettings extends Component
+class EmailSubscribe extends Component
 {
 
     render()
@@ -65,4 +65,4 @@ class AccountSettings extends Component
     }
 }
 
-export default AccountSettings;
+export default EmailSubscribe;

@@ -74,11 +74,12 @@ class Dockable extends Component
         }
         else if (type === 'report')
         {
+            const name = this.props.info.properties.name;
             return (
                 <React.Fragment>
 
                 <FontAwesomeIcon icon={faFileInvoice} className='dockable icon' />
-                <span>Report</span>
+                <span>{name}</span>
                 
                 </React.Fragment>
             );
@@ -136,6 +137,8 @@ class Dockable extends Component
                 ref={this.setInnerWindowRef}
                 strategy_id={this.props.strategy_id}
                 item_id={this.props.item_id}
+                info={this.props.info}
+                retrieveReport={this.props.retrieveReport}
             />
         }
     }

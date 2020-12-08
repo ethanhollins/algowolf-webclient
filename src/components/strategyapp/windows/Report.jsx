@@ -4,13 +4,42 @@ import SpreadSheet from './SpreadSheet';
 class Report extends Component
 {
 
+    state = {
+        data: null
+    }
+
+    async componentDidMount()
+    {
+        const data = await this.retrieveData();
+        console.log(data);
+        this.setState({ data });
+    }
+    
     render()
     {
         return (
-            <SpreadSheet/>
+            <SpreadSheet
+                key={this.getName()}
+                data={this.getData()}
+            />
         );
     }
 
+
+    getName = () =>
+    {
+        return this.props.info.properties.name;
+    }
+
+    getData = () =>
+    {
+        return this.state.data;
+    }
+
+    retrieveData = () =>
+    {
+        return this.props.retrieveReport(this.getName());
+    }
    
 }
 

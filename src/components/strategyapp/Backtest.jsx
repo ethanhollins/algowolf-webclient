@@ -27,6 +27,8 @@ class Backtest extends Component
             selected_offset: null,
         }
 
+        this.retrieveReport = this.retrieveReport.bind(this);
+
         this.windows = [];
 
         this.addWindowsRef = elem => {
@@ -138,6 +140,7 @@ class Backtest extends Component
                             isTopWindow={this.props.isTopWindow}
                             getTopWindow={this.props.getTopWindow}
                             setTopWindow={this.props.setTopWindow}
+                            retrieveReport={this.retrieveReport}
                             moveWindow={this.props.moveWindow}
                             hideShadows={this.hideShadows}
                             // History Functions
@@ -556,6 +559,14 @@ class Backtest extends Component
     switchLocalVariablesPreset = (account_id, data) =>
     {
         
+    }
+
+    async retrieveReport(name)
+    {
+        const strategy_id = this.props.id.split('/backtest/')[0];
+        const backtest_id = this.props.id.split('/backtest/')[1];
+
+        return await this.props.retrieveReport(strategy_id, backtest_id, name);
     }
 
     isLoaded = () =>

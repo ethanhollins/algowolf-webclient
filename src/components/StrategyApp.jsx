@@ -61,6 +61,8 @@ class StrategyApp extends Component
         this.retrieveAllBrokers = this.retrieveAllBrokers.bind(this);
         this.retrieveStrategies = this.retrieveStrategies.bind(this);
         this.retrieveAccountInfo = this.retrieveAccountInfo.bind(this);
+        this.retrieveReport = this.retrieveReport.bind(this);
+        this.retrieveBacktestReport = this.retrieveBacktestReport.bind(this);
         this.retrieveTransactions = this.retrieveTransactions.bind(this);
         this.retrieveChartData = this.retrieveChartData.bind(this);
         this.updateStrategyInputVariables = this.updateStrategyInputVariables.bind(this);
@@ -407,6 +409,7 @@ class StrategyApp extends Component
                         isTopWindow={this.isTopWindow}
                         getTopWindow={this.getTopWindow}
                         setTopWindow={this.setTopWindow}
+                        retrieveReport={this.retrieveBacktestReport}
                         // History Functions
                         addHistory={this.addHistory}
                         getHistory={this.getHistory}
@@ -466,6 +469,7 @@ class StrategyApp extends Component
                         isTopWindow={this.isTopWindow}
                         getTopWindow={this.getTopWindow}
                         setTopWindow={this.setTopWindow}
+                        retrieveReport={this.retrieveReport}
                         // History Functions
                         addHistory={this.addHistory}
                         getHistory={this.getHistory}
@@ -816,6 +820,44 @@ class StrategyApp extends Component
 
         const res = await fetch(
             `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/${broker_id}/${account_id}`,
+            reqOptions
+        ).then(res => res.json());
+
+        return res
+    }
+
+    async retrieveReport(strategy_id, broker_id, account_id, name)
+    {
+        const { REACT_APP_API_URL } = process.env;
+
+        /** Retrieve strategy info */
+        const reqOptions = {
+            method: 'GET',
+            headers: this.props.getHeaders(),
+            credentials: 'include'
+        }
+
+        const res = await fetch(
+            `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/${broker_id}/${account_id}/reports/${name}`,
+            reqOptions
+        ).then(res => res.json());
+
+        return res
+    }
+
+    async retrieveBacktestReport(strategy_id, backtest_id, name)
+    {
+        const { REACT_APP_API_URL } = process.env;
+
+        /** Retrieve strategy info */
+        const reqOptions = {
+            method: 'GET',
+            headers: this.props.getHeaders(),
+            credentials: 'include'
+        }
+
+        const res = await fetch(
+            `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/backtest/${backtest_id}/reports/${name}`,
             reqOptions
         ).then(res => res.json());
 

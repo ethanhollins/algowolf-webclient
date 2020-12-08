@@ -3,6 +3,9 @@ import ChartSettings from './popups/ChartSettings';
 import BrokerSettings from './popups/BrokerSettings';
 import StrategySettings from './popups/StrategySettings';
 import AccountSettings from './popups/AccountSettings';
+import NotAvailable from './popups/NotAvailable';
+import AreYouSure from './popups/AreYouSure';
+import EmailSubscribe from './popups/EmailSubscribe';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faChevronRight, faPlus
@@ -162,6 +165,24 @@ class Popup extends Component
                     updateStrategyInfo={this.props.updateStrategyInfo}
                     setHoverOn={this.setHoverOn}
                     setHoverOff={this.setHoverOff}
+                />
+            }
+            else if (popup.type === 'not-available')
+            {
+                return <NotAvailable
+                    getPopup={this.props.getPopup}
+                />
+            }
+            else if (popup.type === 'are-you-sure')
+            {
+                return <AreYouSure
+                    getPopup={this.props.getPopup}
+                />
+            }
+            else if (popup.type === 'email-subscribe')
+            {
+                return <EmailSubscribe
+                    getPopup={this.props.getPopup}
                 />
             }
             // else if (popup.type === 'chart-indicators')
