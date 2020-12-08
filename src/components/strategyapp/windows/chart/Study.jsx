@@ -294,6 +294,11 @@ class Study extends Component
                             pos, size, scale
                         );
 
+                        // current_pos = camera.convertWorldPosToScreenPos(
+                        //     { x: x_pos, y: i_val },
+                        //     pos, size, scale
+                        // );
+
                         ctx.lineTo(
                             current_pos.x + start_pos.x, 
                             current_pos.y + start_pos.y

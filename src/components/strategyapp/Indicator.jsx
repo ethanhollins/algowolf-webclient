@@ -453,28 +453,58 @@ class tr extends Indicator
         if (i < this.min_bars || ohlc[i].every((x) => x === null))
             return [null]
 
-        let tr_sum = 0;
-        for (let j = 0; j < this.period; j++)
-        {
-            const prev_close = ohlc[i-j-1][3];
-            const high = ohlc[i-j][1];
-            const low = ohlc[i-j][2];
+        
 
+        let atr = 0;
+        if (values[i-1][0] !== null)
+        {
+            const prev_close = ohlc[i-1][3];
+            const high = ohlc[i][1];
+            const low = ohlc[i][2];
+
+            let tr = 0;
             if (prev_close > high)
             {
-                tr_sum += prev_close - low;
+                tr = prev_close - low;
             }
             else if (prev_close < low)
             {
-                tr_sum += high - prev_close
+                tr = high - prev_close
             }
             else
             {
-                tr_sum += high - low
+                tr = high - low
             }
-        }
 
-        atr = tr_sum / this.period;
+            const prev = values[i-1][0];
+            const alpha = 1 / this.period;
+            atr = alpha * tr + (1 - alpha) * prev;
+        }
+        else
+        {
+            let tr_sum = 0;
+            for (let j = 0; j < this.period; j++)
+            {
+                const prev_close = ohlc[i-j-1][3];
+                const high = ohlc[i-j][1];
+                const low = ohlc[i-j][2];
+
+                if (prev_close > high)
+                {
+                    tr_sum += prev_close - low;
+                }
+                else if (prev_close < low)
+                {
+                    tr_sum += high - prev_close
+                }
+                else
+                {
+                    tr_sum += high - low
+                }
+            }
+
+            atr = tr_sum / this.period;
+        }
 
         return [atr];
     }
