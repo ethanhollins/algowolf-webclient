@@ -564,22 +564,26 @@ class StrategyApp extends Component
         }
 
         // Check windows
+        const strategy = this.getStrategyInfo(strategy_id);
         const windows = this.getStrategyWindows(strategy_id);
         windows.sort((a, b) => parseFloat(b.zIndex) - parseFloat(a.zIndex));
         for (let i of windows)
         {
-            const pos = this.convertWorldUnitToScreenUnit(i.pos);
-            const size = this.convertWorldUnitToScreenUnit({
-                x: i.size.width, y: i.size.height
-            });
-            const rect = {
-                x: pos.x, y: pos.y,
-                width: size.x, height: size.y
-            }
-            const maximised = i.maximised;
-            if (maximised || this.isWithinBounds(rect, mouse_pos))
+            if (i.page === strategy.current_page)
             {
-                return i.id;
+                const pos = this.convertWorldUnitToScreenUnit(i.pos);
+                const size = this.convertWorldUnitToScreenUnit({
+                    x: i.size.width, y: i.size.height
+                });
+                const rect = {
+                    x: pos.x, y: pos.y,
+                    width: size.x, height: size.y
+                }
+                const maximised = i.maximised;
+                if (maximised || this.isWithinBounds(rect, mouse_pos))
+                {
+                    return i.id;
+                }
             }
         }
         return null;
@@ -1919,9 +1923,26 @@ class StrategyApp extends Component
 
     deletePage()
     {
-        // Iteratively delete windows associated with current page
-        // decrement all page numbers above current page number
-        // decrement pages
+        const strategy_id = this.getCurrentStrategy()
+        let { strategyInfo } = this.state;
+        let strategy = strategyInfo[strategy_id];
+
+        const current_page = strategy.current_page;
+        for (let i = strategy.windows.length-1; i >= 0; i--)
+        {
+            if (strategy.windows[i].page === current_page)
+            {
+                strategy.windows.splice(i, 1);
+            }
+            else if (strategy.windows[i].page > current_page)
+            {
+                strategy.windows[i].page -= 1;
+            }
+        }
+        strategy.pages -= 1;
+        strategy.current_page = Math.max(strategy.current_page - 1, 0);
+
+        this.setState({ strategyInfo });
     }
 
     getPage = () => 

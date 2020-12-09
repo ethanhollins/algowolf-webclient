@@ -171,9 +171,9 @@ class Chart extends Component
                 scale = chart_properties.scale;
                 this.setState({ pos, scale, first_load });
             }
-            else if (auto_zoom)
+            else
             {
-                if (trans_x === 0)
+                if (auto_zoom && trans_x === 0)
                 {
                     const num_steps = 3;
                     const c_scale = scale.y;
@@ -727,11 +727,11 @@ class Chart extends Component
                 {
                     const chart_properties = this.getChartProperties(this.getOhlc(), Math.floor(pos.x), scale);
                     scale.y = chart_properties.scale.y;
-        
-                    for (let study of this.studies)
-                    {
-                        study.setStudyProperties(study.getResult());
-                    }
+                }
+
+                for (let study of this.studies)
+                {
+                    study.setStudyProperties(study.getResult());
                 }
     
                 this.setState({ pos, scale, is_scrolling });
@@ -1004,7 +1004,6 @@ class Chart extends Component
                                 
                                 item = (
                                     <span 
-                                        className='chart values price'
                                         style={{color: `rgb(${color})`}}
                                     >
                                         {price}
@@ -1012,7 +1011,7 @@ class Chart extends Component
                                 );
     
                                 value_elems.push(
-                                    <span key={x + '' + y}>{item}</span>
+                                    <div className='chart values price' key={x + '' + y}>{item}</div>
                                 );
                             }
                         }
@@ -1020,7 +1019,7 @@ class Chart extends Component
     
                     // const name = study.display_name;
                     study_info.push(
-                        <div key={i} className='chart group study' style={{top: (start_pos.y + 10) + 'px', left: '5px'}}>
+                        <div key={i} className='chart group study' style={{top: (start_pos.y + 5) + 'px', left: '5px'}}>
                             <div className='chart values type'>{name}</div>
                             {value_elems}
                         </div>
@@ -2000,11 +1999,45 @@ class Chart extends Component
                 {
                     // Handle Horizontal Line
                     if (d_props.type === 'horizontalLine')
+                    {
                         this.drawHorizontalLine(ctx, screen_pos, d_props.properties);
+                    }
+                    // Handle Text
+                    else if (d_props.type === 'text')
+                    {
+                        // Font settings
+                        const font_size = d_props.properties.font_size;
+                        ctx.font = '600 ' + String(8) + 'pt Segoe UI';
+                        ctx.textAlign = 'center';
+
+                        const text_size = ctx.measureText(d_props.properties.text);
+                        
+                        // ctx.fillStyle = '#FFF';
+
+                        // ctx.fillRect(
+                        //     Math.round(screen_pos.x - box_width/2), 
+                        //     Math.round(screen_pos.y - box_height/2),
+                        //     box_width, box_height
+                        // );
+
+                        ctx.fillStyle = d_props.properties.colors[0];
+                        ctx.strokeStyle = '#FFF';
+
+                        // ctx.strokeText(
+                        //     d_props.properties.text, 
+                        //     screen_pos.x, 
+                        //     Math.round(screen_pos.y + (3/4 * (font_size/2)))
+                        // );
+
+                        ctx.fillText(
+                            d_props.properties.text, 
+                            screen_pos.x, 
+                            Math.round(screen_pos.y + (3/4 * (font_size/2)))
+                        );
+                    }
                     // Handle Misc Drawings
                     else
                     {
-
                         if (!(d_props.type in Drawings)) continue;
                         const drawing = Drawings[d_props.type]();
                         // Get Rotation and Scale

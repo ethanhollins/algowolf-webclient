@@ -1305,7 +1305,12 @@
 }
 
 .chart.group.study {
-    background-color: transparent;
+    display: flex;
+    align-items: center;
+    background-color: rgba(255,255,255,0.7);
+    border-radius: 5px;
+    padding-left: 3px;
+    padding-right: 3px;
 }
 
 .chart.product-btn {
@@ -1320,12 +1325,7 @@
 }
 
 .chart.product-btn:hover {
-    border: 1px solid rgba(80,80,80,1);
-}
-
-.chart.product-btn:active {
-    border: 1px solid rgba(180,180,180,1);
-    color: rgb(180,180,180)
+    background-color: #f39d1246;
 }
 
 .chart.period-btn {
@@ -1338,12 +1338,7 @@
 }
 
 .chart.period-btn:hover {
-    border: 1px solid rgba(80,80,80,1);
-}
-
-.chart.period-btn:active {
-    border: 1px solid rgba(180,180,180,1);
-    color: rgb(180,180,180)
+    background-color: #f39d1246;
 }
 
 .chart.values {
@@ -1386,8 +1381,8 @@
     line-height: 1.0em;
 }
 
-.chart.values.price {
-    padding-left: 2px;
+.chart.group.study > .chart.values.price {
+    padding-left: 10px;
 }
 
 /* .chart.group.ohlc {
