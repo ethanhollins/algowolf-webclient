@@ -116,6 +116,16 @@ class StrategyApp extends Component
             await this.retrieveStrategies(account.metadata.open_strategies);
         }
 
+        const popup = {
+            type: 'welcome-demo',
+            size: {
+                width: 40,
+                height: 70
+            },
+            fade: true
+        }
+        this.setPopup(popup);
+
         this.is_loaded = true;
     }
 
@@ -402,6 +412,8 @@ class StrategyApp extends Component
                         getKeys={this.getKeys}
                         getPage={this.getPage}
                         setPopup={this.setPopup}
+                        getPopup={this.getPopup}
+                        setShowLoadScreen={this.setShowLoadScreen}
                         // Window Funcs
                         closeWindow={this.closeWindow}
                         windowExists={this.windowExists}
@@ -461,6 +473,7 @@ class StrategyApp extends Component
                         getKeys={this.getKeys}
                         getPage={this.getPage}
                         setPopup={this.setPopup}
+                        getPopup={this.getPopup}
                         setShowLoadScreen={this.setShowLoadScreen}
                         // Window Funcs
                         closeWindow={this.closeWindow}

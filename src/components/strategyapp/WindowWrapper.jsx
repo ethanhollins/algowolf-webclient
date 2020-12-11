@@ -128,6 +128,7 @@ class WindowWrapper extends Component
                 getCursor={this.getCursor}
                 setCursor={this.setCursor}
                 notAvailable={this.notAvailable}
+                getPopup={this.props.getPopup}
     
                 // Window Props
                 connectChart={this.props.connectChart}

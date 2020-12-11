@@ -23,6 +23,8 @@ class Candlesticks extends Component
         const timestamps = this.props.getTimestamps();
         const info = this.props.getWindowInfo();
 
+        // console.log(ohlc);
+
         for (let i = 0; i < ohlc.length; i++) 
         {
             let x_pos = (ohlc.length - i)+0.5;

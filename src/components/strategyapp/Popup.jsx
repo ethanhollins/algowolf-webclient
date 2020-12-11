@@ -3,6 +3,7 @@ import ChartSettings from './popups/ChartSettings';
 import BrokerSettings from './popups/BrokerSettings';
 import StrategySettings from './popups/StrategySettings';
 import AccountSettings from './popups/AccountSettings';
+import WelcomeDemo from './popups/WelcomeDemo';
 import NotAvailable from './popups/NotAvailable';
 import AreYouSure from './popups/AreYouSure';
 import EmailSubscribe from './popups/EmailSubscribe';
@@ -27,6 +28,9 @@ class Popup extends Component
         this.setPopupBody = elem => {
             this.popupBody = elem;
         };
+        this.setPopupFade = elem => {
+            this.popupFade = elem;
+        };
 
         this.onMouseUp = this.onMouseUp.bind(this);
         this.onResize = this.onResize.bind(this);
@@ -47,7 +51,12 @@ class Popup extends Component
     render()
     {
         return(
+            <React.Fragment>
+
+            <div key={'fade'} ref={this.setPopupFade} className='popup fade'></div>
+
             <div 
+                key={'body'}
                 ref={this.setPopupBody} className='popup body' 
                 onMouseEnter={this.setMainHoverOn} onMouseLeave={this.setMainHoverOff}
             >
@@ -58,6 +67,8 @@ class Popup extends Component
                 </div>
                 
             </div>
+
+            </React.Fragment>
         );
     }
 
@@ -94,6 +105,14 @@ class Popup extends Component
         {
             this.getPopupElem().style.display = 'flex';
             const popup = this.props.getPopup();
+            if (popup.fade === true)
+            {
+                this.popupFade.style.display = 'block';
+            }
+            else
+            {
+                this.popupFade.style.display = 'none';
+            }
             this.handleBody();
 
             // if (popup.type === 'windows-charts')
@@ -167,6 +186,12 @@ class Popup extends Component
                     setHoverOff={this.setHoverOff}
                 />
             }
+            else if (popup.type === 'welcome-demo')
+            {
+                return <WelcomeDemo
+                    getPopup={this.props.getPopup}
+                />
+            }
             else if (popup.type === 'not-available')
             {
                 return <NotAvailable
@@ -198,6 +223,7 @@ class Popup extends Component
         else if (this.getPopupElem() !== undefined)
         {
             this.getPopupElem().style.display = 'none';
+            this.popupFade.style.display = 'none';
         }
     }
 

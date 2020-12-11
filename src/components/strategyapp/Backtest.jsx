@@ -42,6 +42,8 @@ class Backtest extends Component
 
         let strategy = this.getStrategyInfo();
         this.handleTransactions(strategy.properties.end);
+
+        this.props.setShowLoadScreen(false);
     }
 
     render() {
@@ -133,6 +135,7 @@ class Backtest extends Component
                             updateInfo={this.props.updateInfo}
                             getKeys={this.props.getKeys}
                             setPopup={this.props.setPopup}
+                            getPopup={this.props.getPopup}
                             // Window Funcs
                             closeWindow={this.props.closeWindow}
                             windowExists={this.props.windowExists}
@@ -342,6 +345,7 @@ class Backtest extends Component
     handleCreateDrawing = (drawings, trans) =>
     {
         const item = trans.item;
+        
         if (!(item.layer in drawings))
         {
             drawings[item.layer] = [];
@@ -442,7 +446,7 @@ class Backtest extends Component
                         break;
                 }
             }
-    
+            
             this.setState({ current_idx, current_timestamp, positions, orders, drawings, info, log });
         }
 

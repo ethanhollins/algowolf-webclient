@@ -3,7 +3,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faBars,  faChartLine, faChartPie,
     faLightbulb, faCode, faHistory, faChevronRight,
-    faTools, faExpandArrowsAlt, faLink, faExpandAlt
+    faTools, faExpandArrowsAlt, faLink, faExpandAlt,
+    faQuestionCircle
 } from '@fortawesome/pro-regular-svg-icons';
 import { 
     faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
@@ -52,6 +53,9 @@ class BacktestToolbar extends Component
         }
         this.setBacktestElem = elem => {
             this.backtestElem = elem;
+        }
+        this.setHelpElem = elem => {
+            this.helpElem = elem;
         }
     }
 
@@ -216,6 +220,13 @@ class BacktestToolbar extends Component
                             <span className='toolbox label'>Backtest</span>
                         </div>
                     </div>
+                    <div className='toolbox separator' />
+                    <div className='toolbox item'>
+                        <div ref={this.setHelpElem} className='toolbox item row btn' onClick={this.onHelpItem}>
+                            <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faQuestionCircle} />
+                            <span className='toolbox label'>Help</span>
+                        </div>
+                    </div>
                 </div>
             </div> 
         );
@@ -342,6 +353,19 @@ class BacktestToolbar extends Component
                 width: 30,
                 height: 30
             }
+        }
+        this.props.setPopup(popup);
+    }
+
+    onHelpItem = (e) =>
+    {
+        const popup = {
+            type: 'welcome-demo',
+            size: {
+                width: 40,
+                height: 70
+            },
+            fade: true
         }
         this.props.setPopup(popup);
     }

@@ -41,7 +41,8 @@ class Chart extends Component
             horiz_axis: false,
             bar: false,
             study_handle: false
-        }
+        },
+        isinitialized: false
     }
 
     constructor(props)
@@ -90,7 +91,6 @@ class Chart extends Component
         }
 
         this._ismounted = true;
-        this._isinitialized = false;
 
         this.onMouseDown = this.onMouseDown.bind(this);
         this.onMouseMove = _.throttle(this.onMouseMove.bind(this), 1);
@@ -114,7 +114,6 @@ class Chart extends Component
             this.onScroll
         );
 
-        this.updateCanvas();
 
         if (this.isBacktest())
         {
@@ -122,11 +121,10 @@ class Chart extends Component
             this.limit(properties.start, properties.end);
         }
 
-        console.log('chart before');
+        this.updateCanvas();
         /* Initialize Chart */
         if (this.getChart() === undefined)
             await this.addChart();
-        console.log('chart created');
 
         /* Initialize Indicators */
         const overlays = this.getOverlays();
@@ -153,7 +151,9 @@ class Chart extends Component
             this.setTimeInterval();
         }
 
-        this._isinitialized = true;
+        let { isinitialized } = this.state;
+        isinitialized = true;
+        this.setState({ isinitialized });
     }
 
     componentDidUpdate() 
@@ -225,6 +225,7 @@ class Chart extends Component
         return (
             <div
                 className='chart container'
+                key={this.getItemId()}
                 ref={this.setContainerRef}
                 style={{
                     width: "100%",
@@ -657,8 +658,9 @@ class Chart extends Component
             x: e.clientX, y: e.clientY
         }
         const top_offset = this.props.getTopOffset();
+        const { isinitialized } = this.state;
 
-        if (this._isinitialized && before_change !== null && this.isBacktest())
+        if (isinitialized && before_change !== null && this.isBacktest())
         {
             if (Math.abs(pos.x - before_change.x) < 1 && Math.abs(pos.y - before_change.y) < 1)
             {
@@ -692,7 +694,7 @@ class Chart extends Component
 
     onScroll(e)
     {
-        if (this.getChart() !== undefined)
+        if (this.getChart() !== undefined && (this.props.getPopup() === null || this.props.getPopup() === undefined))
         {
             const mouse_pos = {
                 x: e.clientX, y: e.clientY
@@ -834,7 +836,9 @@ class Chart extends Component
     {
         const overlays = this.getOverlays();
         let gen_overlays = [];
-        if (this._isinitialized)
+        const { isinitialized } = this.state;
+
+        if (isinitialized)
         {
             for (let i = 0; i < overlays.length; i++) {
                 gen_overlays.push(
@@ -868,9 +872,10 @@ class Chart extends Component
     generateStudies()
     {
         const studies = this.getStudies();
+        const { isinitialized } = this.state;
 
         let gen_studies = [];
-        if (this._isinitialized)
+        if (isinitialized)
         {
             for (let i = 0; i < studies.length; i++) 
             {
@@ -910,7 +915,9 @@ class Chart extends Component
 
     generateInfo()
     {
-        if (this._isinitialized)
+        const { isinitialized } = this.state;
+
+        if (isinitialized)
         {
             const prices = this.getPriceInfo();
             if (prices !== undefined)
@@ -1058,7 +1065,8 @@ class Chart extends Component
 
     update()
     {   
-        if (this.getChart() && this._isinitialized)
+        const { isinitialized } = this.state;
+        if (this.getChart() && isinitialized)
         {
             this.updateCanvas();
             this.updateChart();
@@ -1135,6 +1143,7 @@ class Chart extends Component
         const price_data = this.drawPriceGrid(ctx);
         const time_data = this.drawTimeGrid(ctx);
         
+
         // Draw Candlesticks
         this.getCandlesticks().draw();
 
@@ -1988,11 +1997,8 @@ class Chart extends Component
     
                 const y = d_props.prices[0];
                 const screen_pos = camera.convertWorldPosToScreenPos(
-                    { x: x+0.5, y: y }, 
-                    pos, 
-                    seg_size,
-                    scale
-                )
+                    { x: x+0.5, y: y }, pos, seg_size, scale
+                );
                 
                 // Handle Vertical Line
                 if (!UNIVERSAL_DRAWINGS.includes(d_props.type))
@@ -2007,19 +2013,9 @@ class Chart extends Component
                     {
                         // Font settings
                         const font_size = d_props.properties.font_size;
-                        ctx.font = '600 ' + String(8) + 'pt Segoe UI';
+                        ctx.font = '600 ' + String(font_size) + 'pt Segoe UI';
                         ctx.textAlign = 'center';
-
-                        const text_size = ctx.measureText(d_props.properties.text);
                         
-                        // ctx.fillStyle = '#FFF';
-
-                        // ctx.fillRect(
-                        //     Math.round(screen_pos.x - box_width/2), 
-                        //     Math.round(screen_pos.y - box_height/2),
-                        //     box_width, box_height
-                        // );
-
                         ctx.fillStyle = d_props.properties.colors[0];
                         ctx.strokeStyle = '#FFF';
 
@@ -2200,9 +2196,6 @@ class Chart extends Component
             if (top_window !== undefined)
             {
                 const top_chart = top_window.getInnerElement();
-                
-                // console.log(top_chart);
-                // console.log(top_window.getElementType());
 
                 if (
                     top_chart !== undefined && 
@@ -2222,8 +2215,8 @@ class Chart extends Component
                     const chart_size = this.getChartSize();
                     const seg_size = this.getSegmentSize(top_seg_idx);
             
-                    if (mouse_pos.y > top_offset + top_chart_size.height) return;
-    
+                    if (mouse_pos.y > top_offset + top_window_seg_start.y + top_chart_size.height) return;
+
                     let top_pos, top_scale, pos, scale = undefined;
                     if (top_seg_idx > 0)
                     {
@@ -2246,7 +2239,6 @@ class Chart extends Component
                         scale = this.state.scale;
                     }
         
-                    // const left_offset = screen_pos.x;
                     const mouse_world_pos = camera.convertScreenPosToWorldPos(
                         { 
                             x: mouse_pos.x - top_screen_pos.x, 

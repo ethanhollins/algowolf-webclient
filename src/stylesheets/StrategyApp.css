@@ -377,6 +377,10 @@
     width: 2.5vh;
 }
 
+.steal-blue_btn {
+    color: #535c68;
+}
+
 .blue_btn {
     color: #3498db;
 }
@@ -679,6 +683,18 @@
     border: 1px solid rgb(220,220,220);
     border-radius: 7px;
     box-shadow: 0px 2px 3px rgb(220,220,220);
+    z-index: 31;
+}
+
+.popup.body.dark {
+    box-shadow: 0px 2px 3px rgb(180,180,180);
+}
+
+.popup.fade {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgb(0,0,0,0.1);
     z-index: 31;
 }
 
@@ -1829,6 +1845,78 @@
     width: 100px;
 }
 
+.welcome.message {
+    padding-left: 20px;
+    padding-right: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+}
+
+.welcome.message li {
+    list-style-type: none;
+}
+
+.welcome.table {
+    display: table;
+}
+
+.welcome.table-row {
+    display: table-row;
+}
+
+.welcome.table-cell {
+    display: table-cell;
+    vertical-align: middle;
+    padding-bottom: 10px;
+}
+
+.welcome.table-cell.subject {
+    padding-left: 30px;
+    padding-right: 50px;
+    font-weight: 500;
+    font-size: 0.9em;
+}
+
+.welcome.message-icon {
+    /* font-size: 1.0em; */
+    width: 17px;
+    height: 17px;
+}
+
+#sp_rtv {
+    color: #e74c3c;
+}
+
+#sp_rtc {
+    color: #e67e22;
+}
+
+#sp_dv {
+    color: #9b59b6;
+}
+
+#sp_b {
+    color: #1abc9c;
+}
+
+#sp_t {
+    color: #2ecc71;
+}
+
+#sp_w {
+    color: #3498db;
+}
+
+#sp_long {
+    color: #3498db;
+}
+
+#sp_short {
+    color: #f39c12;
+}
+
+#sp_trend {
+    color: #0fb9b1;
+}
 
 #live_status {
     color: #ff6861;

@@ -151,6 +151,7 @@ class Strategy extends Component
                             getCurrentAccount={this.getCurrentAccount}
                             getKeys={this.props.getKeys}
                             setPopup={this.props.setPopup}
+                            getPopup={this.props.getPopup}
                             // Window Funcs
                             closeWindow={this.props.closeWindow}
                             windowExists={this.props.windowExists}
