@@ -139,6 +139,7 @@ class Dockable extends Component
                 item_id={this.props.item_id}
                 info={this.props.info}
                 retrieveReport={this.props.retrieveReport}
+                getScreenSize={this.props.getScreenSize}
             />
         }
     }

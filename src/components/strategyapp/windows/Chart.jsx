@@ -114,17 +114,20 @@ class Chart extends Component
             this.onScroll
         );
 
+        this.updateCanvas();
+        /* Initialize Chart */
+        if (this.getChart() === undefined)
+            await this.addChart();
 
         if (this.isBacktest())
         {
             const properties = this.getStrategy().properties;
             this.limit(properties.start, properties.end);
-        }
 
-        this.updateCanvas();
-        /* Initialize Chart */
-        if (this.getChart() === undefined)
-            await this.addChart();
+            let { pos, scale } = this.state; 
+            pos.x = Math.max(pos.x, this.getPosFromTimestamp(properties.start) - scale.x);
+            this.setState({ pos });
+        }
 
         /* Initialize Indicators */
         const overlays = this.getOverlays();
@@ -418,7 +421,7 @@ class Chart extends Component
 
                 auto_zoom = false;
             }
-            else
+            else if (this.props.getCursor() === 'inherit')
             {
                 pos.x += move.x;
                 if (is_move)
@@ -441,17 +444,13 @@ class Chart extends Component
                 { x: mouse_pos.x, y: mouse_pos.y - top_offset }
             );
             let { hovered } = this.state;
-            let isChanged = false;
 
-            isChanged = isChanged || this.onBarHover(mouse_pos, is_top, hovered);
-            isChanged = isChanged || this.onVertAxisHover(mouse_pos, is_top, hovered);
-            isChanged = isChanged || this.onHorizAxisHover(mouse_pos, is_top, hovered);
-            isChanged = isChanged || this.onStudyHandleHover(mouse_pos, is_top, hovered);
+            this.onBarHover(mouse_pos, is_top, hovered);
+            this.onVertAxisHover(mouse_pos, is_top, hovered);
+            this.onHorizAxisHover(mouse_pos, is_top, hovered);
+            this.onStudyHandleHover(mouse_pos, is_top, hovered);
 
-            if (isChanged)
-            {
-                this.handleCursor(hovered, is_down);
-            }
+            this.handleCursor(hovered, is_down);
 
         }
     }
@@ -586,8 +585,12 @@ class Chart extends Component
     handleCursor(hovered, is_down)
     {
         let { cursor } = this.state;
-
-        if (hovered.horiz_axis)
+        
+        if (this.props.getCursor() !== 'inherit')
+        {
+            cursor = 'inherit';
+        }
+        else if (hovered.horiz_axis)
         {
             cursor = 'w-resize';
         }
@@ -1957,19 +1960,65 @@ class Chart extends Component
     drawVerticalLine(ctx, pos, properties)
     {
         const chart_size = this.getChartSize();
+        const x = Math.round(pos.x - properties.scale/2);
 
-        // Handle properties
-        ctx.fillStyle = properties.colors[0];
-        ctx.fillRect(Math.round(pos.x - properties.scale/2), 0, properties.scale, chart_size.height);
+
+        if (properties.lineType === 'dashed')
+        {
+            // Dashed line
+            const line_width = 6;
+            const line_space = 4;
+
+            // Handle Time Line
+            ctx.fillStyle = properties.colors[0];
+
+            let c_y = 0;
+            while (c_y < chart_size.height)
+            {
+                ctx.fillRect(x, c_y, properties.scale, line_width);
+                c_y += line_width + line_space;
+            }
+
+        }
+        else
+        {
+             // Handle properties
+            ctx.fillStyle = properties.colors[0];
+            ctx.fillRect(x, 0, properties.scale, chart_size.height);
+        }
+
+       
     }
 
     drawHorizontalLine(ctx, pos, properties)
     {
         const chart_size = this.getChartSize();
+        const y = Math.round(pos.y - properties.scale/2);
 
-        // Handle properties
-        ctx.fillStyle = properties.colors[0];
-        ctx.fillRect(0, Math.round(pos.y - properties.scale/2), chart_size.width, properties.scale);
+        if (properties.lineType === 'dashed')
+        {
+            // Dashed line
+            const line_width = 6;
+            const line_space = 4;
+
+            // Handle Time Line
+            ctx.fillStyle = properties.colors[0];
+
+            let c_x = 0;
+            while (c_x < chart_size.width)
+            {
+                ctx.fillRect(c_x, y, line_width, properties.scale);
+                c_x += line_width + line_space;
+            }
+
+        }
+        else
+        {
+            // Handle properties
+            ctx.fillStyle = properties.colors[0];
+            ctx.fillRect(0, y, chart_size.width, properties.scale);
+        }
+
     }
 
     handleDrawings(ctx)

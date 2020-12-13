@@ -21,6 +21,7 @@ class Report extends Component
             <SpreadSheet
                 key={this.getName()}
                 data={this.getData()}
+                getScreenSize={this.props.getScreenSize}
             />
         );
     }

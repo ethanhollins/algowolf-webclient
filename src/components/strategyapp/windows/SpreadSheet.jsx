@@ -10,7 +10,9 @@ class SpreadSheet extends Component
         {
             return (
                 <div className='spreadsheet background'>
-                    <div className='spreadsheet body header'>
+                    <div 
+                        className='spreadsheet body header'
+                    >
                         {this.generateColumnHeaders(data)}
                     </div>
                     <div className='spreadsheet body'>

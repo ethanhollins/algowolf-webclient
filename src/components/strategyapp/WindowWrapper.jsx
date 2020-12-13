@@ -22,7 +22,11 @@ class WindowWrapper extends Component
             is_move: false,
             is_resize: false,
             keys: [],
-            before_change: 60
+            before_change: 60,
+            hovered: {
+                move: false,
+                resize: false,
+            }
         }
 
         this.setWindowBtnsRef = elem => {
@@ -63,6 +67,7 @@ class WindowWrapper extends Component
         // );
 
         this.update();
+        this.forceUpdate();
     }
 
     componentDidUpdate()
@@ -111,7 +116,6 @@ class WindowWrapper extends Component
     {
         if (this.state.info.type === 'chart')
         {
-            // console.log(this.props);
             return (<Chart
                 ref={this.setInnerElementRef}
                 strategy_id={this.props.strategy_id}
@@ -208,6 +212,7 @@ class WindowWrapper extends Component
                 strategy_id={this.props.strategy_id}
                 item_id={this.state.info.id}
                 info={this.state.info}
+                getScreenSize={this.getRoundedScreenSize}
                 getElementType={this.getElementType}
                 retrieveReport={this.props.retrieveReport}
             />;
@@ -224,8 +229,7 @@ class WindowWrapper extends Component
                 x: e.clientX, y: e.clientY-this.getTopOffset()
             }
             const { pos, size } = this.state.info;
-            const keys = this.props.getKeys();
-            let { is_move, is_resize, before_change } = this.state;
+            let { is_move, is_resize, before_change, hovered } = this.state;
 
             if (this.props.isTopWindow(
                 this.getStrategyId(), this.getItemId(), mouse_pos
@@ -233,97 +237,121 @@ class WindowWrapper extends Component
             {
                 this.props.setTopWindow(this.getStrategyId(), this.getItemId());
                 
-                if (keys.includes(SPACEBAR))
-                {
-                    
-                    e.preventDefault();
-                    this.props.hideShadows(true);
+                e.preventDefault();
+                this.props.hideShadows(true);
 
-                    mouse_pos.y += this.getTopOffset();
-                    const direction = this.isResizeMouseLocation(mouse_pos);
-                    if (direction !== false)
-                    {
-                        is_resize = direction;
-                        before_change = {
-                            id: this.getItemId(),
-                            action: 'resize',
-                            item: {
-                                x: Math.round(pos.x), y: Math.round(pos.y),
-                                width: Math.round(size.width), height: Math.round(size.height)
-                            }
-                        };
-        
-                        this.setState({ is_resize, before_change });
-                    }
-                    else
-                    {
-                        is_move = true;
-                        before_change = {
-                            id: this.getItemId(),
-                            action: 'move',
-                            item: this.props.clone(pos)
-                        };
-        
-                        this.setState({ is_move, before_change });
-                    }
+                if (hovered.resize !== false)
+                {
+                    is_resize = hovered.resize;
+                    before_change = {
+                        id: this.getItemId(),
+                        action: 'resize',
+                        item: {
+                            x: Math.round(pos.x), y: Math.round(pos.y),
+                            width: Math.round(size.width), height: Math.round(size.height)
+                        }
+                    };
     
+                    this.setState({ is_resize, before_change });
+                }
+                else if (hovered.move)
+                {
+                    is_move = true;
+                    before_change = {
+                        id: this.getItemId(),
+                        action: 'move',
+                        item: this.props.clone(pos)
+                    };
+    
+                    this.setState({ is_move, before_change });
                 }
             }
         }
     }
 
-    isResizeMouseLocation(mouse_pos)
+    isMoveMouseLocation(mouse_pos, is_top, hovered)
     {
-        const rect = this.windowWrapper.getBoundingClientRect();
-        const RESIZE_THRESHOLD_X = this.props.getSize().width / this.props.getScale().x;
-        const RESIZE_THRESHOLD_Y = this.props.getSize().height / this.props.getScale().y;
-        
-        let direction = false;
-        if (mouse_pos.x < rect.x + RESIZE_THRESHOLD_X &&
-            mouse_pos.y < rect.y + RESIZE_THRESHOLD_Y)
+        let is_changed = false;
+        if (is_top)
         {
-            direction = 'nw-resize';
-            this.setCursor(direction);
+            const rect = this.windowWrapper.getBoundingClientRect();
+            rect.y = rect.y - this.getTopOffset();
+            const MOVE_THRESHOLD_Y = 28;
+
+            let is_hovered = false;
+            if (mouse_pos.y < rect.y + MOVE_THRESHOLD_Y)
+            {
+                is_hovered = true;
+            }
+    
+            if (is_hovered !== hovered.move)
+            {
+                hovered.move = is_hovered;
+                is_changed = true;
+            }
         }
-        else if (mouse_pos.x > rect.x + rect.width - RESIZE_THRESHOLD_X &&
-                    mouse_pos.y < rect.y + RESIZE_THRESHOLD_Y)
+
+        return is_changed;
+    }
+
+    isResizeMouseLocation(mouse_pos, is_top, hovered)
+    {
+        let is_changed = false;
+        if (is_top)
         {
-            direction = 'ne-resize';
-            this.setCursor('ne-resize');
+            let rect = this.windowWrapper.getBoundingClientRect();
+            rect.y = rect.y - this.getTopOffset();
+            // const RESIZE_THRESHOLD_X = this.props.getSize().width / this.props.getScale().x;
+            // const RESIZE_THRESHOLD_Y = this.props.getSize().height / this.props.getScale().y;
+            const RESIZE_THRESHOLD_X = 10;
+            const RESIZE_THRESHOLD_Y = 10;
+
+            let direction = false;
+            if (mouse_pos.x < rect.x + RESIZE_THRESHOLD_X &&
+                mouse_pos.y < rect.y + RESIZE_THRESHOLD_Y)
+            {
+                direction = 'nw-resize';
+            }
+            else if (mouse_pos.x > rect.x + rect.width - RESIZE_THRESHOLD_X &&
+                        mouse_pos.y < rect.y + RESIZE_THRESHOLD_Y)
+            {
+                direction = 'ne-resize';
+            }
+            else if (mouse_pos.x < rect.x + RESIZE_THRESHOLD_X &&
+                        mouse_pos.y > rect.y + rect.height - RESIZE_THRESHOLD_Y)
+            {
+                direction = 'sw-resize';
+            }
+            else if (mouse_pos.x > rect.x + rect.width - RESIZE_THRESHOLD_X &&
+                        mouse_pos.y > rect.y + rect.height - RESIZE_THRESHOLD_Y)
+            {
+                direction = 'se-resize';
+            }
+            else if (mouse_pos.x < rect.x + RESIZE_THRESHOLD_X)
+            {
+                direction = 'w-resize';
+            }
+            else if (mouse_pos.x > rect.x + rect.width - RESIZE_THRESHOLD_X)
+            {
+                direction = 'e-resize';
+            }
+            else if (mouse_pos.y < rect.y + RESIZE_THRESHOLD_Y)
+            {
+                direction = 'n-resize';
+            }
+            else if (mouse_pos.y > rect.y + rect.height - RESIZE_THRESHOLD_Y)
+            {
+                direction = 's-resize';
+            }
+    
+            if (hovered.resize !== direction)
+            {
+                is_changed = true;
+                hovered.resize = direction;
+            }
         }
-        else if (mouse_pos.x < rect.x + RESIZE_THRESHOLD_X &&
-                    mouse_pos.y > rect.y + rect.height - RESIZE_THRESHOLD_Y)
-        {
-            direction = 'sw-resize';
-            this.setCursor('sw-resize');
-        }
-        else if (mouse_pos.x > rect.x + rect.width - RESIZE_THRESHOLD_X &&
-                    mouse_pos.y > rect.y + rect.height - RESIZE_THRESHOLD_Y)
-        {
-            direction = 'se-resize';
-            this.setCursor('se-resize');
-        }
-        else if (mouse_pos.x < rect.x + RESIZE_THRESHOLD_X)
-        {
-            direction = 'w-resize';
-            this.setCursor('w-resize');
-        }
-        else if (mouse_pos.x > rect.x + rect.width - RESIZE_THRESHOLD_X)
-        {
-            direction = 'e-resize';
-            this.setCursor('e-resize');
-        }
-        else if (mouse_pos.y < rect.y + RESIZE_THRESHOLD_Y)
-        {
-            direction = 'n-resize';
-            this.setCursor('n-resize');
-        }
-        else if (mouse_pos.y > rect.y + rect.height - RESIZE_THRESHOLD_Y)
-        {
-            direction = 's-resize';
-            this.setCursor('s-resize');
-        }
-        return direction;
+
+        return is_changed;
     }
 
     handleKeys(e)
@@ -525,20 +553,69 @@ class WindowWrapper extends Component
         }
     }
 
+    handleCursor(hovered)
+    {
+        let { cursor, is_move, is_resize } = this.state;
+
+        if (is_resize !== false)
+        {
+            cursor = is_resize;
+        }
+        else if (is_move)
+        {
+            cursor = 'move';
+        }
+        else if (hovered.resize !== false)
+        {
+            cursor = hovered.resize;
+        }
+        else if (hovered.move)
+        {
+            cursor = 'move';
+        }
+        else
+        {
+            cursor = 'inherit';
+        }
+
+        this.setState({ cursor });
+    }
+
     onMouseMoveThrottled(e)
     {
-        this.handleKeys(e);
+        const mouse_pos = {
+            x: e.clientX, y: e.clientY-this.getTopOffset()
+        }
+        const is_top = this.props.isTopWindow(
+            this.getStrategyId(), this.getItemId(), mouse_pos
+        )
+        if (!this.getMaximised())
+        {
+            let { hovered } = this.state;
+            let isChanged = false;
+    
+            isChanged = isChanged || this.isResizeMouseLocation(mouse_pos, is_top, hovered);
+            isChanged = isChanged || this.isMoveMouseLocation(mouse_pos, is_top, hovered);
+    
+            if (isChanged)
+            {
+                this.handleCursor(hovered);
+            }
+    
+            // this.handleKeys(e);
+    
+            this.moveWindow(e);
+            this.resizeWindow(e);
+        }
 
-        this.moveWindow(e);
-        this.resizeWindow(e);
-
+        this.showWindowBtns(is_top);
     }
 
     onMouseUp(e)
     {
         let pos = this.getWorldPos();
         let size = this.getWorldSize();
-        let { is_move, is_resize, before_change } = this.state;
+        let { is_move, is_resize, before_change, hovered } = this.state;
         if (is_move)
         {
             is_move = false;
@@ -578,6 +655,8 @@ class WindowWrapper extends Component
 
             this.setState({ is_resize, size });
         }
+
+        this.handleCursor(hovered)
         this.props.hideShadows(false);
     }
 
@@ -614,7 +693,7 @@ class WindowWrapper extends Component
 
     onMaximise = () =>
     {
-        let { info } = this.state;
+        let { info, hovered } = this.state;
         if (info.maximised)
         {
             info.maximised = false;
@@ -633,7 +712,9 @@ class WindowWrapper extends Component
         }
         this.props.addHistory(this.getStrategyId(), new_item);
 
-        this.setState({ info });
+        Object.keys(hovered).forEach(key => hovered[key] = false);
+        this.handleCursor(hovered);
+        this.setState({ info, hovered });
     }
 
     clampMove(pos, size, scale)
@@ -777,6 +858,22 @@ class WindowWrapper extends Component
             });
         }
         return { width: result.x, height: result.y };
+    }
+
+    getRoundedScreenSize = () =>
+    {
+        const camera = this.getCamera();
+        const scale = this.props.getScale();
+        const container_size = this.getAppContainerSize();
+
+        const screen_size = this.getScreenSize();
+        const world_size = camera.convertScreenUnitToWorldUnit(
+            { x: screen_size.width, y: screen_size.height }, container_size, scale
+        );
+
+        return camera.convertWorldUnitToScreenUnit(
+            {x: Math.round(world_size.x), y: Math.round(world_size.y)}, container_size, scale
+        );
     }
 
     getMaximised = () =>
