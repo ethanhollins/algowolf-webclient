@@ -2012,6 +2012,23 @@ class Chart extends Component
             }
 
         }
+        else if (properties.lineType === 'dotted')
+        {
+            // Dashed line
+            const line_width = 2;
+            const line_space = 3;
+
+            // Handle Time Line
+            ctx.fillStyle = properties.colors[0];
+
+            let c_x = 0;
+            while (c_x < chart_size.width)
+            {
+                ctx.fillRect(c_x, y, line_width, properties.scale);
+                c_x += line_width + line_space;
+            }
+
+        }
         else
         {
             // Handle properties

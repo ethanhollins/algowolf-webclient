@@ -372,7 +372,7 @@ class Backtest extends Component
 
     handleCreateInfo = (info, trans) =>
     {
-        // info.push(trans.item);
+        info[trans.timestamp] = trans.item;
     }
 
     handleCreateLog = (log, trans) =>
