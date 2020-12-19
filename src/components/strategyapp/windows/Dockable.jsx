@@ -12,6 +12,9 @@ class Dockable extends Component
     {
         super(props);
 
+        this.setHeaderRef = elem => {
+            this.header = elem;
+        }
         this.setInnerWindowRef = elem => {
             this.innerWindow = elem;
         }
@@ -27,7 +30,10 @@ class Dockable extends Component
     {
         return (
             <div className='dockable background'>
-                <div className='dockable header'>
+                <div 
+                    ref={this.setHeaderRef}
+                    className='dockable header'
+                >
                     {this.generateTitle()}
                 </div>
                 {this.generateInnerWindow()}
@@ -56,7 +62,7 @@ class Dockable extends Component
                 <React.Fragment>
 
                 <FontAwesomeIcon icon={faInfoCircle} className='dockable icon' />
-                <span>Info</span>
+                <span>Chart Info</span>
                 
                 </React.Fragment>
             );
@@ -138,10 +144,22 @@ class Dockable extends Component
                 strategy_id={this.props.strategy_id}
                 item_id={this.props.item_id}
                 info={this.props.info}
+                getHeader={this.getHeader}
                 retrieveReport={this.props.retrieveReport}
                 getScreenSize={this.props.getScreenSize}
+                setCurrentTimestamp={this.props.setCurrentTimestamp}
+                setScrollbarHovered={this.props.setScrollbarHovered}
+                getScrollbarHovered={this.props.getScrollbarHovered}
+                isTopWindow={this.props.isTopWindow}
+                getTopOffset={this.props.getTopOffset}
+                getWindowScreenPos={this.props.getWindowScreenPos}
             />
         }
+    }
+
+    getHeader = () =>
+    {
+        return this.header;
     }
 }
 

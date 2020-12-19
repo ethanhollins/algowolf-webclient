@@ -19,6 +19,7 @@ class WindowWrapper extends Component
         this.state = {
             info: props.info,
             cursor: 'default',
+            border: null,
             is_move: false,
             is_resize: false,
             keys: [],
@@ -26,6 +27,7 @@ class WindowWrapper extends Component
             hovered: {
                 move: false,
                 resize: false,
+                scrollbar: false
             }
         }
 
@@ -67,7 +69,6 @@ class WindowWrapper extends Component
         // );
 
         this.update();
-        this.forceUpdate();
     }
 
     componentDidUpdate()
@@ -93,7 +94,8 @@ class WindowWrapper extends Component
                 className="window wrapper"
                 style={{
                     cursor: this.state.cursor,
-                    zIndex: this.state.info.zIndex
+                    zIndex: this.state.info.zIndex,
+                    border: this.state.border
                 }}
             >
                 <div ref={this.setWindowBtnsRef} className='window btns'>
@@ -117,6 +119,7 @@ class WindowWrapper extends Component
         if (this.state.info.type === 'chart')
         {
             return (<Chart
+                key={this.state.info.id}
                 ref={this.setInnerElementRef}
                 strategy_id={this.props.strategy_id}
                 item_id={this.state.info.id}
@@ -162,11 +165,15 @@ class WindowWrapper extends Component
                 getTopWindow={this.props.getTopWindow}
                 setPopup={this.props.setPopup}
                 setSelectedOffset={this.props.setSelectedOffset}
+                getSelectedOffset={this.props.getSelectedOffset}
+                getBorder={this.getBorder}
+                setBorder={this.setBorder}
             />)
         }
         else if (this.state.info.type === 'log')
         {
             return <Dockable
+                key={this.state.info.id}
                 ref={this.setInnerElementRef}
                 strategy_id={this.props.strategy_id}
                 item_id={this.state.info.id}
@@ -192,6 +199,7 @@ class WindowWrapper extends Component
         else if (this.state.info.type === 'control_panel')
         {
             return <Dockable
+                key={this.state.info.id}
                 ref={this.setInnerElementRef}
                 strategy_id={this.props.strategy_id}
                 item_id={this.state.info.id}
@@ -208,6 +216,7 @@ class WindowWrapper extends Component
         else if (this.state.info.type === 'report')
         {
             return <Dockable
+                key={this.state.info.id}
                 ref={this.setInnerElementRef}
                 strategy_id={this.props.strategy_id}
                 item_id={this.state.info.id}
@@ -215,6 +224,12 @@ class WindowWrapper extends Component
                 getScreenSize={this.getRoundedScreenSize}
                 getElementType={this.getElementType}
                 retrieveReport={this.props.retrieveReport}
+                setCurrentTimestamp={this.props.setCurrentTimestamp}
+                getScrollbarHovered={this.getScrollbarHovered}
+                setScrollbarHovered={this.setScrollbarHovered}
+                isTopWindow={this.props.isTopWindow}
+                getTopOffset={this.getTopOffset}
+                getWindowScreenPos={this.getScreenPos}
             />;
         }
 
@@ -565,6 +580,10 @@ class WindowWrapper extends Component
         {
             cursor = 'move';
         }
+        else if (hovered.scrollbar)
+        {
+            cursor = 'default';
+        }
         else if (hovered.resize !== false)
         {
             cursor = hovered.resize;
@@ -779,8 +798,12 @@ class WindowWrapper extends Component
 
             window_wrapper.style.left = Math.round(screen_pos.x) + "px";
             window_wrapper.style.top = Math.round(screen_pos.y) + "px";
-            window_wrapper.style.width = Math.round(screen_size.x) + "px";
-            window_wrapper.style.height = Math.round(screen_size.y) + "px";
+            window_wrapper.style.width = (
+                Math.round(screen_size.x) - Math.max(Math.round(screen_pos.x) + Math.round(screen_size.x) - container_size.width, 0)
+            ) + "px";
+            window_wrapper.style.height = (
+                Math.round(screen_size.y) - Math.max(Math.round(screen_pos.y) + Math.round(screen_size.y) - container_size.height, 0)
+            ) + "px";
         }
     }
 
@@ -926,9 +949,32 @@ class WindowWrapper extends Component
         return this.state.keys;
     }
 
+    getBorder = () => 
+    {
+        return this.state.border;
+    }
+
+    setBorder = (border) =>
+    {
+        this.setState({ border });
+    }
+
+    getScrollbarHovered = () =>
+    {
+        return this.state.hovered.scrollbar;
+    }
+
+    setScrollbarHovered = (is_hovered) =>
+    {
+        let { hovered } = this.state;
+        hovered.scrollbar = is_hovered;
+        this.handleCursor(hovered);
+        this.setState({ hovered });
+    }
+
 }
 
-const MIN_WINDOW_SIZE = 20;
+const MIN_WINDOW_SIZE = 10;
 const SPACEBAR = 32;
 
 export default WindowWrapper;

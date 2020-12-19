@@ -109,27 +109,27 @@ class Candlesticks extends Component
                 );
             }
 
-            const c_x = Math.round(body_pos.x - body_size.x / 2);
-            const c_y = Math.max(body_pos.y - body_size.y / 2);
+            const c_x = body_pos.x - body_size.x / 2;
+            const c_y = body_pos.y - body_size.y / 2;
             
-            const w_x = Math.round(body_pos.x);
+            const w_x = body_pos.x;
             const w_width = 1.0;
             
             ctx.fillStyle = wick_color;
             // Draw Wick Up
             if (scale.x < 500)
             {
-                const w_up_y = Math.round(body_pos.y - body_size.y/2)+1;
+                const w_up_y = body_pos.y - body_size.y/2 + 1;
                 ctx.fillRect(
-                    w_x, w_up_y - Math.round(wick_up_size.y),
-                    Math.max(w_width, 1), Math.max(Math.round(wick_up_size.y), 1)
+                    Math.floor(w_x), Math.floor(w_up_y - wick_up_size.y),
+                    Math.floor(Math.max(w_width, 1)), Math.floor(Math.max(wick_up_size.y, 1))
                 );
     
                 // Draw Wick Down
-                const w_down_y = Math.round(body_pos.y + body_size.y / 2)-1;
+                const w_down_y = body_pos.y + body_size.y / 2 - 1;
                 ctx.fillRect(
-                    w_x, w_down_y,
-                    Math.max(w_width, 1), Math.max(Math.round(wick_down_size.y), 1)
+                    Math.floor(w_x), Math.floor(w_down_y),
+                    Math.floor(Math.max(w_width, 1)), Math.floor(Math.max(wick_down_size.y, 1))
                 );
             }
 
@@ -137,17 +137,17 @@ class Candlesticks extends Component
             ctx.strokeStyle = outline_color;
             // Draw Body
             ctx.fillRect(
-                Math.round(c_x), Math.round(c_y),
-                Math.max(Math.round(body_size.x), 1),
-                Math.max(Math.round(body_size.y), 1)
+                Math.floor(c_x), Math.floor(c_y),
+                Math.floor(Math.max(body_size.x, 1)),
+                Math.floor(Math.max(body_size.y, 1))
             );
 
             if (scale.x < 500)
             {
                 ctx.strokeRect(
-                    Math.round(c_x)+0.5, Math.round(c_y)-0.5,
-                    Math.max(Math.round(body_size.x), 1),
-                    Math.max(Math.round(body_size.y), 1)
+                    Math.floor(c_x)+0.5, Math.floor(c_y)-0.5,
+                    Math.floor(Math.max(body_size.x, 1)),
+                    Math.floor(Math.max(body_size.y, 1))
                 );
             }
 

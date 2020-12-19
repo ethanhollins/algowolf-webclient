@@ -119,14 +119,13 @@ class Chart extends Component
         if (this.getChart() === undefined)
             await this.addChart();
 
+        let { pos, scale } = this.state; 
         if (this.isBacktest())
         {
             const properties = this.getStrategy().properties;
             this.limit(properties.start, properties.end);
 
-            let { pos, scale } = this.state; 
             pos.x = Math.max(pos.x, this.getPosFromTimestamp(properties.start) - scale.x);
-            this.setState({ pos });
         }
 
         /* Initialize Indicators */
@@ -154,9 +153,10 @@ class Chart extends Component
             this.setTimeInterval();
         }
 
-        let { isinitialized } = this.state;
+        let { isinitialized, first_load } = this.state;
         isinitialized = true;
-        this.setState({ isinitialized });
+        first_load = true;
+        this.setState({ isinitialized, first_load, pos });
     }
 
     componentDidUpdate() 
@@ -172,6 +172,7 @@ class Chart extends Component
                 first_load = false;
                 pos = chart_properties.pos;
                 scale = chart_properties.scale;
+
                 this.setState({ pos, scale, first_load });
             }
             else
@@ -231,9 +232,6 @@ class Chart extends Component
                 key={this.getItemId()}
                 ref={this.setContainerRef}
                 style={{
-                    width: "100%",
-                    height: "100%",
-                    overflow: "hidden",
                     cursor: this.state.cursor
                 }}
                 onContextMenu={this.onContextMenu.bind(this)}
@@ -335,47 +333,44 @@ class Chart extends Component
             }
             
             const studies = this.getStudyComponents();
-            if (!keys.includes(SPACEBAR))
+            is_down = true;
+            if (!(hovered.horiz_axis || hovered.vert_axis))
             {
-                is_down = true;
-                if (!(hovered.horiz_axis || hovered.vert_axis))
+                if (hovered.study_handle !== false)
                 {
-                    if (hovered.study_handle !== false)
+                    is_down = false;
+                    is_move = false;
+                    
+                    studies[hovered.study_handle].setIsResize(true);
+                }
+                else if (this.isWithinBounds(rect, mouse_pos))
+                {
+                    e.preventDefault();
+                    is_move = true;
+                    before_change = { x: pos.x, y: pos.y };
+                }
+                else
+                {
+                    // Check mouse within study bounds
+                    for (let i = 0; i < studies.length; i++)
                     {
-                        is_down = false;
-                        is_move = false;
-                        
-                        studies[hovered.study_handle].setIsResize(true);
-                    }
-                    else if (this.isWithinBounds(rect, mouse_pos))
-                    {
-                        e.preventDefault();
-                        is_move = true;
-                        before_change = { x: pos.x, y: pos.y };
-                    }
-                    else
-                    {
-                        // Check mouse within study bounds
-                        for (let i = 0; i < studies.length; i++)
+                        let study = studies[i];
+                        start_pos = this.getWindowSegmentStartPos(study.getWindowIndex());
+                        segment_size = this.getSegmentSize(study.getWindowIndex());
+                        rect = {
+                            x: start_pos.x,
+                            y: start_pos.y + top_offset,
+                            width: segment_size.width,
+                            height: segment_size.height
+                        }
+        
+                        if (this.isWithinBounds(rect, mouse_pos)) 
                         {
-                            let study = studies[i];
-                            start_pos = this.getWindowSegmentStartPos(study.getWindowIndex());
-                            segment_size = this.getSegmentSize(study.getWindowIndex());
-                            rect = {
-                                x: start_pos.x,
-                                y: start_pos.y + top_offset,
-                                width: segment_size.width,
-                                height: segment_size.height
-                            }
-            
-                            if (this.isWithinBounds(rect, mouse_pos)) 
-                            {
-                                e.preventDefault();
-                                is_down = true;
-                                study.setIsMove(true);
-                                this.setState({ is_down });
-                                return
-                            }
+                            e.preventDefault();
+                            is_down = true;
+                            study.setIsMove(true);
+                            this.setState({ is_down });
+                            return
                         }
                     }
                 }
@@ -630,7 +625,6 @@ class Chart extends Component
         }
 
         let { is_down, is_move, before_change, trans_x, pos, scale, hovered } = this.state;
-        is_down = false;
 
         if (is_move)
         {
@@ -662,25 +656,34 @@ class Chart extends Component
         }
         const top_offset = this.props.getTopOffset();
         const { isinitialized } = this.state;
+        const is_top = this.props.isTopWindow(
+            this.getStrategyId(), this.getItemId(), 
+            { x: mouse_pos.x, y: mouse_pos.y - top_offset }
+        )
 
-        if (isinitialized && before_change !== null && this.isBacktest())
+        const period_offset = this.getPeriodOffsetSeconds(this.getPeriod());
+        if (this.getChart() && this.isBacktest())
         {
-            if (Math.abs(pos.x - before_change.x) < 1 && Math.abs(pos.y - before_change.y) < 1)
+            if (is_down)
             {
-                if (this.props.isTopWindow(
-                    this.getStrategyId(), this.getItemId(), 
-                    { x: mouse_pos.x, y: mouse_pos.y - top_offset }
-                ))
+                if (isinitialized && before_change !== null && is_top)
                 {
-                    const period_offset = this.getPeriodOffsetSeconds(this.getPeriod());
-                    this.props.setSelectedOffset(period_offset);
-
-                    const timestamp = this.isWithinBarBounds(mouse_pos);
-                    if (timestamp !== null)
+                    if (Math.abs(pos.x - before_change.x) < 1 && Math.abs(pos.y - before_change.y) < 1)
                     {
-                        this.props.setCurrentTimestamp(timestamp + period_offset);
+                        const timestamp = this.isWithinBarBounds(mouse_pos);
+                        if (timestamp !== null)
+                        {
+                            this.props.setCurrentTimestamp(timestamp + period_offset);
+                        }
                     }
                 }
+
+                this.props.setSelectedOffset(this.getTimestamps()[0], period_offset);
+                this.props.setBorder('1px solid #ff8103');
+            }
+            else
+            {
+                this.props.setBorder(null);
             }
         }
 
@@ -691,6 +694,8 @@ class Chart extends Component
         {
             this.contextMenu.style.display = 'none';
         }
+
+        is_down = false;
 
         this.setState({ is_down, is_move, trans_x, scale });
     }
@@ -766,23 +771,32 @@ class Chart extends Component
 
         this.contextMenu.style.display = 'none';
 
-        const name = e.target.getAttribute('name');
-        
-        if (name === 'settings')
-        {
-            const popup = {
-                type: 'chart-settings',
-                size: {
-                    width: 60,
-                    height: 75
-                },
-                opened: undefined,
-                properties: {
-                    item_id: this.getItemId()
-                }
+        const popup = {
+            type: 'not-available',
+            size: {
+                width: 30,
+                height: 30
             }
-            this.props.setPopup(popup);
         }
+        this.props.setPopup(popup);
+
+        // const name = e.target.getAttribute('name');
+        
+        // if (name === 'settings')
+        // {
+        //     const popup = {
+        //         type: 'chart-settings',
+        //         size: {
+        //             width: 60,
+        //             height: 75
+        //         },
+        //         opened: undefined,
+        //         properties: {
+        //             item_id: this.getItemId()
+        //         }
+        //     }
+        //     this.props.setPopup(popup);
+        // }
     }
 
     clampScale = (x) =>
@@ -1162,9 +1176,6 @@ class Chart extends Component
             this.handlePriceLine(ctx);
         }
 
-        // Handle Positions/Orders
-        this.handleTrades(ctx);
-
         // Handle Axis prices
         this.drawPrices(ctx, price_data);
 
@@ -1176,6 +1187,9 @@ class Chart extends Component
 
         // Handle Drawings
         this.handleDrawings(ctx);
+
+        // Handle Positions/Orders
+        this.handleTrades(ctx);
 
         const studies = this.getStudyComponents();
 
@@ -1202,6 +1216,9 @@ class Chart extends Component
             study.drawPrices(ctx, study_price_data); 
             study.drawSeparator(ctx);
 
+            // Handle Study Drawings
+            this.handleStudyDrawings(ctx, i);
+
             // Restore context
             ctx.restore(); 
 
@@ -1209,6 +1226,7 @@ class Chart extends Component
         }
 
         this.drawTimes(ctx, time_data);
+        
         // Handle Cross Segment Drawings
         this.handleUniversalDrawings(ctx);
         // Handle Crosshairs
@@ -1244,8 +1262,8 @@ class Chart extends Component
             { x: mouse_pos.x, y: mouse_pos.y - this.props.getTopOffset() }
         );
 
-        let x_pos = 1;
-        let my_timestamp = this.getTimestamps()[this.getTimestamps().length];
+        let x_pos;
+        let my_timestamp;
         if (top_window_id !== null)
         {
             const top_window = this.props.getWindowById(top_window_id);
@@ -1275,13 +1293,50 @@ class Chart extends Component
                             y: mouse_pos.y - top_seg_start.y - top_window_seg_start.y - this.props.getTopOffset() 
                         }, top_pos, top_seg_size, top_scale
                     );
-    
-                    const timestamp = top_chart.getTimestampByPos(Math.floor(mouse_world_pos.x));
-                    const timestamp_idx = this.getAllTimestampsIdx(timestamp);
-                    x_pos = this.getTimestamps().length - timestamp_idx;
-                    x_pos = Math.max(x_pos, 1);
-                    my_timestamp = this.getAllTimestamps()[timestamp_idx];
+                        
+                    let timestamp;
+                    let timestamp_idx;
+                    if (this.isBacktest())
+                    {
+                        timestamp = Math.min(
+                            this.props.getCurrentTimestamp(),
+                            top_chart.getTimestampByPos(Math.floor(mouse_world_pos.x)) + this.props.getPeriodOffsetSeconds(this.getPeriod())
+                        );
+                        timestamp_idx = this.getTimestampIdxWithOffset(
+                            timestamp, this.props.getPeriodOffsetSeconds(this.getPeriod())
+                        );
+                    }
+                    else
+                    {
+                        timestamp = top_chart.getTimestampByPos(Math.floor(mouse_world_pos.x));
+                        timestamp_idx = this.getAllTimestampsIdx(timestamp);
+                    }
+                    if (timestamp_idx !== undefined)
+                    {
+                        x_pos = this.getTimestamps().length - timestamp_idx;
+                        x_pos = Math.max(x_pos, 1);
+                        my_timestamp = this.getAllTimestamps()[timestamp_idx];
+                    }
                 }
+            }
+        }
+
+        if (x_pos === undefined)
+        {
+            if (this.isBacktest())
+            {
+                const timestamp_idx = this.getTimestampIdxWithOffset(
+                    this.props.getCurrentTimestamp(),
+                    this.props.getPeriodOffsetSeconds(this.getPeriod())
+                );
+                x_pos = this.getTimestamps().length - timestamp_idx;
+                x_pos = Math.max(x_pos, 1);
+                my_timestamp = this.getTimestamps()[timestamp_idx];
+            }
+            else
+            {
+                x_pos = 1;
+                my_timestamp = this.getTimestamps()[this.getTimestamps().length];
             }
         }
 
@@ -1826,21 +1881,49 @@ class Chart extends Component
             )
 
             let color = undefined;
-            if (c_trade.direction === 'long')
+            if (c_trade.order_type === 'limitorder' || c_trade.order_type === 'stoporder')
             {
-                color = '#3498db';
+                color = '#8c8c8c';
             }
             else
             {
-                color = '#f39c12';
+                if (c_trade.direction === 'long')
+                {
+                    color = '#3498db';
+                }
+                else
+                {
+                    color = '#f39c12';
+                }
             }
             
             /* Draw Entry, SL, TP lines */
 
+            // Text
+            const font_size = 8;
+            ctx.font = '700 ' + String(font_size) + 'pt Segoe UI';
+            ctx.textAlign = 'left';
+            ctx.lineWidth = 1;
+            
+            // SL Line
+            ctx.strokeStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.moveTo(0, Math.floor(sl_pos.y));
+            ctx.lineTo(seg_size.width, Math.floor(sl_pos.y));
+            ctx.setLineDash([5, 3]);
+            ctx.stroke();
+
+            // TP Line
+            ctx.strokeStyle = '#2ecc71';
+            ctx.beginPath();
+            ctx.moveTo(0, Math.floor(tp_pos.y));
+            ctx.lineTo(seg_size.width, Math.floor(tp_pos.y));
+            ctx.setLineDash([5, 3]);
+            ctx.stroke();
+
             // Entry line
             ctx.fillStyle = '#FFF';
             ctx.strokeStyle = color;
-            ctx.lineWidth = 1;
 
             // Dashed line
             ctx.beginPath();
@@ -1857,47 +1940,201 @@ class Chart extends Component
             ctx.stroke();
 
             const trade_icon_size = 8;
-            if (c_trade.order_type === 'limitorder' || c_trade.order_type === 'stoporder')
+            const trade_label_height = 21;
+            const trade_label_off = 20;
+            const trade_label_inside_off = 7;
+            if (c_trade.order_type === 'limitorder')
             {
+                let text;
+                let direction_color;
+                if (c_trade.direction === 'long')
+                {
+                    text = 'BUY LIMIT';
+                    direction_color = '#3498db';
+                }
+                else
+                {
+                    text = 'SELL LIMIT';
+                    direction_color = '#f39c12';
+                }
+                let text_width = ctx.measureText(text).width;
+                let position_size_width = ctx.measureText(String(parseInt(c_trade.lotsize))).width
+                let trade_label_width = trade_label_inside_off*4 + Math.floor(text_width) + Math.floor(position_size_width);
+
                 // Fill Rect
                 ctx.fillRect(
-                    Math.round(entry_pos.x - trade_icon_size/2)+0.5, 
-                    Math.round(entry_pos.y - trade_icon_size/2)+0.5, 
+                    Math.floor(entry_pos.x - trade_icon_size/2)+0.5, 
+                    Math.floor(entry_pos.y - trade_icon_size/2)+0.5, 
                     trade_icon_size, trade_icon_size,
                 );
                 ctx.strokeRect(
-                    Math.round(entry_pos.x - trade_icon_size/2)+0.5, 
-                    Math.round(entry_pos.y - trade_icon_size/2)+0.5, 
+                    Math.floor(entry_pos.x - trade_icon_size/2)+0.5, 
+                    Math.floor(entry_pos.y - trade_icon_size/2)+0.5, 
                     trade_icon_size, trade_icon_size,
+                );
+
+                // Fill Rect
+                ctx.fillRect(
+                    trade_label_off+0.5, 
+                    Math.floor(entry_pos.y - trade_label_height/2)+0.5, 
+                    trade_label_width, trade_label_height,
+                );
+                ctx.strokeRect(
+                    trade_label_off+0.5, 
+                    Math.floor(entry_pos.y - trade_label_height/2)+0.5, 
+                    trade_label_width, trade_label_height,
+                );
+
+                // Label Inside
+                ctx.fillStyle = direction_color;
+                ctx.fillText(
+                    text, (trade_label_off+0.5) + trade_label_inside_off,
+                    Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2
+                );
+                
+                ctx.beginPath();
+                ctx.moveTo(
+                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2, 
+                    Math.floor(entry_pos.y - trade_label_height/2) + 0.5
+                );
+                ctx.lineTo(
+                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2, 
+                    Math.floor(entry_pos.y - trade_label_height/2) + 0.5 + trade_label_height
+                );
+                ctx.stroke();
+
+                ctx.fillText(
+                    String(parseInt(c_trade.lotsize)), 
+                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3,
+                    Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2
+                );
+            }
+            else if (c_trade.order_type === 'stoporder')
+            {
+                let text;
+                let direction_color;
+                if (c_trade.direction === 'long')
+                {
+                    text = 'BUY STOP';
+                    direction_color = '#3498db';
+                }
+                else
+                {
+                    text = 'SELL STOP';
+                    direction_color = '#f39c12';
+                }
+                let text_width = ctx.measureText(text).width;
+                let position_size_width = ctx.measureText(String(parseInt(c_trade.lotsize))).width
+                let trade_label_width = trade_label_inside_off*4 + Math.floor(text_width) + Math.floor(position_size_width);
+
+                // Fill Rect
+                ctx.fillRect(
+                    Math.floor(entry_pos.x - trade_icon_size/2)+0.5, 
+                    Math.floor(entry_pos.y - trade_icon_size/2)+0.5, 
+                    trade_icon_size, trade_icon_size,
+                );
+                ctx.strokeRect(
+                    Math.floor(entry_pos.x - trade_icon_size/2)+0.5, 
+                    Math.floor(entry_pos.y - trade_icon_size/2)+0.5, 
+                    trade_icon_size, trade_icon_size,
+                );
+
+                // Fill Rect
+                ctx.fillRect(
+                    trade_label_off+0.5, 
+                    Math.floor(entry_pos.y - trade_label_height/2)+0.5, 
+                    trade_label_width, trade_label_height,
+                );
+                ctx.strokeRect(
+                    trade_label_off+0.5, 
+                    Math.floor(entry_pos.y - trade_label_height/2)+0.5, 
+                    trade_label_width, trade_label_height,
+                );
+
+                // Label Inside
+                ctx.fillStyle = direction_color;
+                ctx.fillText(
+                    text, (trade_label_off+0.5) + trade_label_inside_off,
+                    Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2
+                );
+                
+                ctx.beginPath();
+                ctx.moveTo(
+                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2, 
+                    Math.floor(entry_pos.y - trade_label_height/2) + 0.5
+                );
+                ctx.lineTo(
+                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2, 
+                    Math.floor(entry_pos.y - trade_label_height/2) + 0.5 + trade_label_height
+                );
+                ctx.stroke();
+
+                ctx.fillText(
+                    String(parseInt(c_trade.lotsize)), 
+                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3,
+                    Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2
                 );
             }
             else
             {
+                let text;
+                if (c_trade.direction === 'long')
+                {
+                    text = 'BUY TRADE';
+                }
+                else
+                {
+                    text = 'SELL TRADE';
+                }
+                let text_width = ctx.measureText(text).width;
+                let position_size_width = ctx.measureText(String(parseInt(c_trade.lotsize))).width
+                let trade_label_width = trade_label_inside_off*4 + Math.floor(text_width) + Math.floor(position_size_width);
+
                 // Fill Circle
                 ctx.beginPath();
                 ctx.arc(
-                    Math.round(entry_pos.x)+0.5, Math.round(entry_pos.y)+0.5, 
+                    Math.floor(entry_pos.x)+0.5, Math.floor(entry_pos.y)+0.5, 
                     trade_icon_size/2, 0, 2 * Math.PI
                 );
                 ctx.fill();
                 ctx.stroke();
-            }
-            
-            // SL Line
-            ctx.strokeStyle = '#e74c3c';
-            ctx.beginPath();
-            ctx.moveTo(0, sl_pos.y);
-            ctx.lineTo(seg_size.width, sl_pos.y);
-            ctx.setLineDash([5, 3]);
-            ctx.stroke();
 
-            // TP Line
-            ctx.strokeStyle = '#2ecc71';
-            ctx.beginPath();
-            ctx.moveTo(0, tp_pos.y);
-            ctx.lineTo(seg_size.width, tp_pos.y);
-            ctx.setLineDash([5, 3]);
-            ctx.stroke();
+                // Fill Rect
+                ctx.fillRect(
+                    trade_label_off+0.5, 
+                    Math.floor(entry_pos.y - trade_label_height/2)+0.5, 
+                    trade_label_width, trade_label_height,
+                );
+                ctx.strokeRect(
+                    trade_label_off+0.5, 
+                    Math.floor(entry_pos.y - trade_label_height/2)+0.5, 
+                    trade_label_width, trade_label_height,
+                );
+
+                // Label Inside
+                ctx.fillStyle = color;
+                ctx.fillText(
+                    text, (trade_label_off+0.5) + trade_label_inside_off,
+                    Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2
+                );
+                
+                ctx.beginPath();
+                ctx.moveTo(
+                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2, 
+                    Math.floor(entry_pos.y - trade_label_height/2) + 0.5
+                );
+                ctx.lineTo(
+                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2, 
+                    Math.floor(entry_pos.y - trade_label_height/2) + 0.5 + trade_label_height
+                );
+                ctx.stroke();
+
+                ctx.fillText(
+                    String(parseInt(c_trade.lotsize)), 
+                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3,
+                    Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2
+                );
+            }
             
         }
     }
@@ -1990,11 +2227,10 @@ class Chart extends Component
        
     }
 
-    drawHorizontalLine(ctx, pos, properties)
+    drawHorizontalLine(ctx, start_pos, pos, properties)
     {
         const chart_size = this.getChartSize();
-        const y = Math.round(pos.y - properties.scale/2);
-
+        const y = Math.round(start_pos.y + pos.y - properties.scale/2);
         if (properties.lineType === 'dashed')
         {
             // Dashed line
@@ -2038,11 +2274,62 @@ class Chart extends Component
 
     }
 
+    drawText(ctx, start_pos, screen_pos, properties)
+    {
+        // Font settings
+        const font_size = properties.font_size;
+        ctx.font = '600 ' + String(font_size) + 'pt Segoe UI';
+        ctx.textAlign = 'center';
+
+        ctx.fillStyle = properties.colors[0];
+        ctx.strokeStyle = '#FFF';
+
+        // ctx.strokeText(
+        //     properties.text, 
+        //     screen_pos.x, 
+        //     Math.round(screen_pos.y + (3/4 * (font_size/2)))
+        // );
+
+        ctx.fillText(
+            properties.text, 
+            start_pos.x + screen_pos.x, 
+            Math.round(start_pos.y + screen_pos.y + (3/4 * (font_size/2)))
+        );
+    }
+
+    drawMisc(ctx, start_pos, screen_pos, d_props)
+    {
+        const drawing = Drawings[d_props.type]();
+        // Get Rotation and Scale
+        const rotation = this.degsToRads(d_props.properties.rotation);
+        const drawing_scale = 0.01 * d_props.properties.scale;
+        
+        const width = drawing.size.width;
+        const height = drawing.size.height;
+
+        // Move to position
+        ctx.translate(
+            start_pos.x + screen_pos.x - (width*drawing_scale),
+            start_pos.y + screen_pos.y - (height*drawing_scale)
+        );
+        ctx.scale(drawing_scale, drawing_scale);
+
+        // Rotate around center
+        ctx.translate(width, height);
+        ctx.rotate(rotation);
+        ctx.translate(-width/2, -height/2);
+        
+        ctx.fillStyle = d_props.properties.colors[0];
+        // Fill Path
+        ctx.fill(new Path2D(drawing.path));
+        // Reset Transform
+        ctx.setTransform(1,0,0,1,0,0);
+    }
+
     handleDrawings(ctx)
     {
         const camera = this.getCamera();
         const { pos, scale } = this.state;
-        const seg_size = this.getSegmentSize(0);
 
         const chart_drawings_layers = this.getProperties().drawing_layers;
         let drawings = this.getDrawings();
@@ -2062,70 +2349,99 @@ class Chart extends Component
                 if (x === undefined) continue
     
                 const y = d_props.prices[0];
-                const screen_pos = camera.convertWorldPosToScreenPos(
-                    { x: x+0.5, y: y }, pos, seg_size, scale
-                );
                 
-                // Handle Vertical Line
                 if (!UNIVERSAL_DRAWINGS.includes(d_props.type))
                 {
-                    // Handle Horizontal Line
-                    if (d_props.type === 'horizontalLine')
+                    if (d_props.section_name.toLowerCase() === 'instrument')
                     {
-                        this.drawHorizontalLine(ctx, screen_pos, d_props.properties);
-                    }
-                    // Handle Text
-                    else if (d_props.type === 'text')
-                    {
-                        // Font settings
-                        const font_size = d_props.properties.font_size;
-                        ctx.font = '600 ' + String(font_size) + 'pt Segoe UI';
-                        ctx.textAlign = 'center';
-                        
-                        ctx.fillStyle = d_props.properties.colors[0];
-                        ctx.strokeStyle = '#FFF';
-
-                        // ctx.strokeText(
-                        //     d_props.properties.text, 
-                        //     screen_pos.x, 
-                        //     Math.round(screen_pos.y + (3/4 * (font_size/2)))
-                        // );
-
-                        ctx.fillText(
-                            d_props.properties.text, 
-                            screen_pos.x, 
-                            Math.round(screen_pos.y + (3/4 * (font_size/2)))
+                        const start_pos = this.getChartSegmentStartPos(0);
+                        const seg_size = this.getSegmentSize(0);
+                        const screen_pos = camera.convertWorldPosToScreenPos(
+                            { x: x+0.5, y: y }, pos, seg_size, scale
                         );
+
+                        // Handle Horizontal Line
+                        if (d_props.type === 'horizontalLine')
+                        {
+                            this.drawHorizontalLine(ctx, start_pos, screen_pos, d_props.properties);
+                        }
+                        // Handle Text
+                        else if (d_props.type === 'text')
+                        {
+                            this.drawText(ctx, start_pos, screen_pos, d_props.properties);
+                        }
+                        // Handle Misc Drawings
+                        else if (d_props.type in Drawings)
+                        {
+                            this.drawMisc(ctx, start_pos, screen_pos, d_props);
+                        }
                     }
-                    // Handle Misc Drawings
-                    else
+                }
+            }
+        }
+    }
+
+    handleStudyDrawings(ctx, idx)
+    {
+        const camera = this.getCamera();
+        const { pos, scale } = this.state;
+
+        const chart_drawings_layers = this.getProperties().drawing_layers;
+        let drawings = this.getDrawings();
+
+        for (let layer of chart_drawings_layers)
+        {
+            if (!(layer in drawings)) continue;
+
+            for (let i = 0; i < drawings[layer].length; i++)
+            {
+                const d_props = drawings[layer][i];
+                if (d_props.product !== this.getProduct()) continue;
+    
+                // Get Position
+                const x = this.getPosFromAllTimestamps(d_props.timestamps[0]);
+                // Skip if x doesn't exist
+                if (x === undefined) continue
+    
+                const y = d_props.prices[0];
+                
+                if (!UNIVERSAL_DRAWINGS.includes(d_props.type))
+                {
+                    if (d_props.section_name.toLowerCase() !== 'instrument')
                     {
-                        if (!(d_props.type in Drawings)) continue;
-                        const drawing = Drawings[d_props.type]();
-                        // Get Rotation and Scale
-                        const rotation = this.degsToRads(d_props.properties.rotation);
-                        const drawing_scale = 0.01 * d_props.properties.scale;
-                        
-                        const width = drawing.size.width;
-                        const height = drawing.size.height;
-            
-                        // Move to position
-                        ctx.translate(
-                            screen_pos.x - (width*drawing_scale),
-                            screen_pos.y - (height*drawing_scale)
-                        );
-                        ctx.scale(drawing_scale, drawing_scale);
-            
-                        // Rotate around center
-                        ctx.translate(width, height);
-                        ctx.rotate(rotation);
-                        ctx.translate(-width/2, -height/2);
-                        
-                        ctx.fillStyle = d_props.properties.colors[0];
-                        // Fill Path
-                        ctx.fill(new Path2D(drawing.path));
-                        // Reset Transform
-                        ctx.setTransform(1,0,0,1,0,0);
+                        const studies = this.getStudies();
+                        const study_components = this.getStudyComponents();
+
+                        // Studies
+                        const study = study_components[idx];
+                        const ind = studies[idx];
+                        const name = this.getIndicator(ind).type;
+                        const study_pos = { x: pos.x, y: study.getPos().y };
+                        const study_scale = { x: scale.x, y: study.getScale().y };
+
+                        if (name.toLowerCase() === d_props.section_name.toLowerCase())
+                        {
+                            const start_pos = this.getChartSegmentStartPos(idx+1);
+                            const seg_size = this.getSegmentSize(idx+1);
+                            const screen_pos = camera.convertWorldPosToScreenPos(
+                                { x: x+0.5, y: y }, study_pos, seg_size, study_scale
+                            );
+                            // Handle Horizontal Line
+                            if (d_props.type === 'horizontalLine')
+                            {
+                                this.drawHorizontalLine(ctx, start_pos, screen_pos, d_props.properties);
+                            }
+                            // Handle Text
+                            else if (d_props.type === 'text')
+                            {
+                                this.drawText(ctx, start_pos, screen_pos, d_props.properties);
+                            }
+                            // Handle Misc Drawings
+                            else if (d_props.type in Drawings)
+                            {
+                                this.drawMisc(ctx, start_pos, screen_pos, d_props);
+                            }
+                        }
                     }
                 }
             }
@@ -2466,6 +2782,28 @@ class Chart extends Component
         return idx;
     }
 
+    getTimestampIdxWithOffset = (ts, off) =>
+    {
+        const timestamps = this.getTimestamps();
+        // Return undefined if timestamp is greater than latest existing timestamp
+        if (
+            (!this.isBacktest() && 
+                ts >= this.getNextTimestamp() + this.getPeriodOffsetSeconds(this.getChart().period)) ||
+            ts < timestamps[0]
+        )
+            return undefined
+
+        const indicies = [...Array(timestamps.length).keys()]
+        const idx = indicies.reduce(function(prev, curr) {
+            return (
+                (Math.abs(timestamps[curr] - ts) < Math.abs(timestamps[prev] - ts)) && 
+                timestamps[curr] <= ts - off ? curr : prev
+            );
+        });
+
+        return idx;
+    }
+
     getAllTimestampsIdx = (ts) =>
     {
         const timestamps = this.getAllTimestamps();
@@ -2775,7 +3113,7 @@ class Chart extends Component
     getChartSize = () =>
     {
         const container_size = this.getSize();
-
+        
         return {
             width: container_size.width,
             height: container_size.height - this.getBottomOff()

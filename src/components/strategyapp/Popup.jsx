@@ -201,6 +201,7 @@ class Popup extends Component
             else if (popup.type === 'are-you-sure')
             {
                 return <AreYouSure
+                    close={this.close}
                     getPopup={this.props.getPopup}
                 />
             }

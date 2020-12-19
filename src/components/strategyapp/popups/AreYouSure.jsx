@@ -9,11 +9,18 @@ class AreYouSure extends Component
             <React.Fragment>
             
             <div className='popup header'>
-                <span>Account Settings</span>
+                <span>Are You Sure</span>
             </div>
             <div className='popup content'>
                 <div className='popup main'>
                     <div className='popup main-list'>
+                        <div className='are-you-sure body'>
+                            <div className='are-you-sure message'>{this.props.getPopup().message}</div>
+                            <div className='are-you-sure btn-group'>
+                                <div className='are-you-sure btn' onClick={this.onYes.bind(this)}>Yes</div>
+                                <div className='are-you-sure btn' onClick={this.onNo.bind(this)}>No</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -22,46 +29,15 @@ class AreYouSure extends Component
         );
     }
 
-    getBarsItems()
+    onYes()
     {
-        return
+        this.props.getPopup().func();
+        this.props.close();
     }
 
-    getChartItems()
+    onNo()
     {
-        return
-    }
-
-    getTradingItems()
-    {
-        return
-    }
-
-    getItems()
-    {
-        const opened = this.props.getPopup().opened;
-
-        if (opened === 'bars')
-        {
-            return this.getBarsItems();
-        }
-        else if (opened === 'chart')
-        {
-            return this.getChartItems();
-        }
-        else if (opened === 'trading')
-        {
-            return this.getTradingItems();
-        }
-    }
-
-    isSelected(category)
-    {
-        const popup = this.props.getPopup();
-        if (popup.opened === category)
-            return ' selected';
-        else
-            return '';
+        this.props.close();
     }
 }
 

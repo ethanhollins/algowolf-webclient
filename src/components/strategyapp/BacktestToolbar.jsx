@@ -9,7 +9,7 @@ import {
 import { 
     faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
     faFileInvoice, faChartBar, faTicketAlt, faLayerGroup,
-    faSignOut
+    faSignOut, faInfoCircle, faScroll
 } from '@fortawesome/pro-light-svg-icons';
 
 class BacktestToolbar extends Component
@@ -39,14 +39,8 @@ class BacktestToolbar extends Component
         this.setUtilsElem = elem => {
             this.utilsElem = elem;
         }
-        this.setToolsElem = elem => {
-            this.toolsElem = elem;
-        }
         this.setUtilsDropdown = elem => {
             this.utilsDropdown = elem;
-        }
-        this.setToolsDropdown = elem => {
-            this.toolsDropdown = elem;
         }
         this.setScriptElem = elem => {
             this.scriptElem = elem;
@@ -166,7 +160,13 @@ class BacktestToolbar extends Component
                             </div>
                             <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
                                 <span className='toolbox left'>
-                                    <FontAwesomeIcon icon={faSlidersVSquare} className='toolbox left-icon' /><span>Control Center</span>
+                                    <FontAwesomeIcon icon={faSlidersVSquare} className='toolbox left-icon' /><span>Control Panel</span>
+                                </span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
+                            </div>
+                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
+                                <span className='toolbox left'>
+                                    <FontAwesomeIcon icon={faInfoCircle} className='toolbox left-icon' /><span>Chart Info</span>
                                 </span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
                             </div>
@@ -178,32 +178,15 @@ class BacktestToolbar extends Component
                             </div>
                             <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
                                 <span className='toolbox left'>
-                                    <FontAwesomeIcon icon={faCodeLight} className='toolbox left-icon' /><span>Script Editor</span>
+                                    <FontAwesomeIcon icon={faScroll} className='toolbox left-icon' /><span>Script Log</span>
                                 </span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
                             </div>
-                        </div>
-                    </div>
-                    <div className='toolbox item'>
-                        <div ref={this.setToolsElem} className='toolbox item row btn' onClick={this.onToolsDropdown}>
-                            <FontAwesomeIcon className='toolbox icon orange_btn' icon={faTools} />
-                            <span className='toolbox label'>Tools</span>
-                        </div>
-                        <div ref={this.setToolsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
                             <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
                                 <span className='toolbox left'>
-                                    <FontAwesomeIcon icon={faExpandArrowsAlt} className='toolbox left-icon' /><span>Move</span>
+                                    <FontAwesomeIcon icon={faCodeLight} className='toolbox left-icon' /><span>Script Editor</span>
                                 </span>
-                            </div>
-                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
-                                <span className='toolbox left'>
-                                    <FontAwesomeIcon icon={faLink} className='toolbox left-icon' /><span>Link</span>
-                                </span>
-                            </div>
-                            <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
-                                <span className='toolbox left'>
-                                    <FontAwesomeIcon icon={faExpandAlt} className='toolbox left-icon' /><span>Resize</span>
-                                </span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faPlus} className='toolbox right-icon' /></span>
                             </div>
                         </div>
                     </div>
@@ -288,20 +271,6 @@ class BacktestToolbar extends Component
         }
     }
 
-    onToolsDropdown = (e) =>
-    {
-        if (this.toolsDropdown.style.display === 'none')
-        {
-            this.toolsDropdown.style.display = 'block';
-            const btn_rect = this.toolsElem.getBoundingClientRect();
-            this.toolsDropdown.style.left = parseInt(btn_rect.x) + 'px';
-        }
-        else
-        {
-            this.toolsDropdown.style.display = 'none';
-        }
-    }
-
     onBacktestDropdown = (e) =>
     {
         if (this.backtestDropdown.style.display === 'none')
@@ -324,11 +293,6 @@ class BacktestToolbar extends Component
     onUtilsDropdownItem = (e) =>
     {
         this.utilsDropdown.style.display = 'none';
-    }
-
-    onToolsDropdownItem = (e) =>
-    {
-        this.toolsDropdown.style.display = 'none';
     }
 
     onNotAvailableItem = (e) =>
@@ -391,11 +355,6 @@ class BacktestToolbar extends Component
         {
             if (!this.props.isWithinBounds(this.utilsDropdown.getBoundingClientRect(), mouse_pos))
                 this.utilsDropdown.style.display = 'none';
-        }
-        if (this.toolsDropdown.style.display !== 'none')
-        {
-            if (!this.props.isWithinBounds(this.toolsDropdown.getBoundingClientRect(), mouse_pos))
-                this.toolsDropdown.style.display = 'none';
         }
     }
 }

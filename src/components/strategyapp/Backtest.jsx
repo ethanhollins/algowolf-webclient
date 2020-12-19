@@ -20,11 +20,11 @@ class Backtest extends Component
             positions: [],
             orders: [],
             drawings: {},
-            info: {},
             input_variables: {},
             log: [],
             hide_shadows: false,
-            selected_offset: null,
+            reference_timestamp: 0,
+            selected_offset: 0,
         }
 
         this.retrieveReport = this.retrieveReport.bind(this);
@@ -44,6 +44,8 @@ class Backtest extends Component
         this.handleTransactions(strategy.properties.end);
 
         this.props.setShowLoadScreen(false);
+
+        console.log(strategy.info);
     }
 
     render() {
@@ -170,6 +172,7 @@ class Backtest extends Component
                             getCurrentTimestamp={this.getCurrentTimestamp}
                             setCurrentTimestamp={this.setCurrentTimestamp}
                             setSelectedOffset={this.setSelectedOffset}
+                            getSelectedOffset={this.getSelectedOffset}
                             // Log Functions
                             getLog={this.getLog}
                             getInfo={this.getInfo}
@@ -256,6 +259,24 @@ class Backtest extends Component
         this.setState({ hide_shadows });
     }
 
+    updateInfo = () =>
+    {
+        for (let w of this.windows)
+        {
+            if (w !== null && w.getInnerElement() !== null)
+            {
+                if (w.getInnerElement().updateInfo !== undefined)
+                {
+                    const mouse_pos = this.props.getMousePos();
+                    w.getInnerElement().updateInfo({ 
+                        x: mouse_pos.x, 
+                        y: mouse_pos.y - this.props.getAppContainer().offsetTop 
+                    });
+                }
+            }
+        }
+    }
+
     handleKeys = () =>
     {
         const keys = this.props.getKeys();
@@ -264,12 +285,14 @@ class Backtest extends Component
         if (keys.includes(ARROW_RIGHT))
         {
             const { current_timestamp } = this.state;
-            this.handleTransactions(current_timestamp + selected_offset);
+            this.handleTransactions(this.getRoundedTimestamp(current_timestamp + selected_offset));
+            this.updateInfo();
         }
         if (keys.includes(ARROW_LEFT))
         {
             const { current_timestamp } = this.state;
-            this.handleTransactions(current_timestamp - selected_offset);
+            this.handleTransactions(this.getRoundedTimestamp(current_timestamp - selected_offset));
+            this.updateInfo();
         }
     }
 
@@ -485,9 +508,16 @@ class Backtest extends Component
         return this.state.log;
     }
 
-    getInfo = () =>
+    getInfo = (product, period) =>
     {
-        return this.state.info;
+        if (product in this.getStrategyInfo().info)
+        {
+            if (period in this.getStrategyInfo().info[product])
+            {
+                return this.getStrategyInfo().info[product][period];
+            }
+        }
+        return {};
     }
 
     getInputVariables = () =>
@@ -565,6 +595,12 @@ class Backtest extends Component
         
     }
 
+    getRoundedTimestamp = (timestamp) =>
+    {
+        const { reference_timestamp, selected_offset } = this.state;
+        return timestamp - (timestamp - reference_timestamp) % selected_offset
+    }
+
     async retrieveReport(name)
     {
         const strategy_id = this.props.id.split('/backtest/')[0];
@@ -578,9 +614,14 @@ class Backtest extends Component
         return true;
     }
 
-    setSelectedOffset = (selected_offset) =>
+    setSelectedOffset = (reference_timestamp, selected_offset) =>
     {
-        this.setState({ selected_offset });
+        this.setState({ reference_timestamp, selected_offset });
+    }
+
+    getSelectedOffset = () =>
+    {
+        return this.state.selected_offset;
     }
 
     removeWindowsRef = (elem) =>
