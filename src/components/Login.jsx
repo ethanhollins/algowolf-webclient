@@ -44,7 +44,7 @@ class Login extends Component
                 <div className="login container">
                     <form className="login form" onSubmit={this.handleSubmit.bind(this)}>
                         <a className='login logo' href='/'>
-                            <ReactSVG src="./algowolf.svg" />
+                            <ReactSVG src={process.env.PUBLIC_URL + "/algowolf.svg"} />
                         </a>
     
                         <div className="login field">

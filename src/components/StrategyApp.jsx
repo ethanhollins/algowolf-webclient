@@ -260,7 +260,7 @@ class StrategyApp extends Component
             >
                 <div className='main load-item'>
                     <div>
-                        <ReactSVG className='main load-img' src="./wolf-logo.svg" />
+                        <ReactSVG className='main load-img' src={process.env.PUBLIC_URL + "/wolf-logo.svg"} />
                     </div>
                     {/* <div className='main load-text'>Loading</div> */}
                 </div>
@@ -278,7 +278,7 @@ class StrategyApp extends Component
                 >
                     <div className='main load-item mobile'>
                         <div>
-                            <ReactSVG className='main mobile-img' src="./wolf-logo.svg" />
+                            <ReactSVG className='main mobile-img' src={process.env.PUBLIC_URL + "/wolf-logo.svg"} />
                         </div>
                         <div>Sorry this app is currently unavailable on mobile.</div>
                     </div>
