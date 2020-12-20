@@ -3,8 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faBars,  faChartLine, faChartPie,
     faLightbulb, faCode, faHistory, faChevronRight,
-    faTools, faExpandArrowsAlt, faLink, faExpandAlt,
-    faQuestionCircle
+    faQuestionCircle, faEnvelope
 } from '@fortawesome/pro-regular-svg-icons';
 import { 
     faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
@@ -47,6 +46,9 @@ class BacktestToolbar extends Component
         }
         this.setBacktestElem = elem => {
             this.backtestElem = elem;
+        }
+        this.setNotifyElem = elem => {
+            this.notifyElem = elem;
         }
         this.setHelpElem = elem => {
             this.helpElem = elem;
@@ -205,6 +207,12 @@ class BacktestToolbar extends Component
                     </div>
                     <div className='toolbox separator' />
                     <div className='toolbox item'>
+                        <div ref={this.setNotifyElem} className='toolbox item row btn' onClick={this.onNotifyItem}>
+                            <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faEnvelope} />
+                            <span className='toolbox label'>Notify Me</span>
+                        </div>
+                    </div>
+                    <div className='toolbox item'>
                         <div ref={this.setHelpElem} className='toolbox item row btn' onClick={this.onHelpItem}>
                             <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faQuestionCircle} />
                             <span className='toolbox label'>Help</span>
@@ -317,6 +325,19 @@ class BacktestToolbar extends Component
                 width: 30,
                 height: 30
             }
+        }
+        this.props.setPopup(popup);
+    }
+
+    onNotifyItem = (e) =>
+    {
+        const popup = {
+            type: 'notify-me',
+            size: {
+                width: 30,
+                height: 30
+            },
+            fade: true
         }
         this.props.setPopup(popup);
     }

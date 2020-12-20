@@ -9,6 +9,7 @@ import Login from './components/Login';
 import Logout from './components/Logout';
 import { config } from '@fortawesome/fontawesome-svg-core'
 import Cookies from 'universal-cookie';
+import moment from "moment-timezone";
 
 class App extends Component 
 {
@@ -22,6 +23,12 @@ class App extends Component
         config.autoAddCss = false
         this.cookies = new Cookies();
         this.checkAuthorization = this.checkAuthorization.bind(this);
+        this.dailyVisitorCounter = this.dailyVisitorCounter.bind(this);
+    }
+
+    componentDidMount()
+    {
+        this.dailyVisitorCounter();
     }
 
     render() {
@@ -137,6 +144,31 @@ class App extends Component
 
         this.setUserId(user_id);
         return user_id;
+    }
+
+    async dailyVisitorCounter()
+    {
+        let last_visit = this.getCookies().get('last-visit');
+        if (last_visit === undefined)
+        {
+            last_visit = 0;
+        }
+
+        if (!moment().startOf('day').isSame(moment(last_visit), 'day'))
+        {
+            const { REACT_APP_API_URL } = process.env;
+            var requestOptions = {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: '*/*'
+                },
+                credentials: 'include'
+            };
+    
+            await fetch(`${REACT_APP_API_URL}/v1/analytics/visitors/daily`, requestOptions);
+            this.getCookies().set('last-visit', moment().format());
+        }
     }
 
     getURI = () =>
