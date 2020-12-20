@@ -129,133 +129,136 @@ class SpreadSheet extends Component
 
     generateRows(data)
     {
-        const num_cols = Object.keys(data).length+1;
-        const num_rows = data[Object.keys(data)[0]].length+1;
-
-        const format = this.props.format;
-
-        let r_profit = 0;
-        let old_exit = 0;
-
-        let result = [];
-        for (let i = 0; i < num_rows; i++)
+        if (Object.keys(data).length > 0)
         {
-            let row_result = [];
-            for (let j = 0; j < num_cols; j++)
+            const num_cols = Object.keys(data).length+1;
+            const num_rows = data[Object.keys(data)[0]].length+1;
+    
+            const format = this.props.format;
+    
+            let r_profit = 0;
+            let old_exit = 0;
+    
+            let result = [];
+            for (let i = 0; i < num_rows; i++)
             {
-                // TEMP
-                if (i === num_rows-1)
+                let row_result = [];
+                for (let j = 0; j < num_cols; j++)
                 {
-                    if (j === 0)
+                    // TEMP
+                    if (i === num_rows-1)
                     {
-                        row_result.push(
-                            <div key={j} className='spreadsheet cell index'>Totals</div>
-                        );
-                    }
-                    else
-                    {
-                        const col_name = Object.keys(data)[j-1];
-                        if (col_name === 'R Profit')
+                        if (j === 0)
                         {
                             row_result.push(
-                                <div key={j} className='spreadsheet cell item'><div>{r_profit.toFixed(2)}</div></div>
-                            );
-                        }
-                        else if (col_name === 'Old Exit Alg')
-                        {
-                            row_result.push(
-                                <div key={j} className='spreadsheet cell item'><div>{old_exit.toFixed(2)}</div></div>
+                                <div key={j} className='spreadsheet cell index'>Totals</div>
                             );
                         }
                         else
                         {
+                            const col_name = Object.keys(data)[j-1];
+                            if (col_name === 'R Profit')
+                            {
+                                row_result.push(
+                                    <div key={j} className='spreadsheet cell item'><div>{r_profit.toFixed(2)}</div></div>
+                                );
+                            }
+                            else if (col_name === 'Old Exit Alg')
+                            {
+                                row_result.push(
+                                    <div key={j} className='spreadsheet cell item'><div>{old_exit.toFixed(2)}</div></div>
+                                );
+                            }
+                            else
+                            {
+                                row_result.push(
+                                    <div key={j} className='spreadsheet cell item'><div></div></div>
+                                );
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (j === 0)
+                        {
                             row_result.push(
-                                <div key={j} className='spreadsheet cell item'><div></div></div>
+                                <div key={j} className='spreadsheet cell index'>{i+1}</div>
+                            );
+                        }
+                        else
+                        {
+                            const col_name = Object.keys(data)[j-1];
+                            const cell = data[col_name][i];
+                            
+                            // TEMP
+                            if (col_name === 'R Profit')
+                            {
+                                r_profit += parseFloat(cell);
+                            }
+                            else if (col_name === 'Old Exit Alg')
+                            {
+                                old_exit += parseFloat(cell);
+                            }
+    
+    
+                            if (col_name in format)
+                            {
+                                if (format[col_name].type !== undefined)
+                                {
+                                    // Date Type
+                                    if (format[col_name].type === 'date')
+                                    {
+                                        const time = moment(cell, moment.ISO_8601, true);
+                                        if (time.isValid())
+                                        {
+                                            if (format[col_name].format !== undefined)
+                                            {
+                                                row_result.push(
+                                                    <div 
+                                                        key={j} name={cell}
+                                                        className='spreadsheet cell item link'
+                                                        onClick={this.onTime.bind(this)}
+                                                    >
+                                                        <div>{time.format(format[col_name].format)}</div>
+                                                    </div>
+                                                );
+                                            }
+                                            else
+                                            {
+                                                row_result.push(
+                                                    <div 
+                                                        key={j} name={cell}
+                                                        className='spreadsheet cell item link' 
+                                                        onClick={this.onTime.bind(this)}
+                                                    >
+                                                        <div>{time}</div>
+                                                    </div>
+                                                );
+                                            }
+        
+                                            continue;
+                                        }
+                                    }
+        
+                                }
+                            }
+        
+                            // Default Type
+                            row_result.push(
+                                <div key={j} className='spreadsheet cell item'><div>{String(cell)}</div></div>
                             );
                         }
                     }
                 }
-                else
-                {
-                    if (j === 0)
-                    {
-                        row_result.push(
-                            <div key={j} className='spreadsheet cell index'>{i+1}</div>
-                        );
-                    }
-                    else
-                    {
-                        const col_name = Object.keys(data)[j-1];
-                        const cell = data[col_name][i];
-                        
-                        // TEMP
-                        if (col_name === 'R Profit')
-                        {
-                            r_profit += parseFloat(cell);
-                        }
-                        else if (col_name === 'Old Exit Alg')
-                        {
-                            old_exit += parseFloat(cell);
-                        }
-
-
-                        if (col_name in format)
-                        {
-                            if (format[col_name].type !== undefined)
-                            {
-                                // Date Type
-                                if (format[col_name].type === 'date')
-                                {
-                                    const time = moment(cell, moment.ISO_8601, true);
-                                    if (time.isValid())
-                                    {
-                                        if (format[col_name].format !== undefined)
-                                        {
-                                            row_result.push(
-                                                <div 
-                                                    key={j} name={cell}
-                                                    className='spreadsheet cell item link'
-                                                    onClick={this.onTime.bind(this)}
-                                                >
-                                                    <div>{time.format(format[col_name].format)}</div>
-                                                </div>
-                                            );
-                                        }
-                                        else
-                                        {
-                                            row_result.push(
-                                                <div 
-                                                    key={j} name={cell}
-                                                    className='spreadsheet cell item link' 
-                                                    onClick={this.onTime.bind(this)}
-                                                >
-                                                    <div>{time}</div>
-                                                </div>
-                                            );
-                                        }
-    
-                                        continue;
-                                    }
-                                }
-    
-                            }
-                        }
-    
-                        // Default Type
-                        row_result.push(
-                            <div key={j} className='spreadsheet cell item'><div>{String(cell)}</div></div>
-                        );
-                    }
-                }
+                result.push(
+                    <div key={i} className='spreadsheet row'>
+                        {row_result}
+                    </div>
+                );
             }
-            result.push(
-                <div key={i} className='spreadsheet row'>
-                    {row_result}
-                </div>
-            );
+    
+            return result;
         }
-
-        return result;
     }
    
     getData = () =>

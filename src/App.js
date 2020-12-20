@@ -23,6 +23,7 @@ class App extends Component
         config.autoAddCss = false
         this.cookies = new Cookies();
         this.checkAuthorization = this.checkAuthorization.bind(this);
+        this.demoAuthorization = this.demoAuthorization.bind(this);
         this.dailyVisitorCounter = this.dailyVisitorCounter.bind(this);
     }
 
@@ -50,6 +51,16 @@ class App extends Component
                     </Route>
                     <Route exact path="/app">
                         {this.getConditionalAppComponent()}
+                    </Route>
+                    <Route exact path="/holygrail/demo">
+                        <StrategyApp
+                            isDemo={true}
+                            getURI={this.getURI}
+                            getCookies={this.getCookies}
+                            getHeaders={this.getDemoHeaders}
+                            getUserId={this.getUserId}
+                            checkAuthorization={this.demoAuthorization}
+                        />
                     </Route>
 
                     {/* <Route exact path={["/", "/alerts", "/learn", "/hire", "/brokers", "/u/:username"]}>
@@ -146,6 +157,11 @@ class App extends Component
         return user_id;
     }
 
+    async demoAuthorization()
+    {
+        this.setUserId('demo');
+    }
+
     async dailyVisitorCounter()
     {
         let last_visit = this.getCookies().get('last-visit');
@@ -187,6 +203,15 @@ class App extends Component
             "Content-Type": "application/json",
             Accept: '*/*',
             Authorization: 'Bearer ' + this.getCookies().get('Authorization')
+        };
+    }
+
+    getDemoHeaders = () =>
+    {
+        return {
+            "Content-Type": "application/json",
+            Accept: '*/*',
+            Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZW1vIiwiaWF0IjoxNjA4NDM1NTg3fQ.gwJRakOUz1uWBpD8_VOphebSwyPUm_t9D4vJOB5b2Kg'
         };
     }
 

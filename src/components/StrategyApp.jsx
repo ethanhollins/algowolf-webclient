@@ -896,9 +896,15 @@ class StrategyApp extends Component
         const res = await fetch(
             `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/${broker_id}/${account_id}/reports/${name}`,
             reqOptions
-        ).then(res => res.json());
-
-        return res
+        );
+        if (res.status === 200)
+        {
+            return await res.json();
+        }
+        else
+        {
+            return {};
+        }
     }
 
     async retrieveBacktestReport(strategy_id, backtest_id, name)
@@ -915,9 +921,16 @@ class StrategyApp extends Component
         const res = await fetch(
             `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/backtest/${backtest_id}/reports/${name}`,
             reqOptions
-        ).then(res => res.json());
+        );
 
-        return res
+        if (res.status === 200)
+        {
+            return await res.json();
+        }
+        else
+        {
+            return {};
+        }
     }
 
     async retrieveTransactions(strategy_id)
