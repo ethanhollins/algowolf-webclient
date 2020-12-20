@@ -7,6 +7,7 @@ import WelcomeDemo from './popups/WelcomeDemo';
 import NotAvailable from './popups/NotAvailable';
 import AreYouSure from './popups/AreYouSure';
 import EmailSubscribe from './popups/EmailSubscribe';
+import EmailSubscribeComplete from './popups/EmailSubscribeComplete';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faChevronRight, faPlus
@@ -208,6 +209,16 @@ class Popup extends Component
             else if (popup.type === 'email-subscribe')
             {
                 return <EmailSubscribe
+                    close={this.close}
+                    getPopup={this.props.getPopup}
+                    setPopup={this.props.setPopup}
+                    subscribeEmail={this.props.subscribeEmail}
+                />
+            }
+            else if (popup.type === 'email-subscribe-complete')
+            {
+                return <EmailSubscribeComplete
+                    close={this.close}
                     getPopup={this.props.getPopup}
                 />
             }

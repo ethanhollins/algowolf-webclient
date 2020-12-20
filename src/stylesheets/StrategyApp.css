@@ -723,6 +723,7 @@ body {
     flex-direction: column;
     min-width: 600px;
     max-width: 900px;
+    min-height: 300px;
     background-color: #FFF;
     border: 1px solid rgb(220,220,220);
     border-radius: 7px;
@@ -1952,6 +1953,32 @@ body {
     width: 100px;
 }
 
+.email-subscribe.body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 15px 20px 0px 20px;
+}
+
+.email-subscribe.message {
+    margin-bottom: 20px;
+    font-size: 1.0em;
+}
+
+.email-subscribe > .popup.input {
+    width: 90%;
+}
+
+.email-subscribe > .popup.center {
+    margin-top: 10px;
+}
+
+.email-subscribe > .popup.center > .error {
+    font-size: 0.9em;
+}
+
 .are-you-sure.body {
     display: flex;
     flex-direction: column;
@@ -2026,6 +2053,36 @@ body {
     /* font-size: 1.0em; */
     width: 17px;
     height: 17px;
+}
+
+#entry_line {
+    width: 35px;
+    margin-top: 4px;
+    border-bottom: 2px solid #3498db;
+}
+
+#stop_line {
+    width: 35px;
+    margin-top: 4px;
+    border-bottom: 2px dashed #e74c3c;
+}
+
+#target_line {
+    width: 35px;
+    margin-top: 4px;
+    border-bottom: 2px dashed #2ecc71;
+}
+
+#be_line {
+    width: 35px;
+    margin-top: 4px;
+    border-bottom: 2px dotted #2ecc71;
+}
+
+#ht_line {
+    width: 35px;
+    margin-top: 4px;
+    border-bottom: 2px dotted #e056fd;
 }
 
 #sp_rtv {

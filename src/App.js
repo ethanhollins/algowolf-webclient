@@ -27,11 +27,6 @@ class App extends Component
         this.dailyVisitorCounter = this.dailyVisitorCounter.bind(this);
     }
 
-    componentDidMount()
-    {
-        this.dailyVisitorCounter();
-    }
-
     render() {
         return (
             <Router >
@@ -60,17 +55,9 @@ class App extends Component
                             getHeaders={this.getDemoHeaders}
                             getUserId={this.getUserId}
                             checkAuthorization={this.demoAuthorization}
+                            dailyVisitorCounter={this.dailyVisitorCounter}
                         />
                     </Route>
-
-                    {/* <Route exact path={["/", "/alerts", "/learn", "/hire", "/brokers", "/u/:username"]}>
-                        <Home
-                            getUserId={this.getUserId}
-                            setUserId={this.setUserId}
-                            checkAuthorization={this.checkAuthorization}
-                            getAxiosObj={this.getAxiosObj}
-                        />
-                    </Route> */}
 
                     <Route>
                         404

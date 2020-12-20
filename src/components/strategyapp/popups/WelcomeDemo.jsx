@@ -94,6 +94,36 @@ class WelcomeDemo extends Component
                                         </div>
                                         <div className='welcome table-cell'>Trend Off.</div>
                                     </div>
+                                    <div className='welcome table-row'>
+                                        <div className='welcome table-cell subject'>
+                                            <div id="entry_line"></div>
+                                        </div>
+                                        <div className='welcome table-cell'>Potential Entry Line (<span id='sp_long'>LONG</span> / <span id='sp_short'>SHORT</span>)</div>
+                                    </div>
+                                    <div className='welcome table-row'>
+                                        <div className='welcome table-cell subject'>
+                                            <div id="stop_line"></div>
+                                        </div>
+                                        <div className='welcome table-cell'>Potential Stop Line</div>
+                                    </div>
+                                    <div className='welcome table-row'>
+                                        <div className='welcome table-cell subject'>
+                                            <div id="target_line"></div>
+                                        </div>
+                                        <div className='welcome table-cell'>Potential Target Line</div>
+                                    </div>
+                                    <div className='welcome table-row'>
+                                        <div className='welcome table-cell subject'>
+                                            <div id="be_line"></div>
+                                        </div>
+                                        <div className='welcome table-cell'>Potential 1.1R Breakeven Line (for 2R trades)</div>
+                                    </div>
+                                    <div className='welcome table-row'>
+                                        <div className='welcome table-cell subject'>
+                                            <div id="ht_line"></div>
+                                        </div>
+                                        <div className='welcome table-cell'>High and Tight Line</div>
+                                    </div>
                                 </div>
                                 <p>Click on the <FontAwesomeIcon className='welcome message-icon steal-blue_btn' icon={faQuestionCircle} /> icon to read this message again.</p>
                             </div>

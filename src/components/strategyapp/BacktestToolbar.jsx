@@ -332,7 +332,7 @@ class BacktestToolbar extends Component
     onNotifyItem = (e) =>
     {
         const popup = {
-            type: 'notify-me',
+            type: 'email-subscribe',
             size: {
                 width: 30,
                 height: 30

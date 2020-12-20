@@ -67,6 +67,7 @@ class StrategyApp extends Component
         this.retrieveChartData = this.retrieveChartData.bind(this);
         this.updateStrategyInputVariables = this.updateStrategyInputVariables.bind(this);
         this.updateAccountInputVariables = this.updateAccountInputVariables.bind(this);
+        this.subscribeEmail = this.subscribeEmail.bind(this);
 
         this.setAppContainerRef = elem => {
             this.appContainer = elem;
@@ -97,6 +98,11 @@ class StrategyApp extends Component
         window.addEventListener("resize", this.update);
         window.addEventListener("keydown", this.onKeyDown);
         window.addEventListener("keyup", this.onKeyUp);
+
+        if (this.props.isDemo)
+        {
+            this.props.dailyVisitorCounter();
+        }
 
         let { checkLogin } = this.state;
         const user_id = await this.props.checkAuthorization();
@@ -211,6 +217,7 @@ class StrategyApp extends Component
                         getAllStrategyInfo={this.getAllStrategyInfo}
                         updateStrategyInfo={this.updateStrategyInfo}
                         setHovered={this.setHovered}
+                        subscribeEmail={this.subscribeEmail}
                     />
                     
                 </div>
@@ -1000,6 +1007,24 @@ class StrategyApp extends Component
         ).then(res => res.json());
 
         return res.input_variables;
+    }
+
+    async subscribeEmail(email)
+    {
+        const { REACT_APP_API_URL } = process.env;
+        /** Retrieve strategy info */
+        const reqOptions = {
+            method: 'POST',
+            headers: this.props.getHeaders(),
+            credentials: 'include'
+        }
+
+        let res = await fetch(
+            `${REACT_APP_API_URL}/v1/analytics/subscribe/${email}`,
+            reqOptions
+        );
+
+        return res.status === 200;
     }
 
     async retrieveChartData(broker, product, period, from, to, tz)
