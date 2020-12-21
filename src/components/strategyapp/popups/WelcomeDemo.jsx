@@ -22,10 +22,10 @@ class WelcomeDemo extends Component
                     <div className='popup main-list'>
                         <div className='welcome body'>
                             <div className='welcome message'>
-                                <p>Welcome to the AlgoWolf demo platform based on Scott Phillip's Holy Grail system!</p>
+                                <p>Welcome to the AlgoWolf platform.</p>
                                 <p>
-                                    This demo contains a recent day's backtest results which are determined by our algorithmic systems. 
-                                    These results are indicitive of the live signals the trading system will produce.
+                                    This demo contains a recent day's backtest results, based on <span id='sp_bold'>Scott Phillip's Holy Grail</span> system, as determined by our algorithmic systems. 
+                                    These results are indicitive of the live signals our trading system produces.
                                 </p>
                                 <h2>Here's how to use it.</h2>
                                 <p>On our charts you will find icons and text drawn. Please refer to the legend below to see what they all mean.</p>
@@ -42,10 +42,13 @@ class WelcomeDemo extends Component
                                 </p>
                                 <p>
                                     The green/red vertical lines denote the start and finish of the trading session based on London time 0700 - 1300. 
-                                    <br/>Note: The demo charts have been converted to Australian Sydney time.
+                                    <br/><span id='sp_bold'>Note:</span> The demo charts have been converted to Australian Sydney time.
                                 </p>
                                 <p>
                                     The position sizing is based on a hypothetical $10K (USD) trading bank and a 1% risk.
+                                </p>
+                                <p>
+                                    Our algorithms can be used to generate precise manual trading signals or may be fully automated through your broker's platform.
                                 </p>
                                 <h2>Legend</h2>
                                 <div className='welcome table'>
@@ -149,14 +152,14 @@ class WelcomeDemo extends Component
                                     </div>
                                 </div>
                                 <p>
-                                    Please Note: Under <FontAwesomeIcon className='welcome message-icon steal-blue_btn' icon={faInfoCircle} /> <span id='sp_bold'>Chart Info</span> 'Pending' denotes a setup has completed and awaiting H&T and CE confirmation.
-                                    Once a position is entered, it's no longer tracked under <FontAwesomeIcon className='welcome message-icon steal-blue_btn' icon={faInfoCircle} /> <span id='sp_bold'>Chart Info</span>, but can still be monitored on the candle chart.
+                                    <span id='sp_bold'>Please Note:</span> Under <FontAwesomeIcon className='welcome message-icon steal-blue_btn' icon={faInfoCircle} /> <span className='steal-blue_btn' id='sp_bold'>Chart Info</span> 'Pending' denotes a setup has completed and awaiting H&T and CE confirmation.
+                                    Once a position is entered, it's no longer tracked under <FontAwesomeIcon className='welcome message-icon steal-blue_btn' icon={faInfoCircle} /> <span className='steal-blue_btn' id='sp_bold'>Chart Info</span>, but can still be monitored on the candle chart.
                                 </p>
                                 <p>
-                                    Click on <FontAwesomeIcon className='welcome message-icon steal-blue_btn' icon={faEnvelope} /> <span id='sp_bold'>Notify Me</span> to subscribe for email updates.
+                                    Click on <FontAwesomeIcon className='welcome message-icon steal-blue_btn' icon={faEnvelope} /> <span className='steal-blue_btn' id='sp_bold'>Notify Me</span> to subscribe for email updates.
                                 </p>
                                 <p>
-                                    Click on the <FontAwesomeIcon className='welcome message-icon steal-blue_btn' icon={faQuestionCircle} /> <span id='sp_bold'>Help</span> icon to read this message again.
+                                    Click on the <FontAwesomeIcon className='welcome message-icon steal-blue_btn' icon={faQuestionCircle} /> <span className='steal-blue_btn' id='sp_bold'>Help</span> icon to read this message again.
                                 </p>
                             </div>
                         </div>
