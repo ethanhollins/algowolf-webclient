@@ -41,6 +41,10 @@ class WelcomeDemo extends Component
                                     Clicking on the timestamp will set the charts on the main page to that time.
                                 </p>
                                 <p>
+                                    The green/red vertical lines denote the start and finish of the trading session based on London time 0700 - 1300. 
+                                    <br/>Note: The demo charts have been converted to Australian Sydney time.
+                                </p>
+                                <p>
                                     The position sizing is based on a hypothetical $10K (USD) trading bank and a 1% risk.
                                 </p>
                                 <h2>Legend</h2>
