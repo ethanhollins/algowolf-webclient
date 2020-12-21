@@ -24,7 +24,7 @@ class WelcomeDemo extends Component
                             <div className='welcome message'>
                                 <p>Welcome to the AlgoWolf demo platform based on Scott Phillip's Holy Grail system!</p>
                                 <p>
-                                    This demo contains the previous day's backtest results which are determined by our algorithmic systems. 
+                                    This demo contains a recent day's backtest results which are determined by our algorithmic systems. 
                                     These results are indicitive of the live signals the trading system will produce.
                                 </p>
                                 <h2>Here's how to use it.</h2>
