@@ -92,7 +92,13 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.main.mobile-img {
+.mobile.text {
+    text-align: center;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.mobile.img {
     width: 60px;
     height: 60px;
     margin-bottom: 30px;
@@ -2085,6 +2091,23 @@ body {
     border-bottom: 2px dotted #e056fd;
 }
 
+#sp_square {
+    width: 10px;
+    height: 10px;
+    margin-top: 4px;
+    background-color: #FFF;
+    border: 1px solid #8c8c8c;
+}
+
+#sp_circle {
+    width: 10px;
+    height: 10px;
+    margin-top: 4px;
+    background-color: #FFF;
+    border: 1px solid #3498db;
+    border-radius: 10px;
+}
+
 #sp_rtv {
     color: #e74c3c;
 }
@@ -2119,6 +2142,11 @@ body {
 
 #sp_trend {
     color: #0fb9b1;
+}
+
+#sp_bold {
+    color: #535c68;
+    font-weight: 500;
 }
 
 #live_status {

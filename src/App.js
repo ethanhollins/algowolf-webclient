@@ -47,6 +47,9 @@ class App extends Component
                     <Route exact path="/app">
                         {this.getConditionalAppComponent()}
                     </Route>
+                    <Route exact path="/holygrail">
+                        <Redirect to="/holygrail/demo"/>
+                    </Route>
                     <Route exact path="/holygrail/demo">
                         <StrategyApp
                             isDemo={true}
