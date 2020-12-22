@@ -160,13 +160,13 @@ class SpreadSheet extends Component
                             if (col_name === 'R Profit')
                             {
                                 row_result.push(
-                                    <div key={j} className='spreadsheet cell item'><div>{r_profit.toFixed(2)}</div></div>
+                                    <div key={j} className='spreadsheet cell item'><div><strong>{r_profit.toFixed(2)}</strong></div></div>
                                 );
                             }
                             else if (col_name === 'Old Exit Alg')
                             {
                                 row_result.push(
-                                    <div key={j} className='spreadsheet cell item'><div>{old_exit.toFixed(2)}</div></div>
+                                    <div key={j} className='spreadsheet cell item'><div><strong>{old_exit.toFixed(2)}</strong></div></div>
                                 );
                             }
                             else
