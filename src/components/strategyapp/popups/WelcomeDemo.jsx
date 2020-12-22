@@ -27,6 +27,9 @@ class WelcomeDemo extends Component
                                     This demo contains a recent day's backtest results, based on <span id='sp_bold'>Scott Phillip's Holy Grail</span> strategy, as determined by our algorithmic systems. 
                                     These results are indicitive of the live signals our trading system produces.
                                 </p>
+                                <p>
+                                    Our algorithms can be used to generate precise manual trading signals or may be fully automated through your broker's platform.
+                                </p>
                                 <h2>Here's how to use it.</h2>
                                 <p>On our charts you will find icons and text drawn. Please refer to the legend below to see what they all mean.</p>
                                 <p>
@@ -46,9 +49,6 @@ class WelcomeDemo extends Component
                                 </p>
                                 <p>
                                     The position sizing is based on a hypothetical $10K (USD) trading bank and a 1% risk.
-                                </p>
-                                <p>
-                                    Our algorithms can be used to generate precise manual trading signals or may be fully automated through your broker's platform.
                                 </p>
                                 <h2>Legend</h2>
                                 <div className='welcome table'>
