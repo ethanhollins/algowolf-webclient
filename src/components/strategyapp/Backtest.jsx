@@ -25,6 +25,7 @@ class Backtest extends Component
             hide_shadows: false,
             reference_timestamp: 0,
             selected_offset: 0,
+            selected_chart: null
         }
 
         this.retrieveReport = this.retrieveReport.bind(this);
@@ -173,6 +174,8 @@ class Backtest extends Component
                             setCurrentTimestamp={this.setCurrentTimestamp}
                             setSelectedOffset={this.setSelectedOffset}
                             getSelectedOffset={this.getSelectedOffset}
+                            setSelectedChart={this.setSelectedChart}
+                            getSelectedChart={this.getSelectedChart}
                             // Log Functions
                             getLog={this.getLog}
                             getInfo={this.getInfo}
@@ -622,6 +625,16 @@ class Backtest extends Component
     getSelectedOffset = () =>
     {
         return this.state.selected_offset;
+    }
+
+    setSelectedChart = (selected_chart) =>
+    {
+        this.setState({ selected_chart });
+    }
+
+    getSelectedChart = () =>
+    {
+        return this.state.selected_chart;
     }
 
     removeWindowsRef = (elem) =>

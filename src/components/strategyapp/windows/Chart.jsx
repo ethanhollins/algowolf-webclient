@@ -679,11 +679,7 @@ class Chart extends Component
                 }
 
                 this.props.setSelectedOffset(this.getTimestamps()[0], period_offset);
-                this.props.setBorder('1px solid #ff8103');
-            }
-            else
-            {
-                this.props.setBorder(null);
+                this.props.setSelectedChart(this);
             }
         }
 

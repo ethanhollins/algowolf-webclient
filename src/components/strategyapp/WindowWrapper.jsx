@@ -95,7 +95,7 @@ class WindowWrapper extends Component
                 style={{
                     cursor: this.state.cursor,
                     zIndex: this.state.info.zIndex,
-                    border: this.state.border
+                    border: this.getBorder()
                 }}
             >
                 <div ref={this.setWindowBtnsRef} className='window btns'>
@@ -166,6 +166,7 @@ class WindowWrapper extends Component
                 setPopup={this.props.setPopup}
                 setSelectedOffset={this.props.setSelectedOffset}
                 getSelectedOffset={this.props.getSelectedOffset}
+                setSelectedChart={this.props.setSelectedChart}
                 getBorder={this.getBorder}
                 setBorder={this.setBorder}
             />)
@@ -194,6 +195,7 @@ class WindowWrapper extends Component
                 getTopWindow={this.props.getTopWindow}
                 getInfo={this.props.getInfo}
                 getCurrentAccount={this.props.getCurrentAccount}
+                getSelectedChart={this.props.getSelectedChart}
             />;
         }
         else if (this.state.info.type === 'control_panel')
@@ -951,12 +953,18 @@ class WindowWrapper extends Component
 
     getBorder = () => 
     {
-        return this.state.border;
-    }
-
-    setBorder = (border) =>
-    {
-        this.setState({ border });
+        if (
+            this.state.info.type === 'chart' && 
+            this.props.getSelectedChart() !== null && 
+            this.props.getSelectedChart().getItemId() === this.getItemId()
+        )
+        {
+            return '1px solid #ff8103';
+        }
+        else
+        {
+            return null;
+        }
     }
 
     getScrollbarHovered = () =>

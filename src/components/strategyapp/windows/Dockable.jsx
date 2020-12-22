@@ -118,6 +118,7 @@ class Dockable extends Component
                 getTopWindow={this.props.getTopWindow}
                 getInfo={this.props.getInfo}
                 getCurrentAccount={this.props.getCurrentAccount}
+                getSelectedChart={this.props.getSelectedChart}
             />;
         }
         else if (type === 'control_panel')
