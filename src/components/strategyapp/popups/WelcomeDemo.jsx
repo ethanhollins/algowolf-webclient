@@ -35,7 +35,7 @@ class WelcomeDemo extends Component
                                 <p>
                                     You can click on the candlesticks to change the time of the backtest. 
                                     When you do this only the events that happened before that candlestick will appear.
-                                    This will also show, on the chart, any pending orders that have been placed or positions that have been entered.
+                                    This will also show, on the chart, any pending orders that have been placed or positions that were entered at that time.
                                     You can use the arrow keys as well to step the backtest forward bar by bar on any of the charts.
                                 </p>
                                 <p>
@@ -124,7 +124,7 @@ class WelcomeDemo extends Component
                                         <div className='welcome table-cell subject'>
                                             <div id="target_line"></div>
                                         </div>
-                                        <div className='welcome table-cell'>Potential Target Line</div>
+                                        <div className='welcome table-cell'>Potential Target Line (1.1R or 2R as applicable)</div>
                                     </div>
                                     <div className='welcome table-row'>
                                         <div className='welcome table-cell subject'>
@@ -152,7 +152,7 @@ class WelcomeDemo extends Component
                                     </div>
                                 </div>
                                 <p>
-                                    <span id='sp_bold'>Please Note:</span> Under <FontAwesomeIcon className='welcome message-icon steal-blue_btn' icon={faInfoCircle} /> <span className='steal-blue_btn' id='sp_bold'>Chart Info</span> 'Pending' denotes a setup has completed and awaiting H&T and CE confirmation.
+                                    <span id='sp_bold'>Please Note:</span> Under <FontAwesomeIcon className='welcome message-icon steal-blue_btn' icon={faInfoCircle} /> <span className='steal-blue_btn' id='sp_bold'>Chart Info</span>, 'Pending' denotes a setup has commenced but still awaiting either H&T, CE or H/SS confirmation.
                                     Once a position is entered, it's no longer tracked under <FontAwesomeIcon className='welcome message-icon steal-blue_btn' icon={faInfoCircle} /> <span className='steal-blue_btn' id='sp_bold'>Chart Info</span>, but can still be monitored on the candle chart.
                                 </p>
                                 <p>
