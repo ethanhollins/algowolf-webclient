@@ -627,6 +627,17 @@ class StrategyApp extends Component
         {
             if (i.page === strategy.current_page)
             {
+                const maximised = i.maximised;
+                if (maximised)
+                {
+                    return i.id;
+                }
+            }
+        }
+        for (let i of windows)
+        {
+            if (i.page === strategy.current_page)
+            {
                 const pos = this.convertWorldUnitToScreenUnit(i.pos);
                 const size = this.convertWorldUnitToScreenUnit({
                     x: i.size.width, y: i.size.height
@@ -635,8 +646,7 @@ class StrategyApp extends Component
                     x: pos.x, y: pos.y,
                     width: size.x, height: size.y
                 }
-                const maximised = i.maximised;
-                if (maximised || this.isWithinBounds(rect, mouse_pos))
+                if (this.isWithinBounds(rect, mouse_pos))
                 {
                     return i.id;
                 }
