@@ -24,7 +24,8 @@ class App extends Component
         this.cookies = new Cookies();
         this.checkAuthorization = this.checkAuthorization.bind(this);
         this.demoAuthorization = this.demoAuthorization.bind(this);
-        this.dailyVisitorCounter = this.dailyVisitorCounter.bind(this);
+        this.visitorCounter = this.visitorCounter.bind(this);
+        this.firstVisitorCounter = this.firstVisitorCounter.bind(this);
     }
 
     render() {
@@ -58,7 +59,8 @@ class App extends Component
                             getHeaders={this.getDemoHeaders}
                             getUserId={this.getUserId}
                             checkAuthorization={this.demoAuthorization}
-                            dailyVisitorCounter={this.dailyVisitorCounter}
+                            visitorCounter={this.visitorCounter}
+                            firstVisitorCounter={this.firstVisitorCounter}
                         />
                     </Route>
 
@@ -152,7 +154,22 @@ class App extends Component
         this.setUserId('demo');
     }
 
-    async dailyVisitorCounter()
+    async firstVisitorCounter()
+    {
+        const { REACT_APP_API_URL } = process.env;
+        var requestOptions = {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+                Accept: '*/*'
+            },
+            credentials: 'include'
+        };
+
+        await fetch(`${REACT_APP_API_URL}/v1/analytics/visitors/first`, requestOptions);
+    }
+
+    async visitorCounter()
     {
         let last_visit = this.getCookies().get('last-visit');
         if (last_visit === undefined)

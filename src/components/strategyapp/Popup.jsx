@@ -23,6 +23,7 @@ class Popup extends Component
         super(props);
 
         this.state = {
+            is_down: false,
             opened: props.opened,
             hovered: [false, false]
         }
@@ -33,18 +34,21 @@ class Popup extends Component
             this.popupFade = elem;
         };
 
+        this.onMouseDown = this.onMouseDown.bind(this);
         this.onMouseUp = this.onMouseUp.bind(this);
         this.onResize = this.onResize.bind(this);
     }
 
     componentDidMount()
     {
+        window.addEventListener("mousedown", this.onMouseDown);
         window.addEventListener("mouseup", this.onMouseUp);
         window.addEventListener("resize", this.onResize);
     }
 
     componentWillUnmount()
     {
+        window.removeEventListener("mousedown", this.onMouseDown);
         window.removeEventListener("mouseup", this.onMouseUp);
         window.removeEventListener("resize", this.onResize);
     }
@@ -73,18 +77,36 @@ class Popup extends Component
         );
     }
 
+    onMouseDown(e)
+    {
+        if (this.props.getPopup() !== null)
+        {
+            let { is_down } = this.state;
+            is_down = true;
+            this.setState({ is_down });
+        }
+    }
+
     onMouseUp(e)
     {
+        let { is_down } = this.state;
         if (this.props.getPopup() !== null)
         {
             const mouse_pos = {
                 x: e.clientX, y: e.clientY
             }
-            if (!this.props.isTopWindow(
-                this.props.getStrategyId(), 'popup', mouse_pos
-            ))
+            if (
+                is_down &&
+                !this.props.isTopWindow(
+                    this.props.getStrategyId(), 'popup', mouse_pos
+                )
+            )
+            {
                 this.close();
+            }
         }
+        is_down = false;
+        this.setState({ is_down });
     }
 
     onResize(e)
@@ -97,6 +119,11 @@ class Popup extends Component
 
     close = () =>
     {
+        if (this.props.getPopup().type === 'welcome-demo')
+        {
+            this.props.onFirstVisit();
+        }
+
         this.props.setPopup(null);
     }
 

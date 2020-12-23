@@ -14,7 +14,7 @@ class EmailSubscribe extends Component
             <div className='popup content'>
                 <div className='popup main'>
                     <div className='popup main-list'>
-                        <div className='email-subscribe body'>
+                        <div className='email-subscribe body complete'>
                             <div className='email-subscribe message'>
                                 You have successfully subscribed {this.props.getPopup().email}.
                             </div>

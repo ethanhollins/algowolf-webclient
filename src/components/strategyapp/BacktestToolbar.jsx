@@ -335,7 +335,7 @@ class BacktestToolbar extends Component
             type: 'email-subscribe',
             size: {
                 width: 30,
-                height: 30
+                height: 37
             },
             fade: true
         }

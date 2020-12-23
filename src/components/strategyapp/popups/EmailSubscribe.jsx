@@ -4,6 +4,7 @@ class EmailSubscribe extends Component
 {
 
     state = {
+        name: '',
         email: '',
         error: ''
     }
@@ -25,8 +26,16 @@ class EmailSubscribe extends Component
                             </div>
                             <div className='popup input'>
                                 <input 
-                                    className='popup text-input' placeholder='e.g. johndoe@example.com'
+                                    className='popup text-input' placeholder='Name (e.g. John Doe)'
                                     onChange={this.onTextInputChange.bind(this)}
+                                    name='name'
+                                />
+                            </div>
+                            <div className='popup input'>
+                                <input 
+                                    className='popup text-input' placeholder='Email (e.g. johndoe@example.com)'
+                                    onChange={this.onTextInputChange.bind(this)}
+                                    name='email'
                                 />
                             </div>
                             <div className='popup center' onClick={this.onSubscribe.bind(this)}>
@@ -52,16 +61,27 @@ class EmailSubscribe extends Component
 
     onTextInputChange(e)
     {
-        const email = e.target.value;
-        this.setState({ email });
+        const name = e.target.getAttribute('name');
+        if (name === 'name')
+        {
+            const name = e.target.value;
+            this.setState({ name });
+        }
+        else if (name === 'email')
+        {
+            const email = e.target.value;
+            this.setState({ email });
+        }
+
+        
     }
 
     onSubscribe()
     {
-        let { email, error } = this.state;
+        let { name, email, error } = this.state;
         if (this.validateEmail(email))
         {
-            this.props.subscribeEmail(email);
+            this.props.subscribeEmail(name, email);
             this.props.close();
 
             const popup = {

@@ -1963,7 +1963,6 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     height: 100%;
     padding: 15px 20px 0px 20px;
 }
@@ -1975,14 +1974,19 @@ body {
 
 .email-subscribe > .popup.input {
     width: 90%;
+    margin-bottom: 20px;
 }
 
 .email-subscribe > .popup.center {
-    margin-top: 10px;
+    margin-bottom: 5px;
 }
 
 .email-subscribe > .popup.center > .error {
     font-size: 0.9em;
+}
+
+.email-subscribe.complete {
+    justify-content: center;
 }
 
 .are-you-sure.body {

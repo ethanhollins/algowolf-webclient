@@ -99,11 +99,6 @@ class StrategyApp extends Component
         window.addEventListener("keydown", this.onKeyDown);
         window.addEventListener("keyup", this.onKeyUp);
 
-        if (this.props.isDemo)
-        {
-            this.props.dailyVisitorCounter();
-        }
-
         let { checkLogin } = this.state;
         const user_id = await this.props.checkAuthorization();
         checkLogin = true;
@@ -122,15 +117,21 @@ class StrategyApp extends Component
             await this.retrieveStrategies(account.metadata.open_strategies);
         }
 
-        const popup = {
-            type: 'welcome-demo',
-            size: {
-                width: 40,
-                height: 70
-            },
-            fade: true
+
+        if (this.props.isDemo)
+        {
+            const popup = {
+                type: 'welcome-demo',
+                size: {
+                    width: 40,
+                    height: 70
+                },
+                fade: true
+            }
+            this.setPopup(popup);
+            this.props.visitorCounter();
         }
-        this.setPopup(popup);
+        
 
         this.is_loaded = true;
     }
@@ -218,6 +219,7 @@ class StrategyApp extends Component
                         updateStrategyInfo={this.updateStrategyInfo}
                         setHovered={this.setHovered}
                         subscribeEmail={this.subscribeEmail}
+                        onFirstVisit={this.onFirstVisit}
                     />
                     
                 </div>
@@ -665,16 +667,24 @@ class StrategyApp extends Component
         let { strategyInfo } = this.state;
         let windows = strategyInfo[strategy_id].windows;
         windows.sort((a, b) => parseFloat(b.zIndex) - parseFloat(a.zIndex));
-        let c_idx = windows.length-1;
-
-        if (windows[0].id !== item_id)
+        let page_windows = [];
+        for (let i = 0; i < windows.length; i++)
         {
-            for (let i = 0; i < windows.length; i++)
+            if (windows[i].page === strategyInfo[strategy_id].current_page)
             {
-                let w = windows[i];
+                page_windows.push(windows[i]);
+            }
+        }
+        let c_idx = page_windows.length-1;
+
+        if (page_windows[0].id !== item_id)
+        {
+            for (let i = 0; i < page_windows.length; i++)
+            {
+                let w = page_windows[i];
                 if (w.id === item_id)
                 {
-                    w.zIndex = windows.length;
+                    w.zIndex = page_windows.length;
                 }
                 else
                 {
@@ -1019,18 +1029,22 @@ class StrategyApp extends Component
         return res.input_variables;
     }
 
-    async subscribeEmail(email)
+    async subscribeEmail(name, email)
     {
         const { REACT_APP_API_URL } = process.env;
         /** Retrieve strategy info */
         const reqOptions = {
             method: 'POST',
             headers: this.props.getHeaders(),
-            credentials: 'include'
+            credentials: 'include',
+            body: JSON.stringify({
+                name: name,
+                email: email
+            })
         }
 
         let res = await fetch(
-            `${REACT_APP_API_URL}/v1/analytics/subscribe/${email}`,
+            `${REACT_APP_API_URL}/v1/analytics/subscribe`,
             reqOptions
         );
 
@@ -2129,19 +2143,22 @@ class StrategyApp extends Component
 
     addToSave = (strategy_id, item_ids) =>
     {
-        let { toSave, lastChange } = this.state;
-        if (!toSave.hasOwnProperty(strategy_id))
-            toSave[strategy_id] = [];
-
-        for (let i of item_ids)
+        if (!strategy_id.includes('/backtest/'))
         {
-            if (!toSave[strategy_id].includes(i))
-                toSave[strategy_id].push(i);
+            let { toSave, lastChange } = this.state;
+            if (!toSave.hasOwnProperty(strategy_id))
+                toSave[strategy_id] = [];
+    
+            for (let i of item_ids)
+            {
+                if (!toSave[strategy_id].includes(i))
+                    toSave[strategy_id].push(i);
+            }
+    
+            lastChange = new Date().getTime();
+            this.onSaveTimeout();
+            this.setState({ toSave, lastChange });
         }
-
-        lastChange = new Date().getTime();
-        this.onSaveTimeout();
-        this.setState({ toSave, lastChange });
     }
 
     addHistory = (strategy_id, new_item) =>
@@ -2324,6 +2341,37 @@ class StrategyApp extends Component
             }
         }
         this.setPopup(popup);
+    }
+
+    onFirstVisit = () =>
+    {
+        if (this.props.isDemo)
+        {
+            let first_visit = this.props.getCookies().get('first-visit');
+            if (first_visit === undefined)
+            {
+                setTimeout(() => {
+                    const current_popup = this.getPopup();
+                    if (current_popup !== undefined && current_popup !== null)
+                    {
+                        current_popup.close();
+                    }
+                    
+                    const popup = {
+                        type: 'email-subscribe',
+                        size: {
+                            width: 30,
+                            height: 30
+                        },
+                        fade: true
+                    }
+                    this.setPopup(popup);
+                    this.props.getCookies().set('first-visit', true);
+                    this.props.firstVisitorCounter();
+                }, 5*1000);
+            }
+        }
+        
     }
 
     getPeriodOffsetSeconds(period)
