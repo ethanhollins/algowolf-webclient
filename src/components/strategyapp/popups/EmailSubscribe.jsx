@@ -38,8 +38,8 @@ class EmailSubscribe extends Component
                                     name='email'
                                 />
                             </div>
-                            <div className='popup center' onClick={this.onSubscribe.bind(this)}>
-                                <div className='popup broker-btn'>Subscribe</div>
+                            <div className='popup center'>
+                                <div className='popup broker-btn' onClick={this.onSubscribe.bind(this)}>Subscribe</div>
                             </div>
                             <div className='popup center'>
                                 <div className='email-subscribe message error'>{this.state.error}</div>
