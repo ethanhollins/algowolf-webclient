@@ -30,7 +30,8 @@ class Strategy extends Component
         logs: {},
         info: {},
         input_variables: {},
-        variables_preset: {}
+        variables_preset: {},
+        selected_chart: null
     }
 
     async componentDidMount()
@@ -184,6 +185,8 @@ class Strategy extends Component
                             getPositions={this.getPositions}
                             getOrders={this.getOrders}
                             getCurrentTimestamp={this.getCurrentTimestamp}
+                            setSelectedChart={this.setSelectedChart}
+                            getSelectedChart={this.getSelectedChart}
                             // Other Window Functions
                             getLog={this.getLog}
                             getInfo={this.getInfo}
@@ -818,6 +821,16 @@ class Strategy extends Component
         let { variables_preset } = this.state;
         variables_preset[account_id] = data;
         this.setState({ variables_preset });
+    }
+
+    setSelectedChart = (selected_chart) =>
+    {
+        this.setState({ selected_chart });
+    }
+
+    getSelectedChart = () =>
+    {
+        return this.state.selected_chart;
     }
 
     async retrieveAccountInfo(account_code)

@@ -2551,7 +2551,7 @@ class Chart extends Component
         // Properties
         ctx.fillStyle = '#3498db';
 
-        ctx.fillRect(0, Math.round(screen_pos.y), seg_size.width, 1);
+        ctx.fillRect(0, Math.floor(screen_pos.y), seg_size.width, 1);
     }
 
     handleCrosshairs(ctx)

@@ -2351,12 +2351,6 @@ class StrategyApp extends Component
             if (first_visit === undefined)
             {
                 setTimeout(() => {
-                    const current_popup = this.getPopup();
-                    if (current_popup !== undefined && current_popup !== null)
-                    {
-                        current_popup.close();
-                    }
-                    
                     const popup = {
                         type: 'email-subscribe',
                         size: {
