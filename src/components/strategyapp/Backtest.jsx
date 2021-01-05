@@ -431,7 +431,7 @@ class Backtest extends Component
             {
                 const t = transactions[current_idx];
                 if (t.timestamp > current_timestamp) break;
-    
+                
                 switch (t.type)
                 {
                     case 'marketentry':
