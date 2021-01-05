@@ -154,6 +154,7 @@ class Dockable extends Component
                 isTopWindow={this.props.isTopWindow}
                 getTopOffset={this.props.getTopOffset}
                 getWindowScreenPos={this.props.getWindowScreenPos}
+                setChartPositionsByTimestamp={this.props.setChartPositionsByTimestamp}
             />
         }
     }

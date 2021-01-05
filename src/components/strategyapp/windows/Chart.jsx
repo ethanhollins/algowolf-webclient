@@ -897,6 +897,7 @@ class Chart extends Component
                         key={'study_'+i}
                         ref={this.addStudyRef}
                         index={i}
+                        getIndicator={this.getStudyIndicator}
                         getValues={this.getStudyValues}
                         getOhlcValues={this.getOhlc}
                         getFilteredOffset={this.getFilteredOffset}
@@ -941,7 +942,8 @@ class Chart extends Component
                 {
                     const overlay = overlays[i];
                     const name = this.getOverlayDisplayName(i);
-    
+                    const ind = this.getOverlayIndicator(i);
+
                     let value_elems = [];
                     if (prices.overlays.length > 0)
                     {
@@ -957,7 +959,7 @@ class Chart extends Component
                                 }
                                 else
                                 {
-                                    price = price.toFixed(5);
+                                    price = price.toFixed(ind.precision);
                                 }
 
                                 const color = overlay.properties.colors[x][y];
@@ -1001,6 +1003,7 @@ class Chart extends Component
                     const study = studies[i];
                     const name = this.getStudyDisplayName(i);
                     const start_pos = this.getChartSegmentStartPos(i+1);
+                    const ind = this.getStudyIndicator(i);
     
                     let value_elems = [];
                     if (prices.studies.length > 0)
@@ -1017,7 +1020,7 @@ class Chart extends Component
                                 }
                                 else
                                 {
-                                    price = price.toFixed(5);
+                                    price = price.toFixed(ind.precision);
                                 }
 
                                 const color = study.properties.colors[x][y];
@@ -2830,6 +2833,20 @@ class Chart extends Component
         return all_timestamps[idx];
     }
 
+    setPosByTimestamp = (ts) =>
+    {
+        let { pos, scale } = this.state;
+        let x = this.getPosFromTimestamp(ts);
+        if (x === undefined)
+        {
+            pos.x = 1;
+        }
+
+        pos.x -= Math.floor(scale.x/3);
+
+        this.setState({ pos });
+    }
+
     limit = (start, end) =>
     {
         let { limit } = this.state;
@@ -3346,6 +3363,12 @@ class Chart extends Component
         return result;
     }
 
+    getOverlayIndicator = (idx) =>
+    {
+        const overlays = this.getOverlays();
+        return this.getIndicator(overlays[idx])
+    }
+
     getStudyDisplayName = (idx) =>
     {
         const study = this.getStudies()[idx];
@@ -3370,6 +3393,12 @@ class Chart extends Component
             );
         }
         return result;
+    }
+
+    getStudyIndicator = (idx) =>
+    {
+        const studies = this.getStudies();
+        return this.getIndicator(studies[idx])
     }
 
     getDrawings = () =>

@@ -96,6 +96,7 @@ class boll extends Indicator
         this.properties = properties;
         this.period = properties.periods[0];
         this.min_bars = this.period;
+        this.precision = 5;
 
         this.display_name = `BOLL\n${this.period}, ${this.properties.StdDev}`;
 
@@ -152,6 +153,7 @@ class donch extends Indicator
         this.properties = properties;
         this.period = properties.periods[0];
         this.min_bars = this.period;
+        this.precision = 5;
 
         this.display_name = `DONCH\n${this.period}`;
 
@@ -195,6 +197,7 @@ class ema extends Indicator
         this.properties = properties;
         this.period = properties.periods[0];
         this.min_bars = this.period;
+        this.precision = 5;
 
         this.display_name = `EMA ${this.period}`;
 
@@ -246,6 +249,7 @@ class mae extends Indicator
         this.properties = properties;
         this.period = properties.periods[0];
         this.min_bars = this.period;
+        this.precision = 5;
 
         this.display_name = `MAE\n${this.period}, ${this.properties.Percent}`;
 
@@ -302,6 +306,7 @@ class sma extends Indicator
         this.properties = properties;
         this.period = properties.periods[0];
         this.min_bars = this.period;
+        this.precision = 5;
 
         this.display_name = `SMA ${this.period}`;
         
@@ -347,6 +352,7 @@ class atr extends Indicator
         this.properties = properties;
         this.period = properties.periods[0];
         this.min_bars = this.period;
+        this.precision = 5;
 
         this.display_name = `ATR ${this.period}`;
 
@@ -438,6 +444,7 @@ class tr extends Indicator
         this.properties = properties;
         this.period = properties.periods[0];
         this.min_bars = this.period+1;
+        this.precision = 6;
 
         this.display_name = `ATR ${this.period}`;
 

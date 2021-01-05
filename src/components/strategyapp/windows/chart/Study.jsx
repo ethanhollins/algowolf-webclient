@@ -221,6 +221,7 @@ class Study extends Component
         const ohlc = this.props.getOhlcValues();
         const values = this.props.getValues(this.props.index);
         const properties = this.props.getProperties(this.props.index);
+        const ind = this.props.getIndicator(this.props.index)
 
         // If empty values list, cancel drawing
         if (values.length === 0) return;
@@ -288,7 +289,7 @@ class Study extends Component
                     }
 
                     current_pos = camera.convertWorldPosToScreenPos(
-                        { x: x_pos, y: Math.round(i_val * 100000) / 100000 },
+                        { x: x_pos, y: Math.round(i_val * Math.pow(10, ind.precision)) / Math.pow(10, ind.precision) },
                         pos, size, scale
                     );
 

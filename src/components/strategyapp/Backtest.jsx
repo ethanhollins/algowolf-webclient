@@ -149,6 +149,7 @@ class Backtest extends Component
                             retrieveReport={this.retrieveReport}
                             moveWindow={this.props.moveWindow}
                             hideShadows={this.hideShadows}
+                            setChartPositionsByTimestamp={this.setChartPositionsByTimestamp}
                             // History Functions
                             addHistory={this.props.addHistory}
                             getHistory={this.props.getHistory}
@@ -596,6 +597,17 @@ class Backtest extends Component
     switchLocalVariablesPreset = (account_id, data) =>
     {
         
+    }
+
+    setChartPositionsByTimestamp = (timestamp) =>
+    {
+        for (let w of this.windows)
+        {
+            if (w !== null && w.getElementType() === 'chart')
+            {
+                w.getInnerElement().setPosByTimestamp(timestamp);
+            }
+        }
     }
 
     getRoundedTimestamp = (timestamp) =>

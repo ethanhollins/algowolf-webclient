@@ -35,24 +35,8 @@ class Info extends Component
 
     updateInfo = (mouse_pos) =>
     {
-        // Get current hovered timestamp
-
-        // let { last_top_window } = this.state;
         let current_info = [];
 
-        // const top_window = this.props.getTopWindow(this.props.strategy_id, mouse_pos);
-        // let window = this.props.getWindowById(top_window);
-        // if (top_window !== null && window !== undefined && window.getElementType() === 'chart')
-        // {
-        //     last_top_window = window
-        // }
-        // else if (last_top_window !== null)
-        // {
-        //     window = last_top_window
-        // }
-
-        // if (window !== undefined && window.getElementType() === 'chart')
-        // {
         const chart = this.props.getSelectedChart();
         if (chart !== undefined && chart !== null)
         {

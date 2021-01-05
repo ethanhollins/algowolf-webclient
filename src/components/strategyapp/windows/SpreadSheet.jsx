@@ -270,6 +270,7 @@ class SpreadSheet extends Component
     {
         const time = moment(e.target.getAttribute('name'), moment.ISO_8601, true);
         this.props.setCurrentTimestamp(time.unix());
+        this.props.setChartPositionsByTimestamp(time.unix());
     }
 
 }

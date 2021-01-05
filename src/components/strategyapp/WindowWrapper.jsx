@@ -232,6 +232,7 @@ class WindowWrapper extends Component
                 isTopWindow={this.props.isTopWindow}
                 getTopOffset={this.getTopOffset}
                 getWindowScreenPos={this.getScreenPos}
+                setChartPositionsByTimestamp={this.props.setChartPositionsByTimestamp}
             />;
         }
 

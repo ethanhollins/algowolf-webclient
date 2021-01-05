@@ -43,6 +43,7 @@ class Report extends Component
                 getTopOffset={this.props.getTopOffset}
                 getWindowScreenPos={this.props.getWindowScreenPos}
                 getHeader={this.props.getHeader}
+                setChartPositionsByTimestamp={this.props.setChartPositionsByTimestamp}
             />
         );
     }
