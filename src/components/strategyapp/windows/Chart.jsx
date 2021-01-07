@@ -1718,7 +1718,7 @@ class Chart extends Component
         }
 
 
-        const tz = 'Australia/Melbourne';
+        const tz = 'America/New_York';
         let time = this.getWeekendDates(
             moment(ts*1000).subtract(7, 'd').unix()
         )[1].tz(tz);
@@ -1791,7 +1791,7 @@ class Chart extends Component
         const { pos, scale } = this.state;
         const timestamps = this.getTimestamps();
         const all_timestamps = this.getAllTimestamps();
-        const tz = 'Australia/Melbourne';
+        const tz = 'America/New_York';
 
         const chart_size = this.getChartSize();
         const start_pos = { x: 0, y: chart_size.height }
@@ -2656,7 +2656,7 @@ class Chart extends Component
                     // Box Settings
                     ctx.fillStyle = 'rgb(80,80,80)';
             
-                    const tz = 'Australia/Melbourne';
+                    const tz = 'America/New_York';
                     const time = moment.utc(
                         my_timestamp*1000
                     ).tz(tz).format(top_chart.getCurrentPriceFormat());
