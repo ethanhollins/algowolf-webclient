@@ -46,7 +46,7 @@ class Info extends Component
 
             if (prices !== undefined)
             {
-                const tz = 'Australia/Melbourne';
+                const tz = 'America/New_York';
                 const time = moment.utc(
                     prices.timestamp*1000
                 ).tz(tz).format(chart.getCurrentPriceFormat());
