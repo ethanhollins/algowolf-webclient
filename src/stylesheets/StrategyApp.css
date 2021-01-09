@@ -1498,14 +1498,26 @@ body {
     align-items: center;
     height: 28px;
     box-sizing: border-box;
-    color: rgb(80,80,80);
     padding-left: 10px;
     font-size: 0.9em;
     /* font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-weight: 600;
-    text-decoration: underline #f39c12;
     border-bottom: 1px solid rgb(200,200,200);
+}
+
+.dockable.header-item {
+    display: flex;
+    align-items: center;
+    margin-right: 15px;
+    color: rgb(180,180,180);
+    cursor: pointer;
+    z-index: 31;
+}
+
+.dockable.header-item.selected {
+    color: rgb(80,80,80);
+    text-decoration: underline #f39c12;
 }
 
 .dockable.header > span {
@@ -1518,7 +1530,7 @@ body {
 .dockable.icon {
     width: 18px;
     height: 18px;
-    margin-right: 7px;
+    margin-right: 5px;
 }
 
 .log.background {

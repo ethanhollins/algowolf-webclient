@@ -3,8 +3,10 @@ import Log from './Log';
 import Info from './Info';
 import ControlPanel from './ControlPanel';
 import Report from './Report';
+import Positions from './Positions';
+import Transactions from './Transactions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faScroll, faInfoCircle, faSlidersVSquare, faFileInvoice } from '@fortawesome/pro-regular-svg-icons';
+import { faScroll, faInfoCircle, faSlidersVSquare, faFileInvoice, faSort, faReceipt } from '@fortawesome/pro-regular-svg-icons';
 
 class Dockable extends Component
 {
@@ -34,67 +36,110 @@ class Dockable extends Component
                     ref={this.setHeaderRef}
                     className='dockable header'
                 >
-                    {this.generateTitle()}
+                    {this.generateTitles()}
                 </div>
                 {this.generateInnerWindow()}
             </div>
         );
     }
 
-    generateTitle()
+    generateTitles()
     {
-        const type = this.props.getElementType();
+        const windows = this.props.info.windows;
+
+        const opened = this.getOpened();
+        // const type = window.type;
         
-        if (type === 'log')
+        let result = [];
+        for (let w of windows)
         {
-            return (
-                <React.Fragment>
+            let class_name;
+            if (w.id === opened.id)
+            {
+                class_name = 'dockable header-item selected';
+            }
+            else
+            {
+                class_name = 'dockable header-item';
+            }
 
-                <FontAwesomeIcon icon={faScroll} className='dockable icon' />
-                <span>Script Log</span>
-
-                </React.Fragment>
-            );
+            if (w.type === 'log')
+            {
+                result.push(
+                    <div key={w.id} className={class_name}>
+    
+                    <FontAwesomeIcon icon={faScroll} className='dockable icon' />
+                    <span>Script Log</span>
+    
+                    </div>
+                );
+            }
+            else if (w.type === 'info')
+            {
+                result.push(
+                    <div key={w.id} className={class_name}>
+    
+                    <FontAwesomeIcon icon={faInfoCircle} className='dockable icon' />
+                    <span>Chart Info</span>
+                    
+                    </div>
+                );
+            }
+            else if (w.type === 'control_panel')
+            {
+                result.push(
+                    <div key={w.id} className={class_name}>
+    
+                    <FontAwesomeIcon icon={faSlidersVSquare} className='dockable icon' />
+                    <span>Control Panel</span>
+                    
+                    </div>
+                );
+            }
+            else if (w.type === 'report')
+            {
+                const name = this.props.info.properties.name;
+                result.push(
+                    <div key={w.id} className={class_name}>
+    
+                    <FontAwesomeIcon icon={faFileInvoice} className='dockable icon' />
+                    <span>{name}</span>
+                    
+                    </div>
+                );
+            }
+            else if (w.type === 'positions')
+            {
+                result.push(
+                    <div key={w.id} className={class_name}>
+    
+                    <FontAwesomeIcon icon={faSort} className='dockable icon' />
+                    <span>Positions</span>
+                    
+                    </div>
+                );
+            }
+            else if (w.type === 'transactions')
+            {
+                result.push(
+                    <div key={w.id} className={class_name}>
+    
+                    <FontAwesomeIcon icon={faReceipt} className='dockable icon' />
+                    <span>Transactions</span>
+                    
+                    </div>
+                );
+            }
         }
-        else if (type === 'info')
-        {
-            return (
-                <React.Fragment>
 
-                <FontAwesomeIcon icon={faInfoCircle} className='dockable icon' />
-                <span>Chart Info</span>
-                
-                </React.Fragment>
-            );
-        }
-        else if (type === 'control_panel')
-        {
-            return (
-                <React.Fragment>
-
-                <FontAwesomeIcon icon={faSlidersVSquare} className='dockable icon' />
-                <span>Control Panel</span>
-                
-                </React.Fragment>
-            );
-        }
-        else if (type === 'report')
-        {
-            const name = this.props.info.properties.name;
-            return (
-                <React.Fragment>
-
-                <FontAwesomeIcon icon={faFileInvoice} className='dockable icon' />
-                <span>{name}</span>
-                
-                </React.Fragment>
-            );
-        }
+        return result;
     }
 
     generateInnerWindow()
     {
-        const type = this.props.getElementType();
+        const window = this.getOpened();
+        const type = window.type;
+
         if (type === 'log')
         {
             return <Log
@@ -157,11 +202,67 @@ class Dockable extends Component
                 setChartPositionsByTimestamp={this.props.setChartPositionsByTimestamp}
             />
         }
+        else if (type === 'positions')
+        {
+            return <Positions
+                key={this.props.item_id}
+                ref={this.setInnerWindowRef}
+                strategy_id={this.props.strategy_id}
+                item_id={this.props.item_id}
+                info={this.props.info}
+                getHeader={this.getHeader}
+                getScreenSize={this.props.getScreenSize}
+                setCurrentTimestamp={this.props.setCurrentTimestamp}
+                setScrollbarHovered={this.props.setScrollbarHovered}
+                getScrollbarHovered={this.props.getScrollbarHovered}
+                isTopWindow={this.props.isTopWindow}
+                getTopOffset={this.props.getTopOffset}
+                getWindowScreenPos={this.props.getWindowScreenPos}
+                setChartPositionsByTimestamp={this.props.setChartPositionsByTimestamp}
+                getPositions={this.props.getPositions}
+            />
+        }
+        else if (type === 'transactions')
+        {
+            return <Transactions
+                key={this.props.item_id}
+                ref={this.setInnerWindowRef}
+                strategy_id={this.props.strategy_id}
+                item_id={this.props.item_id}
+                info={this.props.info}
+                getHeader={this.getHeader}
+                getScreenSize={this.props.getScreenSize}
+                setCurrentTimestamp={this.props.setCurrentTimestamp}
+                setScrollbarHovered={this.props.setScrollbarHovered}
+                getScrollbarHovered={this.props.getScrollbarHovered}
+                isTopWindow={this.props.isTopWindow}
+                getTopOffset={this.props.getTopOffset}
+                getWindowScreenPos={this.props.getWindowScreenPos}
+                setChartPositionsByTimestamp={this.props.setChartPositionsByTimestamp}
+                getTransactions={this.props.getTransactions}
+            />
+        }
     }
 
     getHeader = () =>
     {
         return this.header;
+    }
+
+    getOpened = () =>
+    {
+        const windows = this.props.info.windows;
+        const opened = this.props.info.opened;
+
+        for (let w of windows)
+        {
+            if (w.id === opened)
+            {
+                return w
+            }
+        }
+
+        return windows[0];
     }
 }
 

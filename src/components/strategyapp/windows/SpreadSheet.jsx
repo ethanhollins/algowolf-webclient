@@ -126,8 +126,106 @@ class SpreadSheet extends Component
             </div>
         );
     }
-
+   
     generateRows(data)
+    {
+        if (Object.keys(data).length > 0)
+        {
+            const num_cols = Object.keys(data).length+1;
+            const num_rows = data[Object.keys(data)[0]].length;
+    
+            const format = this.props.format;
+    
+            let result = [];
+            for (let i = 0; i < num_rows; i++)
+            {
+                let row_result = [];
+                for (let j = 0; j < num_cols; j++)
+                {
+                    if (j === 0)
+                    {
+                        row_result.push(
+                            <div key={j} className='spreadsheet cell index'>{i+1}</div>
+                        );
+                    }
+                    else
+                    {
+                        const col_name = Object.keys(data)[j-1];
+                        const cell = data[col_name][i];
+
+                        if (col_name in format)
+                        {
+                            if (format[col_name].type !== undefined)
+                            {
+                                // Date Type
+                                if (format[col_name].type === 'date')
+                                {
+                                    const time = moment(cell, moment.ISO_8601, true);
+                                    if (time.isValid())
+                                    {
+                                        if (format[col_name].format !== undefined)
+                                        {
+                                            row_result.push(
+                                                <div 
+                                                    key={j} name={cell}
+                                                    className='spreadsheet cell item link'
+                                                    onClick={this.onTime.bind(this)}
+                                                >
+                                                    <div>{time.format(format[col_name].format)}</div>
+                                                </div>
+                                            );
+                                        }
+                                        else
+                                        {
+                                            row_result.push(
+                                                <div 
+                                                    key={j} name={cell}
+                                                    className='spreadsheet cell item link' 
+                                                    onClick={this.onTime.bind(this)}
+                                                >
+                                                    <div>{time}</div>
+                                                </div>
+                                            );
+                                        }
+    
+                                        continue;
+                                    }
+                                }
+    
+                            }
+                        }
+    
+                        // Default Type
+                        row_result.push(
+                            <div key={j} className='spreadsheet cell item'><div>{String(cell)}</div></div>
+                        );
+                    }
+                }
+                result.push(
+                    <div key={i} className='spreadsheet row'>
+                        {row_result}
+                    </div>
+                );
+            }
+    
+            return result;
+        }
+    }
+
+    getData = () =>
+    {
+        return this.props.data;
+    }
+
+    onTime = (e) =>
+    {
+        const time = moment(e.target.getAttribute('name'), moment.ISO_8601, true);
+        this.props.setCurrentTimestamp(time.unix());
+        this.props.setChartPositionsByTimestamp(time.unix());
+    }
+
+    // TEMP
+    generateRowsDemo(data)
     {
         if (Object.keys(data).length > 0)
         {
@@ -260,18 +358,7 @@ class SpreadSheet extends Component
             return result;
         }
     }
-   
-    getData = () =>
-    {
-        return this.props.data;
-    }
 
-    onTime = (e) =>
-    {
-        const time = moment(e.target.getAttribute('name'), moment.ISO_8601, true);
-        this.props.setCurrentTimestamp(time.unix());
-        this.props.setChartPositionsByTimestamp(time.unix());
-    }
 
 }
 

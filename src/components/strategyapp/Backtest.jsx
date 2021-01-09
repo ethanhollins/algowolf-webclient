@@ -10,7 +10,7 @@ class Backtest extends Component
     {
         super(props);
 
-        this.transactions = null;
+        this.backtest_transactions = null;
 
         this.state = {
             sio: undefined,
@@ -22,6 +22,11 @@ class Backtest extends Component
             drawings: {},
             input_variables: {},
             log: [],
+            transactions: {
+                'Time': [], 'Type': [], 'Instrument': [],
+                'Size': [], 'Price': [], 'StopLoss': [], 
+                'TakeProfit': [], 'Amount': []
+            },
             hide_shadows: false,
             reference_timestamp: 0,
             selected_offset: 0,
@@ -39,7 +44,7 @@ class Backtest extends Component
 
     async componentDidMount()
     {
-        this.transactions = (await this.props.retrieveTransactions(this.props.id)).transactions;
+        this.backtest_transactions = (await this.props.retrieveTransactions(this.props.id)).transactions;
 
         let strategy = this.getStrategyInfo();
         this.handleTransactions(strategy.properties.end);
@@ -171,6 +176,7 @@ class Backtest extends Component
                             getDrawings={this.getDrawings}
                             getPositions={this.getPositions}
                             getOrders={this.getOrders}
+                            getTransactions={this.getTransactions}
                             getCurrentTimestamp={this.getCurrentTimestamp}
                             setCurrentTimestamp={this.setCurrentTimestamp}
                             setSelectedOffset={this.setSelectedOffset}
@@ -300,12 +306,22 @@ class Backtest extends Component
         }
     }
 
-    handleCreatePosition = (positions, trans) =>
+    handleCreatePosition = (positions, trans, transactions) =>
     {
         positions.push(trans.item.new);
+
+        // Create Transaction
+        transactions['Time'].push(trans.timestamp);
+        transactions['Type'].push(trans.type.replace('_', ' ').toUpperCase());
+        transactions['Instrument'].push(trans.item.new.product.replace('_', ' '));
+        transactions['Size'].push(trans.item.new.lotsize);
+        transactions['Price'].push(trans.item.new.entry_price);
+        transactions['StopLoss'].push(trans.item.new.sl);
+        transactions['TakeProfit'].push(trans.item.new.tp);
+        transactions['Amount'].push(0);
     }
 
-    handleCreatePositionFromOrder = (positions, orders, trans) =>
+    handleCreatePositionFromOrder = (positions, orders, trans, transactions) =>
     {
         for (let i = 0; i < orders.length; i++)
         {
@@ -315,9 +331,19 @@ class Backtest extends Component
             }
         }
         positions.push(trans.item.new);
+
+        // Create Transaction
+        transactions['Time'].push(trans.timestamp);
+        transactions['Type'].push(trans.type.replace('_', ' ').toUpperCase());
+        transactions['Instrument'].push(trans.item.new.product.replace('_', ' '));
+        transactions['Size'].push(trans.item.new.lotsize);
+        transactions['Price'].push(trans.item.new.entry_price);
+        transactions['StopLoss'].push(trans.item.new.sl);
+        transactions['TakeProfit'].push(trans.item.new.tp);
+        transactions['Amount'].push(0);
     }
 
-    handleClosePosition = (positions, trans) =>
+    handleClosePosition = (positions, trans, transactions) =>
     {
         for (let i = 0; i < positions.length; i++)
         {
@@ -326,14 +352,34 @@ class Backtest extends Component
                 positions.splice(i, 1);
             }
         }
+
+        // Create Transaction
+        transactions['Time'].push(trans.timestamp);
+        transactions['Type'].push(trans.type.replace('_', ' ').toUpperCase());
+        transactions['Instrument'].push(trans.item.new.product.replace('_', ' '));
+        transactions['Size'].push(trans.item.new.lotsize);
+        transactions['Price'].push(trans.item.new.close_price);
+        transactions['StopLoss'].push(trans.item.new.sl);
+        transactions['TakeProfit'].push(trans.item.new.tp);
+        transactions['Amount'].push(0);
     }
 
-    handleCreateOrder = (orders, trans) =>
+    handleCreateOrder = (orders, trans, transactions) =>
     {
         orders.push(trans.item.new);
+
+        // Create Transaction
+        transactions['Time'].push(trans.timestamp);
+        transactions['Type'].push(trans.type.replace('_', ' ').toUpperCase());
+        transactions['Instrument'].push(trans.item.new.product.replace('_', ' '));
+        transactions['Size'].push(trans.item.new.lotsize);
+        transactions['Price'].push(trans.item.new.entry_price);
+        transactions['StopLoss'].push(trans.item.new.sl);
+        transactions['TakeProfit'].push(trans.item.new.tp);
+        transactions['Amount'].push(0);
     }
 
-    handleCancelOrder = (orders, trans) =>
+    handleCancelOrder = (orders, trans, transactions) =>
     {
         for (let i = 0; i < orders.length; i++)
         {
@@ -342,9 +388,19 @@ class Backtest extends Component
                 orders.splice(i, 1);
             }
         }
+
+        // Create Transaction
+        transactions['Time'].push(trans.timestamp);
+        transactions['Type'].push(trans.type.replace('_', ' ').toUpperCase());
+        transactions['Instrument'].push(trans.item.new.product.replace('_', ' '));
+        transactions['Size'].push(trans.item.new.lotsize);
+        transactions['Price'].push(trans.item.new.entry_price);
+        transactions['StopLoss'].push(trans.item.new.sl);
+        transactions['TakeProfit'].push(trans.item.new.tp);
+        transactions['Amount'].push(0);
     }
 
-    handleModify = (positions, orders, trans) =>
+    handleModify = (positions, orders, trans, transactions) =>
     {
         const item = trans.item.new;
         if (item.order_type === 'limitorder' || item.order_type === 'stoporder')
@@ -367,6 +423,16 @@ class Backtest extends Component
                 }
             }
         }
+
+        // Create Transaction
+        transactions['Time'].push(trans.timestamp);
+        transactions['Type'].push(trans.type.replace('_', ' ').toUpperCase());
+        transactions['Instrument'].push(trans.item.new.product.replace('_', ' '));
+        transactions['Size'].push(trans.item.new.lotsize);
+        transactions['Price'].push(trans.item.new.entry_price);
+        transactions['StopLoss'].push(trans.item.new.sl);
+        transactions['TakeProfit'].push(trans.item.new.tp);
+        transactions['Amount'].push(0);
     }
 
     handleCreateDrawing = (drawings, trans) =>
@@ -409,10 +475,10 @@ class Backtest extends Component
 
     handleTransactions = (dest_timestamp) =>
     {
-        if (this.transactions !== null)
+        if (this.backtest_transactions !== null)
         {
-            let { current_idx, current_timestamp, positions, orders, drawings, info, log } = this.state;
-            const transactions = this.getTransactions();
+            let { current_idx, current_timestamp, positions, orders, drawings, info, log, transactions } = this.state;
+            const backtest_transactions = this.getBacktestTransactions();
     
             if (dest_timestamp === current_timestamp) return;
             else if (dest_timestamp < current_timestamp)
@@ -424,37 +490,42 @@ class Backtest extends Component
                 info = [];
                 log = [];
                 drawings = {};
+                transactions = {
+                    'Time': [], 'Type': [], 'Instrument': [],
+                    'Size': [], 'Price': [], 'StopLoss': [], 
+                    'TakeProfit': [], 'Amount': []
+                };
             }
             current_timestamp = dest_timestamp;
     
-            for (current_idx; current_idx < transactions.length; current_idx++)
+            for (current_idx; current_idx < backtest_transactions.length; current_idx++)
             {
-                const t = transactions[current_idx];
+                const t = backtest_transactions[current_idx];
                 if (t.timestamp > current_timestamp) break;
                 
                 switch (t.type)
                 {
                     case 'marketentry':
-                        this.handleCreatePosition(positions, t);
+                        this.handleCreatePosition(positions, t, transactions);
                         break;
                     case 'limitentry':
                     case 'stopentry':
-                        this.handleCreatePositionFromOrder(positions, orders, t);
+                        this.handleCreatePositionFromOrder(positions, orders, t, transactions);
                         break;
                     case 'limitorder':
                     case 'stoporder':
-                        this.handleCreateOrder(orders, t);
+                        this.handleCreateOrder(orders, t, transactions);
                         break;
                     case 'positionclose':
                     case 'stoploss':
                     case 'takeprofit':
-                        this.handleClosePosition(positions, t);
+                        this.handleClosePosition(positions, t, transactions);
                         break;
                     case 'ordercancel':
-                        this.handleCancelOrder(orders, t);
+                        this.handleCancelOrder(orders, t, transactions);
                         break;
                     case 'modify':
-                        this.handleModify(positions, orders, t);
+                        this.handleModify(positions, orders, t, transactions);
                         break;
                     case 'create_drawing':
                         this.handleCreateDrawing(drawings, t);
@@ -487,9 +558,9 @@ class Backtest extends Component
         return this.props.getStrategyInfo(strategy_id);
     }
 
-    getTransactions = () =>
+    getBacktestTransactions = () =>
     {
-        return this.transactions;
+        return this.backtest_transactions;
     }
 
     getDrawings = () =>
@@ -510,6 +581,11 @@ class Backtest extends Component
     getLog = () =>
     {
         return this.state.log;
+    }
+
+    getTransactions = () =>
+    {
+        return this.state.transactions;
     }
 
     getInfo = (product, period) =>

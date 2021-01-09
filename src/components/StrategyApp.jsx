@@ -127,7 +127,7 @@ class StrategyApp extends Component
                     height: 70
                 },
                 fade: true
-            }
+            };
             this.setPopup(popup);
             this.props.visitorCounter();
         }
@@ -1243,6 +1243,7 @@ class StrategyApp extends Component
             headers: this.props.getHeaders(),
             credentials: 'include',
             body: JSON.stringify({
+                'broker': 'oanda',
                 'items': [product]
             })
         }
@@ -1269,7 +1270,9 @@ class StrategyApp extends Component
             broker_id: broker_id,
             field: 'ontick',
             items: {
-                [product]: [period]
+                'oanda': {
+                    [product]: [period]
+                }
             }
         });
     }

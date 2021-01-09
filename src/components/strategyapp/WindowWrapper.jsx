@@ -171,6 +171,41 @@ class WindowWrapper extends Component
                 setBorder={this.setBorder}
             />)
         }
+        else if (this.state.info.type === 'dockable')
+        {
+            return <Dockable
+                key={this.state.info.id}
+                ref={this.setInnerElementRef}
+                strategy_id={this.props.strategy_id}
+                item_id={this.state.info.id}
+                info={this.state.info}
+                getElementType={this.getElementType}
+                getLog={this.props.getLog}
+                getMousePos={this.props.getMousePos}
+                getWindowById={this.props.getWindowById}
+                getTopWindow={this.props.getTopWindow}
+                getInfo={this.props.getInfo}
+                getCurrentAccount={this.props.getCurrentAccount}
+                getSelectedChart={this.props.getSelectedChart}
+                getGlobalInputVariables={this.props.getGlobalInputVariables}
+                getCurrentGlobalVariablesPreset={this.props.getCurrentGlobalVariablesPreset}
+                getLocalInputVariables={this.props.getLocalInputVariables}
+                getCurrentLocalVariablesPreset={this.props.getCurrentLocalVariablesPreset}
+                updateInputVariables={this.props.updateInputVariables}
+                getScreenSize={this.getRoundedScreenSize}
+                retrieveReport={this.props.retrieveReport}
+                setCurrentTimestamp={this.props.setCurrentTimestamp}
+                getScrollbarHovered={this.getScrollbarHovered}
+                setScrollbarHovered={this.setScrollbarHovered}
+                isTopWindow={this.props.isTopWindow}
+                getTopOffset={this.getTopOffset}
+                getWindowScreenPos={this.getScreenPos}
+                setChartPositionsByTimestamp={this.props.setChartPositionsByTimestamp}
+                getPositions={this.props.getPositions}
+                getTransactions={this.props.getTransactions}
+                isLoaded={this.props.isLoaded}
+            />;
+        }
         else if (this.state.info.type === 'log')
         {
             return <Dockable
@@ -233,6 +268,46 @@ class WindowWrapper extends Component
                 getTopOffset={this.getTopOffset}
                 getWindowScreenPos={this.getScreenPos}
                 setChartPositionsByTimestamp={this.props.setChartPositionsByTimestamp}
+            />;
+        }
+        else if (this.state.info.type === 'positions')
+        {
+            return <Dockable
+                key={this.state.info.id}
+                ref={this.setInnerElementRef}
+                strategy_id={this.props.strategy_id}
+                item_id={this.state.info.id}
+                info={this.state.info}
+                getScreenSize={this.getRoundedScreenSize}
+                getElementType={this.getElementType}
+                setCurrentTimestamp={this.props.setCurrentTimestamp}
+                getScrollbarHovered={this.getScrollbarHovered}
+                setScrollbarHovered={this.setScrollbarHovered}
+                isTopWindow={this.props.isTopWindow}
+                getTopOffset={this.getTopOffset}
+                getWindowScreenPos={this.getScreenPos}
+                setChartPositionsByTimestamp={this.props.setChartPositionsByTimestamp}
+                getPositions={this.props.getPositions}
+            />;
+        }
+        else if (this.state.info.type === 'transactions')
+        {
+            return <Dockable
+                key={this.state.info.id}
+                ref={this.setInnerElementRef}
+                strategy_id={this.props.strategy_id}
+                item_id={this.state.info.id}
+                info={this.state.info}
+                getScreenSize={this.getRoundedScreenSize}
+                getElementType={this.getElementType}
+                setCurrentTimestamp={this.props.setCurrentTimestamp}
+                getScrollbarHovered={this.getScrollbarHovered}
+                setScrollbarHovered={this.setScrollbarHovered}
+                isTopWindow={this.props.isTopWindow}
+                getTopOffset={this.getTopOffset}
+                getWindowScreenPos={this.getScreenPos}
+                setChartPositionsByTimestamp={this.props.setChartPositionsByTimestamp}
+                getTransactions={this.props.getTransactions}
             />;
         }
 
