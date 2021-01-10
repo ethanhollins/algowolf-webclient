@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 import SpreadSheet from './SpreadSheet';
 import moment from "moment-timezone";
 
-class Positions extends Component
+class Orders extends Component
 {
-
     constructor(props)
     {
         super(props);
@@ -49,20 +48,20 @@ class Positions extends Component
 
     getName = () =>
     {
-        return 'Positions';
+        return 'Orders';
     }
 
     getData = () =>
     {
-        const positions = this.getPositions();
+        const orders = this.getOrders();
         let result = {
             'Time': [], 'Instrument': [], 'Direction': [], 'Size': [], 
             'Entry': [], 'StopLoss': [], 'TakeProfit': []
         };
 
-        for (let i = 0; i < positions.length; i++)
+        for (let i = 0; i < orders.length; i++)
         {
-            const pos = positions[i];
+            const pos = orders[i];
             result['Time'].push(
                 moment.unix(pos.open_time).tz('America/New_York').format('MM/DD HH:mm')
             );
@@ -82,11 +81,11 @@ class Positions extends Component
         return {};
     }
 
-    getPositions = () =>
+    getOrders = () =>
     {
-        return this.props.getPositions();
+        return this.props.getOrders();
     }
 
 }
 
-export default Positions;
+export default Orders;

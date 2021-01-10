@@ -558,6 +558,7 @@ class StrategyApp extends Component
             {
                 return <BacktestToolbar 
                     ref={this.setToolbarRef}
+                    isDemo={this.props.isDemo}
                     getCurrentStrategy={this.getCurrentStrategy}
                     updateStrategyInfo={this.updateStrategyInfo}
                     getStrategyInfo={this.getStrategyInfo}
@@ -571,6 +572,7 @@ class StrategyApp extends Component
                     key={current_strategy}
                     ref={this.setToolbarRef}
                     history={this.props.history}
+                    isDemo={this.props.isDemo}
                     getCurrentStrategy={this.getCurrentStrategy}
                     updateStrategyInfo={this.updateStrategyInfo}
                     getStrategyComponent={this.getStrategyComponent}

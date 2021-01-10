@@ -1498,7 +1498,6 @@ body {
     align-items: center;
     height: 28px;
     box-sizing: border-box;
-    padding-left: 10px;
     font-size: 0.9em;
     /* font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -1509,15 +1508,32 @@ body {
 .dockable.header-item {
     display: flex;
     align-items: center;
-    margin-right: 15px;
+    padding-left: 12px;
+    padding-right: 13px;
     color: rgb(180,180,180);
     cursor: pointer;
     z-index: 31;
+    transition: color 0.2s ease;
+    border-right: 1px solid rgb(200,200,200);
 }
 
 .dockable.header-item.selected {
     color: rgb(80,80,80);
-    text-decoration: underline #f39c12;
+    cursor: auto;
+    /* text-decoration: underline #f39c12; */
+}
+
+.dockable.header-item > * {
+    pointer-events: none;
+}
+
+.dockable.header-item:hover {
+    color: rgb(80,80,80);
+    transition: color 0.2s ease;
+}
+
+.dockable.header-item.no-border {
+    border-right: none;
 }
 
 .dockable.header > span {
@@ -1528,9 +1544,36 @@ body {
 }
 
 .dockable.icon {
-    width: 18px;
-    height: 18px;
+    width: auto;
+    height: 16px;
     margin-right: 5px;
+}
+
+.dockable.separator {
+    width: 1px;
+    height: 60%;
+    background-color: rgb(200,200,200);
+}
+
+.dockable.dropdown-icon {
+    color: rgb(80,80,80);
+    /* border-right: 1px solid rgb(200,200,200); */
+    cursor: pointer;
+    z-index: 31;
+    transition: margin-top 0.2s linear;
+}
+
+.dockable.dropdown-icon > svg {
+    width: 10px;
+    height: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.dockable.dropdown-icon:hover {
+    margin-top: 4px;
+    color: #ff8103;
+    transition: margin-top 0.2s linear;
 }
 
 .log.background {

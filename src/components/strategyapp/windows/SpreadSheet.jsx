@@ -25,6 +25,7 @@ class SpreadSheet extends Component
         {
             return (
                 <div 
+                    key={this.props.item_id}
                     ref={this.setBackgroundRef}
                     className='spreadsheet background'
                 >
@@ -42,7 +43,7 @@ class SpreadSheet extends Component
         }
         else
         {
-            return <React.Fragment />
+            return <React.Fragment key={this.props.item_id} />
         }
     }
 

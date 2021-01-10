@@ -4,9 +4,13 @@ import Info from './Info';
 import ControlPanel from './ControlPanel';
 import Report from './Report';
 import Positions from './Positions';
+import Orders from './Orders';
 import Transactions from './Transactions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faScroll, faInfoCircle, faSlidersVSquare, faFileInvoice, faSort, faReceipt } from '@fortawesome/pro-regular-svg-icons';
+import { 
+    faScroll, faInfoCircle, faSlidersVSquare, 
+    faFileInvoice, faSort, faReceipt, faChevronDown 
+} from '@fortawesome/pro-regular-svg-icons';
 
 class Dockable extends Component
 {
@@ -14,18 +18,45 @@ class Dockable extends Component
     {
         super(props);
 
+        this.state = {
+            tabs: [],
+            dropdown: []
+        }
+
         this.setHeaderRef = elem => {
             this.header = elem;
         }
         this.setInnerWindowRef = elem => {
             this.innerWindow = elem;
+            if (this.innerWindow !== null)
+            {
+                this.onMouseMoveThrottled = this.innerWindow.onMouseMoveThrottled;
+                this.updateInfo = this.innerWindow.updateInfo;
+            }
+        }
+
+        this.addTabElem = elem => {
+            let { tabs } = this.state;
+            if (elem !== null)
+            {
+                tabs.push([elem, elem.clientWidth]);
+            }
+            else
+            {
+                tabs = tabs.filter(x => x !== null);
+            }
+            this.setState({ tabs });
         }
     }
 
     componentDidMount()
     {
-        this.onMouseMoveThrottled = this.innerWindow.onMouseMoveThrottled;
-        this.updateInfo = this.innerWindow.updateInfo;
+        this.handleTabDropdown()
+    }
+
+    componentDidUpdate()
+    {
+        this.handleTabDropdown()
     }
 
     render()
@@ -36,23 +67,64 @@ class Dockable extends Component
                     ref={this.setHeaderRef}
                     className='dockable header'
                 >
-                    {this.generateTitles()}
+                    {this.generateTabs()}
+                    {this.generateDropdown()}
                 </div>
                 {this.generateInnerWindow()}
             </div>
         );
     }
 
-    generateTitles()
+    handleTabDropdown()
+    {
+        const header_width = this.header.clientWidth - this.props.getWindowBtnsWidth();
+        let tab_width = 0;
+
+        let { dropdown, tabs } = this.state;
+        let new_dropdown = [];
+        for (let i = 0; i < tabs.length; i++)
+        {
+            const tab = tabs[i];
+            console.log(tab[1]);
+            tab_width += tab[1];
+            if (i !== 0 && tab_width > header_width)
+            {
+                new_dropdown.push(tab[0].getAttribute('name'));
+                tab[0].style.display = 'none';
+            }
+            else
+            {
+                tab[0].style.display = 'flex';
+            }
+        }
+
+        if (dropdown.length !== new_dropdown.length)
+        {
+            dropdown = new_dropdown;
+            this.setState({ dropdown });
+        }
+    }
+
+    onTabClick(e)
+    {
+        const id = e.target.getAttribute('name');
+        this.onMouseMoveThrottled = undefined;
+        this.updateInfo = undefined;
+        this.props.info.opened = id;
+        this.props.updateStrategyInfo();
+    }
+
+    generateTabs()
     {
         const windows = this.props.info.windows;
 
         const opened = this.getOpened();
-        // const type = window.type;
         
         let result = [];
-        for (let w of windows)
+        for (let i = 0; i < windows.length; i++)
         {
+            const w = windows[i];
+            let elem;
             let class_name;
             if (w.id === opened.id)
             {
@@ -63,76 +135,111 @@ class Dockable extends Component
                 class_name = 'dockable header-item';
             }
 
+            if (windows.length === 1)
+            {
+                class_name += ' no-border';
+            }
+
             if (w.type === 'log')
             {
-                result.push(
-                    <div key={w.id} className={class_name}>
+                elem = (
+                    <div key={w.id} ref={this.addTabElem} className={class_name} name={w.id} onClick={this.onTabClick.bind(this)}>
     
                     <FontAwesomeIcon icon={faScroll} className='dockable icon' />
-                    <span>Script Log</span>
+                    <div>Script Log</div>
     
                     </div>
                 );
             }
             else if (w.type === 'info')
             {
-                result.push(
-                    <div key={w.id} className={class_name}>
+                elem = (
+                    <div key={w.id} ref={this.addTabElem} className={class_name} name={w.id} onClick={this.onTabClick.bind(this)}>
     
                     <FontAwesomeIcon icon={faInfoCircle} className='dockable icon' />
-                    <span>Chart Info</span>
+                    <div>Chart Info</div>
                     
                     </div>
                 );
             }
             else if (w.type === 'control_panel')
             {
-                result.push(
-                    <div key={w.id} className={class_name}>
+                elem = (
+                    <div key={w.id} ref={this.addTabElem} className={class_name} name={w.id} onClick={this.onTabClick.bind(this)}>
     
                     <FontAwesomeIcon icon={faSlidersVSquare} className='dockable icon' />
-                    <span>Control Panel</span>
+                    <div>Control Panel</div>
                     
                     </div>
                 );
             }
             else if (w.type === 'report')
             {
-                const name = this.props.info.properties.name;
-                result.push(
-                    <div key={w.id} className={class_name}>
+                const name = w.properties.name;
+                elem = (
+                    <div key={w.id} ref={this.addTabElem} className={class_name} name={w.id} onClick={this.onTabClick.bind(this)}>
     
                     <FontAwesomeIcon icon={faFileInvoice} className='dockable icon' />
-                    <span>{name}</span>
+                    <div>{name}</div>
                     
                     </div>
                 );
             }
             else if (w.type === 'positions')
             {
-                result.push(
-                    <div key={w.id} className={class_name}>
+                elem = (
+                    <div key={w.id} ref={this.addTabElem} className={class_name} name={w.id} onClick={this.onTabClick.bind(this)}>
     
                     <FontAwesomeIcon icon={faSort} className='dockable icon' />
-                    <span>Positions</span>
+                    <div>Positions</div>
+                    
+                    </div>
+                );
+            }
+            else if (w.type === 'orders')
+            {
+                elem = (
+                    <div key={w.id} ref={this.addTabElem} className={class_name} name={w.id} onClick={this.onTabClick.bind(this)}>
+    
+                    <FontAwesomeIcon icon={faSort} className='dockable icon' />
+                    <div>Orders</div>
                     
                     </div>
                 );
             }
             else if (w.type === 'transactions')
             {
-                result.push(
-                    <div key={w.id} className={class_name}>
+                elem = (
+                    <div key={w.id} ref={this.addTabElem} className={class_name} name={w.id} onClick={this.onTabClick.bind(this)}>
     
                     <FontAwesomeIcon icon={faReceipt} className='dockable icon' />
-                    <span>Transactions</span>
+                    <div>Transactions</div>
                     
                     </div>
                 );
             }
+
+            if (elem !== undefined)
+            {
+                result.push(elem);
+                // result.push(<div key={i} className='dockable separator'></div>);
+            }
         }
 
         return result;
+    }
+
+    generateDropdown()
+    {
+        const { dropdown } = this.state;
+        if (dropdown.length > 0)
+        {
+            return (
+                <div ref={this.setDropdownRef} className='dockable dropdown-icon'>
+                    <FontAwesomeIcon icon={faChevronDown} />
+                </div>
+            );
+        }
     }
 
     generateInnerWindow()
@@ -146,7 +253,7 @@ class Dockable extends Component
                 key={this.props.item_id}
                 ref={this.setInnerWindowRef}
                 strategy_id={this.props.strategy_id}
-                item_id={this.props.item_id}
+                item_id={window.id}
                 getLog={this.props.getLog}
                 getCurrentAccount={this.props.getCurrentAccount}
             />;
@@ -157,7 +264,7 @@ class Dockable extends Component
                 key={this.props.item_id}
                 ref={this.setInnerWindowRef}
                 strategy_id={this.props.strategy_id}
-                item_id={this.props.item_id}
+                item_id={window.id}
                 getMousePos={this.props.getMousePos}
                 getWindowById={this.props.getWindowById}
                 getTopWindow={this.props.getTopWindow}
@@ -172,7 +279,7 @@ class Dockable extends Component
                 key={this.props.item_id}
                 ref={this.setInnerWindowRef}
                 strategy_id={this.props.strategy_id}
-                item_id={this.props.item_id}
+                item_id={window.id}
                 getGlobalInputVariables={this.props.getGlobalInputVariables}
                 getCurrentGlobalVariablesPreset={this.props.getCurrentGlobalVariablesPreset}
                 getLocalInputVariables={this.props.getLocalInputVariables}
@@ -188,8 +295,8 @@ class Dockable extends Component
                 key={this.props.item_id}
                 ref={this.setInnerWindowRef}
                 strategy_id={this.props.strategy_id}
-                item_id={this.props.item_id}
-                info={this.props.info}
+                item_id={window.id}
+                info={window}
                 getHeader={this.getHeader}
                 retrieveReport={this.props.retrieveReport}
                 getScreenSize={this.props.getScreenSize}
@@ -208,8 +315,8 @@ class Dockable extends Component
                 key={this.props.item_id}
                 ref={this.setInnerWindowRef}
                 strategy_id={this.props.strategy_id}
-                item_id={this.props.item_id}
-                info={this.props.info}
+                item_id={window.id}
+                info={window}
                 getHeader={this.getHeader}
                 getScreenSize={this.props.getScreenSize}
                 setCurrentTimestamp={this.props.setCurrentTimestamp}
@@ -222,14 +329,34 @@ class Dockable extends Component
                 getPositions={this.props.getPositions}
             />
         }
+        else if (type === 'orders')
+        {
+            return <Orders
+                key={this.props.item_id}
+                ref={this.setInnerWindowRef}
+                strategy_id={this.props.strategy_id}
+                item_id={window.id}
+                info={window}
+                getHeader={this.getHeader}
+                getScreenSize={this.props.getScreenSize}
+                setCurrentTimestamp={this.props.setCurrentTimestamp}
+                setScrollbarHovered={this.props.setScrollbarHovered}
+                getScrollbarHovered={this.props.getScrollbarHovered}
+                isTopWindow={this.props.isTopWindow}
+                getTopOffset={this.props.getTopOffset}
+                getWindowScreenPos={this.props.getWindowScreenPos}
+                setChartPositionsByTimestamp={this.props.setChartPositionsByTimestamp}
+                getOrders={this.props.getOrders}
+            />
+        }
         else if (type === 'transactions')
         {
             return <Transactions
                 key={this.props.item_id}
                 ref={this.setInnerWindowRef}
                 strategy_id={this.props.strategy_id}
-                item_id={this.props.item_id}
-                info={this.props.info}
+                item_id={window.id}
+                info={window}
                 getHeader={this.getHeader}
                 getScreenSize={this.props.getScreenSize}
                 setCurrentTimestamp={this.props.setCurrentTimestamp}

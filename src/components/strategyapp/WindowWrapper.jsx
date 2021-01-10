@@ -35,6 +35,10 @@ class WindowWrapper extends Component
             this.windowBtns = elem;
         };
 
+        this.setInnerWindowBtnsRef = elem => {
+            this.innerWindowBtns = elem;
+        }
+
         this.setWindowWrapperRef = elem => {
             this.windowWrapper = elem;
         };
@@ -99,7 +103,7 @@ class WindowWrapper extends Component
                 }}
             >
                 <div ref={this.setWindowBtnsRef} className='window btns'>
-                    <div>
+                    <div ref={this.setInnerWindowBtnsRef}>
                         <FontAwesomeIcon className='window item small' icon={faSquare} onClick={this.onMaximise} />
                         <FontAwesomeIcon className='window item small' icon={faWindowMaximize} onClick={this.notAvailable} />
                         <FontAwesomeIcon className='window item' icon={faMinus} onClick={this.notAvailable} />
@@ -179,6 +183,7 @@ class WindowWrapper extends Component
                 strategy_id={this.props.strategy_id}
                 item_id={this.state.info.id}
                 info={this.state.info}
+                updateStrategyInfo={this.props.updateStrategyInfo}
                 getElementType={this.getElementType}
                 getLog={this.props.getLog}
                 getMousePos={this.props.getMousePos}
@@ -202,7 +207,9 @@ class WindowWrapper extends Component
                 getWindowScreenPos={this.getScreenPos}
                 setChartPositionsByTimestamp={this.props.setChartPositionsByTimestamp}
                 getPositions={this.props.getPositions}
+                getOrders={this.props.getOrders}
                 getTransactions={this.props.getTransactions}
+                getWindowBtnsWidth={this.getWindowBtnsWidth}
                 isLoaded={this.props.isLoaded}
             />;
         }
@@ -1054,6 +1061,11 @@ class WindowWrapper extends Component
         hovered.scrollbar = is_hovered;
         this.handleCursor(hovered);
         this.setState({ hovered });
+    }
+
+    getWindowBtnsWidth = () =>
+    {
+        return this.innerWindowBtns.clientWidth;
     }
 
 }
