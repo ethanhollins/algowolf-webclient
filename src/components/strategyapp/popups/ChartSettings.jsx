@@ -4,7 +4,7 @@ import {
     faChevronRight
 } from '@fortawesome/pro-regular-svg-icons';
 import { 
-    faChartBar, faChartLine, faDollarSign
+    faChartBar, faChartLine, faDollarSign, faPencilAlt
 } from '@fortawesome/pro-light-svg-icons';
 import ColorSwatch from './ColorSwatch';
 
@@ -28,17 +28,17 @@ class ChartSettings extends Component
             </div>
             <div className='popup content'>
                 <div className='popup category'>
-                    <div className={'popup category-btn' + this.isSelected('bars')} onClick={this.props.onChangeCategory} name='bars'>
+                    <div className={'popup category-btn' + this.isSelected('general')} onClick={this.props.onChangeCategory} name='general'>
                         <span className='popup category-left'>
-                            <FontAwesomeIcon icon={faChartBar} />
-                            Bars
+                            <FontAwesomeIcon icon={faChartLine} />
+                            General
                         </span>
                         <span className='popup category-right'><FontAwesomeIcon icon={faChevronRight} className='popup category-icon' /></span>
                     </div>
-                    <div className={'popup category-btn' + this.isSelected('chart')} onClick={this.props.onChangeCategory} name='chart'>
+                    <div className={'popup category-btn' + this.isSelected('appearance')} onClick={this.props.onChangeCategory} name='appearance'>
                         <span className='popup category-left'>
-                            <FontAwesomeIcon icon={faChartLine} />
-                            Chart
+                            <FontAwesomeIcon icon={faPencilAlt} />
+                            Appearance
                         </span>
                         <span className='popup category-right'><FontAwesomeIcon icon={faChevronRight} className='popup category-icon' /></span>
                     </div>
@@ -61,197 +61,330 @@ class ChartSettings extends Component
         );
     }
 
-    getBarsItems()
+    getGeneralItems()
     {
         return (
-            <React.Fragment>
-
-            <div>
-                <div className='popup left'>Bar type</div>
-                <div className='popup left'>Body</div>
-                <div className='popup left'>Outline</div>
-                <div className='popup left'>Wick</div>
+            <div key='bars' className='popup table'>
+            
+            <div className='popup table-row'>
+                <div className='popup table-cell'>
+                    <div className='popup left'>Timezone</div>
+                </div>
+                <div className='popup table-cell'>
+                    <div className='popup right'>
+                    </div>
+                </div>
             </div>
-            <div>
-                <div className='popup right'>
-                    
+            <div className='popup table-row'>
+                <div className='popup table-cell'>
+                    <div className='popup left'>Date Format</div>
                 </div>
-                <div className='popup right'>
-                    <ColorSwatch 
-                        key={'bodyLong'}
-                        sub={'bars'}
-                        name={'bodyLong'}
-                        getProperty={this.getProperty}
-                        setProperty={this.setProperty}
-                        setHoverOn={this.props.setHoverOn}
-                        setHoverOff={this.props.setHoverOff}
-                    />
-                    <ColorSwatch 
-                        key={'bodyShort'}
-                        sub={'bars'}
-                        name={'bodyShort'}
-                        getProperty={this.getProperty}
-                        setProperty={this.setProperty}
-                        setHoverOn={this.props.setHoverOn}
-                        setHoverOff={this.props.setHoverOff}
-                    />
+                <div className='popup table-cell'>
+                    <div className='popup right'>
+                    </div>
                 </div>
-                <div className='popup right'>
-                    <ColorSwatch 
-                        key={'outlineLong'}
-                        sub={'bars'}
-                        name={'outlineLong'}
-                        getProperty={this.getProperty}
-                        setProperty={this.setProperty}
-                        setHoverOn={this.props.setHoverOn}
-                        setHoverOff={this.props.setHoverOff}
-                    />
-                    <ColorSwatch 
-                        key={'outline'}
-                        sub={'bars'}
-                        name={'outlineShort'}
-                        getProperty={this.getProperty}
-                        setProperty={this.setProperty}
-                        setHoverOn={this.props.setHoverOn}
-                        setHoverOff={this.props.setHoverOff}
-                    />
+            </div>
+            <div className='popup table-row'>
+                <div className='popup table-cell'>
+                    <div className='popup left'>Font Size</div>
                 </div>
-                <div className='popup right'>
-                    <ColorSwatch 
-                        key={'wickLong'}
-                        sub={'bars'}
-                        name={'wickLong'}
-                        getProperty={this.getProperty}
-                        setProperty={this.setProperty}
-                        setHoverOn={this.props.setHoverOn}
-                        setHoverOff={this.props.setHoverOff}
-                    />
-                    <ColorSwatch 
-                        key={'wickShort'}
-                        sub={'bars'}
-                        name={'wickShort'}
-                        getProperty={this.getProperty}
-                        setProperty={this.setProperty}
-                        setHoverOn={this.props.setHoverOn}
-                        setHoverOff={this.props.setHoverOff}
-                    />
+                <div className='popup table-cell'>
+                    <div className='popup right'>
+                    </div>
+                </div>
+            </div>
+            <div className='popup table-row'>
+                <div className='popup table-cell'>
+                    <div className='popup left'>Precision</div>
+                </div>
+                <div className='popup table-cell'>
+                    <div className='popup right'>
+                    </div>
                 </div>
             </div>
 
-
-            </React.Fragment>
+            </div>
         )
     }
 
-    getChartItems()
+    getAppearanceItems()
     {
         return (
-            <React.Fragment>
+            <div key='bars' className='popup table'>
             
-            <div>
-                <div className='popup left'>Background</div>
-                <div className='popup left'>Horizontal Grid</div>
-                <div className='popup left'>Vertical Grid</div>
-                <div className='popup left'>Price label</div>
-                <div className='popup left'>Price line</div>
-                <div className='popup left'>Crosshair</div>
+            <div className='popup table-row'>
+                <div className='popup table-cell'>
+                    <div className='popup left'>
+                        <label className='popup checkbox'>
+                            <input 
+                                type='checkbox' 
+                                defaultChecked='checked'
+                            />
+                            <div className='checkmark'></div>
+                        </label>
+                        <div>Body</div>
+                    </div>
+                </div>
+                <div className='popup table-cell'>
+                    <div className='popup right'>
+                        <ColorSwatch 
+                            key={'bodyLong'}
+                            sub={'bars'}
+                            name={'bodyLong'}
+                            getProperty={this.getProperty}
+                            setProperty={this.setProperty}
+                            setHoverOn={this.props.setHoverOn}
+                            setHoverOff={this.props.setHoverOff}
+                        />
+                        <ColorSwatch 
+                            key={'bodyShort'}
+                            sub={'bars'}
+                            name={'bodyShort'}
+                            getProperty={this.getProperty}
+                            setProperty={this.setProperty}
+                            setHoverOn={this.props.setHoverOn}
+                            setHoverOff={this.props.setHoverOff}
+                        />
+                    </div>
+                </div>
             </div>
-            <div>
-                <div className='popup right'>
-                    <ColorSwatch 
-                        key={'background'}
-                        sub={'chart'}
-                        name={'background'}
-                        getProperty={this.getProperty}
-                        setProperty={this.setProperty}
-                        setHoverOn={this.props.setHoverOn}
-                        setHoverOff={this.props.setHoverOff}
-                    />
+            <div className='popup table-row'>
+                <div className='popup table-cell'>
+                    <div className='popup left'>
+                        <label className='popup checkbox'>
+                            <input 
+                                type='checkbox' 
+                                defaultChecked='checked'
+                            />
+                            <div className='checkmark'></div>
+                        </label>
+                        <div>Outline</div>
+                    </div>
                 </div>
-                <div className='popup right'>
-                    <ColorSwatch 
-                        key={'horizontalGrid'}
-                        sub={'chart'}
-                        name={'horizontalGrid'}
-                        getProperty={this.getProperty}
-                        setProperty={this.setProperty}
-                        setHoverOn={this.props.setHoverOn}
-                        setHoverOff={this.props.setHoverOff}
-                    />
+                <div className='popup table-cell'>
+                    <div className='popup right'>
+                        <ColorSwatch 
+                            key={'bodyLong'}
+                            sub={'bars'}
+                            name={'bodyLong'}
+                            getProperty={this.getProperty}
+                            setProperty={this.setProperty}
+                            setHoverOn={this.props.setHoverOn}
+                            setHoverOff={this.props.setHoverOff}
+                        />
+                        <ColorSwatch 
+                            key={'bodyShort'}
+                            sub={'bars'}
+                            name={'bodyShort'}
+                            getProperty={this.getProperty}
+                            setProperty={this.setProperty}
+                            setHoverOn={this.props.setHoverOn}
+                            setHoverOff={this.props.setHoverOff}
+                        />
+                    </div>
                 </div>
-                <div className='popup right'>
-                    <ColorSwatch 
-                        key={'verticalGrid'}
-                        sub={'chart'}
-                        name={'verticalGrid'}
-                        getProperty={this.getProperty}
-                        setProperty={this.setProperty}
-                        setHoverOn={this.props.setHoverOn}
-                        setHoverOff={this.props.setHoverOff}
-                    />
+            </div>
+            <div className='popup table-row'>
+                <div className='popup table-cell'>
+                    <div className='popup left'>
+                        <label className='popup checkbox'>
+                            <input 
+                                type='checkbox' 
+                                defaultChecked='checked'
+                            />
+                            <div className='checkmark'></div>
+                        </label>
+                        <div>Wick</div>
+                    </div>
                 </div>
-                <div className='popup right'>
-                    <ColorSwatch 
-                        key={'priceLabel'}
-                        sub={'chart'}
-                        name={'priceLabel'}
-                        getProperty={this.getProperty}
-                        setProperty={this.setProperty}
-                        setHoverOn={this.props.setHoverOn}
-                        setHoverOff={this.props.setHoverOff}
-                    />
+                <div className='popup table-cell'>
+                    <div className='popup right'>
+                        <ColorSwatch 
+                            key={'bodyLong'}
+                            sub={'bars'}
+                            name={'bodyLong'}
+                            getProperty={this.getProperty}
+                            setProperty={this.setProperty}
+                            setHoverOn={this.props.setHoverOn}
+                            setHoverOff={this.props.setHoverOff}
+                        />
+                        <ColorSwatch 
+                            key={'bodyShort'}
+                            sub={'bars'}
+                            name={'bodyShort'}
+                            getProperty={this.getProperty}
+                            setProperty={this.setProperty}
+                            setHoverOn={this.props.setHoverOn}
+                            setHoverOff={this.props.setHoverOff}
+                        />
+                    </div>
                 </div>
-                <div className='popup right'>
-                    <ColorSwatch 
-                        key={'priceLine'}
-                        sub={'chart'}
-                        name={'priceLine'}
-                        getProperty={this.getProperty}
-                        setProperty={this.setProperty}
-                        setHoverOn={this.props.setHoverOn}
-                        setHoverOff={this.props.setHoverOff}
-                    />
+            </div>
+            <div className='popup table-row'>
+                <div className='popup table-cell'>
+                    <div className='popup left'>
+                        <label className='popup checkbox'>
+                            <input 
+                                type='checkbox' 
+                                defaultChecked='checked'
+                            />
+                            <div className='checkmark'></div>
+                        </label>
+                        <div>Price Line</div>
+                    </div>
                 </div>
-                <div className='popup right'>
-                    <ColorSwatch 
-                        key={'showOrders'}
-                        sub={'chart'}
-                        name={'crosshair'}
-                        getProperty={this.getProperty}
-                        setProperty={this.setProperty}
-                        setHoverOn={this.props.setHoverOn}
-                        setHoverOff={this.props.setHoverOff}
-                    />
+                <div className='popup table-cell'>
+                    <div className='popup right'>
+                        <ColorSwatch 
+                            key={'bodyLong'}
+                            sub={'bars'}
+                            name={'bodyLong'}
+                            getProperty={this.getProperty}
+                            setProperty={this.setProperty}
+                            setHoverOn={this.props.setHoverOn}
+                            setHoverOff={this.props.setHoverOff}
+                        />
+                    </div>
+                </div>
+            </div>
+            <div className='popup table-row'>
+                <div className='popup table-cell'>
+                    <div className='popup left'>
+                        <label className='popup checkbox'>
+                            <input 
+                                type='checkbox' 
+                                defaultChecked='checked'
+                            />
+                            <div className='checkmark'></div>
+                        </label>
+                        <div>Vert Grid Lines</div>
+                    </div>
+                </div>
+                <div className='popup table-cell'>
+                    <div className='popup right'>
+                        <ColorSwatch 
+                            key={'bodyLong'}
+                            sub={'bars'}
+                            name={'bodyLong'}
+                            getProperty={this.getProperty}
+                            setProperty={this.setProperty}
+                            setHoverOn={this.props.setHoverOn}
+                            setHoverOff={this.props.setHoverOff}
+                        />
+                    </div>
+                </div>
+            </div>
+            <div className='popup table-row'>
+                <div className='popup table-cell'>
+                    <div className='popup left'>
+                        <label className='popup checkbox'>
+                            <input 
+                                type='checkbox' 
+                                defaultChecked='checked'
+                            />
+                            <div className='checkmark'></div>
+                        </label>
+                        <div>Horz Grid Lines</div>
+                    </div>
+                </div>
+                <div className='popup table-cell'>
+                    <div className='popup right'>
+                        <ColorSwatch 
+                            key={'bodyLong'}
+                            sub={'bars'}
+                            name={'bodyLong'}
+                            getProperty={this.getProperty}
+                            setProperty={this.setProperty}
+                            setHoverOn={this.props.setHoverOn}
+                            setHoverOff={this.props.setHoverOff}
+                        />
+                    </div>
+                </div>
+            </div>
+            <div className='popup table-row'>
+                <div className='popup table-cell'>
+                    <div className='popup left'>
+                        <label className='popup checkbox'>
+                            <input 
+                                type='checkbox' 
+                                defaultChecked='checked'
+                            />
+                            <div className='checkmark'></div>
+                        </label>
+                        <div>Crosshair</div>
+                    </div>
+                </div>
+                <div className='popup table-cell'>
+                    <div className='popup right'>
+                        <ColorSwatch 
+                            key={'bodyLong'}
+                            sub={'bars'}
+                            name={'bodyLong'}
+                            getProperty={this.getProperty}
+                            setProperty={this.setProperty}
+                            setHoverOn={this.props.setHoverOn}
+                            setHoverOff={this.props.setHoverOff}
+                        />
+                        <ColorSwatch 
+                            key={'bodyShort'}
+                            sub={'bars'}
+                            name={'bodyShort'}
+                            getProperty={this.getProperty}
+                            setProperty={this.setProperty}
+                            setHoverOn={this.props.setHoverOn}
+                            setHoverOff={this.props.setHoverOff}
+                        />
+                    </div>
                 </div>
             </div>
 
-            </React.Fragment>
+            </div>
         )
     }
 
     getTradingItems()
     {
         return (
-            <React.Fragment>
-
-            <div>
-                <div className='popup left'>Price</div>
-                <div className='popup left'>Show Positions</div>
-                <div className='popup left'>Show Orders</div>
+            <div key='bars' className='popup table'>
+            
+            <div className='popup table-row'>
+                <div className='popup table-cell'>
+                    <div className='popup left'>
+                        <label className='popup checkbox'>
+                            <input 
+                                type='checkbox' 
+                                defaultChecked='checked'
+                            />
+                            <div className='checkmark'></div>
+                        </label>
+                        <div>Show Positions</div>
+                    </div>
+                </div>
+                <div className='popup table-cell'>
+                    <div className='popup right'>
+                    </div>
+                </div>
             </div>
-            <div>
-                <div className='popup right'>
-
+            <div className='popup table-row'>
+                <div className='popup table-cell'>
+                    <div className='popup left'>
+                        <label className='popup checkbox'>
+                            <input 
+                                type='checkbox' 
+                                defaultChecked='checked'
+                            />
+                            <div className='checkmark'></div>
+                        </label>
+                        <div>Show Orders</div>
+                    </div>
                 </div>
-                <div className='popup right'>
-                    
-                </div>
-                <div className='popup right'>
-                    
+                <div className='popup table-cell'>
+                    <div className='popup right'>
+                    </div>
                 </div>
             </div>
 
-            </React.Fragment>
+            </div>
         )
     }
 
@@ -259,13 +392,13 @@ class ChartSettings extends Component
     {
         const opened = this.props.getPopup().opened;
 
-        if (opened === 'bars')
+        if (opened === 'general')
         {
-            return this.getBarsItems();
+            return this.getGeneralItems();
         }
-        else if (opened === 'chart')
+        else if (opened === 'appearance')
         {
-            return this.getChartItems();
+            return this.getAppearanceItems();
         }
         else if (opened === 'trading')
         {

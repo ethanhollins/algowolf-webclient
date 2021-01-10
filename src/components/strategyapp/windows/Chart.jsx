@@ -766,33 +766,37 @@ class Chart extends Component
         e.preventDefault();
 
         this.contextMenu.style.display = 'none';
-
-        const popup = {
-            type: 'not-available',
-            size: {
-                width: 30,
-                height: 30
+        let popup;
+        if (this.props.isDemo)
+        {
+            popup = {
+                type: 'not-available',
+                size: {
+                    width: 30,
+                    height: 30
+                }
+            }
+        }
+        else 
+        {
+            const name = e.target.getAttribute('name');
+            
+            if (name === 'settings')
+            {
+                popup = {
+                    type: 'chart-settings',
+                    size: {
+                        width: 60,
+                        height: 75
+                    },
+                    opened: undefined,
+                    properties: {
+                        item_id: this.getItemId()
+                    }
+                }
             }
         }
         this.props.setPopup(popup);
-
-        // const name = e.target.getAttribute('name');
-        
-        // if (name === 'settings')
-        // {
-        //     const popup = {
-        //         type: 'chart-settings',
-        //         size: {
-        //             width: 60,
-        //             height: 75
-        //         },
-        //         opened: undefined,
-        //         properties: {
-        //             item_id: this.getItemId()
-        //         }
-        //     }
-        //     this.props.setPopup(popup);
-        // }
     }
 
     clampScale = (x) =>

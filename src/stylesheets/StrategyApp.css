@@ -1216,14 +1216,14 @@ body {
     display:flex;
     align-items: center;
     height: 50px;
-    margin-left: 30px;
+    /* padding-left: 30px; */
+    /* padding-right: 30px; */
 }
 
 .popup.right {
     display:flex;
     align-items: center;
     height: 50px;
-    margin-left: 70px;
 }
 
 .popup.right-item {
@@ -1330,6 +1330,27 @@ body {
     background-color: #ffb64d;
     color: #FFF;
 }
+
+.popup.table {
+    display: table;
+    padding: 20px 20px 0 20px;
+}
+
+.popup.table-row {
+    display: table-row;
+}
+
+.popup.table-cell {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+/* .popup.table-cell > div {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+    margin-bottom: 5px;
+} */
 
 .chart.container {
     width: 100%;
