@@ -33,19 +33,16 @@ class WelcomeDemo extends Component
                                 <h2>Here's how to use it.</h2>
                                 <p>On our charts you will find icons and text drawn. Please refer to the legend below to see what they all mean.</p>
                                 <p>
-                                    You can click on the candlesticks to change the time of the backtest. 
-                                    When you do this only the events that happened before that candlestick will appear.
-                                    This will also show, on the chart, any pending orders that have been placed or positions that were entered at that time.
-                                    You can use the arrow keys as well to step the backtest forward bar by bar on any of the charts.
+                                    Click on a candlestick to view on the chart any setups, pending orders or positions that were placed or entered at that time.
+                                    Use the arrow keys to step the backtest forward bar by bar on any of the charts.
                                 </p>
                                 <p>
-                                    At the bottom of the page you will see a yellow bar and a grey one.
-                                    These are separate pages you can switch between. If you click on the second page, you will find a spreadsheet of the backtest's "System Results" for that session.
+                                    At the bottom of the screen you will see separate pages you can switch between.
+                                    On the second page, you will find the spreadsheet results of the backtest for that session.
                                     Clicking on the timestamp will set the charts on the main page to that time.
                                 </p>
                                 <p>
-                                    The green/red vertical lines denote the start and finish of the trading session based on London time 0700 - 1300. 
-                                    <br/><span id='sp_bold'>Note:</span> The demo charts have been converted to Australian Sydney time.
+                                    The green/red vertical lines denote the start and finish of the trading session based on New York time 0200 - 0800.
                                 </p>
                                 <p>
                                     The position sizing is based on a hypothetical $10K (USD) trading bank and a 1% risk.
@@ -160,6 +157,9 @@ class WelcomeDemo extends Component
                                 </p>
                                 <p>
                                     Click on the <FontAwesomeIcon className='welcome message-icon steal-blue_btn' icon={faQuestionCircle} /> <span className='steal-blue_btn' id='sp_bold'>Help</span> icon to read this message again.
+                                </p>
+                                <p>
+                                    Please send any enquires to <span id='sp_bold'>admin@algowolf.com</span>
                                 </p>
                             </div>
                         </div>
