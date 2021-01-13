@@ -8,7 +8,8 @@ class ColorSwatch extends React.Component {
     {
         super(props);
 
-        const hex = props.getProperty(props.sub, props.name);
+        const hex = props.getProperty(props.category, props.sub, props.name);
+
         let color = undefined;
         if (hex === undefined)
         {
@@ -20,12 +21,7 @@ class ColorSwatch extends React.Component {
         }
         else
         {
-            // color = this.hexToRgb(hex);
-            color = {
-                r: hex[0],
-                g: hex[1],
-                b: hex[2]
-            }
+            color = this.hexToRgb(hex);
         }
         color.a = '1';
 

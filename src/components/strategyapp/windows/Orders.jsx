@@ -32,6 +32,7 @@ class Orders extends Component
                 key={this.getName()}
                 data={this.getData()}
                 format={this.getFormat()}
+                getName={this.getName}
                 getScreenSize={this.props.getScreenSize}
                 setCurrentTimestamp={this.props.setCurrentTimestamp}
                 setScrollbarHovered={this.props.setScrollbarHovered}

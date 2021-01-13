@@ -12,8 +12,7 @@ class Study extends Component
         interval: 0,
         trans_x: 0,
         is_move: false,
-        is_resize: false,
-        result: undefined
+        is_resize: false
     }
 
     constructor(props)
@@ -29,6 +28,7 @@ class Study extends Component
         window.addEventListener("mousemove", this.onMouseMove);
         window.addEventListener("mouseup", this.onMouseUp);
 
+        this.setStudyProperties();
         // let { pos, scale } = this.state;
         // const study_properties = this.getStudyProperties();
         // pos = study_properties.pos;
@@ -85,12 +85,8 @@ class Study extends Component
         this.setState({ trans_x, is_resize });
     }
 
-    getStudyProperties(result)
+    getStudyProperties()
     {
-        if (result === undefined)
-        {
-            result = this.state.result;
-        }
         const chart_pos = this.props.getPos();
         const chart_scale = this.props.getScale();
         let pos = { x: chart_pos.x, y: this.state.pos.y };
@@ -98,27 +94,25 @@ class Study extends Component
 
         let hl = [null, null];
 
-        if (result !== undefined)
+        let values = this.props.getValues(this.props.index);
+        for (let x = 0; x < values.length; x++)
         {
-            for (let x = 0; x < result.length; x++)
+            let counted = 0;
+            let y = parseInt(pos.x);
+            while (counted < Math.max(scale.x, 10) && y < values[x].length)
             {
-                let counted = 0;
-                let y = parseInt(pos.x);
-                while (counted < Math.max(scale.x, 10) && y < result[x].length)
+                let val = values[x][values[x].length-1-y];
+                y++;
+                if (val === undefined) continue;
+                for (let z = 0; z < val.length; z++)
                 {
-                    let val = result[x][result[x].length-1-y];
-                    y++;
-                    if (val === undefined) continue;
-                    for (let z = 0; z < val.length; z++)
-                    {
-                        if (val[z] === undefined || val[z] === null) continue;
-                        if (hl[0] == null || val[z] > hl[0])
-                            hl[0] = val[z];
-                        if (hl[1] == null || val[z] < hl[1])
-                            hl[1] = val[z];
-                        
-                        if (z === 0) counted += 1;
-                    }
+                    if (val[z] === undefined || val[z] === null) continue;
+                    if (hl[0] == null || val[z] > hl[0])
+                        hl[0] = val[z];
+                    if (hl[1] == null || val[z] < hl[1])
+                        hl[1] = val[z];
+                    
+                    if (z === 0) counted += 1;
                 }
             }
         }
@@ -138,9 +132,9 @@ class Study extends Component
         }
     }
 
-    setStudyProperties(result)
+    setStudyProperties()
     {
-        const study_props = this.getStudyProperties(result);
+        const study_props = this.getStudyProperties();
         let { pos, scale } = this.state;
         pos = { y: study_props.pos.y };
         scale = { y: study_props.scale.y };
@@ -194,13 +188,6 @@ class Study extends Component
 
     draw() 
     {
-        let { result } = this.state;
-        let setProperties = false;
-        if (result === undefined)
-            setProperties = true;
-
-        result = [];
-
         const camera = this.props.getCamera();
         const canvas = this.props.getCanvas();
         const ctx = canvas.getContext("2d");
@@ -232,7 +219,6 @@ class Study extends Component
             ctx.lineWidth = 1.5;
             let current_pos = null;
             
-            result.push([...Array(ohlc.length)].map(x=>Array(values[i][0].length)));
             // Iterate rows
             for (let y = 0; y < values[i][0].length; y++)
             {
@@ -271,10 +257,8 @@ class Study extends Component
                     let i_val = values[i][c_x][y];
                     if (i_val === null || ohlc === undefined || ohlc[x][0] === null)
                     {
-                        result[i][x][y] = null;
                         continue;
                     }
-                    result[i][x][y] = i_val;
 
                     if (!is_future && current_timestamp !== null && timestamps[x] + period_offset > current_timestamp)
                     {
@@ -309,9 +293,6 @@ class Study extends Component
             }
         }
         
-        this.setState({ result });
-        if(setProperties) this.setStudyProperties(result);
-
     }
 
     drawPriceGrid(ctx)
@@ -526,17 +507,17 @@ class Study extends Component
         return values;
     }
 
-    getResult = () =>
-    {
-        return this.state.result;
-    }
+    // getResult = () =>
+    // {
+    //     return this.state.result;
+    // }
 
-    resetResult = () =>
-    {
-        let { result } = this.state;
-        result = [];
-        this.setState({ result });
-    }
+    // resetResult = () =>
+    // {
+    //     let { result } = this.state;
+    //     result = [];
+    //     this.setState({ result });
+    // }
 
 }
 

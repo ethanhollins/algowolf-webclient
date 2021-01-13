@@ -22,6 +22,7 @@ class StrategyApp extends Component
         keys: [],
         account: {},
         strategyInfo: {},
+        metadata: {},
         positions: [],
         orders: [],
         page: 0,
@@ -451,6 +452,9 @@ class StrategyApp extends Component
                         closeWindow={this.closeWindow}
                         windowExists={this.windowExists}
                         getWindowById={this.getWindowById}
+                        getWindowInfo={this.getWindowInfo}
+                        getMetadata={this.getMetadata}
+                        setMetadata={this.setMetadata}
                         isTopWindow={this.isTopWindow}
                         getTopWindow={this.getTopWindow}
                         setTopWindow={this.setTopWindow}
@@ -512,6 +516,8 @@ class StrategyApp extends Component
                         closeWindow={this.closeWindow}
                         windowExists={this.windowExists}
                         getWindowById={this.getWindowById}
+                        getMetadata={this.getMetadata}
+                        setMetadata={this.setMetadata}
                         isTopWindow={this.isTopWindow}
                         getTopWindow={this.getTopWindow}
                         setTopWindow={this.setTopWindow}
@@ -2512,6 +2518,31 @@ class StrategyApp extends Component
     setShowLoadScreen = (show_load_screen) =>
     {
         this.setState({ show_load_screen });
+    }
+
+    getMetadata = (strategy_id, item_id) =>
+    {
+        const { metadata } = this.state;
+        if (strategy_id in metadata)
+        {
+            return metadata[strategy_id][item_id];
+        }
+    }
+
+    setMetadata = (strategy_id, item_id, new_metadata) =>
+    {
+        let { metadata } = this.state;
+        if (!(strategy_id in metadata))
+        {
+            metadata[strategy_id] = {};
+        }
+        if (!(item_id in metadata[strategy_id]))
+        {
+            metadata[strategy_id][item_id] = {}
+        }
+
+        metadata[strategy_id][item_id] = new_metadata;
+        this.setState({ metadata });
     }
 }
 

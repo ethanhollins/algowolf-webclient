@@ -148,6 +148,8 @@ class Backtest extends Component
                             closeWindow={this.props.closeWindow}
                             windowExists={this.props.windowExists}
                             getWindowById={this.props.getWindowById}
+                            getMetadata={this.props.getMetadata}
+                            setMetadata={this.props.setMetadata}
                             isTopWindow={this.props.isTopWindow}
                             getTopWindow={this.props.getTopWindow}
                             setTopWindow={this.props.setTopWindow}
@@ -677,11 +679,23 @@ class Backtest extends Component
 
     setChartPositionsByTimestamp = (timestamp) =>
     {
-        for (let w of this.windows)
+        const strategy = this.getStrategyInfo();
+
+        for (let w of strategy.windows)
         {
-            if (w !== null && w.getElementType() === 'chart')
+            if (w.type === 'chart')
             {
-                w.getInnerElement().setPosByTimestamp(timestamp);
+                let metadata = this.props.getMetadata(this.props.id, w.id);
+                if (metadata === undefined)
+                {
+                    metadata = {};
+                }
+                if (!('actions' in metadata))
+                {
+                    metadata.actions = {}
+                }
+                metadata.actions['setPosByTimestamp'] = [timestamp];
+                this.props.setMetadata(this.props.id, w.id, metadata);
             }
         }
     }

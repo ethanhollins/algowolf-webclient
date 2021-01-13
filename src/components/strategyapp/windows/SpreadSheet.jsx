@@ -23,23 +23,46 @@ class SpreadSheet extends Component
         const data = this.getData();
         if (data !== null)
         {
-            return (
-                <div 
-                    key={this.props.item_id}
-                    ref={this.setBackgroundRef}
-                    className='spreadsheet background'
-                >
-                    <div className='spreadsheet body header'>
-                        {this.generateColumnHeaders(data)}
-                    </div>
+            if (this.props.getName() === 'System Results')
+            {
+                return (
                     <div 
-                        ref={this.setBodyRef}
-                        className='spreadsheet body'
+                        key={this.props.item_id}
+                        ref={this.setBackgroundRef}
+                        className='spreadsheet background'
                     >
-                        {this.generateRows(data)}
+                        <div className='spreadsheet body header'>
+                            {this.generateColumnHeaders(data)}
+                        </div>
+                        <div 
+                            ref={this.setBodyRef}
+                            className='spreadsheet body'
+                        >
+                            {this.generateRowsDemo(data)}
+                        </div>
                     </div>
-                </div>
-            );
+                );
+            }
+            else
+            {
+                return (
+                    <div 
+                        key={this.props.item_id}
+                        ref={this.setBackgroundRef}
+                        className='spreadsheet background'
+                    >
+                        <div className='spreadsheet body header'>
+                            {this.generateColumnHeaders(data)}
+                        </div>
+                        <div 
+                            ref={this.setBodyRef}
+                            className='spreadsheet body'
+                        >
+                            {this.generateRows(data)}
+                        </div>
+                    </div>
+                );
+            }
         }
         else
         {
@@ -172,7 +195,7 @@ class SpreadSheet extends Component
                                                     className='spreadsheet cell item link'
                                                     onClick={this.onTime.bind(this)}
                                                 >
-                                                    <div>{time.format(format[col_name].format)}</div>
+                                                    <div>{time.tz('America/New_York').format(format[col_name].format)}</div>
                                                 </div>
                                             );
                                         }
@@ -318,7 +341,7 @@ class SpreadSheet extends Component
                                                         className='spreadsheet cell item link'
                                                         onClick={this.onTime.bind(this)}
                                                     >
-                                                        <div>{time.format(format[col_name].format)}</div>
+                                                        <div>{time.tz('America/New_York').format(format[col_name].format)}</div>
                                                     </div>
                                                 );
                                             }

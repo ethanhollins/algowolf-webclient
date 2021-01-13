@@ -4,6 +4,7 @@ import WindowShadow from './WindowShadow';
 import io from 'socket.io-client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChartLine } from '@fortawesome/pro-light-svg-icons';
+import { v4 as uuidv4 } from 'uuid';
 
 class Strategy extends Component 
 {
@@ -20,6 +21,8 @@ class Strategy extends Component
         this.addWindowsRef = elem => {
             this.windows.push(elem);
         }
+
+        this.gui_queue = [];
     }
 
     state = {
@@ -282,7 +285,21 @@ class Strategy extends Component
             // Add to transaction history
         });
 
-        socket.on('ongui', (data) =>
+        socket.on('ongui', this.onGui);
+
+        return socket;
+    }
+
+    onGui = (data) =>
+    {
+        if (data.type === 'message_queue')
+        {
+            for (let i of data.item)
+            {
+                this.onGui(i);
+            }
+        }
+        else
         {
             if (data.type === 'create_drawing')
             {
@@ -297,7 +314,7 @@ class Strategy extends Component
             }
             else if (data.type === 'clear_drawing_layer')
             {
-                this.clearDrawingLayer(data.account_id, data.layer);
+                this.clearDrawingLayer(data.account_id, data.item);
             }
             else if (data.type === 'clear_all_drawings')
             {
@@ -315,9 +332,7 @@ class Strategy extends Component
             {
                 this.setActivation(data);
             }
-        });
-
-        return socket;
+        }
     }
 
     subscribe()
@@ -476,6 +491,8 @@ class Strategy extends Component
     {
         let { drawings } = this.state;
 
+        console.log('clear');
+        console.log();
         if (account_id in drawings && layer in drawings[account_id])
         {
             drawings[account_id][layer] = [];
@@ -519,13 +536,27 @@ class Strategy extends Component
 
     createInfo = (account_id, data) =>
     {
-        let { info } = this.state;
-        if (!(data.timestamp in info))
+        let strategy = this.getStrategyInfo();
+
+        if (!('info' in strategy))
         {
-            info[data.timestamp] = [];
+            strategy.info = {};
+        }
+        if (!(data[data.product] in strategy.info))
+        {
+            strategy.info[data.product] = {};
+        }
+        if (!(data.period in strategy.info[data.product]))
+        {
+            strategy.info[data.product][data.period] = {};
+        }
+        if (!(String(data.timestamp) in strategy.info[data.product][data.period]))
+        {
+            strategy.info[data.product][data.period][String(data.timestamp)] = [];
         }
 
-        info[data.timestamp].push(data.item);
+        strategy.info[data.product][data.period][String(data.timestamp)].push(data.item);
+        this.props.updateStrategyInfo();
     }
 
     setActivation = (data) =>
@@ -621,13 +652,19 @@ class Strategy extends Component
         return {};
     }
 
-    getInfo = () =>
+    getInfo = (product, period) =>
     {
-        let current_account = this.getCurrentAccount();
-        
-        if (current_account in this.state.info)
+        const strategy = this.getStrategyInfo();
+        if ('info' in strategy)
         {
-            return this.state.info[current_account];
+            console.log(strategy.info);
+            if (product in strategy.info)
+            {
+                if (period in strategy.info[product])
+                {
+                    return strategy.info[product][period];
+                }
+            }
         }
         return {};
     }
@@ -685,7 +722,6 @@ class Strategy extends Component
     getAccounts = (broker_id) =>
     {
         let strategy = this.getStrategyInfo();
-
         if (strategy !== undefined)
         {
             return Object.keys(strategy.brokers[broker_id].accounts);

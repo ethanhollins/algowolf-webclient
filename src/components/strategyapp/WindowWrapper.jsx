@@ -131,6 +131,8 @@ class WindowWrapper extends Component
                 getTopOffset={this.getTopOffset}
                 getScreenPos={this.getScreenPos}
                 getWindowInfo={this.getWindowInfo}
+                getMetadata={this.props.getMetadata}
+                setMetadata={this.props.setMetadata}
                 getWindowWorldPos={this.getWorldPos}
                 getWindowScreenPos={this.getScreenPos}
                 getWindowSize={this.getWorldSize}

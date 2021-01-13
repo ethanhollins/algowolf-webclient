@@ -15,12 +15,6 @@ import {
 class Chart extends Component 
 {
     state = {
-        pos: {
-            x: -50, y: 0,
-        },
-        scale: {
-            x: 200.0, y:0.2,
-        },
         intervals: {
             x: 0, y: 0
         },
@@ -114,12 +108,20 @@ class Chart extends Component
             this.onScroll
         );
 
+        const is_first_init = !this.isMetadata();
+
+        if (is_first_init)
+        {
+            this.setMetadata({ x: -50, y: 0 }, { x: 200.0, y:0.2 });
+        }
+        
         this.updateCanvas();
         /* Initialize Chart */
         if (this.getChart() === undefined)
             await this.addChart();
 
-        let { pos, scale } = this.state; 
+        let pos = { x: -50, y: 0 };
+        let scale = { x: 200.0, y:0.2 };
         if (this.isBacktest())
         {
             const properties = this.getStrategy().properties;
@@ -156,12 +158,20 @@ class Chart extends Component
         let { isinitialized, first_load } = this.state;
         isinitialized = true;
         first_load = true;
-        this.setState({ isinitialized, first_load, pos });
+        if (is_first_init)
+        {
+            this.setMetadata(pos, scale);
+        }
+        this.setState({ isinitialized, first_load });
+
+        this.handleActions();
     }
 
     componentDidUpdate() 
     {
-        let { pos, scale, first_load, trans_x, auto_zoom } = this.state;
+        let pos = this.getPos();
+        let scale = this.getScale();
+        let { first_load, trans_x, auto_zoom } = this.state;
 
         if (this.getChart() !== undefined)
         {
@@ -173,7 +183,8 @@ class Chart extends Component
                 pos = chart_properties.pos;
                 scale = chart_properties.scale;
 
-                this.setState({ pos, scale, first_load });
+                this.setMetadata(pos, scale);
+                this.setState({ first_load });
             }
             else
             {
@@ -319,7 +330,8 @@ class Chart extends Component
             { x: mouse_pos.x, y: mouse_pos.y - top_offset }
         ))
         {
-            let { is_down, is_move, pos, before_change, hovered } = this.state;
+            let pos = this.getPos();
+            let { is_down, is_move, before_change, hovered } = this.state;
     
             // Check mouse within main segment bounds
     
@@ -392,7 +404,8 @@ class Chart extends Component
         {
             e.preventDefault();
 
-            let { pos, scale } = this.state;
+            let pos = this.getPos();
+            let scale = this.getScale();
             const camera = this.getCamera();
             const screen_move = { x: e.movementX, y: e.movementY };
             let move = camera.convertScreenUnitToWorldUnit(
@@ -423,7 +436,8 @@ class Chart extends Component
                     pos.y += move.y;
             }
 
-            this.setState({ pos, scale, auto_zoom });
+            this.setMetadata(pos, scale);
+            this.setState({ auto_zoom });
         }
     }
 
@@ -624,7 +638,9 @@ class Chart extends Component
             studies[i].setIsMove(false);
         }
 
-        let { is_down, is_move, before_change, trans_x, pos, scale, hovered } = this.state;
+        let pos = this.getPos();
+        let scale = this.getScale();
+        let { is_down, is_move, before_change, trans_x, hovered } = this.state;
 
         if (is_move)
         {
@@ -662,23 +678,26 @@ class Chart extends Component
         )
 
         const period_offset = this.getPeriodOffsetSeconds(this.getPeriod());
-        if (this.getChart() && this.isBacktest())
+        if (this.getChart())
         {
             if (is_down)
             {
-                if (isinitialized && before_change !== null && is_top)
+                if (this.isBacktest())
                 {
-                    if (Math.abs(pos.x - before_change.x) < 1 && Math.abs(pos.y - before_change.y) < 1)
+                    if (isinitialized && before_change !== null && is_top)
                     {
-                        const timestamp = this.isWithinBarBounds(mouse_pos);
-                        if (timestamp !== null)
+                        if (Math.abs(pos.x - before_change.x) < 1 && Math.abs(pos.y - before_change.y) < 1)
                         {
-                            this.props.setCurrentTimestamp(timestamp + period_offset);
+                            const timestamp = this.isWithinBarBounds(mouse_pos);
+                            if (timestamp !== null)
+                            {
+                                this.props.setCurrentTimestamp(timestamp + period_offset);
+                            }
                         }
                     }
+    
+                    this.props.setSelectedOffset(this.getTimestamps()[0], period_offset);
                 }
-
-                this.props.setSelectedOffset(this.getTimestamps()[0], period_offset);
                 this.props.setSelectedChart(this);
             }
         }
@@ -693,7 +712,8 @@ class Chart extends Component
 
         is_down = false;
 
-        this.setState({ is_down, is_move, trans_x, scale });
+        this.setMetadata(this.getPos(), scale);
+        this.setState({ is_down, is_move, trans_x });
     }
 
     onScroll(e)
@@ -703,7 +723,9 @@ class Chart extends Component
             const mouse_pos = {
                 x: e.clientX, y: e.clientY
             };
-            let { pos, scale, is_scrolling, auto_zoom } = this.state;
+            let pos = this.getPos();
+            let scale = this.getScale();
+            let { is_scrolling, auto_zoom } = this.state;
             const dz = e.deltaY;
             const speed = 0.1;
     
@@ -737,10 +759,11 @@ class Chart extends Component
 
                 for (let study of this.studies)
                 {
-                    study.setStudyProperties(study.getResult());
+                    study.setStudyProperties();
                 }
     
-                this.setState({ pos, scale, is_scrolling });
+                this.setMetadata(pos, scale);
+                this.setState({ is_scrolling });
                 this.setPriceInterval();
                 this.setTimeInterval();
             }
@@ -791,7 +814,8 @@ class Chart extends Component
                     },
                     opened: undefined,
                     properties: {
-                        item_id: this.getItemId()
+                        item_id: this.getItemId(),
+                        layout: this.getWindowInfo().properties.layout
                     }
                 }
             }
@@ -807,7 +831,7 @@ class Chart extends Component
 
     clampMove = (x) =>
     {
-        const { scale } = this.state;
+        const scale = this.getScale();
         return Math.max(x, scale.x);
     }
 
@@ -903,6 +927,7 @@ class Chart extends Component
                         index={i}
                         getIndicator={this.getStudyIndicator}
                         getValues={this.getStudyValues}
+                        getStudyValueByPos={this.getStudyValueByPos}
                         getOhlcValues={this.getOhlc}
                         getFilteredOffset={this.getFilteredOffset}
                         getProperties={this.getStudyProperties}
@@ -1058,8 +1083,11 @@ class Chart extends Component
     
                     <div className='chart group'>
                         <div className='chart ohlc-group'>
-                            <div className='chart product-btn' onClick={this.props.notAvailable}>{this.getProduct().replace('_', '')}</div>
-                            <div className='chart period-btn' onClick={this.props.notAvailable}>{this.getPeriod()}</div>
+                            <div className='chart product-btn' onClick={this.props.notAvailable}>
+                                {this.getProduct().replace('_', '')}
+                                <span className='chart broker'>{this.getBroker().toUpperCase()}</span>
+                            </div>
+                            <div className='chart period-btn' onClick={this.props.notAvailable}>{this.getDisplayPeriod()}</div>
                             <div>
                                 <span className='chart values ohlc-type'>O</span>
                                 <span className='chart values price' style={{color: prices.ohlc_color}}>{prices.ohlc[0].toFixed(5)}</span>
@@ -1096,7 +1124,9 @@ class Chart extends Component
 
     async updateChart()
     {
-        let { pos, scale, is_loading } = this.state;
+        let pos = this.getPos();
+        let scale = this.getScale();
+        let { is_loading } = this.state;
         const ts = this.getTimestamps();
         const ohlc = this.getOhlc();
 
@@ -1281,8 +1311,8 @@ class Chart extends Component
                     top_chart.getChart() !== undefined
                 )
                 {
-                    const top_pos = top_chart.state.pos;
-                    const top_scale = top_chart.state.scale;
+                    const top_pos = top_chart.getPos();
+                    const top_scale = top_chart.getScale();
                     const top_seg_idx = top_chart.getSegment(mouse_pos);
                     const top_seg_size = top_chart.getSegmentSize(top_seg_idx);
                     const top_seg_start = top_chart.getChartSegmentStartPos(top_seg_idx);
@@ -1456,7 +1486,8 @@ class Chart extends Component
     {
         const camera = this.getCamera();
         const seg_size = this.getSegmentSize(0);
-        const { scale, intervals } = this.state;
+        const scale = this.getScale();
+        const { intervals } = this.state;
         const min_dist = 100;
         const possible_intervals = [1, 2, 5, 10];
 
@@ -1475,7 +1506,8 @@ class Chart extends Component
     {
         const camera = this.getCamera();
         const seg_size = this.getSegmentSize(0);
-        const { scale, intervals } = this.state;
+        const scale = this.getScale();
+        const { intervals } = this.state;
         const timestamps = this.getTimestamps().concat(this.state.future_timestamps);
 
         const min_dist = 100;
@@ -1638,7 +1670,9 @@ class Chart extends Component
         
         const camera = this.getCamera();
         const seg_size = this.getSegmentSize(0);
-        const { pos, scale, intervals } = this.state;
+        const pos = this.getPos();
+        const scale = this.getScale();
+        const { intervals } = this.state;
 
         const start_pos = camera.convertScreenPosToWorldPos(
             { x: 0, y: -seg_size.height }, pos, seg_size, scale
@@ -1698,7 +1732,9 @@ class Chart extends Component
         const ohlc = this.getOhlc();
         const timestamps = this.getTimestamps().concat(this.state.future_timestamps);
 
-        const { pos, scale, intervals } = this.state;
+        const pos = this.getPos();
+        const scale = this.getScale();
+        const { intervals } = this.state;
 
         if (intervals.x === 0) return;
 
@@ -1762,7 +1798,8 @@ class Chart extends Component
         if (data === undefined) return;
 
         const camera = this.getCamera();
-        const { pos, scale } = this.state;
+        const pos = this.getPos();
+        const scale = this.getScale();
         const seg_size = this.getSegmentSize(0);
 
         // Font settings
@@ -1792,7 +1829,8 @@ class Chart extends Component
         if (data === undefined) return;
 
         const camera = this.getCamera();
-        const { pos, scale } = this.state;
+        const pos = this.getPos();
+        const scale = this.getScale();
         const timestamps = this.getTimestamps();
         const all_timestamps = this.getAllTimestamps();
         const tz = 'America/New_York';
@@ -1860,7 +1898,8 @@ class Chart extends Component
     handleTrades(ctx)
     {
         const camera = this.getCamera();
-        const { pos, scale } = this.state;
+        const pos = this.getPos();
+        const scale = this.getScale();
         const seg_size = this.getSegmentSize(0);
 
         const trades = this.getPositions().concat(this.getOrders());
@@ -2332,7 +2371,8 @@ class Chart extends Component
     handleDrawings(ctx)
     {
         const camera = this.getCamera();
-        const { pos, scale } = this.state;
+        const pos = this.getPos();
+        const scale = this.getScale();
 
         const chart_drawings_layers = this.getProperties().drawing_layers;
         let drawings = this.getDrawings();
@@ -2387,7 +2427,8 @@ class Chart extends Component
     handleStudyDrawings(ctx, idx)
     {
         const camera = this.getCamera();
-        const { pos, scale } = this.state;
+        const pos = this.getPos();
+        const scale = this.getScale();
 
         const chart_drawings_layers = this.getProperties().drawing_layers;
         let drawings = this.getDrawings();
@@ -2454,7 +2495,8 @@ class Chart extends Component
     handleUniversalDrawings(ctx)
     {
         const camera = this.getCamera();
-        const { pos, scale } = this.state;
+        const pos = this.getPos();
+        const scale = this.getScale();
         const seg_size = this.getSegmentSize(0);
 
         const chart_drawings_layers = this.getProperties().drawing_layers;
@@ -2494,7 +2536,8 @@ class Chart extends Component
 
     handlePriceLabel(ctx)
     {
-        const { pos, scale } = this.state;
+        const pos = this.getPos();
+        const scale = this.getScale();
         const seg_size = this.getSegmentSize(0);
         const camera = this.getCamera();
         const ohlc = this.getOhlc();
@@ -2539,7 +2582,8 @@ class Chart extends Component
 
     handlePriceLine(ctx)
     {
-        const { pos, scale } = this.state;
+        const pos = this.getPos();
+        const scale = this.getScale();
         const seg_size = this.getSegmentSize(0);
         const camera = this.getCamera();
         const ohlc = this.getOhlc();
@@ -2608,20 +2652,20 @@ class Chart extends Component
                         const top_study = top_chart.getStudyComponents()[top_seg_idx-1];
                         if (top_study === undefined) return;
     
-                        top_pos = { x: top_chart.state.pos.x, y: top_study.getPos().y};
-                        top_scale = { x: top_chart.state.scale.x, y: top_study.getScale().y};
+                        top_pos = { x: top_chart.getPos().x, y: top_study.getPos().y};
+                        top_scale = { x: top_chart.getScale().x, y: top_study.getScale().y};
     
                         const study = this.getStudyComponents()[top_seg_idx-1];
-                        pos = { x: this.state.pos.x, y: study.getPos().y};
-                        scale = { x: this.state.scale.x, y: study.getScale().y};
+                        pos = { x: this.getPos().x, y: study.getPos().y};
+                        scale = { x: this.getScale().x, y: study.getScale().y};
                     }
                     else
                     {
-                        top_pos = top_chart.state.pos;
-                        top_scale = top_chart.state.scale;
+                        top_pos = top_chart.getPos();
+                        top_scale = top_chart.getScale();
     
-                        pos = this.state.pos;
-                        scale = this.state.scale;
+                        pos = this.getPos();
+                        scale = this.getScale();
                     }
         
                     const mouse_world_pos = camera.convertScreenPosToWorldPos(
@@ -2757,10 +2801,25 @@ class Chart extends Component
 
     setScale = (x, y) =>
     {
-        let { scale } = this.state;
+        let scale = this.getScale();
         scale.x = x;
         scale.y = y;
-        this.setState({ scale });
+        this.setMetadata(this.getPos, scale);
+    }
+
+    handleActions = () =>
+    {
+        let metadata = this.getMetadata();
+        if (metadata !== undefined && 'actions' in metadata)
+        {
+            for (let func in metadata.actions)
+            {
+                this[func](...metadata.actions[func]);
+            }
+
+            metadata.actions = {}
+            this.props.setMetadata(this.getStrategyId(), this.getItemId(), metadata);
+        }
     }
 
     getTimestampIdx = (ts) =>
@@ -2839,16 +2898,19 @@ class Chart extends Component
 
     setPosByTimestamp = (ts) =>
     {
-        let { pos, scale } = this.state;
+        let pos = this.getPos();
+        let scale = this.getScale();
         let x = this.getPosFromTimestamp(ts);
         if (x === undefined)
         {
-            pos.x = 1;
+            pos.x = -50;
+        }
+        else
+        {
+            pos.x = Math.max(-50, x - scale.x/3);
         }
 
-        pos.x -= Math.floor(scale.x/3);
-
-        this.setState({ pos });
+        this.setMetadata(pos, this.getScale());
     }
 
     limit = (start, end) =>
@@ -2882,15 +2944,16 @@ class Chart extends Component
 
     goto = (ts) =>
     {
-        let { pos } = this.state;
+        let pos = this.getPos();
         const idx = this.getTimestampIdx(ts);
         pos.x = this.getTimestamps().length - idx;
-        this.setState({ pos });
+        this.setMetadata(pos, this.getScale());
     }
 
     isWithinBarBounds = (mouse_pos) =>
     {
-        const { pos, scale } = this.state;
+        const pos = this.getPos();
+        const scale = this.getScale();
         const camera = this.getCamera();
         const seg_idx = this.getSegment(mouse_pos);
         const top_offset = this.props.getTopOffset();
@@ -2952,16 +3015,24 @@ class Chart extends Component
 
     getStudyValueByPos = (idx, x) =>
     {
-        const study = this.studies[idx];
-        if (study === undefined)
-            return [];
-        else
-            return study.getValue(x);
+        const values = this.getStudyValues(idx);
+        let result = [];
+        for (let i = 0; i < values.length; i++)
+        {
+            result.push(values[i][values[i].length-x]);
+        }
+        return result;
+        // const study = this.studies[idx];
+        // if (study === undefined)
+        //     return [];
+        // else
+        //     return study.getValue(x);
     }
 
     setFutureTimestamps = () =>
     {
-        let { pos, future_timestamps } = this.state;
+        let pos = this.getPos();
+        let { future_timestamps } = this.state;
         const timestamps = this.getTimestamps();
         
         let last_ts = undefined;
@@ -2994,7 +3065,7 @@ class Chart extends Component
 
     getChartProperties(ohlc, idx, scale)
     {
-        let { pos } = this.state;
+        let pos = this.getPos();
         let hl = [null,null]; // highest/lowest prices
         const max_len = this.getTimestamps().length;
 
@@ -3189,12 +3260,12 @@ class Chart extends Component
 
     getPos = () =>
     {
-        return this.state.pos;
+        return this.getMetadata().pos;
     }
 
     getScale = () =>
     {
-        return this.state.scale;
+        return this.getMetadata().scale;
     }
 
     getPortions = () => 
@@ -3284,14 +3355,16 @@ class Chart extends Component
 
     getBroker = () =>
     {
-        if (this.isBacktest())
-        {
-            return this.getStrategy().properties.broker;
-        }
-        else
-        {
-            return this.getStrategy().brokers[this.getBrokerId()].broker;
-        }
+        return this.getProperties().broker;
+
+        // if (this.isBacktest())
+        // {
+        //     return this.getStrategy().properties.broker;
+        // }
+        // else
+        // {
+        //     return this.getStrategy().brokers[this.getBrokerId()].broker;
+        // }
     }
 
     getProduct = () => 
@@ -3302,6 +3375,67 @@ class Chart extends Component
     getPeriod = () => 
     {
         return this.getProperties().period;
+    }
+
+    getDisplayPeriod = () =>
+    {
+        const period = this.getPeriod();
+        if (period === 'M1')
+        {
+            return '1m';
+        }
+        else if (period === 'M2')
+        {
+            return '2m'
+        }
+        else if (period === 'M3')
+        {
+            return '3m'
+        }
+        else if (period === 'M5')
+        {
+            return '5m'
+        }
+        else if (period === 'M10')
+        {
+            return '10m'
+        }
+        else if (period === 'M15')
+        {
+            return '15m'
+        }
+        else if (period === 'M30')
+        {
+            return '30m'
+        }
+        else if (period === 'H1')
+        {
+            return '1h'
+        }
+        else if (period === 'H2')
+        {
+            return '2h'
+        }
+        else if (period === 'H3')
+        {
+            return '3h'
+        }
+        else if (period === 'H4')
+        {
+            return '4h'
+        }
+        else if (period === 'D')
+        {
+            return 'D'
+        }
+        else if (period === 'W')
+        {
+            return 'W'
+        }
+        else if (period === 'M')
+        {
+            return 'M'
+        }
     }
 
     getPositions = () =>
@@ -3508,16 +3642,39 @@ class Chart extends Component
 
     setScaleY = (y) =>
     {
-        let { scale } = this.state;
+        let scale = this.getScale();
         scale.y = y;
-        this.setState({ scale });
+        this.setMetadata(this.getPos(), scale);
     }
 
     setPosY = (y) =>
     {
-        let { pos } = this.state;
+        let pos = this.getPos();
         pos.y = y;
-        this.setState({ pos });
+        this.setMetadata(pos, this.getScale());
+    }
+
+    getMetadata = () =>
+    {
+        return this.props.getMetadata(this.getStrategyId(), this.getItemId());
+    }
+
+    isMetadata = () =>
+    {
+        return this.getMetadata() !== undefined;
+    }
+
+    setMetadata = (pos, scale) =>
+    {
+        let metadata = this.getMetadata();
+        if (metadata === undefined)
+        {
+            metadata = {};
+        }
+
+        metadata.pos = pos;
+        metadata.scale = scale;
+        this.props.setMetadata(this.getStrategyId(), this.getItemId(), metadata);
     }
 
     getCursor = () =>

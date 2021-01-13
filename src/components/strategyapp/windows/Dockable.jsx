@@ -85,7 +85,6 @@ class Dockable extends Component
         for (let i = 0; i < tabs.length; i++)
         {
             const tab = tabs[i];
-            console.log(tab[1]);
             tab_width += tab[1];
             if (i !== 0 && tab_width > header_width)
             {

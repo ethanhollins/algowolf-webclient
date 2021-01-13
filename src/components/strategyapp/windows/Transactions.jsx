@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import SpreadSheet from './SpreadSheet';
+import moment from "moment-timezone";
 
 class Transactions extends Component
 {
@@ -32,6 +33,7 @@ class Transactions extends Component
                 key={this.getName()}
                 data={this.getData()}
                 format={this.getFormat()}
+                getName={this.getName}
                 getScreenSize={this.props.getScreenSize}
                 setCurrentTimestamp={this.props.setCurrentTimestamp}
                 setScrollbarHovered={this.props.setScrollbarHovered}
@@ -53,7 +55,13 @@ class Transactions extends Component
 
     getData = () =>
     {
-        return this.props.getTransactions();
+        let transactions = this.props.getTransactions();
+        let time = {'Time': []}
+        for (let i = 0; i < transactions['Time'].length; i++)
+        {
+            time['Time'].push(moment.unix(transactions['Time'][i]).tz('America/New_York').format('MM/DD HH:mm'));
+        }
+        return Object.assign({}, transactions, time);
     }
 
     getFormat = () =>
