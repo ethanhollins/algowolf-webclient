@@ -40,6 +40,7 @@ class WelcomeDemo extends Component
                                     At the bottom of the screen you will see separate pages you can switch between.
                                     On the second page, you will find the spreadsheet results of the backtest for that session.
                                     Clicking on the timestamp will set the charts on the main page to that time.
+                                    Click back on the Main page to see that trade setup.
                                 </p>
                                 <p>
                                     The green/red vertical lines denote the start and finish of the trading session based on New York time 0200 - 0800.
