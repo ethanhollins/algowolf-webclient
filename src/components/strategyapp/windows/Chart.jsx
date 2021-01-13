@@ -786,41 +786,41 @@ class Chart extends Component
 
     onContextMenuItem(e)
     {
-        e.preventDefault();
+        // e.preventDefault();
 
-        this.contextMenu.style.display = 'none';
-        let popup;
-        if (this.props.isDemo)
-        {
-            popup = {
-                type: 'not-available',
-                size: {
-                    width: 30,
-                    height: 30
-                }
-            }
-        }
-        else 
-        {
-            const name = e.target.getAttribute('name');
+        // this.contextMenu.style.display = 'none';
+        // let popup;
+        // if (this.props.isDemo)
+        // {
+        //     popup = {
+        //         type: 'not-available',
+        //         size: {
+        //             width: 30,
+        //             height: 30
+        //         }
+        //     }
+        // }
+        // else 
+        // {
+        //     const name = e.target.getAttribute('name');
             
-            if (name === 'settings')
-            {
-                popup = {
-                    type: 'chart-settings',
-                    size: {
-                        width: 60,
-                        height: 75
-                    },
-                    opened: undefined,
-                    properties: {
-                        item_id: this.getItemId(),
-                        layout: this.getWindowInfo().properties.layout
-                    }
-                }
-            }
-        }
-        this.props.setPopup(popup);
+        //     if (name === 'settings')
+        //     {
+        //         popup = {
+        //             type: 'chart-settings',
+        //             size: {
+        //                 width: 60,
+        //                 height: 75
+        //             },
+        //             opened: undefined,
+        //             properties: {
+        //                 item_id: this.getItemId(),
+        //                 layout: this.getWindowInfo().properties.layout
+        //             }
+        //         }
+        //     }
+        // }
+        // this.props.setPopup(popup);
     }
 
     clampScale = (x) =>
