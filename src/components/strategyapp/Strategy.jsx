@@ -39,6 +39,15 @@ class Strategy extends Component
 
     async componentDidMount()
     {
+        if (this.getStrategyInfo().name)
+        {
+            document.title = this.getStrategyInfo().name + ' \u00B7 AlgoWolf';
+        }
+        else
+        {
+            document.title = 'Algorithmic Trading Platform \u00B7 AlgoWolf';
+        }
+
         // await this.props.updatePositions();
         // await this.props.updateOrders();
 

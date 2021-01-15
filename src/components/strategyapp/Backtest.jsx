@@ -44,6 +44,14 @@ class Backtest extends Component
 
     async componentDidMount()
     {
+        if (this.getStrategyInfo().name)
+        {
+            document.title = this.getStrategyInfo().name + ' \u00B7 AlgoWolf';
+        }
+        else
+        {
+            document.title = 'Algorithmic Trading Platform \u00B7 AlgoWolf';
+        }
         this.backtest_transactions = (await this.props.retrieveTransactions(this.props.id)).transactions;
 
         let strategy = this.getStrategyInfo();
