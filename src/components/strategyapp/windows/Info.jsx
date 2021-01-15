@@ -72,6 +72,14 @@ class Info extends Component
                         Chart Info
                     </div>
                     <div className='info row'>
+                        <div className='info item'>Instrument</div>
+                        <div className='info item right'>{chart.getProduct().replace('_', '')}</div>
+                    </div>
+                    <div className='info row'>
+                        <div className='info item'>Period</div>
+                        <div className='info item right'>{chart.getDisplayPeriod()}</div>
+                    </div>
+                    <div className='info row'>
                         <div className='info item'>Time</div>
                         <div className='info item right'>{time}</div>
                     </div>
