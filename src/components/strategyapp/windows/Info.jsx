@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import moment from "moment-timezone";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChartLine } from '@fortawesome/pro-light-svg-icons';
 
 class Info extends Component
 {
@@ -21,16 +23,27 @@ class Info extends Component
 
     render()
     {
-        return (
-            <div className='info background'>
-                <div ref={this.setInfoBodyRef} className='info body'>
-                    <div className='info header'>
-                        Chart Info
+        if (this.state.current_info.length > 0)
+        {
+            return (
+                <div className='info background'>
+                    <div ref={this.setInfoBodyRef} className='info body'>
+                        {this.state.current_info}
                     </div>
-                    {this.state.current_info}
                 </div>
-            </div>
-        );
+            );
+        }
+        else
+        {
+            return (
+                <div className='info background'>
+                    <div ref={this.setInfoBodyRef} className='info message'>
+                        <div>Click on any chart candle to see its info.</div>
+                        <FontAwesomeIcon className='info icon' icon={faChartLine} />
+                    </div>
+                </div>
+            );
+        }
     }
 
     updateInfo = (mouse_pos) =>
@@ -54,7 +67,10 @@ class Info extends Component
                 // Generate default info, check settings for visible items
                 current_info.push(
                     <React.Fragment key={'chart'}>
-                    
+
+                    <div className='info header'>
+                        Chart Info
+                    </div>
                     <div className='info row'>
                         <div className='info item'>Time</div>
                         <div className='info item right'>{time}</div>

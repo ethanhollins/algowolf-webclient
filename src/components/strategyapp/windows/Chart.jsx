@@ -7,6 +7,7 @@ import _ from 'underscore';
 import moment from "moment-timezone";
 import Drawings from '../paths/Paths';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ReactSVG } from 'react-svg';
 import { 
     faCoin, faEye, faUndo, faDollarSign, faCog
 } from '@fortawesome/pro-light-svg-icons';
@@ -238,6 +239,8 @@ class Chart extends Component
 
     render() {
         return (
+            <React.Fragment>
+            
             <div
                 className='chart container'
                 key={this.getItemId()}
@@ -302,7 +305,13 @@ class Chart extends Component
                 />
                 {this.generateOverlays()}
                 {this.generateStudies()}
+
             </div>
+
+            {this.showLoadScreen()}
+
+            </React.Fragment>
+
         );
     }
 
@@ -390,6 +399,26 @@ class Chart extends Component
 
             this.handleCursor(hovered, is_down);
             this.setState({ is_down, is_move, before_change });
+        }
+    }
+
+    showLoadScreen()
+    {
+        const { isinitialized } = this.state;
+
+        if (!isinitialized)
+        {
+            return (
+                <div 
+                    className='chart load'
+                >
+                    <div className='chart load-item'>
+                        <div>
+                            <ReactSVG className='chart load-img' src={process.env.PUBLIC_URL + "/wolf-logo.svg"} />
+                        </div>
+                    </div>
+                </div>
+            );
         }
     }
 
