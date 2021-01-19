@@ -28,7 +28,8 @@ class WindowWrapper extends Component
                 move: false,
                 resize: false,
                 scrollbar: false
-            }
+            },
+            context_menu: null
         }
 
         this.setWindowBtnsRef = elem => {
@@ -50,6 +51,10 @@ class WindowWrapper extends Component
         this.setCameraRef = elem => {
             this.camera = elem;
         };
+
+        this.setContextMenuRef = elem => {
+            this.contextMenu = elem;
+        }
         
         // Bind functions
         this.onMouseDown = this.onMouseDown.bind(this);
@@ -93,6 +98,8 @@ class WindowWrapper extends Component
 
     render() {
         return (
+            <React.Fragment>
+            
             <div
                 ref={this.setWindowWrapperRef}
                 className="window wrapper"
@@ -115,6 +122,12 @@ class WindowWrapper extends Component
                 />
                 {this.getWindowElement()}
             </div>
+
+            <div ref={this.setContextMenuRef} className='context-menu body'>
+                {this.populateContextMenu()}
+            </div>
+
+            </React.Fragment>
         )
     }
 
@@ -127,12 +140,14 @@ class WindowWrapper extends Component
                 ref={this.setInnerElementRef}
                 strategy_id={this.props.strategy_id}
                 item_id={this.state.info.id}
+                isDemo={this.props.isDemo}
                 // Universal Props
                 getTopOffset={this.getTopOffset}
                 getScreenPos={this.getScreenPos}
                 getWindowInfo={this.getWindowInfo}
                 getMetadata={this.props.getMetadata}
                 setMetadata={this.props.setMetadata}
+                getAppContainerSize={this.getAppContainerSize}
                 getWindowWorldPos={this.getWorldPos}
                 getWindowScreenPos={this.getScreenPos}
                 getWindowSize={this.getWorldSize}
@@ -142,6 +157,8 @@ class WindowWrapper extends Component
                 setCursor={this.setCursor}
                 notAvailable={this.notAvailable}
                 getPopup={this.props.getPopup}
+                getContextMenu={this.getContextMenu}
+                setContextMenu={this.setContextMenu}
     
                 // Window Props
                 connectChart={this.props.connectChart}
@@ -321,6 +338,11 @@ class WindowWrapper extends Component
         }
 
         return <React.Fragment/>;
+    }
+
+    populateContextMenu = () =>
+    {
+        return this.state.context_menu;
     }
 
     onMouseDown(e)
@@ -1068,6 +1090,16 @@ class WindowWrapper extends Component
     getWindowBtnsWidth = () =>
     {
         return this.innerWindowBtns.clientWidth;
+    }
+
+    getContextMenu = () =>
+    {
+        return this.contextMenu;
+    }
+
+    setContextMenu = (context_menu) =>
+    {
+        this.setState({ context_menu });
     }
 
 }

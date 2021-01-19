@@ -56,9 +56,6 @@ class Chart extends Component
         this.setContainerRef = elem => {
             this.container = elem;
         }
-        this.setContextMenuRef = elem => {
-            this.contextMenu = elem;
-        }
         this.setCanvasRef = elem => {
             this.canvas = elem;
         }
@@ -108,6 +105,8 @@ class Chart extends Component
             "onwheel" in document ? "wheel" : "mousewheel",
             this.onScroll
         );
+
+        this.populateContextMenu();
 
         const is_first_init = !this.isMetadata();
 
@@ -170,12 +169,12 @@ class Chart extends Component
 
     componentDidUpdate() 
     {
-        let pos = this.getPos();
-        let scale = this.getScale();
         let { first_load, trans_x, auto_zoom } = this.state;
 
         if (this.getChart() !== undefined)
         {
+            let pos = this.getPos();
+            let scale = this.getScale();
             const ohlc = this.getOhlc();
             const chart_properties = this.getChartProperties(ohlc, Math.floor(pos.x), scale);
             if (first_load)
@@ -251,30 +250,6 @@ class Chart extends Component
                 onContextMenu={this.onContextMenu.bind(this)}
                 onDoubleClick={this.onDoubleClick.bind(this)}
             >
-                <div ref={this.setContextMenuRef} className='context-menu body'>
-                    <div className='context-menu item separator' onClick={this.onContextMenuItem.bind(this)} name={'trade'}>
-                        <FontAwesomeIcon icon={faCoin} />
-                        Trade
-                    </div>
-                    <div className='context-menu item left-space' onClick={this.onContextMenuItem.bind(this)} name={'bar-types'}>Bar Types</div>
-                    <div className='context-menu item' onClick={this.onContextMenuItem.bind(this)} name={'price'}>
-                        <FontAwesomeIcon icon={faDollarSign} />
-                        Price
-                    </div>
-                    <div className='context-menu item' onClick={this.onContextMenuItem.bind(this)} name={'show'}>
-                        <FontAwesomeIcon icon={faEye} />
-                        Show
-                    </div>
-                    <div className='context-menu item left-space separator' onClick={this.onContextMenuItem.bind(this)} name={'layouts'}>Layouts</div>
-                    <div className='context-menu item' onClick={this.onContextMenuItem.bind(this)} name={'reset'}>
-                        <FontAwesomeIcon icon={faUndo} />
-                        Reset
-                    </div>
-                    <div className='context-menu item' onClick={this.onContextMenuItem.bind(this)} name={'settings'}>
-                        <FontAwesomeIcon icon={faCog} />
-                        Settings
-                    </div>
-                </div>
                 <div className='chart info'>
                     {this.generateInfo()}
                 </div>
@@ -733,10 +708,11 @@ class Chart extends Component
 
         if (this.getChart()) this.setFutureTimestamps();
         
-        const rect = this.contextMenu.getBoundingClientRect();
+
+        const rect = this.props.getContextMenu().getBoundingClientRect();
         if (!this.isWithinBounds(rect, mouse_pos))
         {
-            this.contextMenu.style.display = 'none';
+            this.props.getContextMenu().style.display = 'none';
         }
 
         is_down = false;
@@ -799,57 +775,94 @@ class Chart extends Component
         }
     }
 
+    populateContextMenu()
+    {
+        const elem = (
+            <React.Fragment>
+
+            <div className='context-menu item separator' onClick={this.onContextMenuItem.bind(this)} name={'trade'}>
+                <FontAwesomeIcon icon={faCoin} />
+                Trade
+            </div>
+            <div className='context-menu item left-space' onClick={this.onContextMenuItem.bind(this)} name={'bar-types'}>Bar Types</div>
+            <div className='context-menu item' onClick={this.onContextMenuItem.bind(this)} name={'price'}>
+                <FontAwesomeIcon icon={faDollarSign} />
+                Price
+            </div>
+            <div className='context-menu item' onClick={this.onContextMenuItem.bind(this)} name={'show'}>
+                <FontAwesomeIcon icon={faEye} />
+                Show
+            </div>
+            <div className='context-menu item left-space separator' onClick={this.onContextMenuItem.bind(this)} name={'layouts'}>Layouts</div>
+            <div className='context-menu item' onClick={this.onContextMenuItem.bind(this)} name={'reset'}>
+                <FontAwesomeIcon icon={faUndo} />
+                Reset
+            </div>
+            <div className='context-menu item' onClick={this.onContextMenuItem.bind(this)} name={'settings'}>
+                <FontAwesomeIcon icon={faCog} />
+                Settings
+            </div>
+
+            </React.Fragment>
+        );
+
+        this.props.setContextMenu(elem);
+    }
+
     onContextMenu(e)
     {
         e.preventDefault();
 
+        const app_size = this.props.getAppContainerSize();
         const top_offset = this.props.getTopOffset();
         const mouse_pos = {
             x: e.clientX, y: e.clientY - top_offset
         };
 
-        this.contextMenu.style.display = 'block';
-        this.contextMenu.style.left = mouse_pos.x + 'px';
-        this.contextMenu.style.top = mouse_pos.y + 'px';
+        this.props.getContextMenu().style.display = 'block';
+        this.props.getContextMenu().style.left = Math.min(mouse_pos.x, app_size.width - 200) + 'px';
+        this.props.getContextMenu().style.top = Math.min(mouse_pos.y, app_size.height - this.props.getContextMenu().clientHeight) + 'px';
+
+        
     }
 
     onContextMenuItem(e)
     {
-        // e.preventDefault();
+        e.preventDefault();
 
-        // this.contextMenu.style.display = 'none';
-        // let popup;
-        // if (this.props.isDemo)
-        // {
-        //     popup = {
-        //         type: 'not-available',
-        //         size: {
-        //             width: 30,
-        //             height: 30
-        //         }
-        //     }
-        // }
-        // else 
-        // {
-        //     const name = e.target.getAttribute('name');
+        this.props.getContextMenu().style.display = 'none';
+        let popup;
+        if (this.props.isDemo)
+        {
+            popup = {
+                type: 'not-available',
+                size: {
+                    width: 30,
+                    height: 30
+                }
+            }
+        }
+        else 
+        {
+            const name = e.target.getAttribute('name');
             
-        //     if (name === 'settings')
-        //     {
-        //         popup = {
-        //             type: 'chart-settings',
-        //             size: {
-        //                 width: 60,
-        //                 height: 75
-        //             },
-        //             opened: undefined,
-        //             properties: {
-        //                 item_id: this.getItemId(),
-        //                 layout: this.getWindowInfo().properties.layout
-        //             }
-        //         }
-        //     }
-        // }
-        // this.props.setPopup(popup);
+            if (name === 'settings')
+            {
+                popup = {
+                    type: 'chart-settings',
+                    size: {
+                        width: 60,
+                        height: 75
+                    },
+                    opened: undefined,
+                    properties: {
+                        item_id: this.getItemId(),
+                        layout: this.getWindowInfo().properties.layout
+                    }
+                }
+            }
+        }
+        this.props.setPopup(popup);
     }
 
     clampScale = (x) =>

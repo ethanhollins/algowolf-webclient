@@ -149,6 +149,7 @@ class Strategy extends Component
                             key={w.id + '-' + current_account}
                             ref={this.addWindowsRef}
                             info={w}
+                            isDemo={this.props.isDemo}
                             strategy_id={this.props.id}
                             removeWindowsRef={this.removeWindowsRef}
                             clone={this.props.clone}
@@ -169,6 +170,8 @@ class Strategy extends Component
                             closeWindow={this.props.closeWindow}
                             windowExists={this.props.windowExists}
                             getWindowById={this.props.getWindowById}
+                            getMetadata={this.props.getMetadata}
+                            setMetadata={this.props.setMetadata}
                             isTopWindow={this.props.isTopWindow}
                             getTopWindow={this.props.getTopWindow}
                             setTopWindow={this.props.setTopWindow}

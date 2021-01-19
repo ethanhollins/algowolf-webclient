@@ -221,6 +221,7 @@ class StrategyApp extends Component
                         setHovered={this.setHovered}
                         subscribeEmail={this.subscribeEmail}
                         onFirstVisit={this.onFirstVisit}
+                        getTimezones={this.getTimezones}
                     />
                     
                 </div>
@@ -431,6 +432,7 @@ class StrategyApp extends Component
                         id={current_strategy}
                         ref={this.setStrategy}
                         clone={this.clone}
+                        isDemo={this.props.isDemo}
                         getAppContainer={this.getAppContainer}
                         convertScreenUnitToWorldUnit={this.convertScreenUnitToWorldUnit}
                         convertWorldUnitToScreenUnit={this.convertWorldUnitToScreenUnit}
@@ -478,6 +480,7 @@ class StrategyApp extends Component
                         getPeriodOffsetSeconds={this.getPeriodOffsetSeconds}
                         getCountDate={this.getCountDate}
                         getCountDateFromDate={this.getCountDateFromDate}
+                        setCustomContextMenu={this.setCustomContextMenu}
                     />
                 }
                 else
@@ -487,6 +490,7 @@ class StrategyApp extends Component
                         id={current_strategy}
                         ref={this.setStrategy}
                         clone={this.clone}
+                        isDemo={this.props.isDemo}
                         getURI={this.props.getURI}
                         getCookies={this.props.getCookies}
                         getHeaders={this.props.getHeaders}
@@ -540,6 +544,7 @@ class StrategyApp extends Component
                         getPeriodOffsetSeconds={this.getPeriodOffsetSeconds}
                         getCountDate={this.getCountDate}
                         getCountDateFromDate={this.getCountDateFromDate}
+                        setCustomContextMenu={this.setCustomContextMenu}
                     />
                 }
             }
@@ -1412,6 +1417,7 @@ class StrategyApp extends Component
             
             if (item['bar_end'])
             {
+                console.log('Now ' + item['timestamp'] + ', Next ' + chart.next_timestamp);
                 // On Bar End
                 chart.asks[chart.asks.length-1] = item['item']['ask'];
                 chart.mids[chart.mids.length-1] = item['item']['mid'];
@@ -2423,6 +2429,15 @@ class StrategyApp extends Component
             return 60 * 60 * 24 * 7 * 4 * 12 * 2;
         else
             return null;
+    }
+
+    getTimezones()
+    {
+        return {
+            'UTC': 'UTC',
+            'UTC-5': 'America/New_York',
+            'UTC+11': 'Australia/Melbourne',
+        }
     }
 
     getWeekendDates(ts)

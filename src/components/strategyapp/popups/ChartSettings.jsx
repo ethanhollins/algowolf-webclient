@@ -1,21 +1,45 @@
 import React, { Component } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-    faChevronRight
+    faChevronRight, faChevronDown
 } from '@fortawesome/pro-regular-svg-icons';
 import { 
     faChartBar, faChartLine, faDollarSign, faPencilAlt
 } from '@fortawesome/pro-light-svg-icons';
 import ColorSwatch from './ColorSwatch';
+import moment from "moment-timezone";
 
 class ChartSettings extends Component
 {
 
+    constructor(props)
+    {
+        super(props);
+
+        this.onMouseUp = this.onMouseUp.bind(this);
+        this.dropdowns = [];
+
+        this.addDropdownRef = elem => {
+            this.dropdowns.push(elem);
+        }
+    }
+
+    state = {
+        selected_dropdown: null
+    }
+
     componentDidMount()
     {
+        window.addEventListener("mouseup", this.onMouseUp);
+
         const popup = this.props.getPopup();
         if (popup.opened === undefined)
-            this.props.changeCategory('bars');
+            this.props.changeCategory('bars');       
+    }
+
+    componentWillUnmount()
+    {
+        window.removeEventListener("mouseup", this.onMouseUp);
     }
 
     render()
@@ -61,9 +85,22 @@ class ChartSettings extends Component
         );
     }
 
+    onMouseUp(e)
+    {
+        this.clearDropdowns(e);
+    }
+
     getGeneralItems()
     {
         const settings = this.getChartSettings().general;
+
+        let timezone_elems = [];
+        for (let tz in this.props.getTimezones())
+        {
+            timezone_elems.push(
+                <div key={tz} className='popup dropdown-item' name={'timezone value'} value={tz}>{tz}</div>
+            )
+        }
 
         return (
             <div key='bars' className='popup table'>
@@ -74,7 +111,15 @@ class ChartSettings extends Component
                 </div>
                 <div className='popup table-cell'>
                     <div className='popup right'>
-                        {settings['timezone'].value}
+                        <div ref={this.addDropdownRef} className='popup dropdown'>
+                            <div className='popup dropdown-btn' onClick={this.onDropdownClick}>
+                                <span>{settings['timezone'].value}</span>
+                                <FontAwesomeIcon icon={faChevronDown} />
+                            </div>
+                            <div className='popup dropdown-content' onClick={this.onDropdownSelectGeneral}>
+                                {timezone_elems}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -84,7 +129,18 @@ class ChartSettings extends Component
                 </div>
                 <div className='popup table-cell'>
                     <div className='popup right'>
-                        {settings['date-format'].value}
+                        <div ref={this.addDropdownRef} className='popup dropdown'>
+                            <div className='popup dropdown-btn' onClick={this.onDropdownClick}>
+                                <span>{moment().format(settings['date-format'].value.replace(' ', '\xa0'))}</span>
+                                <FontAwesomeIcon icon={faChevronDown} />
+                            </div>
+                            <div className='popup dropdown-content' onClick={this.onDropdownSelectGeneral}>
+                                <div className='popup dropdown-item' name={'date-format value'} value={'DD MMM `YY\xa0\xa0HH:mm'}>{moment().format('DD MMM `YY\xa0\xa0HH:mm')}</div>
+                                <div className='popup dropdown-item' name={'date-format value'} value={'YYYY/MM/DD\xa0\xa0HH:mm'}>{moment().format('YYYY/MM/DD\xa0\xa0HH:mm')}</div>
+                                <div className='popup dropdown-item' name={'date-format value'} value={'DD/MM/YY\xa0\xa0HH:mm'}>{moment().format('DD/MM/YY\xa0\xa0HH:mm')}</div>
+                                <div className='popup dropdown-item' name={'date-format value'} value={'MM/DD/YY\xa0\xa0HH:mm'}>{moment().format('MM/DD/YY\xa0\xa0HH:mm')}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -94,7 +150,25 @@ class ChartSettings extends Component
                 </div>
                 <div className='popup table-cell'>
                     <div className='popup right'>
-                        {settings['font-size'].value}
+                        <div ref={this.addDropdownRef} className='popup dropdown'>
+                            <div className='popup dropdown-btn' onClick={this.onDropdownClick}>
+                                <span>{settings['font-size'].value}</span>
+                                <FontAwesomeIcon icon={faChevronDown} />
+                            </div>
+                            <div className='popup dropdown-content' onClick={this.onDropdownSelectGeneral}>
+                                <div className='popup dropdown-item' name={'font-size value'} value={8}>8</div>
+                                <div className='popup dropdown-item' name={'font-size value'} value={10}>10</div>
+                                <div className='popup dropdown-item' name={'font-size value'} value={12}>12</div>
+                                <div className='popup dropdown-item' name={'font-size value'} value={14}>14</div>
+                                <div className='popup dropdown-item' name={'font-size value'} value={16}>16</div>
+                                <div className='popup dropdown-item' name={'font-size value'} value={18}>18</div>
+                                <div className='popup dropdown-item' name={'font-size value'} value={20}>20</div>
+                                <div className='popup dropdown-item' name={'font-size value'} value={20}>24</div>
+                                <div className='popup dropdown-item' name={'font-size value'} value={20}>28</div>
+                                <div className='popup dropdown-item' name={'font-size value'} value={20}>32</div>
+                                <div className='popup dropdown-item' name={'font-size value'} value={20}>40</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -104,7 +178,21 @@ class ChartSettings extends Component
                 </div>
                 <div className='popup table-cell'>
                     <div className='popup right'>
-                        {settings['precision'].value}
+                        <div ref={this.addDropdownRef} className='popup dropdown'>
+                            <div className='popup dropdown-btn' onClick={this.onDropdownClick}>
+                                <span>{settings['precision'].value}</span>
+                                <FontAwesomeIcon icon={faChevronDown} />
+                            </div>
+                            <div className='popup dropdown-content' onClick={this.onDropdownSelectGeneral}>
+                                <div className='popup dropdown-item' name={'precision value'} value={'1/1'}>{'1/1'}</div>
+                                <div className='popup dropdown-item' name={'precision value'} value={'1/10'}>{'1/10'}</div>
+                                <div className='popup dropdown-item' name={'precision value'} value={'1/100'}>{'1/100'}</div>
+                                <div className='popup dropdown-item' name={'precision value'} value={'1/1000'}>{'1/1000'}</div>
+                                <div className='popup dropdown-item' name={'precision value'} value={'1/10000'}>{'1/10000'}</div>
+                                <div className='popup dropdown-item' name={'precision value'} value={'1/100000'}>{'1/100000'}</div>
+                                <div className='popup dropdown-item' name={'precision value'} value={'1/1000000'}>{'1/1000000'}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -454,6 +542,104 @@ class ChartSettings extends Component
         }
         this.props.getWindowInfo(strategy_id, item_id).properties[sub][name] = value;
         this.props.updateStrategyInfo();
+    }
+
+    clearDropdowns = (e) =>
+    {
+        let { selected_dropdown } = this.state;
+
+        if (selected_dropdown !== null)
+        {
+            if (e.target.parentNode !== selected_dropdown && 
+                e.target.parentNode.parentNode !== selected_dropdown)
+            {
+                this.resetSelectedDropdown();
+            }
+        }
+    }
+
+    onDropdownClick = (e) =>
+    {
+        let { selected_dropdown } = this.state;
+
+        let parent = e.target.parentNode;
+        if (parent.className.includes('dropdown-btn'))
+        {
+            parent = parent.parentNode;
+        }
+
+        if (parent !== selected_dropdown)
+        {
+            const btn = parent.childNodes[0];
+            const options = parent.childNodes[1];
+
+            btn.className = btn.className + ' selected';
+            options.style.display = 'block';
+            options.style.width = (parent.clientWidth) + 'px';
+
+            selected_dropdown = parent;
+            this.setState({ selected_dropdown });
+        }
+        else
+        {
+            this.resetSelectedDropdown();
+        }
+    }
+
+    onDropdownSelect = (e, category, sub, name, value) =>
+    {
+        this.resetSelectedDropdown();
+
+        console.log(category + ' ' + sub + ' ' + name + ' ' + value)
+        this.getChartSettings()[category][sub][name] = value;
+    }
+
+    onDropdownSelectGeneral = (e) =>
+    {
+        const elem_name = e.target.getAttribute('name');
+        const value = e.target.getAttribute('value');
+        if (elem_name)
+        {
+            const sub = elem_name.split(' ')[0];
+            const name = elem_name.split(' ')[1];
+            this.onDropdownSelect(e, 'general', sub, name, value);
+        }
+    }
+
+    onDropdownSelectAppearance = (e) =>
+    {
+        const elem_name = e.target.getAttribute('name');
+        const value = e.target.getAttribute('value');
+        if (elem_name)
+        {
+            const sub = elem_name.split(' ')[0];
+            const name = elem_name.split(' ')[1];
+            this.onDropdownSelect(e, 'appearance', sub, name, value);
+        }
+    }
+
+    onDropdownSelectTrading = (e) =>
+    {
+        const elem_name = e.target.getAttribute('name');
+        const value = e.target.getAttribute('value');
+        if (elem_name)
+        {
+            const sub = elem_name.split(' ')[0];
+            const name = elem_name.split(' ')[1];
+            this.onDropdownSelect(e, 'trading', sub, name, value);
+        }
+    }
+
+    resetSelectedDropdown = () =>
+    {
+        let { selected_dropdown } = this.state;
+        if (selected_dropdown !== null)
+        {
+            selected_dropdown.childNodes[0].className = selected_dropdown.childNodes[0].className.replace(' selected', '');
+            selected_dropdown.childNodes[1].style.display = 'none';
+            selected_dropdown = null
+            this.setState({ selected_dropdown });
+        }
     }
 }
 

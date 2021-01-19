@@ -135,6 +135,7 @@ class Backtest extends Component
                             key={w.id}
                             ref={this.addWindowsRef}
                             info={w}
+                            isDemo={this.props.isDemo}
                             strategy_id={this.props.id}
                             removeWindowsRef={this.removeWindowsRef}
                             clone={this.props.clone}

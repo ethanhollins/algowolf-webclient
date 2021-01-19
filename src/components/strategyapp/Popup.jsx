@@ -129,7 +129,7 @@ class Popup extends Component
 
     generatePopup()
     {
-        if (this.props.getPopup() !== null)
+        if (this.props.getPopup())
         {
             this.getPopupElem().style.display = 'flex';
             const popup = this.props.getPopup();
@@ -212,6 +212,7 @@ class Popup extends Component
                     updateStrategyInfo={this.props.updateStrategyInfo}
                     setHoverOn={this.setHoverOn}
                     setHoverOff={this.setHoverOff}
+                    getTimezones={this.props.getTimezones}
                 />
             }
             else if (popup.type === 'welcome-demo')
