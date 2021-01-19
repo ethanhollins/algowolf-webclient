@@ -402,7 +402,7 @@ class StrategyApp extends Component
                 }
                 tabs.push(
                     <div key={i} className={className} name={i} onClick={this.setOpenStrategy.bind(this)}>
-                        {s.name}
+                        <span>{s.name}</span>
                         <FontAwesomeIcon className='tab btn' icon={faTimes} onClick={this.onNotAvailableItem} />
                     </div>
                 );      

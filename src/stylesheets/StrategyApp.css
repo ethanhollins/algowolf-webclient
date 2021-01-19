@@ -133,6 +133,18 @@ body {
     background-color: transparent;
     cursor: pointer;
     transition: background-color 0.2s linear;
+    overflow: hidden;
+}
+
+.tab.item > span {
+    display: -webkit-box;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    white-space: nowrap;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
 }
 
 .tab.item.selected {
