@@ -145,6 +145,7 @@ body {
     white-space: nowrap;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
+    pointer-events: none;
 }
 
 .tab.item.selected {
