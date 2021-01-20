@@ -34,7 +34,8 @@ class Strategy extends Component
         info: {},
         input_variables: {},
         variables_preset: {},
-        selected_chart: null
+        selected_chart: null,
+        event_queue: []
     }
 
     async componentDidMount()
@@ -59,6 +60,11 @@ class Strategy extends Component
         this.setState({ sio });
 
         this.props.setShowLoadScreen(false);
+    }
+
+    componentDidUpdate()
+    {
+        this.handleEventQueue();
     }
 
     componentWillUnmount()
@@ -297,13 +303,37 @@ class Strategy extends Component
             // Add to transaction history
         });
 
-        socket.on('ongui', this.onGui);
+        socket.on('ongui', this.addToEventQueue);
 
         return socket;
     }
 
+    addToEventQueue = (data) =>
+    {
+        // console.log('Add');
+        // console.log(data);
+        // console.log();
+        let { event_queue } = this.state;
+        event_queue.push(data);
+        this.setState({ event_queue });
+    }
+
+    handleEventQueue = () =>
+    {
+        let { event_queue } = this.state;
+        if (event_queue.length > 0)
+        {
+            this.onGui(event_queue[0]);
+            event_queue.splice(0, 1);
+            this.setState({ event_queue });
+        }
+    }
+
     onGui = (data) =>
     {
+        // console.log('Handle');
+        // console.log(data);
+        // console.log();
         if (data.type === 'message_queue')
         {
             for (let i of data.item)
@@ -336,10 +366,10 @@ class Strategy extends Component
             {
                 this.createLog(data.account_id, data);
             }
-            // else if (data.type === 'create_info')
-            // {
-            //     this.createInfo(data.account_id, data);
-            // }
+            else if (data.type === 'create_info')
+            {
+                this.createInfo(data.account_id, data);
+            }
             else if (data.type === 'activation')
             {
                 this.setActivation(data);
@@ -503,8 +533,6 @@ class Strategy extends Component
     {
         let { drawings } = this.state;
 
-        console.log('clear');
-        console.log();
         if (account_id in drawings && layer in drawings[account_id])
         {
             drawings[account_id][layer] = [];
@@ -554,7 +582,7 @@ class Strategy extends Component
         {
             strategy.info = {};
         }
-        if (!(data[data.product] in strategy.info))
+        if (!(data.product in strategy.info))
         {
             strategy.info[data.product] = {};
         }
@@ -669,7 +697,6 @@ class Strategy extends Component
         const strategy = this.getStrategyInfo();
         if ('info' in strategy)
         {
-            console.log(strategy.info);
             if (product in strategy.info)
             {
                 if (period in strategy.info[product])
