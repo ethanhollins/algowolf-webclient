@@ -310,9 +310,6 @@ class Strategy extends Component
 
     addToEventQueue = (data) =>
     {
-        // console.log('Add');
-        // console.log(data);
-        // console.log();
         let { event_queue } = this.state;
         event_queue.push(data);
         this.setState({ event_queue });
@@ -331,9 +328,6 @@ class Strategy extends Component
 
     onGui = (data) =>
     {
-        // console.log('Handle');
-        // console.log(data);
-        // console.log();
         if (data.type === 'message_queue')
         {
             for (let i of data.item)
@@ -574,29 +568,34 @@ class Strategy extends Component
         this.setState({ logs });
     }
 
+    setInfo = (account_id, data) =>
+    {
+        let { info } = this.state;
+        console.log('SET INFO');
+        console.log(data);
+        info = Object.assign({}, info, data);
+        this.setState({ info });
+    }
+
     createInfo = (account_id, data) =>
     {
-        let strategy = this.getStrategyInfo();
+        let { info } = this.state;
 
-        if (!('info' in strategy))
+        if (!(data.product in info))
         {
-            strategy.info = {};
+            info[data.product] = {};
         }
-        if (!(data.product in strategy.info))
+        if (!(data.period in info[data.product]))
         {
-            strategy.info[data.product] = {};
+            info[data.product][data.period] = {};
         }
-        if (!(data.period in strategy.info[data.product]))
+        if (!(String(data.timestamp) in info[data.product][data.period]))
         {
-            strategy.info[data.product][data.period] = {};
-        }
-        if (!(String(data.timestamp) in strategy.info[data.product][data.period]))
-        {
-            strategy.info[data.product][data.period][String(data.timestamp)] = [];
+            info[data.product][data.period][String(data.timestamp)] = [];
         }
 
-        strategy.info[data.product][data.period][String(data.timestamp)].push(data.item);
-        this.props.updateStrategyInfo();
+        info[data.product][data.period][String(data.timestamp)].push(data.item);
+        this.setState({ info });
     }
 
     setActivation = (data) =>
@@ -694,15 +693,12 @@ class Strategy extends Component
 
     getInfo = (product, period) =>
     {
-        const strategy = this.getStrategyInfo();
-        if ('info' in strategy)
+        const { info } = this.state;
+        if (product in info)
         {
-            if (product in strategy.info)
+            if (period in info[product])
             {
-                if (period in strategy.info[product])
-                {
-                    return strategy.info[product][period];
-                }
+                return info[product][period];
             }
         }
         return {};
@@ -918,11 +914,15 @@ class Strategy extends Component
             const account_id = account_code.split('.')[1];
             const account_info = await this.props.retrieveAccountInfo(this.props.id, broker_id, account_id);
     
+            console.log(account_info);
+
             // Set Account Info
             if (account_info.drawings !== undefined)
                 this.setDrawings(account_code, account_info.drawings);
             if (account_info.logs !== undefined)
                 this.setLogs(account_code, account_info.logs);
+            if (account_info.info !== undefined)
+                this.setInfo(account_code, account_info.info);
             if (account_info.input_variables !== undefined)
                 this.setLocalInputVariables(account_code, account_info.input_variables);
             if (account_info.preset !== undefined)
