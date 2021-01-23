@@ -119,7 +119,7 @@ class Popup extends Component
 
     close = () =>
     {
-        if (this.props.getPopup().type === 'welcome-demo')
+        if (this.props.getPopup() !== undefined && this.props.getPopup().type === 'welcome-demo')
         {
             this.props.onFirstVisit();
         }
@@ -203,9 +203,11 @@ class Popup extends Component
             else if (popup.type === 'chart-settings')
             {
                 return <ChartSettings 
+                    close={this.close}
                     getPopup={this.props.getPopup}
                     onChangeCategory={this.onChangeCategory}
                     changeCategory={this.changeCategory}
+                    getContainerSize={this.props.getContainerSize}
                     getWindowInfo={this.props.getWindowInfo}
                     getStrategyId={this.props.getStrategyId}
                     getStrategyInfo={this.props.getStrategyInfo}

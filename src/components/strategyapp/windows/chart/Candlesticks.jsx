@@ -23,8 +23,6 @@ class Candlesticks extends Component
         const timestamps = this.props.getTimestamps();
         const info = this.props.getWindowInfo();
 
-        // console.log(ohlc);
-
         for (let i = 0; i < ohlc.length; i++) 
         {
             let x_pos = (ohlc.length - i)+0.5;
@@ -66,12 +64,10 @@ class Candlesticks extends Component
 
             if (candle[0] > candle[3]) 
             {
-                body_color = info.properties.bars.bodyShort;
-                body_color = `rgba(${body_color[0]}, ${body_color[1]}, ${body_color[2]}, ${opacity})`
-                outline_color = info.properties.bars.outlineShort;
-                outline_color = `rgba(${outline_color[0]}, ${outline_color[1]}, ${outline_color[2]}, ${opacity})`
-                wick_color = info.properties.bars.wickShort;
-                wick_color = `rgba(${wick_color[0]}, ${wick_color[1]}, ${wick_color[2]}, ${opacity})`
+                body_color = this.getBodySettings()['short'];
+                // console.log(body_color);
+                outline_color = this.getOutlineSettings()['short'];
+                wick_color = this.getWickSettings()['short'];
                 ctx.lineWidth = 0.5;
 
                 wick_up_size = candle[1] - candle[0];
@@ -88,12 +84,9 @@ class Candlesticks extends Component
             }
             else 
             {
-                body_color = info.properties.bars.bodyLong;
-                body_color = `rgba(${body_color[0]}, ${body_color[1]}, ${body_color[2]}, ${opacity})`
-                outline_color = info.properties.bars.outlineLong;
-                outline_color = `rgba(${outline_color[0]}, ${outline_color[1]}, ${outline_color[2]}, ${opacity})`
-                wick_color = info.properties.bars.wickLong;
-                wick_color = `rgba(${wick_color[0]}, ${wick_color[1]}, ${wick_color[2]}, ${opacity})`
+                body_color = this.getBodySettings()['long'];
+                outline_color = this.getOutlineSettings()['long'];
+                wick_color = this.getWickSettings()['long'];
                 ctx.lineWidth = 0.5;
 
                 wick_up_size = candle[1] - candle[3];
@@ -153,6 +146,22 @@ class Candlesticks extends Component
 
         }
     }
+
+    getBodySettings = () =>
+    {
+        return this.props.getSettings()['chart-settings'].layouts[this.props.getChartSettingsLayout()].appearance['body'];
+    }
+
+    getOutlineSettings = () =>
+    {
+        return this.props.getSettings()['chart-settings'].layouts[this.props.getChartSettingsLayout()].appearance['outline'];
+    }
+
+    getWickSettings = () =>
+    {
+        return this.props.getSettings()['chart-settings'].layouts[this.props.getChartSettingsLayout()].appearance['wick'];
+    }
+
 }
 
 export default Candlesticks;

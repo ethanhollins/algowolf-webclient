@@ -277,6 +277,8 @@ class Chart extends Component
                     getPeriod={this.getPeriod}
                     getPeriodOffsetSeconds={this.getPeriodOffsetSeconds}
                     getWindowInfo={this.getWindowInfo}
+                    getSettings={this.getSettings}
+                    getChartSettingsLayout={this.getChartSettingsLayout}
                 />
                 {this.generateOverlays()}
                 {this.generateStudies()}
@@ -479,7 +481,7 @@ class Chart extends Component
             const canvas = this.getCanvas();
             const ctx = canvas.getContext("2d");
 
-            const font_size = 10;
+            const font_size = this.getFontSize();
             ctx.font = String(font_size) + 'pt trebuchet ms'; //Consolas
             const text_width = ctx.measureText((0).toFixed(5)).width; // Get placeholder text width
 
@@ -854,10 +856,9 @@ class Chart extends Component
                         width: 60,
                         height: 75
                     },
-                    opened: undefined,
+                    opened: 'general',
                     properties: {
-                        item_id: this.getItemId(),
-                        layout: this.getWindowInfo().properties.layout
+                        item_id: this.getItemId()
                     }
                 }
             }
@@ -944,6 +945,7 @@ class Chart extends Component
                         getCurrentTimestamp={this.getCurrentTimestamp}
                         getPeriod={this.getPeriod}
                         getPeriodOffsetSeconds={this.getPeriodOffsetSeconds}
+                        getSettings={this.getSettings}
                     />
                 );
             }
@@ -989,6 +991,7 @@ class Chart extends Component
                         getCurrentTimestamp={this.getCurrentTimestamp}
                         getPeriod={this.getPeriod}
                         getPeriodOffsetSeconds={this.getPeriodOffsetSeconds}
+                        getSettings={this.getSettings}
                         resizePortion={this.resizePortion}
                     />
                 );
@@ -1577,7 +1580,7 @@ class Chart extends Component
         const sun = 0;
         ts *= 1000;
         
-        const dt = moment(ts).tz("America/New_York");
+        const dt = moment(ts).tz(this.getTimezone());
         const fri_dist = dow.slice(dt.day()).indexOf(fri);
         const sun_dist = dow.slice(dt.day()).slice(fri_dist).indexOf(sun) + fri_dist;
 
@@ -1592,14 +1595,14 @@ class Chart extends Component
     isWrapTime(ts)
     {
         ts *= 1000;
-        const dt = moment(ts).tz("America/New_York");
+        const dt = moment(ts).tz(this.getTimezone());
         return dt.day() > 5 || (dt.day() === 5 && dt.hour() >= 17);
     }
 
     wrapTime(ts)
     {
         ts *= 1000;
-        const dt = moment(ts).tz("America/New_York");
+        const dt = moment(ts).tz(this.getTimezone());
         if (dt.day() > 5 || (dt.day() === 5 && dt.hour() >= 17))
         {
             const open_off = moment.duration(7 % dt.day(), "d");
@@ -1681,18 +1684,6 @@ class Chart extends Component
             return 0;
         else
             return null;
-    }
-
-    getPriceFormat(offset)
-    {
-        if (offset < this.props.getPeriodOffsetSeconds("D"))
-            return 'DD MMM \'YY  HH:mm';
-        else if (offset < this.props.getPeriodOffsetSeconds("W"))
-            return 'ddd d';
-        else if (offset < this.props.getPeriodOffsetSeconds("Y"))
-            return 'MMM';
-        else
-            return 'YYYY';
     }
 
     getShortPriceFormat(offset)
@@ -1800,7 +1791,7 @@ class Chart extends Component
         }
 
 
-        const tz = 'America/New_York';
+        const tz = this.getTimezone();
         let time = this.getWeekendDates(
             moment(ts*1000).subtract(7, 'd').unix()
         )[1].tz(tz);
@@ -1845,7 +1836,7 @@ class Chart extends Component
         const seg_size = this.getSegmentSize(0);
 
         // Font settings
-        const font_size = 10;
+        const font_size = this.getFontSize();
         ctx.font = String(font_size) + 'pt trebuchet ms'; //Consolas
         ctx.fillStyle = 'rgb(80, 80, 80)';
         ctx.strokeStyle = 'rgb(255, 255, 255)';
@@ -1875,7 +1866,7 @@ class Chart extends Component
         const scale = this.getScale();
         const timestamps = this.getTimestamps();
         const all_timestamps = this.getAllTimestamps();
-        const tz = 'America/New_York';
+        const tz = this.getTimezone();
 
         const chart_size = this.getChartSize();
         const start_pos = { x: 0, y: chart_size.height }
@@ -2598,7 +2589,7 @@ class Chart extends Component
         ctx.fillStyle = '#3498db';
 
         // Font settings
-        const font_size = 10;
+        const font_size = this.getFontSize();
         ctx.font = String(font_size) + 'pt trebuchet ms'; //Consolas
         ctx.textAlign = 'right';
 
@@ -2642,7 +2633,7 @@ class Chart extends Component
         );
 
         // Properties
-        ctx.fillStyle = '#3498db';
+        ctx.fillStyle = this.getPriceLineColor();
 
         ctx.fillRect(0, Math.floor(screen_pos.y), seg_size.width, 1);
     }
@@ -2726,7 +2717,7 @@ class Chart extends Component
                     ).x;
                     
                     // Font settings
-                    const font_size = 10;
+                    const font_size = this.getFontSize();
                     ctx.font = String(font_size) + 'pt trebuchet ms'; //Consolas
                     ctx.textAlign = 'right';
                     
@@ -2734,7 +2725,7 @@ class Chart extends Component
                     const line_space = 4;
     
                     // Handle Time Line
-                    ctx.fillStyle = '#787878';
+                    ctx.fillStyle = this.getCrosshairColor();
         
                     let c_y = 0;
                     while (c_y < chart_size.height + this.getBottomOff())
@@ -2744,9 +2735,9 @@ class Chart extends Component
                     }
     
                     // Box Settings
-                    ctx.fillStyle = 'rgb(80,80,80)';
+                    ctx.fillStyle = this.getCrosshairColor();
             
-                    const tz = 'America/New_York';
+                    const tz = this.getTimezone();
                     const time = moment.utc(
                         my_timestamp*1000
                     ).tz(tz).format(top_chart.getCurrentPriceFormat());
@@ -2776,7 +2767,7 @@ class Chart extends Component
                     // Handle Price Line
                     if (top_window_id === this.getItemId())
                     {
-                        ctx.fillStyle = '#787878';
+                        ctx.fillStyle = this.getCrosshairColor();
         
                         let c_x = 0;
                         while (c_x < chart_size.width)
@@ -2786,7 +2777,7 @@ class Chart extends Component
                         }
     
                         // Box Settings
-                        ctx.fillStyle = 'rgb(80,80,80)';
+                        ctx.fillStyle = this.getCrosshairColor();
                         
                         // Draw Prices Box
                         text_size = ctx.measureText(String(mouse_world_pos.y.toFixed(5)));
@@ -3287,7 +3278,7 @@ class Chart extends Component
 
     getCurrentPriceFormat = () =>
     {
-        return this.getPriceFormat(this.state.intervals.x);
+        return this.getDateFormat();
     }
 
     getCurrentShortPriceFormat = () =>
@@ -3386,6 +3377,56 @@ class Chart extends Component
     getAccountId = () =>
     {
         return this.getCurrentAccount().split('.')[1];
+    }
+
+    getSettings = () =>
+    {
+        return this.getStrategy().settings;
+    }
+
+    getChartSettingsLayout = () =>
+    {
+        return this.getSettings()['chart-settings'].current;
+    }
+    
+    getTimezone = () =>
+    {
+        return this.props.getTimezones()[this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].general['timezone'].value];
+    }
+
+    getDateFormat = () =>
+    {
+        return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].general['date-format'].value;
+    }
+
+    getFontSize = () =>
+    {
+        return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].general['font-size'].value;
+    }
+
+    getPrecision = () =>
+    {
+        return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].general['precision'].value;
+    }
+
+    getPriceLineColor = () =>
+    {
+        return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].appearance['price-line'].value;
+    }
+
+    getVertGridLinesColor = () =>
+    {
+        return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].appearance['vert-grid-lines'].value;
+    }
+
+    getHorzGridLinesColor = () =>
+    {
+        return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].appearance['horz-grid-lines'].value;
+    }
+
+    getCrosshairColor = () =>
+    {
+        return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].appearance['crosshair'].value;
     }
 
     getProperties = () =>

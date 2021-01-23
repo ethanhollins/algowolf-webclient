@@ -86,7 +86,7 @@ class ColorSwatch extends React.Component {
 
     handleChange = (color) => {
         this.setState({ color: color.rgb })
-        this.props.setProperty(this.props.sub, this.props.name, this.rgbToHex(color.rgb));
+        this.props.setProperty(this.props.category, this.props.sub, this.props.name, this.rgbToHex(color.rgb));
     };
 
     isWhiteSelected()

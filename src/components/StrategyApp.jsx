@@ -207,6 +207,7 @@ class StrategyApp extends Component
                         windowExists={this.windowExists}
                         isWithinBounds={this.isWithinBounds}
                         isTopWindow={this.isTopWindow}
+                        getContainerSize={this.getContainerSize}
                         getWindowInfo={this.getWindowInfo}
                         getPopup={this.getPopup}
                         getPopupElem={this.getPopupElem}
@@ -450,6 +451,7 @@ class StrategyApp extends Component
                         setPopup={this.setPopup}
                         getPopup={this.getPopup}
                         setShowLoadScreen={this.setShowLoadScreen}
+                        getTimezones={this.getTimezones}
                         // Window Funcs
                         closeWindow={this.closeWindow}
                         windowExists={this.windowExists}
@@ -516,6 +518,7 @@ class StrategyApp extends Component
                         setPopup={this.setPopup}
                         getPopup={this.getPopup}
                         setShowLoadScreen={this.setShowLoadScreen}
+                        getTimezones={this.getTimezones}
                         // Window Funcs
                         closeWindow={this.closeWindow}
                         windowExists={this.windowExists}

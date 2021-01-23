@@ -192,6 +192,7 @@ class WindowWrapper extends Component
                 setSelectedChart={this.props.setSelectedChart}
                 getBorder={this.getBorder}
                 setBorder={this.setBorder}
+                getTimezones={this.props.getTimezones}
             />)
         }
         else if (this.state.info.type === 'dockable')

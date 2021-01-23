@@ -212,6 +212,7 @@ class Strategy extends Component
                             getLog={this.getLog}
                             getInfo={this.getInfo}
                             updateInfo={this.props.updateInfo}
+                            getTimezones={this.props.getTimezones}
                             getGlobalInputVariables={this.getGlobalInputVariables}
                             getCurrentGlobalVariablesPreset={this.getCurrentGlobalVariablesPreset}
                             getLocalInputVariables={this.getLocalInputVariables}

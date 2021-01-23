@@ -228,7 +228,7 @@ class BrokerSettings extends Component
                 <div key={selected + '_one'} className='popup row'>
                     <div className='popup input'>
                         <div className='popup form-title'>Access Token</div>
-                        <div className='popup text-read'>****************************************</div>
+                        <div className='popup text-read'>********************************-********************************</div>
                     </div>
                 </div>
             );
@@ -253,7 +253,7 @@ class BrokerSettings extends Component
                 <div className='popup row'>
                     <div className='popup input'>
                         <div className='popup form-title'>Access Token</div>
-                        <div className='popup text-read'>****************************************</div>
+                        <div className='popup text-read'>********************************-********************************</div>
                     </div>
                 </div>
 
@@ -404,8 +404,11 @@ class BrokerSettings extends Component
 
                     <div className='popup row'>
                         <div className='popup input'>
-                            <div className='popup form-title'>Acess Token</div>
-                            <input className='popup text-input' onChange={this.onTextInputChange.bind(this)} name='key' />
+                            <div className='popup form-title'>Access Token</div>
+                            <input 
+                                className='popup text-input' onChange={this.onTextInputChange.bind(this)} 
+                                placeholder='e.g. 0j3m4bqf0lzjlqeko76xcuo8cb5yj55q-znhilw4rq0v1lr3k08iuzk2ek9czahhf' name='key' 
+                            />
                         </div>
                     </div>
                     <div className='popup row'>
@@ -442,7 +445,7 @@ class BrokerSettings extends Component
                     </div>
                     <div className='popup row'>
                         <div className='popup input'>
-                            <div className='popup form-title'>Acess Token</div>
+                            <div className='popup form-title'>Access Token</div>
                             <input className='popup text-input' onChange={this.onTextInputChange.bind(this)} name='key' />
                         </div>
                     </div>

@@ -20,7 +20,8 @@ class Dockable extends Component
 
         this.state = {
             tabs: [],
-            dropdown: []
+            dropdown: [],
+            is_dropdown_active: false
         }
 
         this.setHeaderRef = elem => {
@@ -33,6 +34,12 @@ class Dockable extends Component
                 this.onMouseMoveThrottled = this.innerWindow.onMouseMoveThrottled;
                 this.updateInfo = this.innerWindow.updateInfo;
             }
+        }
+        this.setDropdownBtnRef = elem => {
+            this.dropdownBtn = elem;
+        }
+        this.setDropdownGroupRef = elem => {
+            this.dropdownGroup = elem;
         }
 
         this.addTabElem = elem => {
@@ -51,6 +58,8 @@ class Dockable extends Component
 
     componentDidMount()
     {
+        window.addEventListener("mouseup", this.onMouseUp.bind(this));
+
         this.handleTabDropdown()
     }
 
@@ -73,6 +82,16 @@ class Dockable extends Component
                 {this.generateInnerWindow()}
             </div>
         );
+    }
+
+    onMouseUp(e)
+    {
+        const { is_dropdown_active } = this.state;
+        if (is_dropdown_active)
+        {
+            this.onDropdownItem(e);
+            this.toggleDropdown(); 
+        }
     }
 
     handleTabDropdown()
@@ -226,17 +245,124 @@ class Dockable extends Component
         }
 
         return result;
-    }
+    }  
 
     generateDropdown()
     {
         const { dropdown } = this.state;
         if (dropdown.length > 0)
         {
+            const opened = this.getOpened();
+
+            let dropdown_items = [];
+            for (let i=0; i < dropdown.length; i++)
+            {
+                const w = this.findInnerWindow(dropdown[i]);
+
+                let elem;
+                let class_name;
+                if (w.id === opened.id)
+                {
+                    class_name = 'dockable dropdown-item selected';
+                }
+                else
+                {
+                    class_name = 'dockable dropdown-item';
+                }
+
+                if (w.type === 'log')
+                {
+                    elem = (
+                        <div key={i} name={w.id} className={class_name}>
+        
+                        <FontAwesomeIcon icon={faScroll} className='dockable icon' />
+                        <div>Script Log</div>
+        
+                        </div>
+                    );
+                }
+                else if (w.type === 'info')
+                {
+                    elem = (
+                        <div key={i} name={w.id} className={class_name}>
+        
+                        <FontAwesomeIcon icon={faInfoCircle} className='dockable icon' />
+                        <div>Chart Info</div>
+                        
+                        </div>
+                    );
+                }
+                else if (w.type === 'control_panel')
+                {
+                    elem = (
+                        <div key={i} name={w.id} className={class_name}>
+        
+                        <FontAwesomeIcon icon={faSlidersVSquare} className='dockable icon' />
+                        <div>Control Panel</div>
+                        
+                        </div>
+                    );
+                }
+                else if (w.type === 'report')
+                {
+                    const name = w.properties.name;
+                    elem = (
+                        <div key={i} name={w.id} className={class_name}>
+        
+                        <FontAwesomeIcon icon={faFileInvoice} className='dockable icon' />
+                        <div>{name}</div>
+                        
+                        </div>
+                    );
+                }
+                else if (w.type === 'positions')
+                {
+                    elem = (
+                        <div key={i} name={w.id} className={class_name}>
+        
+                        <FontAwesomeIcon icon={faSort} className='dockable icon' />
+                        <div>Positions</div>
+                        
+                        </div>
+                    );
+                }
+                else if (w.type === 'orders')
+                {
+                    elem = (
+                        <div key={i} name={w.id} className={class_name}>
+        
+                        <FontAwesomeIcon icon={faSort} className='dockable icon' />
+                        <div>Orders</div>
+                        
+                        </div>
+                    );
+                }
+                else if (w.type === 'transactions')
+                {
+                    elem = (
+                        <div key={i} name={w.id} className={class_name}>
+        
+                        <FontAwesomeIcon icon={faReceipt} className='dockable icon' />
+                        <div>Transactions</div>
+                        
+                        </div>
+                    );
+                }
+
+                dropdown_items.push(elem);
+            }
+
             return (
-                <div ref={this.setDropdownRef} className='dockable dropdown-icon'>
+                <React.Fragment>
+
+                <div ref={this.setDropdownBtnRef} className='dockable dropdown-icon' onClick={this.toggleDropdown}>
                     <FontAwesomeIcon icon={faChevronDown} />
                 </div>
+                <div ref={this.setDropdownGroupRef} className='dockable dropdown-group'>
+                    {dropdown_items}
+                </div>
+
+                </React.Fragment>
             );
         }
     }
@@ -370,6 +496,36 @@ class Dockable extends Component
         }
     }
 
+    toggleDropdown = () =>
+    {
+        let { is_dropdown_active } = this.state;
+
+        if (!is_dropdown_active)
+        {
+            const btn_rect = this.dropdownBtn.getBoundingClientRect();
+    
+            this.dropdownGroup.style.left = btn_rect.x + 'px';
+            this.dropdownGroup.style.top = (btn_rect.height+6) + 'px';
+            this.dropdownGroup.style.display = 'block';
+            is_dropdown_active = true;
+        }
+        else
+        {
+            this.dropdownGroup.style.display = 'none';
+            is_dropdown_active = false;
+        }
+
+        this.setState({ is_dropdown_active });
+    }
+
+    onDropdownItem = (e) =>
+    {
+        if (e.target.className.includes('dropdown-item'))
+        {
+            this.onTabClick(e);
+        }
+    }
+
     getHeader = () =>
     {
         return this.header;
@@ -389,6 +545,19 @@ class Dockable extends Component
         }
 
         return windows[0];
+    }
+
+    findInnerWindow = (item_id) =>
+    {
+        const windows = this.props.info.windows;
+
+        for (let w of windows)
+        {
+            if (w.id === item_id)
+            {
+                return w;
+            }
+        }
     }
 }
 

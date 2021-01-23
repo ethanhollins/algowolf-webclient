@@ -80,6 +80,21 @@ class ChartSettings extends Component
                     </div>
                 </div>
             </div>
+            <div className='popup footer'>
+                <div className='popup dropdown'>
+                    <div className='popup dropdown-btn layout-dropdown' onClick={this.onDropdownClick}>
+                        <span>Layout 1</span>
+                        <FontAwesomeIcon icon={faChevronDown} />
+                    </div>
+                    <div className='popup dropdown-content' onClick={this.onDropdownSelectLayout}>
+                        {this.getLayouts()}
+                    </div>
+                </div>
+                <div className='popup accept-group'>
+                    <div onClick={this.onCancel}>Cancel</div>
+                    <div onClick={this.onAccept}>Accept & Save</div>
+                </div>
+            </div>
 
             </React.Fragment>
         );
@@ -489,12 +504,19 @@ class ChartSettings extends Component
 
     getLayout()
     {
-        return this.props.getPopup().properties.layout;
+        if (this.props.getPopup().properties.layout !== undefined)
+        {
+            return this.props.getPopup().properties.layout;
+        }
+        else
+        {
+            return this.props.getStrategyInfo(this.props.getStrategyId()).settings['chart-settings'].current;
+        }
     }
 
     getChartSettings()
     {
-        return this.props.getStrategyInfo(this.props.getStrategyId()).settings[this.getLayout()]['chart-settings'];
+        return this.props.getStrategyInfo(this.props.getStrategyId()).settings['chart-settings'].layouts[this.getLayout()];
     }
 
     getItems()
@@ -531,16 +553,9 @@ class ChartSettings extends Component
         return settings[sub][name];
     }
 
-    setProperty = (sub, name, value) =>
+    setProperty = (category, sub, name, value) =>
     {
-        const strategy_id = this.props.getStrategyId();
-        const item_id = this.props.getPopup().properties.item_id;
-
-        if (this.props.getWindowInfo(strategy_id, item_id).properties[sub] === undefined)
-        {
-            this.props.getWindowInfo(strategy_id, item_id).properties[sub] = {};
-        }
-        this.props.getWindowInfo(strategy_id, item_id).properties[sub][name] = value;
+        this.getChartSettings()[category][sub][name] = value;
         this.props.updateStrategyInfo();
     }
 
@@ -572,10 +587,17 @@ class ChartSettings extends Component
         {
             const btn = parent.childNodes[0];
             const options = parent.childNodes[1];
+            const container_size = this.props.getContainerSize();
+
+            const DROPDOWN_ITEM_HEIGHT = 37;
+            const options_top = parent.offsetTop + 35;
+            const options_height = (options.childNodes.length+1) * DROPDOWN_ITEM_HEIGHT;
 
             btn.className = btn.className + ' selected';
             options.style.display = 'block';
             options.style.width = (parent.clientWidth) + 'px';
+
+            options.style.top = Math.min(options_top, container_size.height - options_height - DROPDOWN_ITEM_HEIGHT) + 'px';
 
             selected_dropdown = parent;
             this.setState({ selected_dropdown });
@@ -590,8 +612,8 @@ class ChartSettings extends Component
     {
         this.resetSelectedDropdown();
 
-        console.log(category + ' ' + sub + ' ' + name + ' ' + value)
         this.getChartSettings()[category][sub][name] = value;
+        this.props.updateStrategyInfo();
     }
 
     onDropdownSelectGeneral = (e) =>
@@ -630,6 +652,28 @@ class ChartSettings extends Component
         }
     }
 
+    onDropdownSelectLayout = (e) =>
+    {
+        this.resetSelectedDropdown();
+
+        const value = e.target.getAttribute('value');
+        let settings = this.getChartSettings();
+        this.props.getPopup().properties.layout = value;
+        settings['current'] = value;
+        this.props.updateStrategyInfo();
+    }
+
+    getLayouts = () =>
+    {
+        const settings = this.props.getStrategyInfo(this.props.getStrategyId()).settings['chart-settings'];
+        let layouts = [];
+        for (let i of Object.keys(settings.layouts))
+        {
+            layouts.push(<div key={i} className='popup dropdown-item' value={i}>{i}</div>);
+        }
+        return layouts;
+    }
+
     resetSelectedDropdown = () =>
     {
         let { selected_dropdown } = this.state;
@@ -640,6 +684,16 @@ class ChartSettings extends Component
             selected_dropdown = null
             this.setState({ selected_dropdown });
         }
+    }
+
+    onCancel = () =>
+    {
+        this.props.close();
+    }
+
+    onAccept = () =>
+    {
+        this.props.close();
     }
 }
 
