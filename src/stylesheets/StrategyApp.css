@@ -591,6 +591,10 @@ body {
 }
 
 .page.item-name {
+    display: -webkit-box;
+    white-space: nowrap;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
     padding-left: 4px;
     padding-right: 4px;
     background-color: #FFF;
@@ -601,6 +605,7 @@ body {
     font-size: 0.3em;
     font-weight: 500;
     pointer-events: none;
+    overflow: hidden;
 }
 
 .page.tools-group {
@@ -1713,6 +1718,13 @@ body {
 
 .dockable.header-item > * {
     pointer-events: none;
+}
+
+.dockable.header-item > div {
+    display: -webkit-box;
+    white-space: nowrap;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
 }
 
 .dockable.header-item:hover {

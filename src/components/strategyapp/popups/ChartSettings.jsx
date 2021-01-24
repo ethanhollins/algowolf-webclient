@@ -92,7 +92,7 @@ class ChartSettings extends Component
                 </div>
                 <div className='popup accept-group'>
                     <div onClick={this.onCancel}>Cancel</div>
-                    <div onClick={this.onAccept}>Accept & Save</div>
+                    <div onClick={this.onApply}>Apply & Save</div>
                 </div>
             </div>
 
@@ -691,7 +691,7 @@ class ChartSettings extends Component
         this.props.close();
     }
 
-    onAccept = () =>
+    onApply = () =>
     {
         this.props.close();
     }

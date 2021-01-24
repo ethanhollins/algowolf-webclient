@@ -204,6 +204,7 @@ class WindowWrapper extends Component
                 item_id={this.state.info.id}
                 info={this.state.info}
                 updateStrategyInfo={this.props.updateStrategyInfo}
+                getContainerSize={this.props.getContainerSize}
                 getElementType={this.getElementType}
                 getLog={this.props.getLog}
                 getMousePos={this.props.getMousePos}

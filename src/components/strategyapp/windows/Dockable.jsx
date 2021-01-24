@@ -500,18 +500,23 @@ class Dockable extends Component
     {
         let { is_dropdown_active } = this.state;
 
-        if (!is_dropdown_active)
+        if (!is_dropdown_active && this.dropdownGroup !== null)
         {
+            const container_size = this.props.getContainerSize();
             const btn_rect = this.dropdownBtn.getBoundingClientRect();
-    
-            this.dropdownGroup.style.left = btn_rect.x + 'px';
+            
+            this.dropdownGroup.style.left = Math.min(btn_rect.x, container_size.width - 155) + 'px';
             this.dropdownGroup.style.top = (btn_rect.height+6) + 'px';
             this.dropdownGroup.style.display = 'block';
             is_dropdown_active = true;
         }
-        else
+        else if (this.dropdownGroup !== null)
         {
             this.dropdownGroup.style.display = 'none';
+            is_dropdown_active = false;
+        }
+        else
+        {
             is_dropdown_active = false;
         }
 
@@ -520,7 +525,7 @@ class Dockable extends Component
 
     onDropdownItem = (e) =>
     {
-        if (e.target.className.includes('dropdown-item'))
+        if (typeof(e.target.className) === 'string' && e.target.className.includes('dropdown-item'))
         {
             this.onTabClick(e);
         }

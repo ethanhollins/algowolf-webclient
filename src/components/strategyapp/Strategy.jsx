@@ -160,6 +160,7 @@ class Strategy extends Component
                             removeWindowsRef={this.removeWindowsRef}
                             clone={this.props.clone}
                             getAppContainer={this.props.getAppContainer}
+                            getContainerSize={this.props.getContainerSize}
                             convertScreenUnitToWorldUnit={this.props.convertScreenUnitToWorldUnit}
                             convertWorldUnitToScreenUnit={this.props.convertWorldUnitToScreenUnit}
                             getMousePos={this.props.getMousePos}

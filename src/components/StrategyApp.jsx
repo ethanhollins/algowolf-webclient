@@ -435,6 +435,7 @@ class StrategyApp extends Component
                         clone={this.clone}
                         isDemo={this.props.isDemo}
                         getAppContainer={this.getAppContainer}
+                        getContainerSize={this.getContainerSize}
                         convertScreenUnitToWorldUnit={this.convertScreenUnitToWorldUnit}
                         convertWorldUnitToScreenUnit={this.convertWorldUnitToScreenUnit}
                         getMousePos={this.getMousePos}
@@ -497,6 +498,7 @@ class StrategyApp extends Component
                         getCookies={this.props.getCookies}
                         getHeaders={this.props.getHeaders}
                         getAppContainer={this.getAppContainer}
+                        getContainerSize={this.getContainerSize}
                         convertScreenUnitToWorldUnit={this.convertScreenUnitToWorldUnit}
                         convertWorldUnitToScreenUnit={this.convertWorldUnitToScreenUnit}
                         getMousePos={this.getMousePos}

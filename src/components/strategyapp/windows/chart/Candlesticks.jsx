@@ -64,10 +64,10 @@ class Candlesticks extends Component
 
             if (candle[0] > candle[3]) 
             {
-                body_color = this.getBodySettings()['short'];
+                body_color = this.getBodySettings()['short'] + parseInt(255 * opacity).toString(16);
                 // console.log(body_color);
-                outline_color = this.getOutlineSettings()['short'];
-                wick_color = this.getWickSettings()['short'];
+                outline_color = this.getOutlineSettings()['short'] + parseInt(255 * opacity).toString(16);
+                wick_color = this.getWickSettings()['short'] + parseInt(255 * opacity).toString(16);
                 ctx.lineWidth = 0.5;
 
                 wick_up_size = candle[1] - candle[0];
@@ -84,9 +84,9 @@ class Candlesticks extends Component
             }
             else 
             {
-                body_color = this.getBodySettings()['long'];
-                outline_color = this.getOutlineSettings()['long'];
-                wick_color = this.getWickSettings()['long'];
+                body_color = this.getBodySettings()['long'] + parseInt(255 * opacity).toString(16);
+                outline_color = this.getOutlineSettings()['long'] + parseInt(255 * opacity).toString(16);
+                wick_color = this.getWickSettings()['long'] + parseInt(255 * opacity).toString(16);
                 ctx.lineWidth = 0.5;
 
                 wick_up_size = candle[1] - candle[3];
