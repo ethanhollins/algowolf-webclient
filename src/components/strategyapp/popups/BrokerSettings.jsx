@@ -70,33 +70,40 @@ class BrokerSettings extends Component
         let { modes, brokers } = this.state;
         const broker_id = this.props.getPopup().opened;
 
-        // Call Api Connect EPT
-        const { REACT_APP_API_URL } = process.env;
-        const reqOptions = {
-            method: 'POST',
-            headers: this.props.getHeaders(),
-            credentials: 'include',
-            body: JSON.stringify(
-                Object.assign({}, { broker_id: broker_id }, brokers[broker_id])
-            )
-        }
-
-        const res = await fetch(
-            `${REACT_APP_API_URL}/broker`,
-            reqOptions
-        );
-
-        const data = await res.json();
-        if (res.status === 200)
+        if (brokers[broker_id].broker === 'spotware')
         {
-            brokers[broker_id] = data;
-            modes[broker_id] = 'edit';
-    
-            this.setState({ brokers });
+            // Call spotware OAuth
         }
         else
         {
-            return data.message;
+            // Call Api Connect EPT
+            const { REACT_APP_API_URL } = process.env;
+            const reqOptions = {
+                method: 'POST',
+                headers: this.props.getHeaders(),
+                credentials: 'include',
+                body: JSON.stringify(
+                    Object.assign({}, { broker_id: broker_id }, brokers[broker_id])
+                )
+            }
+    
+            const res = await fetch(
+                `${REACT_APP_API_URL}/broker`,
+                reqOptions
+            );
+    
+            const data = await res.json();
+            if (res.status === 200)
+            {
+                brokers[broker_id] = data;
+                modes[broker_id] = 'edit';
+        
+                this.setState({ brokers });
+            }
+            else
+            {
+                return data.message;
+            }
         }
 
     }
@@ -170,7 +177,7 @@ class BrokerSettings extends Component
                     result.push(
                         <div key={broker_id} className={'popup category-btn' + this.isSelected(broker_id)} onClick={this.onChangeCategory} name={broker_id}>
                             <div className='popup category-left'>
-                                <ReactSVG className='popup category-left-logo' src={`./${broker_info.broker}_logo.svg`} />
+                                {this.getBrokerImage(broker_info)}
                                 <span className='popup category-left-name'>{broker_name}</span>
                             </div>
                             <div className='popup category-right'><FontAwesomeIcon icon={faChevronRight} className='popup category-icon' /></div>
@@ -358,7 +365,7 @@ class BrokerSettings extends Component
                         onClick={this.setBroker.bind(this)}
                         name='oanda'
                     >
-                        <ReactSVG className='popup broker-logo' src="./oanda_logo.svg" />
+                        <ReactSVG className='popup broker-logo' src={process.env.PUBLIC_URL + "/oanda_logo.svg"} />
                         <div className='popup broker-text'>Oanda</div>
                     </div>
                     <div 
@@ -366,8 +373,16 @@ class BrokerSettings extends Component
                         onClick={this.setBroker.bind(this)}
                         name='ig'
                     >
-                        <ReactSVG className='popup broker-logo' src="./ig_logo.svg" />
+                        <ReactSVG className='popup broker-logo' src={process.env.PUBLIC_URL + "/ig_logo.svg"} />
                         <div className='popup broker-text'>IG Markets</div>
+                    </div>
+                    <div 
+                        className={'popup broker disabled ' + this.isItemSelected('spotware', broker_info.broker)}
+                        onClick={this.setBroker.bind(this)}
+                        name='spotware'
+                    >
+                        <img className='popup broker-logo' src={process.env.PUBLIC_URL + '/ic_markets_logo.png'} />
+                        <div className='popup broker-text'>IC Markets</div>
                     </div>
                 </div>
             </div>
@@ -413,7 +428,7 @@ class BrokerSettings extends Component
                     </div>
                     <div className='popup row'>
                         <div className='popup center' onClick={this.onConnect.bind(this)}>
-                            <div className='popup broker-btn'>Connect</div>
+                            <div className='popup connect-btn'>Connect</div>
                         </div>
                     </div>
 
@@ -451,7 +466,21 @@ class BrokerSettings extends Component
                     </div>
                     <div className='popup row'>
                         <div className='popup center' onClick={this.onConnect.bind(this)}>
-                            <div className='popup broker-btn'>Connect</div>
+                            <div className='popup connect-btn'>Connect</div>
+                        </div>
+                    </div>
+
+                    </React.Fragment>
+                );
+            }
+            else if (broker_info.broker === 'spotware')
+            {
+                stage_one_elem = (
+                    <React.Fragment key={selected + '_one'}>
+
+                    <div className='popup row'>
+                        <div className='popup center' onClick={this.onConnect.bind(this)}>
+                            <div className='popup connect-btn'>Connect</div>
                         </div>
                     </div>
 
@@ -510,7 +539,7 @@ class BrokerSettings extends Component
                         onClick={this.setBroker.bind(this)}
                         name='oanda'
                     >
-                        <ReactSVG className='popup broker-logo' src="./oanda_logo.svg" />
+                        <ReactSVG className='popup broker-logo' src={process.env.PUBLIC_URL + '/oanda_logo.svg'} />
                         <div className='popup broker-text'>Oanda</div>
                     </div>
                     <div 
@@ -518,8 +547,16 @@ class BrokerSettings extends Component
                         onClick={this.setBroker.bind(this)}
                         name='ig'
                     >
-                        <ReactSVG className='popup broker-logo' src="./ig_logo.svg" />
+                        <ReactSVG className='popup broker-logo' src={process.env.PUBLIC_URL + '/ig_logo.svg'} />
                         <div className='popup broker-text'>IG Markets</div>
+                    </div>
+                    <div 
+                        className={'popup broker' + this.isItemSelected('spotware', broker_info.broker)}
+                        onClick={this.setBroker.bind(this)}
+                        name='spotware'
+                    >
+                        <img className='popup broker-logo' src={process.env.PUBLIC_URL + '/ic_markets_logo.png'} />
+                        <div className='popup broker-text'>IC Markets</div>
                     </div>
                 </div>
             </div>
@@ -659,6 +696,22 @@ class BrokerSettings extends Component
         let { modes } = this.state;
         modes[broker_id] = new_mode;
         this.setState({ modes });
+    }
+
+    getBrokerImage(broker_info)
+    {
+        if (broker_info.broker === 'oanda')
+        {
+            return <ReactSVG className='popup category-left-logo' src={process.env.PUBLIC_URL + '/oanda_logo.svg'} />;
+        }
+        else if (broker_info.broker === 'ig')
+        {
+            return <ReactSVG className='popup category-left-logo' src={process.env.PUBLIC_URL + '/ig_logo.svg'} />;
+        }
+        else if (broker_info.broker === 'spotware')
+        {
+            return <img className='popup category-left-logo' src={process.env.PUBLIC_URL + '/ic_markets_logo.png'} />;
+        }
     }
 }
 
