@@ -278,7 +278,11 @@ class Strategy extends Component
             for (let k in data)
             {
                 // Handle chart important events
-                if (data[k].type === 'marketentry')
+                if (
+                    data[k].type === 'marketentry' ||
+                    data[k].type === 'stopentry' ||
+                    data[k].type === 'limitentry'
+                )
                 {
                     this.addPosition(
                         data[k].item
@@ -289,6 +293,9 @@ class Strategy extends Component
                     this.updatePosition(
                         data[k].item
                     );
+                    this.updateOrder(
+                        data[k].item
+                    );
                 }
                 else if (
                     data[k].type === 'positionclose' ||
@@ -297,6 +304,23 @@ class Strategy extends Component
                 )
                 {
                     this.deletePosition(
+                        data[k].item
+                    );
+                }
+                else if (
+                    data[k].type === 'stoporder' ||
+                    data[k].type === 'limitorder'
+                )
+                {
+                    this.addOrder(
+                        data[k].item
+                    );
+                }
+                else if (
+                    data[k].type === 'ordercancel'
+                )
+                {
+                    this.deleteOrder(
                         data[k].item
                     );
                 }
@@ -404,6 +428,9 @@ class Strategy extends Component
         {
             const broker_id = this.getCurrentAccount().split('.')[0];
             
+            // Delete existing order
+            this.deleteOrder(position);
+
             strategy.brokers[broker_id].positions.push(position);
             this.props.updateStrategyInfo();
         }
@@ -440,6 +467,55 @@ class Strategy extends Component
             {
                 if (strategy.brokers[broker_id].positions[j].order_id === position.order_id)
                     strategy.brokers[broker_id].positions.splice(j, 1);
+            }
+            this.props.updateStrategyInfo();
+        }
+    }
+
+    addOrder = (order) =>
+    {
+        let strategy = this.getStrategyInfo();
+
+        if (strategy !== undefined)
+        {
+            const broker_id = this.getCurrentAccount().split('.')[0];
+            
+            strategy.brokers[broker_id].orders.push(order);
+            this.props.updateStrategyInfo();
+        }
+    }
+
+    updateOrder = (order) =>
+    {
+        let strategy = this.getStrategyInfo();
+
+        if (strategy !== undefined)
+        {
+            const broker_id = this.getCurrentAccount().split('.')[0];
+
+            for (let j = 0; j < strategy.brokers[broker_id].orders.length; j++)
+            {
+                if (strategy.brokers[broker_id].orders[j].order_id === order.order_id)
+                {
+                    strategy.brokers[broker_id].orders[j] = order;
+                }
+            }
+            this.props.updateStrategyInfo();
+        }
+    }
+
+    deleteOrder = (order) =>
+    {
+        let strategy = this.getStrategyInfo();
+
+        if (strategy !== undefined)
+        {
+            const broker_id = this.getCurrentAccount().split('.')[0];
+
+            for (let j = 0; j < strategy.brokers[broker_id].orders.length; j++)
+            {
+                if (strategy.brokers[broker_id].orders[j].order_id === order.order_id)
+                    strategy.brokers[broker_id].orders.splice(j, 1);
             }
             this.props.updateStrategyInfo();
         }
