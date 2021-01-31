@@ -35,7 +35,9 @@ class Strategy extends Component
         input_variables: {},
         variables_preset: {},
         selected_chart: null,
-        event_queue: []
+        event_queue: [],
+        current_timestamp: 0,
+        selected_offset: 0
     }
 
     async componentDidMount()
@@ -207,6 +209,9 @@ class Strategy extends Component
                             getPositions={this.getPositions}
                             getOrders={this.getOrders}
                             getCurrentTimestamp={this.getCurrentTimestamp}
+                            setCurrentTimestamp={this.setCurrentTimestamp}
+                            setSelectedOffset={this.setSelectedOffset}
+                            getSelectedOffset={this.getSelectedOffset}
                             setSelectedChart={this.setSelectedChart}
                             getSelectedChart={this.getSelectedChart}
                             // Other Window Functions
@@ -860,6 +865,26 @@ class Strategy extends Component
                 }
             }
         }
+    }
+
+    setSelectedOffset = (reference_timestamp, selected_offset) =>
+    {
+        this.setState({ reference_timestamp, selected_offset });
+    }
+
+    getSelectedOffset = () =>
+    {
+        return this.state.selected_offset;
+    }
+
+    getCurrentTimestamp = () =>
+    {
+        return this.state.current_timestamp;
+    }
+
+    setCurrentTimestamp = (current_timestamp) =>
+    {
+        this.setState({ current_timestamp });
     }
 
     async setCurrentAccount()

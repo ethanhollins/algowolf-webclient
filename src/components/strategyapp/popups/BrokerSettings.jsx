@@ -69,15 +69,17 @@ class BrokerSettings extends Component
     {
         let { modes, brokers } = this.state;
         const broker_id = this.props.getPopup().opened;
+        const { REACT_APP_API_URL } = process.env;
 
         if (brokers[broker_id].broker === 'spotware')
         {
             // Call spotware OAuth
+            const url = `https://connect.spotware.com/apps/auth?client_id=2096_sEzU1jyvCjvNMo2ViU8YnZha8UQmuHokkaXJDVD7fVEoIc1wx3&redirect_uri=http://127.0.0.1:3004/auth/spotware&scope=trading`;
+            window.location.href = url;
         }
         else
         {
             // Call Api Connect EPT
-            const { REACT_APP_API_URL } = process.env;
             const reqOptions = {
                 method: 'POST',
                 headers: this.props.getHeaders(),
@@ -232,12 +234,36 @@ class BrokerSettings extends Component
         if (broker_info.broker === 'oanda')
         {
             stage_one_elem = (
+                <React.Fragment>
+
+                <div className='popup row'>
+                    <div id='popup_demo_selector'>
+                        <div 
+                            id='popup_demo_left' 
+                            className={'disabled ' + this.isItemSelected(false, broker_info.is_demo)}
+                            onClick={this.setIsDemo.bind(this)}
+                            name='live'
+                        >
+                            Live
+                        </div>
+                        <div 
+                            id='popup_demo_right' 
+                            className={'disabled ' + this.isItemSelected(true, broker_info.is_demo)}
+                            onClick={this.setIsDemo.bind(this)}
+                            name='demo'
+                        >
+                            Demo
+                        </div>
+                    </div>
+                </div>
                 <div key={selected + '_one'} className='popup row'>
                     <div className='popup input'>
                         <div className='popup form-title'>Access Token</div>
                         <div className='popup text-read'>********************************-********************************</div>
                     </div>
                 </div>
+
+                </React.Fragment>
             );
         }
         else if (broker_info.broker === 'ig')
@@ -245,6 +271,26 @@ class BrokerSettings extends Component
             stage_one_elem = (
                 <React.Fragment key={selected + '_one'}>
 
+                <div className='popup row'>
+                    <div id='popup_demo_selector'>
+                        <div 
+                            id='popup_demo_left' 
+                            className={'disabled ' + this.isItemSelected(false, broker_info.is_demo)}
+                            onClick={this.setIsDemo.bind(this)}
+                            name='live'
+                        >
+                            Live
+                        </div>
+                        <div 
+                            id='popup_demo_right' 
+                            className={'disabled ' + this.isItemSelected(true, broker_info.is_demo)}
+                            onClick={this.setIsDemo.bind(this)}
+                            name='demo'
+                        >
+                            Demo
+                        </div>
+                    </div>
+                </div>
                 <div className='popup row'>
                     <div className='popup input'>
                         <div className='popup form-title'>Username</div>
@@ -337,26 +383,6 @@ class BrokerSettings extends Component
                     />
                 </div>
             </div>
-            <div className='popup row'>
-                <div id='popup_demo_selector'>
-                    <div 
-                        id='popup_demo_left' 
-                        className={'disabled ' + this.isItemSelected(false, broker_info.is_demo)}
-                        onClick={this.setIsDemo.bind(this)}
-                        name='live'
-                    >
-                        Live
-                    </div>
-                    <div 
-                        id='popup_demo_right' 
-                        className={'disabled ' + this.isItemSelected(true, broker_info.is_demo)}
-                        onClick={this.setIsDemo.bind(this)}
-                        name='demo'
-                    >
-                        Demo
-                    </div>
-                </div>
-            </div>
             <div className='popup column'>
                 {/* <div className='popup title underline'>Broker</div> */}
                 <div id='popup_broker_selector'>
@@ -381,8 +407,8 @@ class BrokerSettings extends Component
                         onClick={this.setBroker.bind(this)}
                         name='spotware'
                     >
-                        <img className='popup broker-logo' src={process.env.PUBLIC_URL + '/ic_markets_logo.png'} />
-                        <div className='popup broker-text'>IC Markets</div>
+                        <img className='popup broker-logo' src={process.env.PUBLIC_URL + '/ctrader_logo.png'} />
+                        <div className='popup broker-text'>CTrader</div>
                     </div>
                 </div>
             </div>
@@ -418,6 +444,26 @@ class BrokerSettings extends Component
                     <React.Fragment key={selected + '_one'}>
 
                     <div className='popup row'>
+                        <div id='popup_demo_selector'>
+                            <div 
+                                id='popup_demo_left' 
+                                className={this.isItemSelected(false, broker_info.is_demo)}
+                                onClick={this.setIsDemo.bind(this)}
+                                name='live'
+                            >
+                                Live
+                            </div>
+                            <div 
+                                id='popup_demo_right' 
+                                className={this.isItemSelected(true, broker_info.is_demo)}
+                                onClick={this.setIsDemo.bind(this)}
+                                name='demo'
+                            >
+                                Demo
+                            </div>
+                        </div>
+                    </div>
+                    <div className='popup row'>
                         <div className='popup input'>
                             <div className='popup form-title'>Access Token</div>
                             <input 
@@ -440,6 +486,26 @@ class BrokerSettings extends Component
                 stage_one_elem = (
                     <React.Fragment key={selected + '_one'}>
 
+                    <div className='popup row'>
+                        <div id='popup_demo_selector'>
+                            <div 
+                                id='popup_demo_left' 
+                                className={this.isItemSelected(false, broker_info.is_demo)}
+                                onClick={this.setIsDemo.bind(this)}
+                                name='live'
+                            >
+                                Live
+                            </div>
+                            <div 
+                                id='popup_demo_right' 
+                                className={this.isItemSelected(true, broker_info.is_demo)}
+                                onClick={this.setIsDemo.bind(this)}
+                                name='demo'
+                            >
+                                Demo
+                            </div>
+                        </div>
+                    </div>
                     <div className='popup row'>
                         <div className='popup input'>
                             <div className='popup form-title'>Username</div>
@@ -511,26 +577,6 @@ class BrokerSettings extends Component
                     />
                 </div>
             </div>
-            <div className='popup row'>
-                <div id='popup_demo_selector'>
-                    <div 
-                        id='popup_demo_left' 
-                        className={this.isItemSelected(false, broker_info.is_demo)}
-                        onClick={this.setIsDemo.bind(this)}
-                        name='live'
-                    >
-                        Live
-                    </div>
-                    <div 
-                        id='popup_demo_right' 
-                        className={this.isItemSelected(true, broker_info.is_demo)}
-                        onClick={this.setIsDemo.bind(this)}
-                        name='demo'
-                    >
-                        Demo
-                    </div>
-                </div>
-            </div>
             <div className='popup column'>
                 {/* <div className='popup title underline'>Broker</div> */}
                 <div id='popup_broker_selector'>
@@ -555,8 +601,8 @@ class BrokerSettings extends Component
                         onClick={this.setBroker.bind(this)}
                         name='spotware'
                     >
-                        <img className='popup broker-logo' src={process.env.PUBLIC_URL + '/ic_markets_logo.png'} />
-                        <div className='popup broker-text'>IC Markets</div>
+                        <img className='popup broker-logo' src={process.env.PUBLIC_URL + '/ctrader_logo.png'} />
+                        <div className='popup broker-text'>CTrader</div>
                     </div>
                 </div>
             </div>
@@ -710,7 +756,7 @@ class BrokerSettings extends Component
         }
         else if (broker_info.broker === 'spotware')
         {
-            return <img className='popup category-left-logo' src={process.env.PUBLIC_URL + '/ic_markets_logo.png'} />;
+            return <img className='popup category-left-logo' src={process.env.PUBLIC_URL + '/ctrader_logo.png'} />;
         }
     }
 }

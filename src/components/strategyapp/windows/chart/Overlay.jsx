@@ -67,7 +67,7 @@ class Overlay extends Component
                     let i_val = values[i][c_x][y];
                     if (i_val === null || ohlc === undefined || ohlc[x][0] === null) continue;
 
-                    if (!is_future && current_timestamp !== null && timestamps[x] + period_offset > current_timestamp)
+                    if (!is_future && this.props.isBacktest() && current_timestamp !== null && timestamps[x] + period_offset > current_timestamp)
                     {
                         is_future = true;
                         ctx.stroke();

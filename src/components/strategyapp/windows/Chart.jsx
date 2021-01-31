@@ -279,6 +279,7 @@ class Chart extends Component
                     getWindowInfo={this.getWindowInfo}
                     getSettings={this.getSettings}
                     getChartSettingsLayout={this.getChartSettingsLayout}
+                    isBacktest={this.isBacktest}
                 />
                 {this.generateOverlays()}
                 {this.generateStudies()}
@@ -541,7 +542,7 @@ class Chart extends Component
 
     onBarHover(mouse_pos, is_top, hovered)
     {
-        if (this.getChart() !== undefined && this.isBacktest())
+        if (this.getChart() !== undefined)
         {
             if (is_top)
             {
@@ -688,22 +689,26 @@ class Chart extends Component
         {
             if (is_down)
             {
-                if (this.isBacktest())
+                // if (this.isBacktest())
+                // {
+                if (isinitialized && before_change !== null && is_top)
                 {
-                    if (isinitialized && before_change !== null && is_top)
+                    if (Math.abs(pos.x - before_change.x) < 1 && Math.abs(pos.y - before_change.y) < 1)
                     {
-                        if (Math.abs(pos.x - before_change.x) < 1 && Math.abs(pos.y - before_change.y) < 1)
+                        const timestamp = this.isWithinBarBounds(mouse_pos);
+                        if (timestamp !== null)
                         {
-                            const timestamp = this.isWithinBarBounds(mouse_pos);
-                            if (timestamp !== null)
-                            {
-                                this.props.setCurrentTimestamp(timestamp + period_offset);
-                            }
+                            this.props.setCurrentTimestamp(timestamp + period_offset);
+                        }
+                        else if (!this.isBacktest())
+                        {
+                            this.props.setCurrentTimestamp(timestamp);
                         }
                     }
-    
-                    this.props.setSelectedOffset(this.getTimestamps()[0], period_offset);
                 }
+
+                this.props.setSelectedOffset(this.getTimestamps()[0], period_offset);
+                // }
                 this.props.setSelectedChart(this);
             }
         }
@@ -946,6 +951,7 @@ class Chart extends Component
                         getPeriod={this.getPeriod}
                         getPeriodOffsetSeconds={this.getPeriodOffsetSeconds}
                         getSettings={this.getSettings}
+                        isBacktest={this.isBacktest}
                     />
                 );
             }
@@ -993,6 +999,7 @@ class Chart extends Component
                         getPeriodOffsetSeconds={this.getPeriodOffsetSeconds}
                         getSettings={this.getSettings}
                         resizePortion={this.resizePortion}
+                        isBacktest={this.isBacktest}
                     />
                 );
             }
@@ -1374,7 +1381,7 @@ class Chart extends Component
                         
                     let timestamp;
                     let timestamp_idx;
-                    if (this.isBacktest())
+                    if (this.props.getCurrentTimestamp())
                     {
                         timestamp = Math.min(
                             this.props.getCurrentTimestamp(),
@@ -1401,7 +1408,7 @@ class Chart extends Component
 
         if (x_pos === undefined)
         {
-            if (this.isBacktest())
+            if (this.props.getCurrentTimestamp())
             {
                 const timestamp_idx = this.getTimestampIdxWithOffset(
                     this.props.getCurrentTimestamp(),
@@ -2882,7 +2889,7 @@ class Chart extends Component
         const timestamps = this.getTimestamps();
         // Return undefined if timestamp is greater than latest existing timestamp
         if (
-            (!this.isBacktest() && 
+            (!this.isBacktest() && this.getNextTimestamp() !== null &&
                 ts >= this.getNextTimestamp() + this.getPeriodOffsetSeconds(this.getChart().period)) ||
             ts < timestamps[0]
         )

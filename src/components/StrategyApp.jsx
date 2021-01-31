@@ -133,6 +133,7 @@ class StrategyApp extends Component
             this.props.visitorCounter();
         }
         
+        this.handleAuth();
 
         this.is_loaded = true;
     }
@@ -254,6 +255,11 @@ class StrategyApp extends Component
         e.preventDefault();
     }
 
+    async handleAuth()
+    {
+        
+    }
+    
     showLoadScreen = () =>
     {
         const { show_load_screen } = this.state;

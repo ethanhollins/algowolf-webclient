@@ -260,7 +260,7 @@ class Study extends Component
                         continue;
                     }
 
-                    if (!is_future && current_timestamp !== null && timestamps[x] + period_offset > current_timestamp)
+                    if (!is_future && this.props.isBacktest() && current_timestamp !== null && timestamps[x] + period_offset > current_timestamp)
                     {
                         is_future = true;
                         ctx.stroke();

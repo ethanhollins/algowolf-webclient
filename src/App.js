@@ -7,6 +7,7 @@ import {
 import StrategyApp from './components/StrategyApp';
 import Login from './components/Login';
 import Logout from './components/Logout';
+import Auth from './components/Auth';
 import { config } from '@fortawesome/fontawesome-svg-core'
 import Cookies from 'universal-cookie';
 import moment from "moment-timezone";
@@ -30,7 +31,7 @@ class App extends Component
 
     render() {
         return (
-            <Router >
+            <Router component={App}>
                 <Switch>
                     <Route exact path="/">
                         <Redirect to="/login"/>
@@ -47,6 +48,9 @@ class App extends Component
                     </Route>
                     <Route exact path="/app">
                         {this.getConditionalAppComponent()}
+                    </Route>
+                    <Route path="/auth">
+                        {this.getConditionalAuthComponent()}
                     </Route>
                     <Route exact path="/holygrail">
                         <Redirect to="/holygrail/demo"/>
@@ -74,9 +78,22 @@ class App extends Component
 
     getConditionalLoginComponent()
     {
+        const queryString = window.location.search;
+        let params = new URLSearchParams(queryString);
+        
         if (this.state.user_id !== null)
         {
-            return <Redirect to="/app"/>;
+            const redirect = params.get('redirect');
+            params.delete('redirect');
+            console.log(redirect);
+            if (redirect)
+            {
+                return <Redirect to={`/auth/${redirect}?${params.toString()}`}/>;
+            }
+            else
+            {
+                return <Redirect to={"/app?"+params.toString()}/>;
+            }
         }
         else
         {
@@ -93,9 +110,10 @@ class App extends Component
 
     getConditionalAppComponent()
     {
+        const queryString = window.location.search;
         if (this.state.user_id === null)
         {
-            return <Redirect to="/login"/>;
+            return <Redirect to={"/login"+queryString}/>;
         }
         else
         {
@@ -107,6 +125,13 @@ class App extends Component
                 checkAuthorization={this.checkAuthorization}
             />
         }
+    }
+
+    getConditionalAuthComponent()
+    {
+        return <Auth 
+            getHeaders={this.getHeaders}
+        />
     }
 
     async checkAuthorization()
