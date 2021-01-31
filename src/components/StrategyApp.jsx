@@ -731,7 +731,7 @@ class StrategyApp extends Component
 
         const keys = this.getKeys();
 
-        if (!keys.includes(SPACEBAR) && this.is_loaded && update_pos)
+        if (!keys.includes(SPACEBAR) && this.is_loaded && update_pos && this.strategy !== undefined)
         {
             this.setState({ mouse_pos });
             for (let w of this.strategy.windows)
