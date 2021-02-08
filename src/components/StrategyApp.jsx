@@ -1662,8 +1662,6 @@ class StrategyApp extends Component
 
     calculateAllChartIndicators = (chart) =>
     {
-        console.log('CHART');
-        console.log(chart);
         chart = this.filterChart(chart, false);
 
         const { indicators } = this.state;
