@@ -459,6 +459,7 @@ class StrategyApp extends Component
                         getPopup={this.getPopup}
                         setShowLoadScreen={this.setShowLoadScreen}
                         getTimezones={this.getTimezones}
+                        convertIncomingPositionSize={this.convertIncomingPositionSize}
                         // Window Funcs
                         closeWindow={this.closeWindow}
                         windowExists={this.windowExists}
@@ -527,6 +528,7 @@ class StrategyApp extends Component
                         getPopup={this.getPopup}
                         setShowLoadScreen={this.setShowLoadScreen}
                         getTimezones={this.getTimezones}
+                        convertIncomingPositionSize={this.convertIncomingPositionSize}
                         // Window Funcs
                         closeWindow={this.closeWindow}
                         windowExists={this.windowExists}
@@ -1562,7 +1564,7 @@ class StrategyApp extends Component
 
         while (ts > until && i >= 0)
         {
-            if (chart.asks[i][0] !== null && chart.mids[i][0] !== null && chart.bids[i][0] !== null)
+            if (chart.asks && chart.asks[i] && chart.asks[i][0] !== null && chart.mids[i][0] !== null && chart.bids[i][0] !== null)
             {
                 filteredTimestamps.unshift(ts)
                 filteredAsks.unshift(chart.asks[i])
@@ -1660,6 +1662,8 @@ class StrategyApp extends Component
 
     calculateAllChartIndicators = (chart) =>
     {
+        console.log('CHART');
+        console.log(chart);
         chart = this.filterChart(chart, false);
 
         const { indicators } = this.state;
@@ -1698,7 +1702,7 @@ class StrategyApp extends Component
         const { indicators } = this.state;
         for (let ind of indicators)
         {
-            if (ind.product === chart.product)
+            if (ind.broker === chart.broker && ind.product === chart.product && ind.chart_period === chart.period)
             {
                 ind.reset();
             }
@@ -2569,6 +2573,38 @@ class StrategyApp extends Component
 
         metadata[strategy_id][item_id] = new_metadata;
         this.setState({ metadata });
+    }
+
+    convertOutgoingPositionSize = (broker, size) =>
+    {
+        if (broker === 'spotware')
+        {
+            return parseInt(size * 10000000);
+        }
+        else if (broker === 'oanda')
+        {
+            return parseInt(size * 1000000);
+        }
+        else
+        {
+            return size;
+        }
+    }
+
+    convertIncomingPositionSize = (broker, size) =>
+    {
+        if (broker === 'spotware')
+        {
+            return Math.round(size / 10000000 * 100) / 100;
+        }
+        else if (broker === 'oanda')
+        {
+            return Math.round(size / 1000000 * 100) / 100;
+        }
+        else
+        {
+            return size;
+        }
     }
 }
 

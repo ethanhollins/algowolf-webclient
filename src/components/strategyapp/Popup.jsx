@@ -8,6 +8,7 @@ import NotAvailable from './popups/NotAvailable';
 import AreYouSure from './popups/AreYouSure';
 import EmailSubscribe from './popups/EmailSubscribe';
 import EmailSubscribeComplete from './popups/EmailSubscribeComplete';
+import IndicatorSettings from './popups/IndicatorSettings';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faChevronRight, faPlus
@@ -215,6 +216,18 @@ class Popup extends Component
                     setHoverOn={this.setHoverOn}
                     setHoverOff={this.setHoverOff}
                     getTimezones={this.props.getTimezones}
+                />
+            }
+            else if (popup.type === 'indicator-settings')
+            {
+                return <IndicatorSettings 
+                    close={this.close}
+                    getPopup={this.props.getPopup}
+                    onChangeCategory={this.onChangeCategory}
+                    changeCategory={this.changeCategory}
+                    getWindowInfo={this.props.getWindowInfo}
+                    getStrategyId={this.props.getStrategyId}
+                    getStrategyInfo={this.props.getStrategyInfo}
                 />
             }
             else if (popup.type === 'welcome-demo')

@@ -9,7 +9,8 @@ import Drawings from '../paths/Paths';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ReactSVG } from 'react-svg';
 import { 
-    faCoin, faEye, faUndo, faDollarSign, faCog
+    faCoin, faEye, faUndo, faDollarSign, faCog,
+    faTimes
 } from '@fortawesome/pro-light-svg-icons';
 
 
@@ -667,7 +668,7 @@ class Chart extends Component
 
                 for (let study of this.studies)
                 {
-                    study.setStudyProperties(study.getResult());
+                    study.setStudyProperties();
                 }
             }
         }
@@ -1065,12 +1066,25 @@ class Chart extends Component
                     // const name = overlay.type.toUpperCase();
                     overlay_info.push(
                         <div key={i} className='chart overlay-item'>
-                            <div>
+                            <div
+                                className='chart ind-group'
+                                onMouseEnter={this.onIndicatorEnter}
+                                onMouseLeave={this.onIndicatorLeave}
+                            >
                                 <div className='chart values overlay-type'>
                                     {name}
                                 </div>
                                 <div className='chart values price-group'>
                                     {value_elems}
+                                </div>
+                                <div className='chart ind-settings'>
+                                    <FontAwesomeIcon 
+                                        className='chart ind-icon' icon={faCog} 
+                                        name={i} onClick={this.onOverlaySettings} 
+                                    />
+                                    <FontAwesomeIcon 
+                                        className='chart ind-icon' icon={faTimes} 
+                                    />
                                 </div>
                             </div>
                         </div>
@@ -1126,6 +1140,10 @@ class Chart extends Component
                         <div key={i} className='chart group study' style={{top: (start_pos.y + 5) + 'px', left: '5px'}}>
                             <div className='chart values type'>{name}</div>
                             {value_elems}
+                            <div className='chart ind-settings'>
+                                <FontAwesomeIcon className='chart ind-icon' icon={faCog} />
+                                <FontAwesomeIcon className='chart ind-icon' icon={faTimes} />
+                            </div>
                         </div>
                     );
                 }
@@ -1161,6 +1179,66 @@ class Chart extends Component
                 )
             }
         }
+    }
+
+    onIndicatorEnter = (e) =>
+    {
+        let elem = e.target;
+        while (elem.className !== 'chart ind-group')
+        {
+            elem = elem.parentNode;
+        }
+        
+        const settings = elem.children[elem.children.length-1];
+        settings.style.display = 'flex';
+    }
+
+    onIndicatorLeave = (e) =>
+    {
+        let elem = e.target;
+        while (elem.className !== 'chart ind-group')
+        {
+            elem = elem.parentNode;
+        }
+        
+        const settings = elem.children[elem.children.length-1];
+        settings.style.display = 'none';
+    }
+
+    onOverlaySettings = (e) =>
+    {
+        const idx = parseInt(e.target.getAttribute('name'));
+        console.log(idx);
+
+        const popup = {
+            type: 'indicator-settings',
+            size: {
+                width: 20,
+                height: 40
+            },
+            opened: 'properties',
+            properties: {
+                indicator: this.getOverlayIndicator(idx)
+            }
+        }
+        this.props.setPopup(popup);
+    }
+
+    onStudySettings = (e) =>
+    {
+        const idx = parseInt(e.target.getAttribute('name'));
+
+        const popup = {
+            type: 'indicator-settings',
+            size: {
+                width: 20,
+                height: 40
+            },
+            properties: {
+                indicator: this.getStudyIndicator(idx)
+            }
+        }
+        this.props.setPopup(popup);
     }
 
     update()
@@ -1208,10 +1286,6 @@ class Chart extends Component
                 this.props.resetIndicators(this.getChart());
                 this.props.updateChart(this.getBroker(), this.getProduct(), this.getPeriod(), data.ohlc);
 
-                for (let i = 0; i < this.studies.length; i++)
-                {
-                    this.studies[i].resetResult();
-                }
                 // Allow new data loading
                 is_loading = false;
                 this.setState({ is_loading });
@@ -1255,12 +1329,6 @@ class Chart extends Component
             overlays[i].draw();
         }
 
-        // Handle Price Line
-        if (!this.isBacktest())
-        {
-            this.handlePriceLine(ctx);
-        }
-
         // Handle Axis prices
         this.drawPrices(ctx, price_data);
 
@@ -1275,6 +1343,12 @@ class Chart extends Component
 
         // Handle Positions/Orders
         this.handleTrades(ctx);
+
+        // Handle Price Line
+        if (!this.isBacktest())
+        {
+            this.handlePriceLine(ctx);
+        }
 
         const studies = this.getStudyComponents();
 
@@ -2025,6 +2099,8 @@ class Chart extends Component
             const trade_label_height = 21;
             const trade_label_off = 20;
             const trade_label_inside_off = 7;
+
+            const lotsize = this.props.convertIncomingPositionSize(this.getBroker(), c_trade.lotsize);
             if (c_trade.order_type === 'limitorder')
             {
                 let text;
@@ -2040,7 +2116,7 @@ class Chart extends Component
                     direction_color = '#f39c12';
                 }
                 let text_width = ctx.measureText(text).width;
-                let position_size_width = ctx.measureText(String(parseInt(c_trade.lotsize))).width
+                let position_size_width = ctx.measureText(String(lotsize)).width
                 let trade_label_width = trade_label_inside_off*4 + Math.floor(text_width) + Math.floor(position_size_width);
 
                 // Fill Rect
@@ -2086,7 +2162,7 @@ class Chart extends Component
                 ctx.stroke();
 
                 ctx.fillText(
-                    String(parseInt(c_trade.lotsize)), 
+                    String(lotsize), 
                     (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3,
                     Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2
                 );
@@ -2106,7 +2182,7 @@ class Chart extends Component
                     direction_color = '#f39c12';
                 }
                 let text_width = ctx.measureText(text).width;
-                let position_size_width = ctx.measureText(String(parseInt(c_trade.lotsize))).width
+                let position_size_width = ctx.measureText(String(lotsize)).width
                 let trade_label_width = trade_label_inside_off*4 + Math.floor(text_width) + Math.floor(position_size_width);
 
                 // Fill Rect
@@ -2152,7 +2228,7 @@ class Chart extends Component
                 ctx.stroke();
 
                 ctx.fillText(
-                    String(parseInt(c_trade.lotsize)), 
+                    String(lotsize), 
                     (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3,
                     Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2
                 );
@@ -2169,7 +2245,7 @@ class Chart extends Component
                     text = 'SELL TRADE';
                 }
                 let text_width = ctx.measureText(text).width;
-                let position_size_width = ctx.measureText(String(parseInt(c_trade.lotsize))).width
+                let position_size_width = ctx.measureText(String(lotsize)).width
                 let trade_label_width = trade_label_inside_off*4 + Math.floor(text_width) + Math.floor(position_size_width);
 
                 // Fill Circle
@@ -2212,7 +2288,7 @@ class Chart extends Component
                 ctx.stroke();
 
                 ctx.fillText(
-                    String(parseInt(c_trade.lotsize)), 
+                    String(lotsize), 
                     (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3,
                     Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2
                 );

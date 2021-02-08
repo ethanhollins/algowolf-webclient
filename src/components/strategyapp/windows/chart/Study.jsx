@@ -220,76 +220,79 @@ class Study extends Component
             let current_pos = null;
             
             // Iterate rows
-            for (let y = 0; y < values[i][0].length; y++)
+            if (values[i].length > 0)
             {
-                let c_x = -1;
-                const color = properties.colors[i][y];
-                let is_future = false;
-
-                ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 1.0)`;
-                ctx.beginPath();
-
-                for (let x = 0; x < ohlc.length; x++) 
+                for (let y = 0; y < values[i][0].length; y++)
                 {
-                    if (ohlc[x][0] !== null) c_x += 1;
-                    if (x === 0) c_x = 0;
+                    let c_x = -1;
+                    const color = properties.colors[i][y];
+                    let is_future = false;
 
-                    let x_pos = (ohlc.length - x)+0.5;
-                    if (x_pos > pos.x + scale.x+1 || current_pos === null)
+                    ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 1.0)`;
+                    ctx.beginPath();
+
+                    for (let x = 0; x < ohlc.length; x++) 
                     {
-                        if (ohlc[x][0] !== null && values[i][c_x][y] !== null)
+                        if (ohlc[x][0] !== null) c_x += 1;
+                        if (x === 0) c_x = 0;
+
+                        let x_pos = (ohlc.length - x)+0.5;
+                        if (x_pos > pos.x + scale.x+1 || current_pos === null)
                         {
-                            // Move to first position
-                            current_pos = camera.convertWorldPosToScreenPos(
-                                { x: x_pos, y: values[i][c_x][y] },
-                                pos, size, scale
-                            );
+                            if (ohlc[x][0] !== null && values[i][c_x][y] !== null)
+                            {
+                                // Move to first position
+                                current_pos = camera.convertWorldPosToScreenPos(
+                                    { x: x_pos, y: values[i][c_x][y] },
+                                    pos, size, scale
+                                );
+                                ctx.moveTo(
+                                    current_pos.x + start_pos.x,
+                                    current_pos.y + start_pos.y
+                                );
+                            }
+                            continue
+                        }
+                        
+                        if (values[i][c_x] === undefined) continue;
+
+                        let i_val = values[i][c_x][y];
+                        if (i_val === null || ohlc === undefined || ohlc[x][0] === null)
+                        {
+                            continue;
+                        }
+
+                        if (!is_future && current_timestamp && timestamps[x] + period_offset > current_timestamp)
+                        {
+                            is_future = true;
+                            ctx.stroke();
+                            ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.2)`;
+                            ctx.beginPath();
                             ctx.moveTo(
                                 current_pos.x + start_pos.x,
                                 current_pos.y + start_pos.y
                             );
                         }
-                        continue
-                    }
-                    
-                    if (values[i][c_x] === undefined) continue;
 
-                    let i_val = values[i][c_x][y];
-                    if (i_val === null || ohlc === undefined || ohlc[x][0] === null)
-                    {
-                        continue;
-                    }
+                        current_pos = camera.convertWorldPosToScreenPos(
+                            { x: x_pos, y: Math.round(i_val * Math.pow(10, ind.precision)) / Math.pow(10, ind.precision) },
+                            pos, size, scale
+                        );
 
-                    if (!is_future && this.props.isBacktest() && current_timestamp !== null && timestamps[x] + period_offset > current_timestamp)
-                    {
-                        is_future = true;
-                        ctx.stroke();
-                        ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.2)`;
-                        ctx.beginPath();
-                        ctx.moveTo(
-                            current_pos.x + start_pos.x,
+                        // current_pos = camera.convertWorldPosToScreenPos(
+                        //     { x: x_pos, y: i_val },
+                        //     pos, size, scale
+                        // );
+
+                        ctx.lineTo(
+                            current_pos.x + start_pos.x, 
                             current_pos.y + start_pos.y
                         );
+                        if (x_pos < pos.x-1) break;
+
                     }
-
-                    current_pos = camera.convertWorldPosToScreenPos(
-                        { x: x_pos, y: Math.round(i_val * Math.pow(10, ind.precision)) / Math.pow(10, ind.precision) },
-                        pos, size, scale
-                    );
-
-                    // current_pos = camera.convertWorldPosToScreenPos(
-                    //     { x: x_pos, y: i_val },
-                    //     pos, size, scale
-                    // );
-
-                    ctx.lineTo(
-                        current_pos.x + start_pos.x, 
-                        current_pos.y + start_pos.y
-                    );
-                    if (x_pos < pos.x-1) break;
-
+                    ctx.stroke();
                 }
-                ctx.stroke();
             }
         }
         

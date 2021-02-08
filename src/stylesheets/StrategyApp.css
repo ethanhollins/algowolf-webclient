@@ -777,6 +777,10 @@ body {
     color: rgb(40,40,40);
 }
 
+.popup.header.no-border {
+    border: none;
+}
+
 .popup.content {
     display: flex;
     height: 100%;
@@ -788,7 +792,7 @@ body {
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    height: 10%;
+    height: 70px;
     border-top: 1px solid rgb(220,220,220);
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     user-select: none;
@@ -852,6 +856,27 @@ body {
     max-width: 200px;
     height: 100%;
     border-right: 1px solid rgb(220,220,220)
+}
+
+.popup.category-top {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    border-bottom: 1px solid rgb(220,220,220);
+}
+
+.popup.category-top > div:first-child {
+    margin-left: 15px;
+}
+
+.popup.category-top > div {
+    padding: 0 15px 5px 15px;
+    cursor: pointer;
+    border-bottom: 2px solid #FFFFFF00;
+}
+
+.popup.category-top > div.selected {
+    border-bottom: 2px solid #ff8103;
 }
 
 .popup.category-btn {
@@ -1551,8 +1576,10 @@ body {
 
 .chart.overlay-item > div {
     display: inline-flex;
+    align-items: center;
     box-sizing: border-box;
-    padding: 2px 5px 2px 10px;
+    margin-left: 5px;
+    padding: 1px 5px 1px 5px;
     background-color: rgba(255,255,255,0.7);
     border: 1px solid rgba(255,255,255,0);
     border-radius: 2px;
@@ -1568,9 +1595,45 @@ body {
     display: flex;
     align-items: center;
     background-color: rgba(255,255,255,0.7);
-    border-radius: 5px;
-    padding-left: 3px;
-    padding-right: 3px;
+    border-radius: 2px;
+    padding: 4px 5px 4px 5px;
+    border: 1px solid rgba(255,255,255,0);
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+}
+
+.chart.group.study:hover {
+    background-color: #FFF;
+    border: 1px solid rgb(180,180,180);
+}
+
+.chart.ind-settings {
+    display: none;
+    align-items: center;
+}
+
+.chart.ind-icon {
+    width: 16px;
+    height: 16px;
+    margin-left: 5px;
+    padding: 2px;
+    border-radius: 2px;
+    color: rgb(80,80,80);
+    cursor: pointer;
+}
+
+.chart.ind-icon > * {
+    pointer-events: none;
+}
+
+.chart.ind-icon:first-child {
+    margin-left: 10px;
+}
+
+.chart.ind-icon:hover {
+    /* background-color: #ffe9ca; */
+    color: #000;
 }
 
 .chart.product-btn {
@@ -1646,6 +1709,8 @@ body {
     display: flex;
     flex-direction: column;
     padding-left: 5px;
+    padding-top: 3px;
+    padding-bottom: 3px;
     line-height: 1.0em;
 }
 

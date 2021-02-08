@@ -49,7 +49,7 @@ class Candlesticks extends Component
             
             // Colors
             let opacity;
-            if (this.props.isBacktest() && current_timestamp !== null && timestamps[i] + period_offset > current_timestamp)
+            if (current_timestamp && timestamps[i] + period_offset > current_timestamp)
             {
                 opacity = 0.2;
             }

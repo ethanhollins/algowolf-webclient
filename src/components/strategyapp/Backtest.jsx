@@ -154,6 +154,7 @@ class Backtest extends Component
                             getKeys={this.props.getKeys}
                             setPopup={this.props.setPopup}
                             getPopup={this.props.getPopup}
+                            convertIncomingPositionSize={this.props.convertIncomingPositionSize}
                             // Window Funcs
                             closeWindow={this.props.closeWindow}
                             windowExists={this.props.windowExists}

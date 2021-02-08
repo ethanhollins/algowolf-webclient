@@ -159,6 +159,7 @@ class WindowWrapper extends Component
                 getPopup={this.props.getPopup}
                 getContextMenu={this.getContextMenu}
                 setContextMenu={this.setContextMenu}
+                convertIncomingPositionSize={this.props.convertIncomingPositionSize}
     
                 // Window Props
                 connectChart={this.props.connectChart}

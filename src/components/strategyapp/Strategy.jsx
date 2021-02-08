@@ -29,6 +29,9 @@ class Strategy extends Component
         sio: undefined,
         hide_shadows: false,
         loaded: [],
+        transactions: {},
+        positions: [],
+        orders: [],
         drawings: {},
         logs: {},
         info: {},
@@ -36,6 +39,7 @@ class Strategy extends Component
         variables_preset: {},
         selected_chart: null,
         event_queue: [],
+        current_idx: 0,
         current_timestamp: 0,
         selected_offset: 0
     }
@@ -175,6 +179,7 @@ class Strategy extends Component
                             getKeys={this.props.getKeys}
                             setPopup={this.props.setPopup}
                             getPopup={this.props.getPopup}
+                            convertIncomingPositionSize={this.props.convertIncomingPositionSize}
                             // Window Funcs
                             closeWindow={this.props.closeWindow}
                             windowExists={this.props.windowExists}
@@ -280,6 +285,8 @@ class Strategy extends Component
 
         socket.on('ontrade', (data) =>
         {
+            const { current_timestamp, transactions } = this.state;
+
             for (let k in data)
             {
                 // Handle chart important events
@@ -329,9 +336,13 @@ class Strategy extends Component
                         data[k].item
                     );
                 }
+                transactions[data[k].item.account_id].push(data[k]);
             }
 
-            // Add to transaction history
+            if (current_timestamp === null)
+            {
+                this.handleTransactions(current_timestamp);
+            }
         });
 
         socket.on('ongui', this.addToEventQueue);
@@ -357,48 +368,77 @@ class Strategy extends Component
         }
     }
 
+    handleLiveTransactions = (data, transactions) =>
+    {
+        if (!(data.account_id in transactions))
+        {
+            transactions[data.account_id] = [];
+        }
+
+        if (data.type === 'create_drawing')
+        {
+            // this.createDrawing(data.account_id, data.item.layer, data.item);
+            transactions[data.account_id].push(data);
+            return true;
+        }
+        else if (data.type === 'create_drawings')
+        {
+            for (let d of data.items)
+            {
+                // this.createDrawing(data.account_id, data.layer, d);
+                transactions[data.account_id].push(data);
+            }
+            return true;
+        }
+        else if (data.type === 'clear_drawing_layer')
+        {
+            // this.clearDrawingLayer(data.account_id, data.item);
+            transactions[data.account_id].push(data);
+            return true;
+        }
+        else if (data.type === 'clear_all_drawings')
+        {
+            // this.clearAllDrawings(data.account_id);
+            transactions[data.account_id].push(data);
+            return true;
+        }
+        else if (data.type === 'create_log')
+        {
+            // this.createLog(data.account_id, data);
+            transactions[data.account_id].push(data);
+            return true;
+        }
+        else if (data.type === 'create_info')
+        {
+            this.createInfo(data.account_id, data);
+        }
+        else if (data.type === 'activation')
+        {
+            this.setActivation(data);
+        }
+
+        return false;
+    }
+
     onGui = (data) =>
     {
+        let { transactions, current_timestamp } = this.state;
+        let update = false;
         if (data.type === 'message_queue')
         {
             for (let i of data.item)
             {
-                this.onGui(i);
+                update = this.handleLiveTransactions(i, transactions) || update;
             }
         }
         else
         {
-            if (data.type === 'create_drawing')
-            {
-                this.createDrawing(data.account_id, data.item.layer, data.item);
-            }
-            else if (data.type === 'create_drawings')
-            {
-                for (let d of data.items)
-                {
-                    this.createDrawing(data.account_id, data.layer, d);
-                }
-            }
-            else if (data.type === 'clear_drawing_layer')
-            {
-                this.clearDrawingLayer(data.account_id, data.item);
-            }
-            else if (data.type === 'clear_all_drawings')
-            {
-                this.clearAllDrawings(data.account_id);
-            }
-            else if (data.type === 'create_log')
-            {
-                this.createLog(data.account_id, data);
-            }
-            else if (data.type === 'create_info')
-            {
-                this.createInfo(data.account_id, data);
-            }
-            else if (data.type === 'activation')
-            {
-                this.setActivation(data);
-            }
+            update = this.handleLiveTransactions(data, transactions) || update;
+        }
+        
+        if (update && current_timestamp === null)
+        {
+            this.handleTransactions(current_timestamp);
         }
     }
 
@@ -423,7 +463,24 @@ class Strategy extends Component
         this.setState({ hide_shadows });
     }
 
-    handleKeys = () => {}
+    handleKeys = () =>
+    {
+        const keys = this.props.getKeys();
+        const { selected_offset } = this.state;
+        
+        if (keys.includes(ARROW_RIGHT))
+        {
+            const { current_timestamp } = this.state;
+            this.handleTransactions(this.getRoundedTimestamp(current_timestamp + selected_offset));
+            // this.updateInfo();
+        }
+        if (keys.includes(ARROW_LEFT))
+        {
+            const { current_timestamp } = this.state;
+            this.handleTransactions(this.getRoundedTimestamp(current_timestamp - selected_offset));
+            // this.updateInfo();
+        }
+    }
 
     addPosition = (position) =>
     {
@@ -526,6 +583,75 @@ class Strategy extends Component
         }
     }
 
+    handleCreatePosition = (positions, trans) =>
+    {
+        positions.push(trans.item);
+    }
+
+    handleCreatePositionFromOrder = (positions, orders, trans) =>
+    {
+        for (let i = 0; i < orders.length; i++)
+        {
+            if (orders[i].order_id === trans.item.prev.order_id)
+            {
+                orders.splice(i, 1);
+            }
+        }
+        positions.push(trans.item);
+    }
+
+    handleClosePosition = (positions, trans) =>
+    {
+        for (let i = 0; i < positions.length; i++)
+        {
+            if (positions[i].order_id === trans.item.order_id)
+            {
+                positions.splice(i, 1);
+            }
+        }
+    }
+
+    handleCreateOrder = (orders, trans) =>
+    {
+        orders.push(trans.item);
+    }
+
+    handleCancelOrder = (orders, trans) =>
+    {
+        for (let i = 0; i < orders.length; i++)
+        {
+            if (orders[i].order_id === trans.item.order_id)
+            {
+                orders.splice(i, 1);
+            }
+        }
+    }
+
+    handleModify = (positions, orders, trans) =>
+    {
+        const item = trans.item;
+        if (item.order_type === 'limitorder' || item.order_type === 'stoporder')
+        {
+            for (let i = 0; i < orders.length; i++)
+            {
+                if (orders[i].order_id === item.order_id)
+                {
+                    orders[i] = item;
+                }
+            }
+        }
+        else
+        {
+            for (let i = 0; i < positions.length; i++)
+            {
+                if (positions[i].order_id === item.order_id)
+                {
+                    positions[i] = item;
+                }
+            }
+        }
+    }
+
     getDrawingIdx = (drawings, account_id, layer, id) =>
     {
 
@@ -569,9 +695,18 @@ class Strategy extends Component
         this.setState({ drawings });
     }
 
-    createDrawing = (account_id, layer, drawing) =>
+    createDrawing = (account_id, layer, drawing, drawings) =>
     {
-        let { drawings } = this.state;
+        let update;
+        if (!drawings)
+        {
+            update = true;
+            drawings = this.state.drawings;
+        }
+        else
+        {
+            update = false;
+        }
 
         if (!(account_id in drawings))
         {
@@ -588,7 +723,8 @@ class Strategy extends Component
             drawings[account_id][layer].push(drawing);
         }
 
-        this.setState({ drawings });
+        if (update)
+            this.setState({ drawings });
     }
 
     deleteDrawing = (account_id, layer, drawing_id) =>
@@ -606,24 +742,48 @@ class Strategy extends Component
         }
     }
 
-    clearDrawingLayer = (account_id, layer) =>
+    clearDrawingLayer = (account_id, layer, drawings) =>
     {
-        let { drawings } = this.state;
+        let update;
+        if (!drawings)
+        {
+            update = true;
+            drawings = this.state.drawings;
+        }
+        else
+        {
+            update = false;
+        }
 
         if (account_id in drawings && layer in drawings[account_id])
         {
             drawings[account_id][layer] = [];
         }
+
+        if (update)
+            this.setState({ drawings });
     }
 
-    clearAllDrawings = (account_id) =>
+    clearAllDrawings = (account_id, drawings) =>
     {
-        let { drawings } = this.state;
+        let update;
+        if (!drawings)
+        {
+            update = true;
+            drawings = this.state.drawings;
+        }
+        else
+        {
+            update = false;
+        }
 
         if (account_id in drawings)
         {
             drawings[account_id] = {};
         }
+
+        if (update)
+            this.setState({ drawings });
     }
 
     setLogs = (account_id, data) =>
@@ -639,23 +799,31 @@ class Strategy extends Component
         this.setState({ logs });
     }
 
-    createLog = (account_id, data) =>
+    createLog = (account_id, data, logs) =>
     {
-        let { logs } = this.state;
+        let update;
+        if (!logs)
+        {
+            update = true;
+            logs = this.state.logs;
+        }
+        else
+        {
+            update = false;
+        }
 
         if (!(account_id in logs))
         {
             logs[account_id] = [];
         }
         logs[account_id].push(data);
-        this.setState({ logs });
+        if (update)
+            this.setState({ logs });
     }
 
     setInfo = (account_id, data) =>
     {
         let { info } = this.state;
-        console.log('SET INFO');
-        console.log(data);
         info = Object.assign({}, info, data);
         this.setState({ info });
     }
@@ -679,6 +847,89 @@ class Strategy extends Component
 
         info[data.product][data.period][String(data.timestamp)].push(data.item);
         this.setState({ info });
+    }
+
+    handleTransactions = (dest_timestamp) =>
+    {
+        // TODO:
+        //  - BLOCK LIVE TRANSACTION UPDATES IF CURRENT TIMESTAMP NOT NULL
+        //  - ADD LIVE TRANSACTIONS TO TRANSACTION LIST THEN USE handleTransactions to update
+        //  - HANDLE POSITION/ORDER EVENTS. Options:
+        //        - SAVE AND SEND MSG DIRECTLY FROM API 
+        //          (THIS ALLOWS LOOKING BACKWARDS WITH SCRIPT NOT RUNNING e.g manual)
+        //  - HANDLE ON TRADE (ADD TO TRANSACTIONS)
+        const account_code = this.getCurrentAccount();
+        let { current_idx, current_timestamp, drawings, logs, positions, orders, transactions } = this.state;
+        
+        if (current_timestamp !== null && dest_timestamp === current_timestamp) return;
+        else if (
+            (dest_timestamp !== null && current_timestamp === null) ||
+            dest_timestamp < current_timestamp
+        )
+        {
+            // Reset all vars and start from beginning
+            current_idx = 0;
+            logs[account_code] = [];
+            drawings[account_code] = {};
+        }
+        current_timestamp = dest_timestamp;
+        if (account_code in transactions)
+        {
+            transactions = transactions[account_code];
+            for (current_idx; current_idx < transactions.length; current_idx++)
+            {
+                const t = transactions[current_idx];
+                if (!t) continue;
+                
+                if (current_timestamp && t.timestamp > current_timestamp) break;
+                
+                switch (t.type)
+                {
+                    case 'marketentry':
+                        this.handleCreatePositionFromOrder(positions, orders, t);
+                        break;
+                    case 'limitentry':
+                    case 'stopentry':
+                        this.handleCreatePositionFromOrder(positions, orders, t);
+                        break;
+                    case 'limitorder':
+                    case 'stoporder':
+                        this.handleCreateOrder(orders, t);
+                        break;
+                    case 'positionclose':
+                    case 'stoploss':
+                    case 'takeprofit':
+                        this.handleClosePosition(positions, t);
+                        break;
+                    case 'ordercancel':
+                        this.handleCancelOrder(orders, t);
+                        break;
+                    case 'modify':
+                        this.handleModify(positions, orders, t);
+                        break;
+                    case 'create_drawing':
+                        this.createDrawing(account_code, t.item.layer, t.item, drawings);
+                        break;
+                    case 'clear_drawing_layer':
+                        this.clearDrawingLayer(account_code, t.item, drawings);
+                        break;
+                    case 'clear_all_drawings':
+                        this.clearAllDrawings(account_code, drawings);
+                        break;
+                    case 'create_log':
+                        this.createLog(account_code, t, logs);
+                        break;
+                }
+            }
+            
+            this.setState({ current_idx, current_timestamp, drawings, logs, positions, orders });
+        }
+    }
+
+    getRoundedTimestamp = (timestamp) =>
+    {
+        const { reference_timestamp, selected_offset } = this.state;
+        return timestamp - (timestamp - reference_timestamp) % selected_offset
     }
 
     setActivation = (data) =>
@@ -884,7 +1135,7 @@ class Strategy extends Component
 
     setCurrentTimestamp = (current_timestamp) =>
     {
-        this.setState({ current_timestamp });
+        this.handleTransactions(current_timestamp);
     }
 
     async setCurrentAccount()
@@ -1009,7 +1260,7 @@ class Strategy extends Component
 
     async retrieveAccountInfo(account_code)
     {
-        let { loaded } = this.state;
+        let { loaded, transactions } = this.state;
 
         if (!loaded.includes(account_code))
         {
@@ -1017,13 +1268,22 @@ class Strategy extends Component
             const account_id = account_code.split('.')[1];
             const account_info = await this.props.retrieveAccountInfo(this.props.id, broker_id, account_id);
     
-            console.log(account_info);
-
             // Set Account Info
-            if (account_info.drawings !== undefined)
-                this.setDrawings(account_code, account_info.drawings);
-            if (account_info.logs !== undefined)
-                this.setLogs(account_code, account_info.logs);
+            if (account_info.transactions !== undefined)
+            {
+                if (account_code in transactions)
+                {
+                    transactions[account_code] = account_info.transactions.concat(transactions[account_code]);
+                }
+                else
+                {
+                    transactions[account_code] = account_info.transactions;
+                }
+            }
+            // if (account_info.drawings !== undefined)
+            //     this.setDrawings(account_code, account_info.drawings);
+            // if (account_info.logs !== undefined)
+            //     this.setLogs(account_code, account_info.logs);
             if (account_info.info !== undefined)
                 this.setInfo(account_code, account_info.info);
             if (account_info.input_variables !== undefined)
@@ -1034,7 +1294,8 @@ class Strategy extends Component
                 this.setCurrentLocalVariablesPreset();
     
             loaded.push(account_code);
-            this.setState({ loaded });
+            this.setState({ loaded, transactions });
+            this.setCurrentTimestamp(null);
         }
     }
 
