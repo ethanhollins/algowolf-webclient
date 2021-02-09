@@ -1261,7 +1261,7 @@ class StrategyApp extends Component
         return backtestCharts[backtest_id][broker + ':' + product + ':' + period];
     }
 
-    async loadChart(broker_id, product)
+    async loadChart(broker_id, broker, product)
     {
         const { REACT_APP_API_URL } = process.env;
         const reqOptions = {
@@ -1269,7 +1269,7 @@ class StrategyApp extends Component
             headers: this.props.getHeaders(),
             credentials: 'include',
             body: JSON.stringify({
-                'broker': 'oanda',
+                'broker': broker,
                 'items': [product]
             })
         }
@@ -1287,16 +1287,21 @@ class StrategyApp extends Component
         }
     }
 
-    connectChart(broker_id, product, period)
+    connectChart(broker_id, broker, product, period)
     {
+        console.log('connect');
+        console.log(broker_id);
+        console.log(broker);
+        console.log(product);
+        console.log(period);
         const { sio } = this.state;
 
-        this.loadChart(broker_id, product);
+        this.loadChart(broker_id, broker, product);
         sio.emit('subscribe', {
             broker_id: broker_id,
             field: 'ontick',
             items: {
-                'oanda': {
+                [broker]: {
                     [product]: [period]
                 }
             }

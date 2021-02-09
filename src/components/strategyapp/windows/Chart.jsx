@@ -3735,7 +3735,7 @@ class Chart extends Component
 
         if (!this.isBacktest())
         {
-            this.props.connectChart(this.getBrokerId(), this.getProduct(), this.getPeriod());
+            this.props.connectChart(this.getBrokerId(), this.getBroker(), this.getProduct(), this.getPeriod());
         }
 
         const ohlc_data = await this.props.retrieveChartData(
