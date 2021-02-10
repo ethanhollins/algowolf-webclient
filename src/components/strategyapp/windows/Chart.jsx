@@ -1203,15 +1203,22 @@ class Chart extends Component
         const idx = parseInt(e.target.getAttribute('name'));
         console.log(idx);
 
+        // const popup = {
+        //     type: 'indicator-settings',
+        //     size: {
+        //         width: 20,
+        //         height: 40
+        //     },
+        //     opened: 'properties',
+        //     properties: {
+        //         indicator: this.getOverlayIndicator(idx)
+        //     }
+        // }
         const popup = {
-            type: 'indicator-settings',
+            type: 'not-available',
             size: {
-                width: 20,
-                height: 40
-            },
-            opened: 'properties',
-            properties: {
-                indicator: this.getOverlayIndicator(idx)
+                width: 30,
+                height: 30
             }
         }
         this.props.setPopup(popup);
