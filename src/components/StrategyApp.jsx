@@ -110,8 +110,8 @@ class StrategyApp extends Component
             let { sio } = this.state;
     
             // Connect to API socket
-            // sio = this.handleSocket();
-            // this.setState({ sio });
+            sio = this.handleSocket();
+            this.setState({ sio });
             
             // Retrieve user specific strategy informations
             const account = await this.retrieveGuiInfo();
@@ -2599,7 +2599,7 @@ class StrategyApp extends Component
         }
         else
         {
-            return size;
+            return Math.round(size * 100) / 100;
         }
     }
 }
