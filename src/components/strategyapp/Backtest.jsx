@@ -611,7 +611,13 @@ class Backtest extends Component
 
     getInfo = (product, period) =>
     {
-        return this.state.info;
+        if (product in this.state.info)
+        {
+            if (period in this.state.info[product])
+            {
+                return this.state.info[product][period];
+            }
+        }
         // if (product in this.getStrategyInfo().info)
         // {
         //     if (period in this.getStrategyInfo().info[product])
