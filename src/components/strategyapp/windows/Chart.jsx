@@ -3533,7 +3533,14 @@ class Chart extends Component
 
     getAccountBroker = () =>
     {
-        return this.getStrategy().brokers[this.getBrokerId()].broker;
+        if (this.isBacktest())
+        {
+            return this.getBroker();
+        }
+        else
+        {
+            return this.getStrategy().brokers[this.getBrokerId()].broker;
+        }
     }
 
     getProduct = () => 
