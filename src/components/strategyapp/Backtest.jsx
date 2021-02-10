@@ -23,6 +23,7 @@ class Backtest extends Component
             input_variables: {},
             log: [],
             info: {},
+            chart_info: {},
             transactions: {
                 'Time': [], 'Type': [], 'Instrument': [],
                 'Size': [], 'Price': [], 'StopLoss': [], 
@@ -56,8 +57,8 @@ class Backtest extends Component
         }
         const backtest_data = (await this.props.retrieveTransactions(this.props.id));
         this.backtest_transactions = backtest_data.transactions;
-        let { info, loaded } = this.state;
-        info = backtest_data.info;
+        let { chart_info, loaded } = this.state;
+        chart_info = backtest_data.info;
 
         let strategy = this.getStrategyInfo();
         this.handleTransactions(strategy.properties.end);
@@ -65,7 +66,7 @@ class Backtest extends Component
         this.props.setShowLoadScreen(false);
 
         loaded = true;
-        this.setState({ info, loaded });
+        this.setState({ chart_info, loaded });
     }
 
     render() {
@@ -611,11 +612,12 @@ class Backtest extends Component
 
     getInfo = (product, period) =>
     {
-        if (product in this.state.info)
+        const { chart_info } = this.state;
+        if (product in chart_info)
         {
-            if (period in this.state.info[product])
+            if (period in chart_info[product])
             {
-                return this.state.info[product][period];
+                return chart_info[product][period];
             }
         }
         // if (product in this.getStrategyInfo().info)
@@ -626,6 +628,7 @@ class Backtest extends Component
         //     }
         // }
         // return {};
+        return {};
     }
 
     getInputVariables = () =>
