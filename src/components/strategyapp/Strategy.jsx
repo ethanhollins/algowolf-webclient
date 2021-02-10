@@ -4,6 +4,7 @@ import WindowShadow from './WindowShadow';
 import io from 'socket.io-client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChartLine } from '@fortawesome/pro-light-svg-icons';
+import moment from "moment-timezone";
 import { v4 as uuidv4 } from 'uuid';
 
 class Strategy extends Component 
@@ -467,16 +468,25 @@ class Strategy extends Component
     {
         const keys = this.props.getKeys();
         const { selected_offset } = this.state;
+        let { current_timestamp } = this.state;
         
         if (keys.includes(ARROW_RIGHT))
         {
-            const { current_timestamp } = this.state;
+            if (current_timestamp === null)
+            {
+                current_timestamp = moment.utc().unix() + selected_offset;
+            }
+
             this.handleTransactions(this.getRoundedTimestamp(current_timestamp + selected_offset));
             // this.updateInfo();
         }
         if (keys.includes(ARROW_LEFT))
         {
-            const { current_timestamp } = this.state;
+            if (current_timestamp === null)
+            {
+                current_timestamp = moment.utc().unix() + selected_offset;
+            }
+            
             this.handleTransactions(this.getRoundedTimestamp(current_timestamp - selected_offset));
             // this.updateInfo();
         }

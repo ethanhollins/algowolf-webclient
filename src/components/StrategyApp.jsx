@@ -110,8 +110,8 @@ class StrategyApp extends Component
             let { sio } = this.state;
     
             // Connect to API socket
-            sio = this.handleSocket();
-            this.setState({ sio });
+            // sio = this.handleSocket();
+            // this.setState({ sio });
             
             // Retrieve user specific strategy informations
             const account = await this.retrieveGuiInfo();
@@ -1288,11 +1288,6 @@ class StrategyApp extends Component
 
     connectChart(broker_id, broker, product, period)
     {
-        console.log('connect');
-        console.log(broker_id);
-        console.log(broker);
-        console.log(product);
-        console.log(period);
         const { sio } = this.state;
 
         this.loadChart(broker_id, broker, product);
@@ -1434,7 +1429,6 @@ class StrategyApp extends Component
             
             if (item['bar_end'])
             {
-                console.log('Now ' + item['timestamp'] + ', Next ' + chart.next_timestamp);
                 // On Bar End
                 chart.asks[chart.asks.length-1] = item['item']['ask'];
                 chart.mids[chart.mids.length-1] = item['item']['mid'];

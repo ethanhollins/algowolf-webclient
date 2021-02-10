@@ -1201,7 +1201,6 @@ class Chart extends Component
     onOverlaySettings = (e) =>
     {
         const idx = parseInt(e.target.getAttribute('name'));
-        console.log(idx);
 
         // const popup = {
         //     type: 'indicator-settings',
@@ -1331,22 +1330,22 @@ class Chart extends Component
         // Handle Axis prices
         this.drawPrices(ctx, price_data);
 
-        // Handle Price Label
-        if (!this.isBacktest())
-        {
-            this.handlePriceLabel(ctx);
-        }
-
         // Handle Drawings
         this.handleDrawings(ctx);
-
-        // Handle Positions/Orders
-        this.handleTrades(ctx);
 
         // Handle Price Line
         if (!this.isBacktest())
         {
             this.handlePriceLine(ctx);
+        }
+
+        // Handle Positions/Orders
+        this.handleTrades(ctx);
+
+        // Handle Price Label
+        if (!this.isBacktest())
+        {
+            this.handlePriceLabel(ctx);
         }
 
         const studies = this.getStudyComponents();
@@ -2099,7 +2098,7 @@ class Chart extends Component
             const trade_label_off = 20;
             const trade_label_inside_off = 7;
 
-            const lotsize = this.props.convertIncomingPositionSize(this.getBroker(), c_trade.lotsize);
+            const lotsize = this.props.convertIncomingPositionSize(this.getAccountBroker(), c_trade.lotsize);
             if (c_trade.order_type === 'limitorder')
             {
                 let text;
@@ -3530,6 +3529,11 @@ class Chart extends Component
         // {
         //     return this.getStrategy().brokers[this.getBrokerId()].broker;
         // }
+    }
+
+    getAccountBroker = () =>
+    {
+        return this.getStrategy().brokers[this.getBrokerId()].broker;
     }
 
     getProduct = () => 
