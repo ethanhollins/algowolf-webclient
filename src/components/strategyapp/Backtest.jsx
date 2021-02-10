@@ -31,7 +31,8 @@ class Backtest extends Component
             hide_shadows: false,
             reference_timestamp: 0,
             selected_offset: 0,
-            selected_chart: null
+            selected_chart: null,
+            loaded: false
         }
 
         this.retrieveReport = this.retrieveReport.bind(this);
@@ -54,9 +55,8 @@ class Backtest extends Component
             document.title = 'Algorithmic Trading Platform \u00B7 AlgoWolf';
         }
         const backtest_data = (await this.props.retrieveTransactions(this.props.id));
-        console.log(backtest_data);
         this.backtest_transactions = backtest_data.transactions;
-        let { info } = this.state;
+        let { info, loaded } = this.state;
         info = backtest_data.info;
 
         let strategy = this.getStrategyInfo();
@@ -64,8 +64,8 @@ class Backtest extends Component
 
         this.props.setShowLoadScreen(false);
 
-        console.log(info);
-        this.setState({ info });
+        loaded = true;
+        this.setState({ info, loaded });
     }
 
     render() {
@@ -161,6 +161,7 @@ class Backtest extends Component
                             setPopup={this.props.setPopup}
                             getPopup={this.props.getPopup}
                             convertIncomingPositionSize={this.props.convertIncomingPositionSize}
+                            isLoaded={this.isLoaded}
                             // Window Funcs
                             closeWindow={this.props.closeWindow}
                             windowExists={this.props.windowExists}
@@ -735,7 +736,7 @@ class Backtest extends Component
 
     isLoaded = () =>
     {
-        return true;
+        return this.state.loaded;
     }
 
     setSelectedOffset = (reference_timestamp, selected_offset) =>

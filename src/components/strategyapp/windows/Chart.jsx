@@ -383,9 +383,7 @@ class Chart extends Component
 
     showLoadScreen()
     {
-        const { isinitialized } = this.state;
-
-        if (!isinitialized)
+        if (!this.isInitialized())
         {
             return (
                 <div 
@@ -679,7 +677,6 @@ class Chart extends Component
             x: e.clientX, y: e.clientY
         }
         const top_offset = this.props.getTopOffset();
-        const { isinitialized } = this.state;
         const is_top = this.props.isTopWindow(
             this.getStrategyId(), this.getItemId(), 
             { x: mouse_pos.x, y: mouse_pos.y - top_offset }
@@ -692,7 +689,7 @@ class Chart extends Component
             {
                 // if (this.isBacktest())
                 // {
-                if (isinitialized && before_change !== null && is_top)
+                if (this.isInitialized() && before_change !== null && is_top)
                 {
                     if (Math.abs(pos.x - before_change.x) < 1 && Math.abs(pos.y - before_change.y) < 1)
                     {
@@ -926,9 +923,8 @@ class Chart extends Component
     {
         const overlays = this.getOverlays();
         let gen_overlays = [];
-        const { isinitialized } = this.state;
 
-        if (isinitialized)
+        if (this.isInitialized())
         {
             for (let i = 0; i < overlays.length; i++) {
                 gen_overlays.push(
@@ -964,10 +960,9 @@ class Chart extends Component
     generateStudies()
     {
         const studies = this.getStudies();
-        const { isinitialized } = this.state;
 
         let gen_studies = [];
-        if (isinitialized)
+        if (this.isInitialized())
         {
             for (let i = 0; i < studies.length; i++) 
             {
@@ -1011,9 +1006,7 @@ class Chart extends Component
 
     generateInfo()
     {
-        const { isinitialized } = this.state;
-
-        if (isinitialized)
+        if (this.isInitialized())
         {
             const prices = this.getPriceInfo();
             if (prices !== undefined)
@@ -1243,8 +1236,7 @@ class Chart extends Component
 
     update()
     {   
-        const { isinitialized } = this.state;
-        if (this.getChart() && isinitialized)
+        if (this.getChart() && this.isInitialized())
         {
             this.updateCanvas();
             this.updateChart();
@@ -3873,6 +3865,18 @@ class Chart extends Component
     isBacktest = () =>
     {
         return this.getStrategyId().includes('/backtest/')
+    }
+
+    isInitialized = () =>
+    {
+        if (this.isBacktest())
+        {
+            return this.state.isinitialized && this.props.isLoaded();
+        }
+        else
+        {
+            return this.state.isinitialized;
+        }
     }
 
 }
