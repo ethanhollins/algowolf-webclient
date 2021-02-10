@@ -22,6 +22,7 @@ class Backtest extends Component
             drawings: {},
             input_variables: {},
             log: [],
+            info: {},
             transactions: {
                 'Time': [], 'Type': [], 'Instrument': [],
                 'Size': [], 'Price': [], 'StopLoss': [], 
@@ -52,14 +53,19 @@ class Backtest extends Component
         {
             document.title = 'Algorithmic Trading Platform \u00B7 AlgoWolf';
         }
-        this.backtest_transactions = (await this.props.retrieveTransactions(this.props.id)).transactions;
+        const backtest_data = (await this.props.retrieveTransactions(this.props.id));
+        console.log(backtest_data);
+        this.backtest_transactions = backtest_data.transactions;
+        let { info } = this.state;
+        info = backtest_data.info;
 
         let strategy = this.getStrategyInfo();
         this.handleTransactions(strategy.properties.end);
 
         this.props.setShowLoadScreen(false);
 
-        console.log(strategy.info);
+        console.log(info);
+        this.setState({ info });
     }
 
     render() {
@@ -604,14 +610,15 @@ class Backtest extends Component
 
     getInfo = (product, period) =>
     {
-        if (product in this.getStrategyInfo().info)
-        {
-            if (period in this.getStrategyInfo().info[product])
-            {
-                return this.getStrategyInfo().info[product][period];
-            }
-        }
-        return {};
+        return this.state.info;
+        // if (product in this.getStrategyInfo().info)
+        // {
+        //     if (period in this.getStrategyInfo().info[product])
+        //     {
+        //         return this.getStrategyInfo().info[product][period];
+        //     }
+        // }
+        // return {};
     }
 
     getInputVariables = () =>

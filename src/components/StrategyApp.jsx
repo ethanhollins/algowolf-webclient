@@ -301,7 +301,6 @@ class StrategyApp extends Component
     generatePages = () =>
     {
         let { account, strategyInfo } = this.state;
-
         if ('metadata' in account)
         {
             const current_strategy = account.metadata.current_strategy;
