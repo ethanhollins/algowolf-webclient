@@ -203,6 +203,8 @@ class Strategy extends Component
                             retrieveChartData={this.props.retrieveChartData}
                             addChart={this.props.addChart}
                             getChart={this.props.getChart}
+                            getBrokerChart={this.props.getBrokerChart}
+                            addBrokerChart={this.props.addBrokerChart}
                             updateChart={this.props.updateChart}
                             findIndicator={this.props.findIndicator}
                             createIndicator={this.props.createIndicator}
@@ -337,7 +339,12 @@ class Strategy extends Component
                         data[k].item
                     );
                 }
-                transactions[data[k].item.account_id].push(data[k]);
+                const account_code = data[k].brokerId + '.' + data[k].item.account_id;
+                if (!(account_code in transactions))
+                {
+                    transactions[account_code] = [];
+                }
+                transactions[account_code].push(data[k]);
             }
 
             if (current_timestamp === null)
@@ -881,6 +888,8 @@ class Strategy extends Component
             current_idx = 0;
             logs[account_code] = [];
             drawings[account_code] = {};
+            positions = [];
+            orders = [];
         }
         current_timestamp = dest_timestamp;
         if (account_code in transactions)
@@ -969,20 +978,28 @@ class Strategy extends Component
 
     getPositions = () =>
     {
+        const { current_timestamp } = this.state;
         let strategy = this.getStrategyInfo();
         let positions = [];
 
-        if (strategy !== undefined)
+        if (current_timestamp !== null)
         {
-            let current_account = this.getCurrentAccount();
-            const broker_id = current_account.split('.')[0];
-            const account_id = current_account.split('.')[1];
-
-            for (let pos of strategy.brokers[broker_id].positions)
+            return this.state.positions;
+        }
+        else
+        {
+            if (strategy !== undefined)
             {
-                if (pos.account_id === account_id)
+                let current_account = this.getCurrentAccount();
+                const broker_id = current_account.split('.')[0];
+                const account_id = current_account.split('.')[1];
+    
+                for (let pos of strategy.brokers[broker_id].positions)
                 {
-                    positions.push(pos);
+                    if (pos.account_id === account_id)
+                    {
+                        positions.push(pos);
+                    }
                 }
             }
         }
@@ -992,20 +1009,28 @@ class Strategy extends Component
 
     getOrders = () =>
     {
+        const { current_timestamp } = this.state;
         let strategy = this.getStrategyInfo();
         let orders = [];
 
-        if (strategy !== undefined)
+        if (current_timestamp !== null)
         {
-            let current_account = this.getCurrentAccount();
-            const broker_id = current_account.split('.')[0];
-            const account_id = current_account.split('.')[1];
-
-            for (let order of strategy.brokers[broker_id].orders)
+            return this.state.orders;
+        }
+        else
+        {
+            if (strategy !== undefined)
             {
-                if (order.account_id === account_id)
+                let current_account = this.getCurrentAccount();
+                const broker_id = current_account.split('.')[0];
+                const account_id = current_account.split('.')[1];
+
+                for (let order of strategy.brokers[broker_id].orders)
                 {
-                    orders.push(order);
+                    if (order.account_id === account_id)
+                    {
+                        orders.push(order);
+                    }
                 }
             }
         }

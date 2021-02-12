@@ -27,6 +27,7 @@ class StrategyApp extends Component
         orders: [],
         page: 0,
         charts: {},
+        broker_charts: {},
         chart_queues: {},
         backtestCharts: {},
         indicators: [],
@@ -548,6 +549,8 @@ class StrategyApp extends Component
                         retrieveChartData={this.retrieveChartData}
                         addChart={this.addChart}
                         getChart={this.getChart}
+                        getBrokerChart={this.getBrokerChart}
+                        addBrokerChart={this.addBrokerChart}
                         updateChart={this.updateChart}
                         findIndicator={this.findIndicator}
                         createIndicator={this.createIndicator}
@@ -1218,6 +1221,25 @@ class StrategyApp extends Component
         return charts[key];
     }
 
+    addBrokerChart = (broker, product, period) =>
+    {
+        let { broker_charts } = this.state;
+
+        const key = broker + ':' + product + ':' + period;
+        broker_charts[key] = {
+            broker: broker,
+            product: product,
+            period: period,
+            timestamp: null,
+            ask: null,
+            mid: null,
+            bid: null
+        };
+
+        this.setState({ broker_charts });
+        return broker_charts[key];
+    }
+
     addBacktestChart = (backtest_id, broker, product, period, ohlc_data) =>
     {
         let { backtestCharts } = this.state;
@@ -1248,6 +1270,12 @@ class StrategyApp extends Component
     {
         const { charts } = this.state;
         return charts[broker + ':' + product + ':' + period];
+    }
+
+    getBrokerChart = (broker, product, period) =>
+    {
+        const { broker_charts } = this.state;
+        return broker_charts[broker + ':' + product + ':' + period];
     }
 
     getBacktestChart = (backtest_id, broker, product, period) =>
@@ -1291,6 +1319,7 @@ class StrategyApp extends Component
         const { sio } = this.state;
 
         this.loadChart(broker_id, broker, product);
+        
         sio.emit('subscribe', {
             broker_id: broker_id,
             field: 'ontick',
@@ -1402,71 +1431,87 @@ class StrategyApp extends Component
             chart_queues[key] = [];
         }
 
-        // const id = uuidv4();
-        chart_queues[key].push(item);
-        this.setState({ chart_queues });
+        if (item['period'] === 'TICK')
+        {
+            this.handleChartUpdate(item);
+        }
+        else
+        {
+            chart_queues[key].push(item);
+            this.setState({ chart_queues });
+        }
     }
 
     handleChartUpdate = (item) => 
     {
-        let { charts, chart_queues } = this.state;
+        let { charts, broker_charts, chart_queues } = this.state;
         const key = item['broker'] + ':' + item['product'] + ':' + item['period'];
-        let chart = charts[key];
-        let queue = chart_queues[key];
-
-        if (chart !== undefined)
+        let chart;
+        
+        if (item['period'] === 'TICK')
         {
-            if (chart.next_timestamp === null)
-            {
-                if (!item['bar_end'])
-                {
-                    this.generateNextTimestamp(
-                        chart, 
-                        item['timestamp'] - this.getPeriodOffsetSeconds(item['period'])
-                    );
-                }
-            }
-            
-            if (item['bar_end'])
-            {
-                // On Bar End
-                chart.asks[chart.asks.length-1] = item['item']['ask'];
-                chart.mids[chart.mids.length-1] = item['item']['mid'];
-                chart.bids[chart.bids.length-1] = item['item']['bid'];
-                this.generateNextTimestamp(chart, item['timestamp']);
-                chart.timestamps.push(chart.next_timestamp);
-                chart.asks.push([null,null,null,null]);
-                chart.mids.push([null,null,null,null]);
-                chart.bids.push([null,null,null,null]);
-            }
-            else if (item['timestamp'] >= chart.next_timestamp)
-            {
-                // If real timestamp ahead of chart timestamp
-                this.generateNextTimestamp(chart, item['timestamp']);
-                chart.asks[chart.asks.length-1] = item['item']['ask'];
-                chart.mids[chart.mids.length-1] = item['item']['mid'];
-                chart.bids[chart.bids.length-1] = item['item']['bid'];
-            }
-            else if (!(item['timestamp'] < chart.next_timestamp - this.getPeriodOffsetSeconds(item['period'])))
-            {
-                // Update Latest Bar
-                chart.asks[chart.asks.length-1] = item['item']['ask'];
-                chart.mids[chart.mids.length-1] = item['item']['mid'];
-                chart.bids[chart.bids.length-1] = item['item']['bid'];
-            }
+            chart = broker_charts[key];
+            chart.timestamp = item['timestamp'];
+            chart.ask = item['item']['ask'];
+            chart.mid = item['item']['mid'];
+            chart.bid = item['item']['bid'];
+
+            this.setState({ broker_charts });
+        }
+        else
+        {
+            chart = charts[key];
+            let queue = chart_queues[key];
     
-            this.calculateAllChartIndicators(chart);
-            queue.splice(0, 1);
-            
-            this.setState({ charts, chart_queues });
+            if (chart !== undefined)
+            {
+                if (chart.next_timestamp === null)
+                {
+                    if (!item['bar_end'])
+                    {
+                        this.generateNextTimestamp(
+                            chart, 
+                            item['timestamp'] - this.getPeriodOffsetSeconds(item['period'])
+                        );
+                    }
+                }
+                
+                if (item['bar_end'])
+                {
+                    // On Bar End
+                    chart.asks[chart.asks.length-1] = item['item']['ask'];
+                    chart.mids[chart.mids.length-1] = item['item']['mid'];
+                    chart.bids[chart.bids.length-1] = item['item']['bid'];
+                    this.generateNextTimestamp(chart, item['timestamp']);
+                    chart.timestamps.push(chart.next_timestamp);
+                    chart.asks.push([null,null,null,null]);
+                    chart.mids.push([null,null,null,null]);
+                    chart.bids.push([null,null,null,null]);
+                }
+                else if (item['timestamp'] >= chart.next_timestamp)
+                {
+                    // If real timestamp ahead of chart timestamp
+                    this.generateNextTimestamp(chart, item['timestamp']);
+                    chart.asks[chart.asks.length-1] = item['item']['ask'];
+                    chart.mids[chart.mids.length-1] = item['item']['mid'];
+                    chart.bids[chart.bids.length-1] = item['item']['bid'];
+                }
+                else if (!(item['timestamp'] < chart.next_timestamp - this.getPeriodOffsetSeconds(item['period'])))
+                {
+                    // Update Latest Bar
+                    chart.asks[chart.asks.length-1] = item['item']['ask'];
+                    chart.mids[chart.mids.length-1] = item['item']['mid'];
+                    chart.bids[chart.bids.length-1] = item['item']['bid'];
+                }
+        
+                this.calculateAllChartIndicators(chart);
+                queue.splice(0, 1);
+                
+                this.setState({ charts, chart_queues });
+        }
     
         }
     }
-
-    // handleChartUpdate = (item) =>
-    // {
-        
-    // }
 
     updateChart = (broker, product, period, ohlc_data) =>
     {
@@ -2595,7 +2640,7 @@ class StrategyApp extends Component
         }
         else if (broker === 'oanda')
         {
-            return Math.round(size / 1000000 * 100) / 100;
+            return Math.round(size / 1000000 * 10000) / 10000;
         }
         else
         {

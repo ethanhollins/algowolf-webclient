@@ -254,8 +254,8 @@ class SpreadSheet extends Component
         if (Object.keys(data).length > 0)
         {
             const num_cols = Object.keys(data).length+1;
-            const num_rows = data[Object.keys(data)[0]].length+1;
-    
+            const num_rows = Object.keys(data[Object.keys(data)[0]]).length+1;
+
             const format = this.props.format;
     
             let r_profit = 0;

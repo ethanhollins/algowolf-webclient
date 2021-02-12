@@ -120,6 +120,8 @@ class Chart extends Component
         /* Initialize Chart */
         if (this.getChart() === undefined)
             await this.addChart();
+        if (this.getBrokerChart() === undefined)
+            await this.addBrokerChart();
 
         let pos = { x: -50, y: 0 };
         let scale = { x: 200.0, y:0.2 };
@@ -2701,6 +2703,32 @@ class Chart extends Component
         const seg_size = this.getSegmentSize(0);
         const camera = this.getCamera();
         const ohlc = this.getOhlc();
+        
+        const chart_size = this.getChartSize();
+        const broker_ask = this.getBrokerAsk();
+        const broker_bid = this.getBrokerBid();
+
+        if (broker_ask && broker_bid)
+        {
+            const line_width = 5;
+            const line_space = 4;
+            const screen_ask_pos = camera.convertWorldPosToScreenPos(
+                { x: 0, y: broker_ask }, pos, seg_size, scale
+            );
+            const screen_bid_pos = camera.convertWorldPosToScreenPos(
+                { x: 0, y: broker_bid }, pos, seg_size, scale
+            );
+
+            let c_x = 0;
+            while (c_x < chart_size.width)
+            {
+                ctx.fillStyle = '#2ecc71';
+                ctx.fillRect(c_x, Math.floor(screen_ask_pos.y), line_width, 1);
+                ctx.fillStyle = '#e74c3c';
+                ctx.fillRect(c_x, Math.floor(screen_bid_pos.y), line_width, 1);
+                c_x += line_width + line_space;
+            }
+        }
 
         let c_close = 0;
         for (let i = ohlc.length-1; i >= 0; i--)
@@ -2709,14 +2737,14 @@ class Chart extends Component
             if (c_close !== null) break;
         }
 
-        const screen_pos = camera.convertWorldPosToScreenPos(
+        const screen_price_pos = camera.convertWorldPosToScreenPos(
             { x: 0, y: c_close }, pos, seg_size, scale
         );
 
         // Properties
         ctx.fillStyle = this.getPriceLineColor();
 
-        ctx.fillRect(0, Math.floor(screen_pos.y), seg_size.width, 1);
+        ctx.fillRect(0, Math.floor(screen_price_pos.y), seg_size.width, 1);
     }
 
     handleCrosshairs(ctx)
@@ -3798,6 +3826,57 @@ class Chart extends Component
     getOhlc = () =>
     {
         return this.getChart()[this.getPrice()];
+    }
+
+    getBrokerChart = () =>
+    {
+        return this.props.getBrokerChart(
+            this.getAccountBroker(),
+            this.getProduct(),
+            'TICK'
+        );
+    }
+
+    async addBrokerChart()
+    {
+        if (!this.isBacktest())
+        {
+            this.props.connectChart(this.getBrokerId(), this.getAccountBroker(), this.getProduct(), 'TICK');
+            
+            // const ohlc_data = await this.props.retrieveChartData(
+            //     this.getBroker(), this.getProduct(), this.getPeriod(), start, end
+            // );
+            this.props.addBrokerChart(
+                this.getAccountBroker(), this.getProduct(), 'TICK'
+            );
+        }
+    }
+
+    getBrokerAsk = () =>
+    {   
+        const chart = this.getBrokerChart();
+        if (chart !== undefined)
+            return this.getBrokerChart().ask;
+        else
+            return undefined
+    }
+
+    getBrokerMid = () =>
+    {
+        const chart = this.getBrokerChart();
+        if (chart !== undefined)
+            return this.getBrokerChart().mid;
+        else
+            return undefined
+    }
+
+    getBrokerBid = () =>
+    {
+        const chart = this.getBrokerChart();
+        if (chart !== undefined)
+            return this.getBrokerChart().bid;
+        else
+            return undefined
     }
 
     getFilteredOffset = ()  =>
