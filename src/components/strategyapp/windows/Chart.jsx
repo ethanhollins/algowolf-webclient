@@ -120,7 +120,7 @@ class Chart extends Component
         /* Initialize Chart */
         if (this.getChart() === undefined)
             await this.addChart();
-        if (this.getBrokerChart() === undefined)
+        if (!this.isBacktest() && this.getBrokerChart() === undefined)
             await this.addBrokerChart();
 
         let pos = { x: -50, y: 0 };
