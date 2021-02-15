@@ -773,7 +773,7 @@ class StrategyApp extends Component
         {
             for (let w of this.strategy.windows)
             {
-                if (w.getInnerElement().updateInfo !== undefined)
+                if (w && w.getInnerElement().updateInfo !== undefined)
                 {
                     w.getInnerElement().updateInfo(mouse_pos);
                 }
