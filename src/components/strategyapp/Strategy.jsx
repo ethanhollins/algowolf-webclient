@@ -5,7 +5,6 @@ import io from 'socket.io-client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChartLine } from '@fortawesome/pro-light-svg-icons';
 import moment from "moment-timezone";
-import { v4 as uuidv4 } from 'uuid';
 
 class Strategy extends Component 
 {
@@ -202,6 +201,7 @@ class Strategy extends Component
                             connectChart={this.props.connectChart}
                             retrieveChartData={this.props.retrieveChartData}
                             addChart={this.props.addChart}
+                            deleteChart={this.props.deleteChart}
                             getChart={this.props.getChart}
                             getBrokerChart={this.props.getBrokerChart}
                             addBrokerChart={this.props.addBrokerChart}
@@ -279,6 +279,11 @@ class Strategy extends Component
         {
             console.log('connected ' + this.props.id);
             this.subscribe();
+            let strategy = this.getStrategyInfo();
+            if (strategy.account)
+            {
+                this.retrieveAccountInfo(strategy.account);
+            }
         });
 
         socket.on('disconnect', () =>
@@ -471,6 +476,24 @@ class Strategy extends Component
         this.setState({ hide_shadows });
     }
 
+    updateInfo = () =>
+    {
+        for (let w of this.windows)
+        {
+            if (w !== null && w.getInnerElement() !== null)
+            {
+                if (w.getInnerElement().updateInfo !== undefined)
+                {
+                    const mouse_pos = this.props.getMousePos();
+                    w.getInnerElement().updateInfo({ 
+                        x: mouse_pos.x, 
+                        y: mouse_pos.y - this.props.getAppContainer().offsetTop 
+                    });
+                }
+            }
+        }
+    }
+
     handleKeys = () =>
     {
         const keys = this.props.getKeys();
@@ -485,7 +508,7 @@ class Strategy extends Component
             }
 
             this.handleTransactions(this.getRoundedTimestamp(current_timestamp + selected_offset));
-            // this.updateInfo();
+            this.updateInfo();
         }
         if (keys.includes(ARROW_LEFT))
         {
@@ -495,7 +518,7 @@ class Strategy extends Component
             }
             
             this.handleTransactions(this.getRoundedTimestamp(current_timestamp - selected_offset));
-            // this.updateInfo();
+            this.updateInfo();
         }
     }
 
@@ -609,7 +632,7 @@ class Strategy extends Component
     {
         for (let i = 0; i < orders.length; i++)
         {
-            if (orders[i].order_id === trans.item.prev.order_id)
+            if (orders[i].order_id === trans.item.order_id)
             {
                 orders.splice(i, 1);
             }
@@ -942,6 +965,7 @@ class Strategy extends Component
             }
             
             this.setState({ current_idx, current_timestamp, drawings, logs, positions, orders });
+            this.updateInfo();
         }
     }
 

@@ -120,10 +120,10 @@ class Study extends Component
         if (hl.every((x) => x !== null))
         {
             scale.y = (hl[0] - hl[1]);
-            const scale_off = scale.y * 0.3;
+            const scale_off = scale.y;
             scale.y += scale_off;
             const mid_point = Math.round(parseFloat(hl[0] + hl[1]) / 2 * 100000) / 100000;
-            pos.y = mid_point + scale_off/4;
+            pos.y = mid_point;
         }
 
         return {

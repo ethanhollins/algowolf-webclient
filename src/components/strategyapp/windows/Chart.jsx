@@ -120,8 +120,8 @@ class Chart extends Component
         /* Initialize Chart */
         if (this.getChart() === undefined)
             await this.addChart();
-        if (this.getBrokerChart() === undefined)
-            await this.addBrokerChart();
+        // if (this.getBrokerChart() === undefined)
+        //     await this.addBrokerChart();
 
         let pos = { x: -50, y: 0 };
         let scale = { x: 200.0, y:0.2 };
@@ -689,8 +689,8 @@ class Chart extends Component
         {
             if (is_down)
             {
-                // if (this.isBacktest())
-                // {
+                this.props.setSelectedChart(this);
+
                 if (this.isInitialized() && before_change !== null && is_top)
                 {
                     if (Math.abs(pos.x - before_change.x) < 1 && Math.abs(pos.y - before_change.y) < 1)
@@ -708,8 +708,6 @@ class Chart extends Component
                 }
 
                 this.props.setSelectedOffset(this.getTimestamps()[0], period_offset);
-                // }
-                this.props.setSelectedChart(this);
             }
         }
 
@@ -2969,7 +2967,7 @@ class Chart extends Component
         const timestamps = this.getTimestamps();
         // Return undefined if timestamp is greater than latest existing timestamp
         if (
-            (!this.isBacktest() && 
+            (!this.isBacktest() && this.getNextTimestamp() !== null &&
                 ts >= this.getNextTimestamp() + this.getPeriodOffsetSeconds(this.getChart().period)) ||
             ts < timestamps[0]
         )
@@ -3791,6 +3789,21 @@ class Chart extends Component
             this.getProduct(),
             this.getPeriod()
         );
+    }
+
+    resetChart = () =>
+    {
+        let { isinitialized } = this.state;
+        isinitialized = false;
+        this.setState({ isinitialized });
+
+        if (!this.getChart())
+        {
+            this.addChart();
+        }
+
+        isinitialized = true;
+        this.setState({ isinitialized });
     }
 
     getTimestamps = () =>

@@ -480,6 +480,7 @@ class StrategyApp extends Component
                         retrieveTransactions={this.retrieveTransactions}
                         retrieveChartData={this.retrieveChartData}
                         addChart={this.addBacktestChart}
+                        deleteChart={this.deleteChart}
                         getChart={this.getBacktestChart}
                         updateChart={this.updateBacktestChart}
                         findIndicator={this.findBacktestIndicator}
@@ -548,6 +549,7 @@ class StrategyApp extends Component
                         connectChart={this.connectChart}
                         retrieveChartData={this.retrieveChartData}
                         addChart={this.addChart}
+                        deleteChart={this.deleteChart}
                         getChart={this.getChart}
                         getBrokerChart={this.getBrokerChart}
                         addBrokerChart={this.addBrokerChart}
@@ -1146,54 +1148,13 @@ class StrategyApp extends Component
             // Reconnect chart live data
             this.connectChart(chart.broker, chart.product, chart.period);
 
-            let last_ts = chart.timestamps[chart.timestamps.length-1] - this.getPeriodOffsetSeconds(chart.period);
-
-            let timestamps = [];
-            let asks = [];
-            let bids = [];
-
-            while (last_ts < moment().unix() - this.getPeriodOffsetSeconds(chart.period))
-            {
-                let data = await this.retrieveChartData(
-                    chart.broker, chart.product, chart.period, 
-                    moment(last_ts * 1000), moment(),
-                    'Australia/Melbourne'
-                )
-                
-                for (let i = 0; i < data.ohlc.timestamps.length; i++)
-                {
-                    const ts = data.ohlc.timestamps[i];
-                    if (ts < chart.timestamps[chart.timestamps.length-1])
-                    {
-                        data.ohlc.timestamps.splice(i, 1);
-                        data.ohlc.asks.splice(i, 1);
-                        data.ohlc.bids.splice(i, 1);
-                    }
-                }
-
-                timestamps = timestamps.concat(data.ohlc.timestamps);
-                asks = asks.concat(data.ohlc.asks);
-                bids = bids.concat(data.ohlc.bids);
-
-                if (timestamps.length > 0)
-                    last_ts = timestamps[timestamps.length-1];
-            }
-
-            for (let i = 0; i < timestamps.length; i++)
-            {
-                const idx = chart.timestamps.indexOf(timestamps[i]);
-                if (idx !== -1)
-                {
-                    chart.asks[idx] = asks[i];
-                    chart.bids[idx] = bids[i];
-                }
-                else
-                {
-                    chart.timestamps.push(timestamps[i]);
-                    chart.asks.push(asks[i]);
-                    chart.bids.push(bids[i]);
-                }
-            }
+            let data = await this.retrieveChartData(
+                chart.broker, chart.product, chart.period, 
+                this.getCountDateFromDate(chart.period, 1000, moment.utc(), -1), 
+                moment(),
+                'Australia/Melbourne'
+            )
+            this.addChart(chart.broker, chart.product, chart.period, data)
 
             this.setState({ charts });
         }
@@ -1219,6 +1180,14 @@ class StrategyApp extends Component
 
         this.setState({ charts });
         return charts[key];
+    }
+
+    deleteChart = (broker, product, period) =>
+    {
+        let { charts } = this.state;
+        const key = broker + ':' + product + ':' + period;
+        delete charts[key];
+        this.setState({ charts });
     }
 
     addBrokerChart = (broker, product, period) =>
@@ -1508,6 +1477,7 @@ class StrategyApp extends Component
                 queue.splice(0, 1);
                 
                 this.setState({ charts, chart_queues });
+                this.updateInfo();
         }
     
         }

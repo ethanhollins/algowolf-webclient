@@ -184,6 +184,7 @@ class Backtest extends Component
                             // Chart Functions
                             retrieveChartData={this.props.retrieveChartData}
                             addChart={this.addChart}
+                            deleteChart={this.props.deleteChart}
                             getChart={this.getChart}
                             updateChart={this.updateChart}
                             findIndicator={this.findIndicator}
@@ -330,16 +331,16 @@ class Backtest extends Component
 
     handleCreatePosition = (positions, trans, transactions) =>
     {
-        positions.push(trans.item.new);
+        positions.push(trans.item);
 
         // Create Transaction
         transactions['Time'].push(trans.timestamp);
         transactions['Type'].push(trans.type.replace('_', ' ').toUpperCase());
-        transactions['Instrument'].push(trans.item.new.product.replace('_', ' '));
-        transactions['Size'].push(trans.item.new.lotsize);
-        transactions['Price'].push(trans.item.new.entry_price);
-        transactions['StopLoss'].push(trans.item.new.sl);
-        transactions['TakeProfit'].push(trans.item.new.tp);
+        transactions['Instrument'].push(trans.item.product.replace('_', ' '));
+        transactions['Size'].push(trans.item.lotsize);
+        transactions['Price'].push(trans.item.entry_price);
+        transactions['StopLoss'].push(trans.item.sl);
+        transactions['TakeProfit'].push(trans.item.tp);
         transactions['Amount'].push(0);
     }
 
@@ -347,21 +348,21 @@ class Backtest extends Component
     {
         for (let i = 0; i < orders.length; i++)
         {
-            if (orders[i].order_id === trans.item.prev.order_id)
+            if (orders[i].order_id === trans.item.order_id)
             {
                 orders.splice(i, 1);
             }
         }
-        positions.push(trans.item.new);
+        positions.push(trans.item);
 
         // Create Transaction
         transactions['Time'].push(trans.timestamp);
         transactions['Type'].push(trans.type.replace('_', ' ').toUpperCase());
-        transactions['Instrument'].push(trans.item.new.product.replace('_', ' '));
-        transactions['Size'].push(trans.item.new.lotsize);
-        transactions['Price'].push(trans.item.new.entry_price);
-        transactions['StopLoss'].push(trans.item.new.sl);
-        transactions['TakeProfit'].push(trans.item.new.tp);
+        transactions['Instrument'].push(trans.item.product.replace('_', ' '));
+        transactions['Size'].push(trans.item.lotsize);
+        transactions['Price'].push(trans.item.entry_price);
+        transactions['StopLoss'].push(trans.item.sl);
+        transactions['TakeProfit'].push(trans.item.tp);
         transactions['Amount'].push(0);
     }
 
@@ -369,7 +370,7 @@ class Backtest extends Component
     {
         for (let i = 0; i < positions.length; i++)
         {
-            if (positions[i].order_id === trans.item.new.order_id)
+            if (positions[i].order_id === trans.item.order_id)
             {
                 positions.splice(i, 1);
             }
@@ -378,26 +379,26 @@ class Backtest extends Component
         // Create Transaction
         transactions['Time'].push(trans.timestamp);
         transactions['Type'].push(trans.type.replace('_', ' ').toUpperCase());
-        transactions['Instrument'].push(trans.item.new.product.replace('_', ' '));
-        transactions['Size'].push(trans.item.new.lotsize);
-        transactions['Price'].push(trans.item.new.close_price);
-        transactions['StopLoss'].push(trans.item.new.sl);
-        transactions['TakeProfit'].push(trans.item.new.tp);
+        transactions['Instrument'].push(trans.item.product.replace('_', ' '));
+        transactions['Size'].push(trans.item.lotsize);
+        transactions['Price'].push(trans.item.close_price);
+        transactions['StopLoss'].push(trans.item.sl);
+        transactions['TakeProfit'].push(trans.item.tp);
         transactions['Amount'].push(0);
     }
 
     handleCreateOrder = (orders, trans, transactions) =>
     {
-        orders.push(trans.item.new);
+        orders.push(trans.item);
 
         // Create Transaction
         transactions['Time'].push(trans.timestamp);
         transactions['Type'].push(trans.type.replace('_', ' ').toUpperCase());
-        transactions['Instrument'].push(trans.item.new.product.replace('_', ' '));
-        transactions['Size'].push(trans.item.new.lotsize);
-        transactions['Price'].push(trans.item.new.entry_price);
-        transactions['StopLoss'].push(trans.item.new.sl);
-        transactions['TakeProfit'].push(trans.item.new.tp);
+        transactions['Instrument'].push(trans.item.product.replace('_', ' '));
+        transactions['Size'].push(trans.item.lotsize);
+        transactions['Price'].push(trans.item.entry_price);
+        transactions['StopLoss'].push(trans.item.sl);
+        transactions['TakeProfit'].push(trans.item.tp);
         transactions['Amount'].push(0);
     }
 
@@ -405,7 +406,7 @@ class Backtest extends Component
     {
         for (let i = 0; i < orders.length; i++)
         {
-            if (orders[i].order_id === trans.item.new.order_id)
+            if (orders[i].order_id === trans.item.order_id)
             {
                 orders.splice(i, 1);
             }
@@ -414,17 +415,17 @@ class Backtest extends Component
         // Create Transaction
         transactions['Time'].push(trans.timestamp);
         transactions['Type'].push(trans.type.replace('_', ' ').toUpperCase());
-        transactions['Instrument'].push(trans.item.new.product.replace('_', ' '));
-        transactions['Size'].push(trans.item.new.lotsize);
-        transactions['Price'].push(trans.item.new.entry_price);
-        transactions['StopLoss'].push(trans.item.new.sl);
-        transactions['TakeProfit'].push(trans.item.new.tp);
+        transactions['Instrument'].push(trans.item.product.replace('_', ' '));
+        transactions['Size'].push(trans.item.lotsize);
+        transactions['Price'].push(trans.item.entry_price);
+        transactions['StopLoss'].push(trans.item.sl);
+        transactions['TakeProfit'].push(trans.item.tp);
         transactions['Amount'].push(0);
     }
 
     handleModify = (positions, orders, trans, transactions) =>
     {
-        const item = trans.item.new;
+        const item = trans.item;
         if (item.order_type === 'limitorder' || item.order_type === 'stoporder')
         {
             for (let i = 0; i < orders.length; i++)
@@ -449,11 +450,11 @@ class Backtest extends Component
         // Create Transaction
         transactions['Time'].push(trans.timestamp);
         transactions['Type'].push(trans.type.replace('_', ' ').toUpperCase());
-        transactions['Instrument'].push(trans.item.new.product.replace('_', ' '));
-        transactions['Size'].push(trans.item.new.lotsize);
-        transactions['Price'].push(trans.item.new.entry_price);
-        transactions['StopLoss'].push(trans.item.new.sl);
-        transactions['TakeProfit'].push(trans.item.new.tp);
+        transactions['Instrument'].push(trans.item.product.replace('_', ' '));
+        transactions['Size'].push(trans.item.lotsize);
+        transactions['Price'].push(trans.item.entry_price);
+        transactions['StopLoss'].push(trans.item.sl);
+        transactions['TakeProfit'].push(trans.item.tp);
         transactions['Amount'].push(0);
     }
 
@@ -568,6 +569,7 @@ class Backtest extends Component
             }
             
             this.setState({ current_idx, current_timestamp, positions, orders, drawings, info, log });
+            this.updateInfo();
         }
 
     }

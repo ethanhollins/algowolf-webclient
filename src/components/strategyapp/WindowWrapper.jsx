@@ -166,6 +166,7 @@ class WindowWrapper extends Component
                 connectChart={this.props.connectChart}
                 retrieveChartData={this.props.retrieveChartData}
                 addChart={this.props.addChart}
+                deleteChart={this.props.deleteChart}
                 getChart={this.props.getChart}
                 getBrokerChart={this.props.getBrokerChart}
                 addBrokerChart={this.props.addBrokerChart}
