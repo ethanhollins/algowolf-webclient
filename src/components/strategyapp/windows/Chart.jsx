@@ -1024,33 +1024,36 @@ class Chart extends Component
                     {
                         for (let x = 0; x < prices.overlays[i].length; x++)
                         {
-                            for (let y = 0; y < prices.overlays[i][x].length; y++)
+                            if (prices.overlays[i][x])
                             {
-                                let item = '';
-                                let price = prices.overlays[i][x][y];
-                                if (price === null || price === undefined) 
+                                for (let y = 0; y < prices.overlays[i][x].length; y++)
                                 {
-                                    price = '';
+                                    let item = '';
+                                    let price = prices.overlays[i][x][y];
+                                    if (price === null || price === undefined) 
+                                    {
+                                        price = '';
+                                    }
+                                    else
+                                    {
+                                        price = price.toFixed(ind.precision);
+                                    }
+    
+                                    const color = overlay.properties.colors[x][y];
+                                    
+                                    item = (
+                                        <span 
+                                            className='chart values price'
+                                            style={{color: `rgb(${color})`}}
+                                        >
+                                            {price}
+                                        </span>
+                                    );
+            
+                                    value_elems.push(
+                                        <div key={x + '-' + y}>{item}</div>
+                                    );
                                 }
-                                else
-                                {
-                                    price = price.toFixed(ind.precision);
-                                }
-
-                                const color = overlay.properties.colors[x][y];
-                                
-                                item = (
-                                    <span 
-                                        className='chart values price'
-                                        style={{color: `rgb(${color})`}}
-                                    >
-                                        {price}
-                                    </span>
-                                );
-        
-                                value_elems.push(
-                                    <div key={x + '-' + y}>{item}</div>
-                                );
                             }
                         }
                     }
@@ -1098,32 +1101,35 @@ class Chart extends Component
                     {
                         for (let x = 0; x < prices.studies[i].length; x++)
                         {
-                            for (let y = 0; y < prices.studies[i][x].length; y++)
+                            if (prices.studies[i][x])
                             {
-                                let item = '';
-                                let price = prices.studies[i][x][y];
-                                if (price === null || price === undefined) 
+                                for (let y = 0; y < prices.studies[i][x].length; y++)
                                 {
-                                    price = '';
-                                }
-                                else
-                                {
-                                    price = price.toFixed(ind.precision);
-                                }
+                                    let item = '';
+                                    let price = prices.studies[i][x][y];
+                                    if (price === null || price === undefined) 
+                                    {
+                                        price = '';
+                                    }
+                                    else
+                                    {
+                                        price = price.toFixed(ind.precision);
+                                    }
 
-                                const color = study.properties.colors[x][y];
-                                
-                                item = (
-                                    <span 
-                                        style={{color: `rgb(${color})`}}
-                                    >
-                                        {price}
-                                    </span>
-                                );
-    
-                                value_elems.push(
-                                    <div className='chart values price' key={x + '' + y}>{item}</div>
-                                );
+                                    const color = study.properties.colors[x][y];
+                                    
+                                    item = (
+                                        <span 
+                                            style={{color: `rgb(${color})`}}
+                                        >
+                                            {price}
+                                        </span>
+                                    );
+        
+                                    value_elems.push(
+                                        <div className='chart values price' key={x + '' + y}>{item}</div>
+                                    );
+                                }
                             }
                         }
                     }
@@ -1535,20 +1541,20 @@ class Chart extends Component
                 if (this.getOverlayValues(i)[0].length > 0)
                 {
                     const value = this.getOverlayValueByPos(i, x_pos);
-                    for (let j = 0; j < value.length; j++)
-                    {
-                        if (value[j] === undefined || value[j].some(x => x === undefined))
-                        {
-                            x_pos = 1;
-                            isNext = true;
-                        }
-                    }
+                    // for (let j = 0; j < value.length; j++)
+                    // {
+                    //     if (value[j] === undefined || value[j].some(x => x === undefined))
+                    //     {
+                    //         x_pos = 1;
+                    //         isNext = true;
+                    //     }
+                    // }
                     result.push(value);
                 }
-                else
-                {
-                    return prices;
-                }
+                // else
+                // {
+                //     return prices;
+                // }
             }
             prices.overlays = result;
             // Studies
@@ -1558,20 +1564,20 @@ class Chart extends Component
                 if (this.getStudyValues(i)[0].length > 0)
                 {
                     const value = this.getStudyValueByPos(i, x_pos);
-                    for (let j = 0; j < value.length; j++)
-                    {
-                        if (value[j] === undefined || value[j].some(x => x === undefined))
-                        {
-                            x_pos = 1;
-                            isNext = true;
-                        }
-                    }
+                    // for (let j = 0; j < value.length; j++)
+                    // {
+                    //     if (value[j] === undefined || value[j].some(x => x === undefined))
+                    //     {
+                    //         x_pos = 1;
+                    //         isNext = true;
+                    //     }
+                    // }
                     result.push(value);
                 }
-                else
-                {
-                    return prices;
-                }
+                // else
+                // {
+                //     return prices;
+                // }
             }
             prices.studies = result;
         }
@@ -3144,29 +3150,20 @@ class Chart extends Component
 
     getOverlayValueByPos = (idx, x) =>
     {
-        const values = this.getOverlayValues(idx);
-        let result = [];
-        for (let i = 0; i < values.length; i++)
-        {
-            result.push(values[i][values[i].length-x]);
-        }
-        return result;
+        const overlay = this.overlays[idx];
+        if (overlay === undefined)
+            return [];
+        else
+            return overlay.getValue(x);
     }
 
     getStudyValueByPos = (idx, x) =>
     {
-        const values = this.getStudyValues(idx);
-        let result = [];
-        for (let i = 0; i < values.length; i++)
-        {
-            result.push(values[i][values[i].length-x]);
-        }
-        return result;
-        // const study = this.studies[idx];
-        // if (study === undefined)
-        //     return [];
-        // else
-        //     return study.getValue(x);
+        const study = this.studies[idx];
+        if (study === undefined)
+            return [];
+        else
+            return study.getValue(x);
     }
 
     setFutureTimestamps = () =>
