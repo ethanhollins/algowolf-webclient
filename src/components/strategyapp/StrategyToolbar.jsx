@@ -322,6 +322,7 @@ class StrategyToolbar extends Component
         let current_account = this.getCurrentAccount();
         const is_running = this.getScriptStatus(current_account);
         const is_loaded = this.props.getStrategyComponent().isLoaded();
+        const { statusMsg } = this.state;
 
         if (is_running === null || !is_loaded)
         {
@@ -331,19 +332,31 @@ class StrategyToolbar extends Component
         {
             return (
                 <div ref={this.setActivationElem} className='toolbox item row btn'>
-                    <FontAwesomeIcon id='stop_status' className='toolbox icon grey_btn' icon={faStop} />
+                    <FontAwesomeIcon id='stop_status' className='toolbox icon' icon={faStop} />
                     <span className='toolbox label'>Stop</span>
                 </div>
             );
         }
         else
         {
-            return (
-                <div ref={this.setActivationElem} className='toolbox item row btn'>
-                    <FontAwesomeIcon id='play_status' className='toolbox icon red_btn' icon={faPlay} />
-                    <span className='toolbox label'>Start</span>
-                </div>
-            );
+            if (statusMsg !== null)
+            {
+                return (
+                    <div ref={this.setActivationElem} className='toolbox item row btn disabled'>
+                        <FontAwesomeIcon className='toolbox icon disabled' icon={faPlay} />
+                        <span className='toolbox label'>Start</span>
+                    </div>
+                );
+            }
+            else
+            {
+                return (
+                    <div ref={this.setActivationElem} className='toolbox item row btn'>
+                        <FontAwesomeIcon id='play_status' className='toolbox icon' icon={faPlay} />
+                        <span className='toolbox label'>Start</span>
+                    </div>
+                );
+            }
         }
     }
 

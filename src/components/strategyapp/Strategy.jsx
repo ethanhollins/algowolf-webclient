@@ -444,6 +444,42 @@ class Strategy extends Component
                 update = this.handleLiveTransactions(i, transactions) || update;
             }
         }
+        else if (data.type === 'script_running')
+        {
+            if (this.getCurrentAccount() === data.account_code)
+            {
+                const strategy = this.getStrategyInfo();
+                const broker_id = data.account_code.split('.')[0];
+                const account_id = data.account_code.split('.')[1];
+
+                strategy.brokers[broker_id].accounts[account_id]['strategy_status'] = true;
+                this.props.setStatusMsg(null);
+                this.props.updateStrategyInfo();
+            }
+        }
+        else if (data.type === 'script_stopped')
+        {
+            if (this.getCurrentAccount() === data.account_code)
+            {
+                const strategy = this.getStrategyInfo();
+                const broker_id = data.account_code.split('.')[0];
+                const account_id = data.account_code.split('.')[1];
+
+                strategy.brokers[broker_id].accounts[account_id]['strategy_status'] = false;
+                this.props.setStatusMsg(null);
+                this.props.updateStrategyInfo();
+            }
+        }
+        else if (data.type === 'live_backtest_uploaded')
+        {
+            console.log('LIVE BACKTEST UPLOADED ', data.account_code);
+            let { info, transactions } = this.state;
+            info = {};
+            transactions[data.account_code] = [];
+            this.setState({ info, transactions });
+            
+            this.retrieveAccountInfo(data.account_code, true);
+        }
         else
         {
             update = this.handleLiveTransactions(data, transactions) || update;
@@ -1317,11 +1353,11 @@ class Strategy extends Component
         return this.state.selected_chart;
     }
 
-    async retrieveAccountInfo(account_code)
+    async retrieveAccountInfo(account_code, override)
     {
         let { loaded, transactions } = this.state;
 
-        if (!loaded.includes(account_code))
+        if (!loaded.includes(account_code) || override)
         {
             console.log('retrieve account');
             const broker_id = account_code.split('.')[0];

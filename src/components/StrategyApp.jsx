@@ -527,6 +527,7 @@ class StrategyApp extends Component
                         getPage={this.getPage}
                         setPopup={this.setPopup}
                         getPopup={this.getPopup}
+                        setStatusMsg={this.setStatusMsg}
                         setShowLoadScreen={this.setShowLoadScreen}
                         getTimezones={this.getTimezones}
                         convertIncomingPositionSize={this.convertIncomingPositionSize}
@@ -1753,7 +1754,6 @@ class StrategyApp extends Component
         );
 
         let { strategyInfo } = this.state;
-
         if (res.status === 200)
         {
             res = await res.json();
@@ -1763,8 +1763,6 @@ class StrategyApp extends Component
             }
             this.setState({ strategyInfo });
         }
-        
-        this.toolbar.setStatusMsg(null);
     }
 
     getAppContainer = () =>
@@ -1808,7 +1806,7 @@ class StrategyApp extends Component
 
     async startScript(broker_id, account_id, input_variables)
     {
-        // this.toolbar.setStatusMsg('Starting strategy...');
+        this.toolbar.setStatusMsg('Initializing script...');
 
         const { account } = this.state;
         const strategy_id = account.metadata.current_strategy;
@@ -1824,7 +1822,7 @@ class StrategyApp extends Component
 
     async stopScript(broker_id, account_id)
     {
-        // this.toolbar.setStatusMsg('Stopping strategy...');
+        this.toolbar.setStatusMsg('Stopping strategy...');
 
         const { account } = this.state;
         const strategy_id = account.metadata.current_strategy;
@@ -1833,6 +1831,12 @@ class StrategyApp extends Component
             { accounts: [account_id] }, 
             'stop'
         );
+        this.toolbar.setStatusMsg(null);
+    }
+
+    setStatusMsg = (msg) =>
+    {
+        this.toolbar.setStatusMsg(msg);
     }
 
     getWindowInfo = (strategy_id, item_id) =>

@@ -229,9 +229,19 @@ body {
     border-radius: 2px;
 }
 
-.toolbox.item.btn:hover {
+.toolbox.item.btn:not(.disabled):hover {
     background-color: #fff5e9;
     cursor: pointer;
+}
+
+.toolbox.item.btn.disabled {
+    background-color: transparent;
+    cursor: not-allowed;
+    color: rgb(180,180,180);
+}
+
+.toolbox.item.btn.disabled:hover {
+    background-color: transparent;
 }
 
 .toolbox.item.row {
@@ -264,6 +274,10 @@ body {
 .toolbox.icon {
     height: 18px;
     margin-right: 5px;
+}
+
+.toolbox.icon.disabled {
+    color: rgb(180,180,180);
 }
 
 .toolbox.standalone-icon {
