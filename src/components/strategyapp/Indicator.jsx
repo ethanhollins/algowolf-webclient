@@ -451,7 +451,7 @@ class tr extends Indicator
         this.appearance = appearance;
         this.period = properties.Period.value;
         this.min_bars = this.period+1;
-        this.precision = 5;
+        this.precision = 6;
 
         this.display_name = `ATR ${this.period}`;
 
