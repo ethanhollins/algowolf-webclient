@@ -225,6 +225,7 @@ class Popup extends Component
                     getPopup={this.props.getPopup}
                     onChangeCategory={this.onChangeCategory}
                     changeCategory={this.changeCategory}
+                    getContainerSize={this.props.getContainerSize}
                     getWindowInfo={this.props.getWindowInfo}
                     getStrategyId={this.props.getStrategyId}
                     getStrategyInfo={this.props.getStrategyInfo}

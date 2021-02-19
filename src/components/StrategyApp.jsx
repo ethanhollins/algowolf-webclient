@@ -1626,10 +1626,10 @@ class StrategyApp extends Component
         return undefined;
     }
 
-    createIndicator = (type, broker, product, chart_period, properties) =>
+    createIndicator = (type, broker, product, chart_period, properties, appearance) =>
     {
         let { indicators } = this.state;
-        const ind = new Indicator[type](broker, product, chart_period, properties);
+        const ind = new Indicator[type](broker, product, chart_period, properties, appearance);
         indicators.push(ind);
         this.setState({ indicators });
         return ind;

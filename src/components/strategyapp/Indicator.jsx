@@ -85,7 +85,7 @@ class Indicator {
 // Bolinger Bands
 class boll extends Indicator
 {
-    constructor(broker, product, chart_period, properties)
+    constructor(broker, product, chart_period, properties, appearance)
     {
         super();
 
@@ -94,7 +94,8 @@ class boll extends Indicator
         this.product = product;
         this.chart_period = chart_period;
         this.properties = properties;
-        this.period = properties.periods[0];
+        this.appearance = appearance;
+        this.period = properties.Period.value;
         this.min_bars = this.period;
         this.precision = 5;
 
@@ -114,7 +115,7 @@ class boll extends Indicator
             return [null, null]
         }
 
-        const std_dev = this.properties.StdDev;
+        const std_dev = this.properties.StdDev.value;
 
         // Calc mean
         let mean = 0;
@@ -142,7 +143,7 @@ class boll extends Indicator
 // Dochian Bands
 class donch extends Indicator
 {
-    constructor(broker, product, chart_period, properties)
+    constructor(broker, product, chart_period, properties, appearance)
     {
         super();
 
@@ -151,7 +152,8 @@ class donch extends Indicator
         this.product = product;
         this.chart_period = chart_period;
         this.properties = properties;
-        this.period = properties.periods[0];
+        this.appearance = appearance;
+        this.period = properties.Period.value;
         this.min_bars = this.period;
         this.precision = 5;
 
@@ -186,7 +188,7 @@ class donch extends Indicator
 // Exponential Moving Average
 class ema extends Indicator
 {
-    constructor(broker, product, chart_period, properties)
+    constructor(broker, product, chart_period, properties, appearance)
     {
         super();
 
@@ -195,7 +197,8 @@ class ema extends Indicator
         this.product = product;
         this.chart_period = chart_period;
         this.properties = properties;
-        this.period = properties.periods[0];
+        this.appearance = appearance;
+        this.period = properties.Period.value;
         this.min_bars = this.period;
         this.precision = 5;
 
@@ -238,7 +241,7 @@ class ema extends Indicator
 // Moving Average Envelope
 class mae extends Indicator
 {
-    constructor(broker, product, chart_period, properties)
+    constructor(broker, product, chart_period, properties, appearance)
     {
         super();
 
@@ -247,7 +250,8 @@ class mae extends Indicator
         this.product = product;
         this.chart_period = chart_period;
         this.properties = properties;
-        this.period = properties.periods[0];
+        this.appearance = appearance;
+        this.period = properties.Period.value;
         this.min_bars = this.period;
         this.precision = 5;
 
@@ -295,7 +299,7 @@ class mae extends Indicator
 // Simple Moving Average
 class sma extends Indicator
 {
-    constructor(broker, product, chart_period, properties)
+    constructor(broker, product, chart_period, properties, appearance)
     {
         super();
 
@@ -304,7 +308,8 @@ class sma extends Indicator
         this.product = product;
         this.chart_period = chart_period;
         this.properties = properties;
-        this.period = properties.periods[0];
+        this.appearance = appearance;
+        this.period = properties.Period.value;
         this.min_bars = this.period;
         this.precision = 5;
 
@@ -341,7 +346,7 @@ class sma extends Indicator
 // Average True Range
 class atr extends Indicator
 {
-    constructor(broker, product, chart_period, properties)
+    constructor(broker, product, chart_period, properties, appearance)
     {
         super();
 
@@ -350,7 +355,8 @@ class atr extends Indicator
         this.product = product;
         this.chart_period = chart_period;
         this.properties = properties;
-        this.period = properties.periods[0];
+        this.appearance = appearance;
+        this.period = properties.Period.value;
         this.min_bars = this.period;
         this.precision = 5;
 
@@ -433,7 +439,7 @@ class atr extends Indicator
 // Modified Average True Range
 class tr extends Indicator
 {
-    constructor(broker, product, chart_period, properties)
+    constructor(broker, product, chart_period, properties, appearance)
     {
         super();
 
@@ -442,7 +448,8 @@ class tr extends Indicator
         this.product = product;
         this.chart_period = chart_period;
         this.properties = properties;
-        this.period = properties.periods[0];
+        this.appearance = appearance;
+        this.period = properties.Period.value;
         this.min_bars = this.period+1;
         this.precision = 5;
 

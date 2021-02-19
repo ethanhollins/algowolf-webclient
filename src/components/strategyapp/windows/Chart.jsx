@@ -936,6 +936,7 @@ class Chart extends Component
                         getOhlcValues={this.getOhlc}
                         getFilteredOffset={this.getFilteredOffset}
                         getProperties={this.getOverlayProperties}
+                        getAppearance={this.getOverlayAppearance}
                         getCamera={this.getCamera}
                         getCanvas={this.getCanvas}
                         getPos={this.getPos}
@@ -977,6 +978,7 @@ class Chart extends Component
                         getOhlcValues={this.getOhlc}
                         getFilteredOffset={this.getFilteredOffset}
                         getProperties={this.getStudyProperties}
+                        getAppearance={this.getStudyAppearance}
                         getTimestamps={this.getTimestamps}
                         getAllTimestamps={this.getAllTimestamps}
                         getNumZeroDecimals={this.getNumZeroDecimals}
@@ -1039,7 +1041,7 @@ class Chart extends Component
                                         price = price.toFixed(ind.precision);
                                     }
     
-                                    const color = overlay.properties.colors[x][y];
+                                    const color = overlay.appearance.colors[x][y];
                                     
                                     item = (
                                         <span 
@@ -1058,8 +1060,6 @@ class Chart extends Component
                         }
                     }
     
-                    // const name = overlay.type.substring(0,1).toUpperCase() + overlay.type.substring(1);
-                    // const name = overlay.type.toUpperCase();
                     overlay_info.push(
                         <div key={i} className='chart overlay-item'>
                             <div
@@ -1116,7 +1116,7 @@ class Chart extends Component
                                         price = price.toFixed(ind.precision);
                                     }
 
-                                    const color = study.properties.colors[x][y];
+                                    const color = study.appearance.colors[x][y];
                                     
                                     item = (
                                         <span 
@@ -1136,7 +1136,12 @@ class Chart extends Component
     
                     // const name = study.display_name;
                     study_info.push(
-                        <div key={i} className='chart group study' style={{top: (start_pos.y + 5) + 'px', left: '5px'}}>
+                        <div 
+                            key={i} className='chart group study' 
+                            style={{top: (start_pos.y + 5) + 'px', left: '5px'}}
+                            onMouseEnter={this.onIndicatorEnter}
+                            onMouseLeave={this.onIndicatorLeave}
+                        >
                             <div className='chart values type'>{name}</div>
                             {value_elems}
                             <div className='chart ind-settings'>
@@ -1183,7 +1188,7 @@ class Chart extends Component
     onIndicatorEnter = (e) =>
     {
         let elem = e.target;
-        while (elem.className !== 'chart ind-group')
+        while (elem.className !== 'chart ind-group' && elem.className !== 'chart group study')
         {
             elem = elem.parentNode;
         }
@@ -1195,7 +1200,7 @@ class Chart extends Component
     onIndicatorLeave = (e) =>
     {
         let elem = e.target;
-        while (elem.className !== 'chart ind-group')
+        while (elem.className !== 'chart ind-group' && elem.className !== 'chart group study')
         {
             elem = elem.parentNode;
         }
@@ -1208,24 +1213,24 @@ class Chart extends Component
     {
         const idx = parseInt(e.target.getAttribute('name'));
 
-        // const popup = {
-        //     type: 'indicator-settings',
-        //     size: {
-        //         width: 20,
-        //         height: 40
-        //     },
-        //     opened: 'properties',
-        //     properties: {
-        //         indicator: this.getOverlayIndicator(idx)
-        //     }
-        // }
         const popup = {
-            type: 'not-available',
+            type: 'indicator-settings',
             size: {
-                width: 30,
-                height: 30
+                width: 20,
+                height: 40
+            },
+            opened: 'properties',
+            properties: {
+                indicator: this.getOverlayIndicator(idx)
             }
         }
+        // const popup = {
+        //     type: 'not-available',
+        //     size: {
+        //         width: 30,
+        //         height: 30
+        //     }
+        // }
         this.props.setPopup(popup);
     }
 
@@ -1342,7 +1347,10 @@ class Chart extends Component
         // Handle Price Line
         if (!this.isBacktest())
         {
-            this.handlePriceLine(ctx);
+            if (this.getPriceLineEnabled())
+            {
+                this.handlePriceLine(ctx);
+            }
         }
 
         // Handle Positions/Orders
@@ -1351,7 +1359,10 @@ class Chart extends Component
         // Handle Price Label
         if (!this.isBacktest())
         {
-            this.handlePriceLabel(ctx);
+            if (this.getPriceLineEnabled())
+            {
+                this.handlePriceLabel(ctx);
+            }
         }
 
         const studies = this.getStudyComponents();
@@ -1393,7 +1404,10 @@ class Chart extends Component
         // Handle Cross Segment Drawings
         this.handleUniversalDrawings(ctx);
         // Handle Crosshairs
-        this.handleCrosshairs(ctx);
+        if (this.getCrosshairEnabled())
+        {
+            this.handleCrosshairs(ctx);
+        }
     }
 
     handleFutureTimestamps()
@@ -2673,7 +2687,7 @@ class Chart extends Component
         );
 
         // Properties
-        ctx.fillStyle = '#3498db';
+        ctx.fillStyle = this.getPriceLineColor();
 
         // Font settings
         const font_size = this.getFontSize();
@@ -2712,7 +2726,7 @@ class Chart extends Component
         const broker_ask = this.getBrokerAsk();
         const broker_bid = this.getBrokerBid();
 
-        if (broker_ask && broker_bid)
+        if (this.getBidAskLineEnabled() && broker_ask && broker_bid)
         {
             const line_width = 5;
             const line_space = 4;
@@ -2726,9 +2740,9 @@ class Chart extends Component
             let c_x = 0;
             while (c_x < chart_size.width)
             {
-                ctx.fillStyle = '#2ecc71';
+                ctx.fillStyle = this.getAskLineColor();
                 ctx.fillRect(c_x, Math.floor(screen_ask_pos.y), line_width, 1);
-                ctx.fillStyle = '#e74c3c';
+                ctx.fillStyle = this.getBidLineColor();
                 ctx.fillRect(c_x, Math.floor(screen_bid_pos.y), line_width, 1);
                 c_x += line_width + line_space;
             }
@@ -3513,9 +3527,29 @@ class Chart extends Component
         return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].general['precision'].value;
     }
 
+    getBidLineColor = () =>
+    {
+        return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].appearance['bid-ask-line'].bid;
+    }
+
+    getAskLineColor = () =>
+    {
+        return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].appearance['bid-ask-line'].ask;
+    }
+
+    getBidAskLineEnabled = () =>
+    {
+        return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].appearance['bid-ask-line'].enabled;
+    }
+
     getPriceLineColor = () =>
     {
         return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].appearance['price-line'].value;
+    }
+
+    getPriceLineEnabled = () =>
+    {
+        return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].appearance['price-line'].enabled;
     }
 
     getVertGridLinesColor = () =>
@@ -3523,14 +3557,29 @@ class Chart extends Component
         return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].appearance['vert-grid-lines'].value;
     }
 
+    getVertGridLinesEnabled = () =>
+    {
+        return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].appearance['vert-grid-lines'].enabled;
+    }
+
     getHorzGridLinesColor = () =>
     {
         return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].appearance['horz-grid-lines'].value;
     }
 
+    getHorzGridLinesEnabled = () =>
+    {
+        return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].appearance['horz-grid-lines'].enabled;
+    }
+
     getCrosshairColor = () =>
     {
         return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].appearance['crosshair'].value;
+    }
+
+    getCrosshairEnabled = () =>
+    {
+        return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].appearance['crosshair'].enabled;
     }
 
     getProperties = () =>
@@ -3686,17 +3735,19 @@ class Chart extends Component
         return this.getProperties().overlays[idx].properties;
     }
 
+    getOverlayAppearance = (idx) =>
+    {
+        return this.getProperties().overlays[idx].appearance;
+    }
+
     getOverlayValues = (idx) =>
     {
         const overlays = this.getOverlays();
+        const price_type = this.getPrice();
         let result = [];
-        for (let i = 0; i < overlays[idx].properties.periods.length; i++)
-        {
-            const price_type = this.getPrice();
-            result.push(
-                this.getIndicator(overlays[idx])['cache_' + price_type]
-            );
-        }
+        result.push(
+            this.getIndicator(overlays[idx])['cache_' + price_type]
+        );
         return result;
     }
 
@@ -3718,17 +3769,19 @@ class Chart extends Component
         return this.getProperties().studies[idx].properties;
     }
 
+    getStudyAppearance = (idx) =>
+    {
+        return this.getProperties().studies[idx].appearance;
+    }
+
     getStudyValues = (idx) =>
     {
         const studies = this.getStudies();
+        const price_type = this.getPrice();
         let result = [];
-        for (let i = 0; i < studies[idx].properties.periods.length; i++)
-        {
-            const price_type = this.getPrice();
-            result.push(
-                this.getIndicator(studies[idx])['cache_' + price_type]
-            );
-        }
+        result.push(
+            this.getIndicator(studies[idx])['cache_' + price_type]
+        );
         return result;
     }
 
@@ -3956,12 +4009,13 @@ class Chart extends Component
     {
         const chart = this.getChart();
         let ind = this.props.findIndicator(
-            ind_props.type, chart.broker, chart.product, chart.period, ind_props.properties.periods[0]
+            ind_props.type, chart.broker, chart.product, chart.period, ind_props.properties.Period.value
         );
         if (ind === undefined)
         {
             ind = this.props.createIndicator(
-                ind_props.type, chart.broker, chart.product, chart.period, ind_props.properties
+                ind_props.type, chart.broker, chart.product, chart.period, 
+                ind_props.properties, ind_props.appearance
             );
             
             this.props.calculateIndicator(ind, chart);

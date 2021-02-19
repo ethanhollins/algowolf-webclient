@@ -230,6 +230,8 @@ class ChartSettings extends Component
                             <input 
                                 type='checkbox' 
                                 defaultChecked={settings['body']['enabled']}
+                                onChange={this.onAppearanceCheckboxInputChange.bind(this)}
+                                name={'body'}
                             />
                             <div className='checkmark'></div>
                         </label>
@@ -268,6 +270,8 @@ class ChartSettings extends Component
                             <input 
                                 type='checkbox' 
                                 defaultChecked={settings['outline']['enabled']}
+                                onChange={this.onAppearanceCheckboxInputChange.bind(this)}
+                                name={'outline'}
                             />
                             <div className='checkmark'></div>
                         </label>
@@ -306,6 +310,8 @@ class ChartSettings extends Component
                             <input 
                                 type='checkbox' 
                                 defaultChecked={settings['wick']['enabled']}
+                                onChange={this.onAppearanceCheckboxInputChange.bind(this)}
+                                name={'wick'}
                             />
                             <div className='checkmark'></div>
                         </label>
@@ -343,7 +349,49 @@ class ChartSettings extends Component
                         <label className='popup checkbox'>
                             <input 
                                 type='checkbox' 
+                                defaultChecked={settings['bid-ask-line']['enabled']}
+                                onChange={this.onAppearanceCheckboxInputChange.bind(this)}
+                                name={'bid-ask-line'}
+                            />
+                            <div className='checkmark'></div>
+                        </label>
+                        <div>Bid/Ask Line</div>
+                    </div>
+                </div>
+                <div className='popup table-cell'>
+                    <div className='popup right'>
+                        <ColorSwatch 
+                            key={'bid-ask-line'}
+                            category={'appearance'}
+                            sub={'bid-ask-line'}
+                            name={'bid'}
+                            getProperty={this.getProperty}
+                            setProperty={this.setProperty}
+                            setHoverOn={this.props.setHoverOn}
+                            setHoverOff={this.props.setHoverOff}
+                        />
+                        <ColorSwatch 
+                            key={'bid-ask-line'}
+                            category={'appearance'}
+                            sub={'bid-ask-line'}
+                            name={'ask'}
+                            getProperty={this.getProperty}
+                            setProperty={this.setProperty}
+                            setHoverOn={this.props.setHoverOn}
+                            setHoverOff={this.props.setHoverOff}
+                        />
+                    </div>
+                </div>
+            </div>
+            <div className='popup table-row'>
+                <div className='popup table-cell'>
+                    <div className='popup left'>
+                        <label className='popup checkbox'>
+                            <input 
+                                type='checkbox' 
                                 defaultChecked={settings['price-line']['enabled']}
+                                onChange={this.onAppearanceCheckboxInputChange.bind(this)}
+                                name={'price-line'}
                             />
                             <div className='checkmark'></div>
                         </label>
@@ -372,6 +420,8 @@ class ChartSettings extends Component
                             <input 
                                 type='checkbox' 
                                 defaultChecked={settings['vert-grid-lines']['enabled']}
+                                onChange={this.onAppearanceCheckboxInputChange.bind(this)}
+                                name={'vert-grid-lines'}
                             />
                             <div className='checkmark'></div>
                         </label>
@@ -400,6 +450,8 @@ class ChartSettings extends Component
                             <input 
                                 type='checkbox' 
                                 defaultChecked={settings['horz-grid-lines']['enabled']}
+                                onChange={this.onAppearanceCheckboxInputChange.bind(this)}
+                                name={'horz-grid-lines'}
                             />
                             <div className='checkmark'></div>
                         </label>
@@ -428,6 +480,8 @@ class ChartSettings extends Component
                             <input 
                                 type='checkbox' 
                                 defaultChecked={settings['crosshair']['enabled']}
+                                onChange={this.onAppearanceCheckboxInputChange.bind(this)}
+                                name={'crosshair'}
                             />
                             <div className='checkmark'></div>
                         </label>
@@ -661,6 +715,20 @@ class ChartSettings extends Component
         this.props.getPopup().properties.layout = value;
         settings['current'] = value;
         this.props.updateStrategyInfo();
+    }
+
+    onEnabledToggle = (category, sub, value) =>
+    {
+        this.getChartSettings()[category][sub].enabled = value;
+        this.props.updateStrategyInfo();
+    }
+
+    onAppearanceCheckboxInputChange(e)
+    {
+        const checked = e.target.checked;
+        const sub = e.target.getAttribute('name');
+        
+        this.onEnabledToggle('appearance', sub, checked);
     }
 
     getLayouts = () =>

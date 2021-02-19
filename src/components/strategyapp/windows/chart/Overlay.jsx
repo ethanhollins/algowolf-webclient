@@ -60,7 +60,7 @@ class Overlay extends Component
         const timestamps = this.props.getTimestamps();
         const ohlc = this.props.getOhlcValues();
         const ind_values = this.props.getValues(this.props.index);
-        const properties = this.props.getProperties(this.props.index);
+        const appearance = this.props.getAppearance(this.props.index);
 
         let { values } = this.state;
         
@@ -84,7 +84,7 @@ class Overlay extends Component
                 for (let y = 0; y < ind_values[i][0].length; y++)
                 {
                     let c_x = -1;
-                    const color = properties.colors[i][y];
+                    const color = appearance.colors[i][y];
                     let is_future = false;
     
                     ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 1.0)`;
