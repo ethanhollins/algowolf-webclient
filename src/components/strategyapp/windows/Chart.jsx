@@ -1213,24 +1213,24 @@ class Chart extends Component
     {
         const idx = parseInt(e.target.getAttribute('name'));
 
-        const popup = {
-            type: 'indicator-settings',
-            size: {
-                width: 20,
-                height: 40
-            },
-            opened: 'properties',
-            properties: {
-                indicator: this.getOverlayIndicator(idx)
-            }
-        }
         // const popup = {
-        //     type: 'not-available',
+        //     type: 'indicator-settings',
         //     size: {
-        //         width: 30,
-        //         height: 30
+        //         width: 20,
+        //         height: 40
+        //     },
+        //     opened: 'properties',
+        //     properties: {
+        //         indicator: this.getOverlayIndicator(idx)
         //     }
         // }
+        const popup = {
+            type: 'not-available',
+            size: {
+                width: 30,
+                height: 30
+            }
+        }
         this.props.setPopup(popup);
     }
 
