@@ -11,6 +11,7 @@ import Auth from './components/Auth';
 import { config } from '@fortawesome/fontawesome-svg-core'
 import Cookies from 'universal-cookie';
 import moment from "moment-timezone";
+import Register from './components/Register';
 
 class App extends Component 
 {
@@ -35,6 +36,9 @@ class App extends Component
                 <Switch>
                     <Route exact path="/">
                         <Redirect to="/login"/>
+                    </Route>
+                    <Route exact path="/register">
+                        <Register />
                     </Route>
                     <Route exact path="/login">
                         {this.getConditionalLoginComponent()}
@@ -103,7 +107,6 @@ class App extends Component
                 getUserId={this.getUserId}
                 setUserId={this.setUserId}
                 checkAuthorization={this.checkAuthorization}
-                getAxiosObj={this.getAxiosObj}
             />;
         }
     }

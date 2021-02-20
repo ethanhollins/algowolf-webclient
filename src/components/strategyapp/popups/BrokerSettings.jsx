@@ -29,6 +29,10 @@ class BrokerSettings extends Component
         const popup = this.props.getPopup();
         if (popup.opened === undefined)
             this.props.changeCategory(Object.keys(brokers)[0]);
+
+        this.setSpotwareInfo = elem => {
+            this.spotwareInfo = elem;
+        }
     }
 
     render()
@@ -409,6 +413,7 @@ class BrokerSettings extends Component
                     >
                         <img className='popup broker-logo' src={process.env.PUBLIC_URL + '/ctrader_logo.png'} />
                         <div className='popup broker-text'>CTrader</div>
+                        <div className='popup broker-description'>Multiple Brokers</div>
                     </div>
                 </div>
             </div>
@@ -600,9 +605,12 @@ class BrokerSettings extends Component
                         className={'popup broker' + this.isItemSelected('spotware', broker_info.broker)}
                         onClick={this.setBroker.bind(this)}
                         name='spotware'
+                        // onMouseEnter={this.onSpotwareEnter.bind(this)}
+                        // onMouseLeave={this.onSpotwareLeave.bind(this)}
                     >
                         <img className='popup broker-logo' src={process.env.PUBLIC_URL + '/ctrader_logo.png'} />
                         <div className='popup broker-text'>CTrader</div>
+                        <div className='popup broker-description'>Multiple Brokers</div>
                     </div>
                 </div>
             </div>
@@ -758,6 +766,18 @@ class BrokerSettings extends Component
         {
             return <img className='popup category-left-logo' src={process.env.PUBLIC_URL + '/ctrader_logo.png'} />;
         }
+    }
+
+    onSpotwareEnter(e)
+    {
+        console.log('enter');
+        this.spotwareInfo.style.display = 'block';
+    }
+
+    onSpotwareLeave(e)
+    {
+        console.log('leave');
+        this.spotwareInfo.style.display = 'none';
     }
 }
 

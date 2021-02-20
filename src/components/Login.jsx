@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { ReactSVG } from 'react-svg';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    faUser, faLock
-} from '@fortawesome/pro-solid-svg-icons';
+    faUser, faLock, faEnvelope
+} from '@fortawesome/pro-regular-svg-icons';
 
 class Login extends Component
 {
@@ -17,7 +17,7 @@ class Login extends Component
     }
 
     state = {
-        username: '',
+        email: '',
         password: '',
         loginCheck: false
 
@@ -42,53 +42,63 @@ class Login extends Component
         {
             return (
                 <div className="login container">
-                    <form className="login form" onSubmit={this.handleSubmit.bind(this)}>
+                    <div>
                         <a className='login logo' href='/'>
                             <ReactSVG src={process.env.PUBLIC_URL + "/algowolf.svg"} />
                         </a>
-    
-                        <div className="login field">
-                            <input 
-                                type="text" className="login input" 
-                                name="username" id="username" 
-                                placeholder="Username"
-                                autoComplete="username" required 
-                                onChange={this.handleChange} 
-                            />
-                            <span className='login icon'>
-                                <FontAwesomeIcon icon={faUser} />
-                            </span>
-                        </div>
-    
-                        <div className="login field">
-                            <input 
-                                type="password" className="login input" 
-                                name="password" id="password" 
-                                placeholder="Password"
-                                required onChange={this.handleChange} 
-                            />
-                            <span className='login icon'>
-                                <FontAwesomeIcon icon={faLock} />
-                            </span>
-                        </div>
-    
-                        <div className="login field">
-                            <input type="submit" id="submit" className="login input" value="LOGIN"/>
-                        </div>
-    
-                        {/* <div className="login field center">
-                            <span>Forgot <a href='/login#'>Username/Password</a>?</span>
-                        </div> */}
-    
-                        <div className="login field center">
-                            <span className='error' ref={this.setErrorMsgRef}></span>
-                        </div>
-                    </form>
-                    {/* <span>Create an Account</span> */}
+                        <form className="login form" onSubmit={this.handleSubmit.bind(this)}>
+                            <div className="login header">
+                                Sign In
+                            </div>
 
-                    {/* <div className='promo container'>
-                        
-                    </div> */}
+                            <div className="login field">
+                                <div className="login field-header">Email</div>
+                                <div className="login input-parent">
+                                    <input 
+                                        type="text" className="login input" 
+                                        name="email" id="email" 
+                                        placeholder="Email"
+                                        autoComplete="email" required 
+                                        onChange={this.handleChange} 
+                                    />
+                                    <span className='login icon' id="email_icon">
+                                        <FontAwesomeIcon icon={faEnvelope} />
+                                    </span>
+                                </div>
+                            </div>
+        
+                            <div className="login field">
+                                <div className="login field-header">Password</div>
+                                <div className="login input-parent">
+                                    <input 
+                                        type="password" className="login input" 
+                                        name="password" id="password" 
+                                        placeholder="Password"
+                                        required onChange={this.handleChange} 
+                                    />
+                                    <span className='login icon'>
+                                        <FontAwesomeIcon icon={faLock} />
+                                    </span>
+                                </div>
+                            </div>
+        
+                            <div className="login field">
+                                <input type="submit" id="submit" className="login input" value="SIGN IN"/>
+                            </div>
+        
+                            <div className="login field center">
+                                <span>Forgot <a href='/login#'>Username/Password</a>?</span>
+                            </div>
+        
+                            <div className="login field center">
+                                <span className='error' ref={this.setErrorMsgRef}></span>
+                            </div>
+
+                        </form>
+                        <div className="login field create-account">
+                            <span><a href='/register'>Create a free account</a> to get started with AlgoWolf</span>
+                        </div>
+                    </div>
 
                 </div>
             )
@@ -101,16 +111,16 @@ class Login extends Component
 
     handleChange = (event) =>
     {
-        let { username, password } = this.state;
-        if (event.target.name === 'username')
+        let { email, password } = this.state;
+        if (event.target.name === 'email')
         {
-            username = event.target.value.toLowerCase();
+            email = event.target.value.toLowerCase();
         }
         else if (event.target.name === 'password')
         {
             password = event.target.value;
         }
-        this.setState({ username, password });
+        this.setState({ email, password });
     }
 
     async handleSubmit(event)
@@ -118,7 +128,7 @@ class Login extends Component
         const { REACT_APP_API_URL } = process.env;
         event.preventDefault();
         const raw = JSON.stringify({
-            'username': this.state.username,
+            'username': this.state.email,
             'password': this.state.password
         });
         var requestOptions = {
