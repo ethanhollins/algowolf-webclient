@@ -261,15 +261,14 @@ class StrategyToolbar extends Component
 
         if (brokers !== undefined)
         {
-
             let current_account = this.getCurrentAccount();
 
             let account_elems = [];
             let class_name;
             for (let broker_id of brokers)
             {
-                const accounts = this.getAccounts(broker_id);
                 const broker_name = strategy.brokers[broker_id].name;
+                const accounts = strategy.brokers[broker_id].accounts;
 
                 if (broker_name !== null)
                 {
@@ -279,10 +278,33 @@ class StrategyToolbar extends Component
                         </div>
                     );
                 }
-                for (let acc of accounts)
+
+                for (let acc in accounts)
                 {
-                    const account_id = broker_id + '.' + acc;
-                    if (account_id === current_account)
+                    let nickname = accounts[acc].nickname;
+
+                    let account_id;
+                    if ('account_id' in accounts[acc])
+                    {
+                        account_id = accounts[acc].account_id;
+                    }
+                    else
+                    {
+                        account_id = acc;
+                    }
+
+                    let display_name;
+                    if (nickname)
+                    {
+                        display_name = `${nickname} (${account_id})`;
+                    }
+                    else
+                    {
+                        display_name = `${account_id}`;
+                    }
+
+                    const account_code = broker_id + '.' + acc;
+                    if (account_code === current_account)
                     {
                         class_name = 'toolbox dropdown-item selected';
                     }
@@ -292,8 +314,8 @@ class StrategyToolbar extends Component
                     }
                             
                     account_elems.push(
-                        <div key={acc} className={class_name} onClick={this.onAccountsDropdownItem} name={account_id}>
-                            <span className='toolbox left'>{this.getAccountDisplayName(acc)}</span>
+                        <div key={acc} className={class_name} onClick={this.onAccountsDropdownItem} name={account_code}>
+                            <span className='toolbox left'>{display_name}</span>
                         </div>
                     );
                 }
@@ -537,7 +559,7 @@ class StrategyToolbar extends Component
             const popup = {
                 type: 'broker-settings',
                 size: {
-                    width: 60,
+                    width: 80,
                     height: 75
                 }
             }

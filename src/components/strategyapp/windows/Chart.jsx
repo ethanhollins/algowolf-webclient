@@ -408,7 +408,7 @@ class Chart extends Component
 
         let { is_down, is_move, auto_zoom, hovered } = this.state;
 
-        if (is_down)
+        if (is_down && !this.props.getPopup())
         {
             e.preventDefault();
 
@@ -685,7 +685,7 @@ class Chart extends Component
         )
 
         const period_offset = this.getPeriodOffsetSeconds(this.getPeriod());
-        if (this.getChart())
+        if (this.getChart() && !this.props.getPopup())
         {
             if (is_down)
             {
@@ -1404,7 +1404,7 @@ class Chart extends Component
         // Handle Cross Segment Drawings
         this.handleUniversalDrawings(ctx);
         // Handle Crosshairs
-        if (this.getCrosshairEnabled())
+        if (this.getCrosshairEnabled() && !this.props.getPopup())
         {
             this.handleCrosshairs(ctx);
         }

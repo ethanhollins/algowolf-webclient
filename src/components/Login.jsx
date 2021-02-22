@@ -11,6 +11,12 @@ class Login extends Component
     {
         super(props);
 
+        this.setEmailRef = elem => {
+            this.email = elem;
+        }
+        this.setPasswordRef = elem => {
+            this.password = elem;
+        }
         this.setErrorMsgRef = elem => {
             this.errorMsg = elem;
         }
@@ -55,7 +61,8 @@ class Login extends Component
                                 <div className="login field-header">Email</div>
                                 <div className="login input-parent">
                                     <input 
-                                        type="text" className="login input" 
+                                        ref={this.setEmailRef}
+                                        type="email" className="login input" 
                                         name="email" id="email" 
                                         placeholder="Email"
                                         autoComplete="email" required 
@@ -71,6 +78,7 @@ class Login extends Component
                                 <div className="login field-header">Password</div>
                                 <div className="login input-parent">
                                     <input 
+                                        ref={this.setPasswordRef}
                                         type="password" className="login input" 
                                         name="password" id="password" 
                                         placeholder="Password"
@@ -87,7 +95,7 @@ class Login extends Component
                             </div>
         
                             <div className="login field center">
-                                <span>Forgot <a href='/login#'>Username/Password</a>?</span>
+                                <span>Forgot <a href='/login#'>Password</a>?</span>
                             </div>
         
                             <div className="login field center">
@@ -95,6 +103,9 @@ class Login extends Component
                             </div>
 
                         </form>
+                        <div className="login field separator">
+                            <span>OR</span>
+                        </div>
                         <div className="login field create-account">
                             <span><a href='/register'>Create a free account</a> to get started with AlgoWolf</span>
                         </div>
@@ -123,12 +134,23 @@ class Login extends Component
         this.setState({ email, password });
     }
 
+    resetErrors()
+    {
+        this.email.style.borderColor = 'rgb(220,220,220)';
+        this.email.style.borderWidth = '1px';
+        this.password.style.borderColor = 'rgb(220,220,220)';
+        this.password.style.borderWidth = '1px';
+        this.errorMsg.textContent = "";
+    }
+
     async handleSubmit(event)
     {
+        this.resetErrors();
+
         const { REACT_APP_API_URL } = process.env;
         event.preventDefault();
         const raw = JSON.stringify({
-            'username': this.state.email,
+            'email': this.state.email,
             'password': this.state.password
         });
         var requestOptions = {
@@ -156,6 +178,18 @@ class Login extends Component
         else
         {
             this.errorMsg.textContent = data.message;
+            this.password.value = "";
+
+            if (data.message === "Incorrect email.")
+            {
+                this.email.style.borderColor = '#e74c3c';
+                this.email.style.borderWidth = '2px';
+            }
+            else if (data.message === "Incorrect password.")
+            {
+                this.password.style.borderColor = '#e74c3c';
+                this.password.style.borderWidth = '2px';
+            }
         }
     }
 }

@@ -1053,7 +1053,6 @@ class Strategy extends Component
                 let current_account = this.getCurrentAccount();
                 const broker_id = current_account.split('.')[0];
                 const account_id = current_account.split('.')[1];
-    
                 for (let pos of strategy.brokers[broker_id].positions)
                 {
                     if (pos.account_id === account_id)
@@ -1204,10 +1203,17 @@ class Strategy extends Component
             {
                 const broker_id = current[0];
                 const current_account = current[1];
-                const accounts = this.getAccounts(broker_id);
-                if (accounts !== undefined && accounts.includes(current_account))
+
+                if (
+                    broker_id in strategy.brokers &&
+                    current_account in strategy.brokers[broker_id].accounts
+                )
                 {
-                    return strategy.account;
+                    const accounts = this.getAccounts(broker_id);
+                    if (accounts !== undefined && accounts.includes(current_account))
+                    {
+                        return strategy.account;
+                    }
                 }
             }
         }
@@ -1359,11 +1365,9 @@ class Strategy extends Component
 
         if (!loaded.includes(account_code) || override)
         {
-            console.log('retrieve account');
             const broker_id = account_code.split('.')[0];
             const account_id = account_code.split('.')[1];
             const account_info = await this.props.retrieveAccountInfo(this.props.id, broker_id, account_id);
-            console.log(account_info);
     
             // Set Account Info
             if (account_info.transactions !== undefined)

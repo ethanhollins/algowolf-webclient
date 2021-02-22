@@ -5,6 +5,8 @@ import StrategySettings from './popups/StrategySettings';
 import AccountSettings from './popups/AccountSettings';
 import WelcomeDemo from './popups/WelcomeDemo';
 import NotAvailable from './popups/NotAvailable';
+import BetaUnavailable from './popups/BetaUnavailable';
+import SignUpPrompt from './popups/SignUpPrompt';
 import AreYouSure from './popups/AreYouSure';
 import EmailSubscribe from './popups/EmailSubscribe';
 import EmailSubscribeComplete from './popups/EmailSubscribeComplete';
@@ -68,9 +70,7 @@ class Popup extends Component
             >
 
                 {this.generatePopup()}
-                <div className='popup close'>
-                    <FontAwesomeIcon icon={faTimes} className='popup close-icon' onClick={this.close} />
-                </div>
+                {this.generateCloseIcon()}
                 
             </div>
 
@@ -120,12 +120,30 @@ class Popup extends Component
 
     close = () =>
     {
-        if (this.props.getPopup() !== undefined && this.props.getPopup().type === 'welcome-demo')
+        // if (this.props.getPopup() !== undefined && this.props.getPopup().type === 'welcome-demo')
+        // {
+        //     this.props.onFirstVisit();
+        // }
+        if (this.props.getPopup() && !this.props.getPopup().permanent)
         {
-            this.props.onFirstVisit();
+            this.props.setPopup(null);
         }
+    }
 
-        this.props.setPopup(null);
+    generateCloseIcon()
+    {
+        if (this.props.getPopup() && this.props.getPopup().permanent)
+        {
+            return <React.Fragment />;
+        }
+        else
+        {
+            return (
+                <div className='popup close'>
+                    <FontAwesomeIcon icon={faTimes} className='popup close-icon' onClick={this.close} />
+                </div>
+            );
+        }
     }
 
     generatePopup()
@@ -243,6 +261,21 @@ class Popup extends Component
                     getPopup={this.props.getPopup}
                 />
             }
+            else if (popup.type === 'beta-unavailable')
+            {
+                return <BetaUnavailable
+                    isDemo={this.props.isDemo}
+                    history={this.props.history}
+                    getPopup={this.props.getPopup}
+                />
+            }
+            else if (popup.type === 'sign-up-prompt')
+            {
+                return <SignUpPrompt
+                    history={this.props.history}
+                    getPopup={this.props.getPopup}
+                />
+            }
             else if (popup.type === 'are-you-sure')
             {
                 return <AreYouSure
@@ -287,7 +320,7 @@ class Popup extends Component
     {
         const popup = this.props.getPopup();
         const container_size = this.props.getSize();
-        const width = Math.max(Math.min(container_size.width * (popup.size.width / 100), 900), 600);
+        const width = Math.max(Math.min(container_size.width * (popup.size.width / 100), 1200), 600);
         const height = container_size.height * (popup.size.height / 100);
         // Handle Sizing
         this.getPopupElem().style.top = parseInt((container_size.height/2) * (1 - (popup.size.height / 100))) + 'px';

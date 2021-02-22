@@ -97,7 +97,7 @@ class BacktestToolbar extends Component
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
                             <div className='dropdown-separator'></div>
-                            <div className='dropdown-item' onClick={onMenuDropdownItem} name='logout'>
+                            <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='logout'>
                                 <span className='toolbox left'>Logout</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faSignOut} className='toolbox right-icon' /></span>
                             </div>
@@ -225,12 +225,12 @@ class BacktestToolbar extends Component
                         </div>
                     </div>
                     <div className='toolbox separator' />
-                    <div className='toolbox item'>
+                    {/* <div className='toolbox item'>
                         <div ref={this.setNotifyElem} className='toolbox item row btn' onClick={this.onNotifyItem}>
                             <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faEnvelope} />
                             <span className='toolbox label'>Notify Me</span>
                         </div>
-                    </div>
+                    </div> */}
                     <div className='toolbox item'>
                         <div ref={this.setHelpElem} className='toolbox item row btn' onClick={this.onHelpItem}>
                             <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faQuestionCircle} />
@@ -353,7 +353,7 @@ class BacktestToolbar extends Component
         }
         else if (name === 'logout')
         {
-            this.props.history.push('/logout');
+            window.location = '/logout';
         }
         
     }

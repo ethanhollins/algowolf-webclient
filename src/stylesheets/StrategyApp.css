@@ -5,7 +5,7 @@
     --chart-app-border: rgb(220,220,220);
 }
 
-body {
+.main.container {
     overflow: hidden;
 }
 
@@ -760,7 +760,7 @@ body {
     display: flex;
     flex-direction: column;
     min-width: 600px;
-    max-width: 900px;
+    max-width: 1200px;
     min-height: 300px;
     background-color: #FFF;
     border: 1px solid rgb(220,220,220);
@@ -986,7 +986,7 @@ body {
     /* width: 100%; */
     /* height: 100%; */
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: auto;
 }
 
 .popup.main-list {
@@ -1008,6 +1008,15 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    padding: 10px 20px 10px 20px;
+}
+
+.popup.input-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     padding: 10px 20px 10px 20px;
 }
@@ -1105,6 +1114,7 @@ body {
     justify-content: space-around;
     text-align: center;
     width: 100%;
+    max-width: 600px;
     color: rgb(140,140,140);
     border-radius: 5px;
 }
@@ -1194,6 +1204,7 @@ body {
     align-items: center;
     justify-content: space-between;
     width: 100%;
+    max-width: 600px;
 }
 
 .popup.input:focus-within {
@@ -1224,10 +1235,12 @@ body {
 }
 
 .popup.input > .popup.title {
-    flex: 0 0 auto;
-    color: rgb(140,140,140);
+    width: 100%;
+    /* color: rgb(140,140,140); */
+    color: rgb(80,80,80);
     padding: 10px;
-    font-size: 0.9em;
+    font-size: 1.0em;
+    font-weight: 600;
 }
 
 .popup.form-title {
@@ -1248,6 +1261,7 @@ body {
 
 .popup.text-input {
     width: calc(100% - 12px);
+    max-width: 600px;
     /* height: 100%; */
     outline: none;
     border: 1px solid rgb(220,220,220);
@@ -1257,7 +1271,17 @@ body {
     padding: 15px 0px 15px 12px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-size: 0.9em;
+    color: #000;
+}
+
+.popup.info {
     color: rgb(80,80,80);
+}
+
+.popup.info a {
+    text-decoration: none;
+    color: #000;
+    font-weight: 600;
 }
 
 .popup.broker {
@@ -1265,7 +1289,9 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 120px;
+    max-width: 120px;
+    min-width: 120px;
+    max-height: 100px;
     min-height: 100px;
     cursor: pointer;
     border: 1px solid rgb(220,220,220);
@@ -1281,7 +1307,7 @@ body {
 
 .popup.broker.disabled {
     pointer-events: none;
-    cursor: auto;
+    cursor: not-allowed;
     color: rgb(200,200,200);
 }
 
@@ -1296,26 +1322,39 @@ body {
     background-color: #fffaf3;
 }
 
-.popup.broker:not(.disabled):hover .broker-logo {
-    transform: scale(1.25);
-    transition: transform 0.15s ease-out;
-}
-
-.popup.broker-logo {
-    width: 40px;
-    height: 40px;
+.popup.broker:not(.disabled):hover .broker-svg {
     transform: scale(1.0);
     transition: transform 0.15s ease-out;
 }
 
+.popup.broker:not(.disabled):hover .broker-img {
+    transform: scale(1.0);
+    transition: transform 0.15s ease-out;
+}
+
+.popup.broker-svg {
+    width: 50px;
+    height: 50px;
+    transform: scale(0.75);
+    transition: transform 0.15s ease-out;
+}
+
+.popup.broker-img {
+    /* width: 40px; */
+    max-width: 120px;
+    max-height: 50px;
+    transform: scale(0.75);
+    transition: transform 0.15s ease-out;
+}
+
 .popup.broker-text {
-    margin-top: 10px;
+    margin-top: 5px;
     text-align: center;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
 .popup.broker-description {
-    margin-top: 10px;
+    margin-top: 3px;
     color: rgb(180,180,180);
     font-size: 0.8em;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
@@ -1485,6 +1524,7 @@ body {
     display: flex;
     justify-content: center;
     width: 100%;
+    margin-bottom: 20px;
 }
 
 .popup.broker-btn {
@@ -2413,6 +2453,97 @@ body {
     width: 100px;
 }
 
+.beta-unavailable.body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    padding: 50px;
+}
+
+.beta-unavailable.body > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.beta-unavailable.header {
+    color: rgb(60,60,60);
+    font-size: 2.25em;
+    font-weight: 600;
+    text-align: center;
+}
+
+.beta-unavailable.message {
+    color: rgb(80,80,80);
+    font-size: 1.25em;
+    text-align: center;
+}
+
+.beta-unavailable.icon {
+    color: #ffa620;
+    width: 125px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.beta-unavailable.body > .login {
+    text-align: center;
+    color: #ff8103;
+    width: 125px;
+}
+
+.sign-up-prompt.body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    padding: 50px;
+}
+
+.sign-up-prompt.body > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sign-up-prompt.header {
+    color: rgb(60,60,60);
+    font-size: 2.25em;
+    font-weight: 600;
+    text-align: center;
+}
+
+.sign-up-prompt.message {
+    color: rgb(80,80,80);
+    font-size: 1.25em;
+    text-align: center;
+}
+
+.sign-up-prompt.message > a {
+    color: #000;
+    font-size: 1.0em;
+    text-decoration: none;
+    margin-top: 5px;
+
+    /* text-align: center; */
+}
+
+.sign-up-prompt.icon {
+    color: #ffa620;
+    width: 125px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.sign-up-prompt.body > .login {
+    text-align: center;
+    color: #ff8103;
+    width: 125px;
+}
+
 .email-subscribe.body {
     display: flex;
     flex-direction: column;
@@ -2634,6 +2765,11 @@ body {
 #info_status.icon {
     width: 10px;
     height: 10px;
+}
+
+#no_strategy_msg {
+    width: 30px;
+    height: 30px;
 }
 
 /* .window-scrollbar > *::-webkit-scrollbar {

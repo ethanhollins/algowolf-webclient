@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faPlus, faMinus, faAngleRight, faAngleLeft } from '@fortawesome/pro-light-svg-icons';
 import Strategy from './strategyapp/Strategy';
 import StrategyToolbar from './strategyapp/StrategyToolbar';
+import EmptyToolbar from './strategyapp/EmptyToolbar';
 import Backtest from './strategyapp/Backtest';
 import BacktestToolbar from './strategyapp/BacktestToolbar';
 import Popup from './strategyapp/Popup';
@@ -102,39 +103,84 @@ class StrategyApp extends Component
         window.addEventListener("keyup", this.onKeyUp);
 
         let { checkLogin } = this.state;
+        
         const user_id = await this.props.checkAuthorization();
         checkLogin = true;
         this.setState({ checkLogin });
 
-        if (user_id !== null)
-        {
-            let { sio } = this.state;
-    
-            // Connect to API socket
-            sio = this.handleSocket();
-            this.setState({ sio });
-            
-            // Retrieve user specific strategy informations
-            const account = await this.retrieveGuiInfo();
-            await this.retrieveStrategies(account.metadata.open_strategies);
-        }
-
-
-        if (this.props.isDemo)
-        {
-            const popup = {
-                type: 'welcome-demo',
-                size: {
-                    width: 40,
-                    height: 70
-                },
-                fade: true
-            };
-            this.setPopup(popup);
-            this.props.visitorCounter();
-        }
+        let { sio } = this.state;
         
-        this.handleAuth();
+        // Connect to API socket
+        const account = await this.retrieveGuiInfo();
+        sio = this.handleSocket();
+        this.setState({ sio });
+        
+        // Retrieve user specific strategy informations
+        const strategyInfo = await this.retrieveStrategies(account, account.metadata.open_strategies);
+        this.setState({ account, strategyInfo });
+    
+        if (!this.props.isDemo)
+        {
+            if (user_id)
+            {
+                if (!account.beta_access)
+                {
+                    const popup = {
+                        type: 'beta-unavailable',
+                        size: {
+                            width: 35,
+                            height: 55
+                        },
+                        fade: true,
+                        permanent: true
+                    };
+                    this.setPopup(popup);
+                }
+            }
+        }
+        else
+        {
+            const user_id = await this.props.checkAuthorization();
+            if (!user_id)
+            {
+                const popup = {
+                    type: 'sign-up-prompt',
+                    size: {
+                        width: 40,
+                        height: 65
+                    },
+                    fade: true,
+                    permanent: true
+                };
+                this.setPopup(popup);
+            }
+            else
+            {
+                const popup = {
+                    type: 'beta-unavailable',
+                    size: {
+                        width: 35,
+                        height: 40
+                    }
+                };
+                this.setPopup(popup);
+            }
+        }
+
+        
+        // if (this.props.isDemo)
+        // {
+        //     const popup = {
+        //         type: 'welcome-demo',
+        //         size: {
+        //             width: 40,
+        //             height: 70
+        //         },
+        //         fade: true
+        //     };
+        //     this.setPopup(popup);
+        //     this.props.visitorCounter();
+        // }
 
         this.is_loaded = true;
     }
@@ -165,7 +211,7 @@ class StrategyApp extends Component
     render()
     {
         const { checkLogin } = this.state;
-        if (checkLogin && this.props.getUserId() !== null)
+        if (checkLogin && (this.props.getUserId() !== null || this.props.isDemo))
         {
             return (
                 <div className='main container'>
@@ -204,6 +250,8 @@ class StrategyApp extends Component
                     <div className='toolbox_shadow'/> 
 
                     <Popup
+                        isDemo={this.props.isDemo}
+                        history={this.props.history}
                         getHeaders={this.props.getHeaders}
                         addWindow={this.addWindow}
                         windowExists={this.windowExists}
@@ -256,11 +304,6 @@ class StrategyApp extends Component
         e.preventDefault();
     }
 
-    async handleAuth()
-    {
-        
-    }
-    
     showLoadScreen = () =>
     {
         const { show_load_screen } = this.state;
@@ -302,6 +345,7 @@ class StrategyApp extends Component
     generatePages = () =>
     {
         let { account, strategyInfo } = this.state;
+        
         if ('metadata' in account)
         {
             const current_strategy = account.metadata.current_strategy;
@@ -396,7 +440,7 @@ class StrategyApp extends Component
     {
         const { account, strategyInfo } = this.state;
         let tabs = [];
-        if (Object.keys(strategyInfo).length > 0)
+        if (account.metadata && Object.keys(strategyInfo).length > 0)
         {
             let i = '';
             for (i in strategyInfo)
@@ -428,7 +472,15 @@ class StrategyApp extends Component
             const current_strategy = account.metadata.current_strategy;
             if (!(current_strategy in strategyInfo))
             {
-                return <React.Fragment />;
+                return (
+                    <div className='window message'>
+                        <div>You have no strategies open!</div>
+                        <div>
+                            <div>Try opening/creating a strategy</div>
+                            <FontAwesomeIcon className='window message-icon' id="no_strategy_msg" icon={faPlus} />
+                        </div>
+                    </div>
+                );
             }
             else if (account.metadata.open_strategies.includes(current_strategy))
             {
@@ -573,20 +625,29 @@ class StrategyApp extends Component
                 return this.generateStrategy();
             }
         }
-        
-        return <React.Fragment />;
+
+        return (
+            <div className='window message'>
+                <div>This page has no open windows!</div>
+                <div>
+                    <div>Try adding a chart</div>
+                    {/* <FontAwesomeIcon className='window message-icon' icon={faChartLine} /> */}
+                </div>
+            </div>
+        );
     }
 
     generateToolbar() 
     {
         const current_strategy = this.getCurrentStrategy();
 
-        if (current_strategy !== undefined && this.strategy !== undefined)
+        if (current_strategy && this.strategy !== undefined)
         {
             if (current_strategy.includes('/backtest/'))
             {
                 return <BacktestToolbar 
                     ref={this.setToolbarRef}
+                    history={this.props.history}
                     isDemo={this.props.isDemo}
                     getCurrentStrategy={this.getCurrentStrategy}
                     updateStrategyInfo={this.updateStrategyInfo}
@@ -613,8 +674,21 @@ class StrategyApp extends Component
                 />
             }
         }
-        
-        return <React.Fragment />;
+        else
+        {
+            return <EmptyToolbar 
+                    key={current_strategy}
+                    ref={this.setToolbarRef}
+                    history={this.props.history}
+                    isDemo={this.props.isDemo}
+                    getCurrentStrategy={this.getCurrentStrategy}
+                    updateStrategyInfo={this.updateStrategyInfo}
+                    getStrategyComponent={this.getStrategyComponent}
+                    getStrategyInfo={this.getStrategyInfo}
+                    isWithinBounds={this.isWithinBounds}
+                    setPopup={this.setPopup}
+                />
+        }
     }
 
     mobileCheck() 
@@ -840,9 +914,16 @@ class StrategyApp extends Component
         {
             console.log('connected');
             this.reconnectCharts();
-            this.retrieveStrategies(
-                Object.keys(this.state.strategyInfo)
-            );
+
+            const { account } = this.state;
+            if (account.metadata && account.metadata.open_strategies.length > 0)
+            {
+                const strategyInfo = this.retrieveStrategies(
+                    account,
+                    Object.keys(strategyInfo)
+                );
+                this.setState({ strategyInfo });
+            }
         });
 
         socket.on('disconnect', () =>
@@ -875,7 +956,6 @@ class StrategyApp extends Component
         )
             .then(res => res.json());
 
-        this.setState({ account });
         return account;
     }
 
@@ -894,7 +974,7 @@ class StrategyApp extends Component
         ).then(res => res.json())
     }
 
-    async retrieveStrategies(strategy_ids)
+    async retrieveStrategies(account, strategy_ids)
     {
         const { REACT_APP_API_URL } = process.env;
         let { strategyInfo } = this.state;
@@ -915,10 +995,14 @@ class StrategyApp extends Component
                     reqOptions
                 ).then(res => res.json())
             );
-
         }
 
-        this.setState({ strategyInfo });
+        if (!(account.metadata.current_strategy in strategyInfo))
+        {
+            this.setShowLoadScreen(false);
+        }
+
+        return strategyInfo;
     }
 
     async retrieveAccountInfo(strategy_id, broker_id, account_id)

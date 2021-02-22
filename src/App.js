@@ -38,7 +38,10 @@ class App extends Component
                         <Redirect to="/login"/>
                     </Route>
                     <Route exact path="/register">
-                        <Register />
+                        <Register 
+                            getCookies={this.getCookies}
+                            setUserId={this.setUserId}
+                        />
                     </Route>
                     <Route exact path="/login">
                         {this.getConditionalLoginComponent()}
@@ -64,9 +67,10 @@ class App extends Component
                             isDemo={true}
                             getURI={this.getURI}
                             getCookies={this.getCookies}
+                            getUserHeaders={this.getHeaders}
                             getHeaders={this.getDemoHeaders}
                             getUserId={this.getUserId}
-                            checkAuthorization={this.demoAuthorization}
+                            checkAuthorization={this.checkAuthorization}
                             visitorCounter={this.visitorCounter}
                             firstVisitorCounter={this.firstVisitorCounter}
                         />
@@ -85,12 +89,18 @@ class App extends Component
         const queryString = window.location.search;
         let params = new URLSearchParams(queryString);
         
+        console.log(this.state.user_id);
+
         if (this.state.user_id !== null)
         {
             const redirect = params.get('redirect');
             params.delete('redirect');
             console.log(redirect);
-            if (redirect)
+            if (redirect === 'demo')
+            {
+                return <Redirect to="/holygrail/demo"/>;
+            }
+            else if (redirect)
             {
                 return <Redirect to={`/auth/${redirect}?${params.toString()}`}/>;
             }
