@@ -112,10 +112,10 @@ class StrategyApp extends Component
         
         // Connect to API socket
         const account = await this.retrieveGuiInfo();
-        const strategyInfo = await this.retrieveStrategies(account, account.metadata.open_strategies);
-        this.setState({ account, strategyInfo });
         sio = this.handleSocket();
         this.setState({ sio });
+        const strategyInfo = await this.retrieveStrategies(account, account.metadata.open_strategies);
+        this.setState({ account, strategyInfo });
         
         // Retrieve user specific strategy informations
     
@@ -916,7 +916,7 @@ class StrategyApp extends Component
             this.reconnectCharts();
 
             let { account, strategyInfo } = this.state;
-            if (account.metadata && account.metadata.open_strategies.length > 0)
+            if (Object.keys(strategyInfo).length > 0 && account.metadata && account.metadata.open_strategies.length > 0)
             {
                 strategyInfo = this.retrieveStrategies(
                     account,
