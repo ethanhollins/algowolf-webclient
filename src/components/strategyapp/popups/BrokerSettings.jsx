@@ -411,7 +411,7 @@ class BrokerSettings extends Component
                         <div className='popup info'>
                             <span>Instructions to find your access token, or <a href="https://www.oanda.com/demo-account/tpa/personal_token" target="_blank">Click Here</a></span>
                             <ol>
-                                <li>Log into your oanda account <a href="https://www.oanda.com/account/login" target="_blank">here</a>.</li>
+                                <li>Log into your Oanda account <a href="https://www.oanda.com/account/login" target="_blank">here</a>.</li>
                                 <li>Scroll down to <strong>My Services</strong> and navigate to <strong>Manage API Acess</strong>.</li>
                                 <li>Click on the <strong>Generate</strong> button.</li>
                                 <li>Copy the token and paste it into the above text box.</li>

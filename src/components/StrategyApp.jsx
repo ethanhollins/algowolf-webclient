@@ -915,7 +915,7 @@ class StrategyApp extends Component
             console.log('connected');
             this.reconnectCharts();
 
-            const { account } = this.state;
+            const { account, strategyInfo } = this.state;
             if (account.metadata && account.metadata.open_strategies.length > 0)
             {
                 const strategyInfo = this.retrieveStrategies(
