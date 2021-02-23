@@ -71,6 +71,7 @@ class StrategyApp extends Component
         this.updateStrategyInputVariables = this.updateStrategyInputVariables.bind(this);
         this.updateAccountInputVariables = this.updateAccountInputVariables.bind(this);
         this.subscribeEmail = this.subscribeEmail.bind(this);
+        this.handleSocket = this.handleSocket.bind(this);
 
         this.setAppContainerRef = elem => {
             this.appContainer = elem;
@@ -895,6 +896,22 @@ class StrategyApp extends Component
         this.updateWindowDimensions();
     }
 
+    async socketConnect()
+    {
+        console.log('connected');
+        this.reconnectCharts();
+
+        let { account, strategyInfo } = this.state;
+        if (Object.keys(strategyInfo).length > 0 && account.metadata && account.metadata.open_strategies.length > 0)
+        {
+            strategyInfo = await this.retrieveStrategies(
+                account,
+                Object.keys(strategyInfo)
+            );
+            this.setState({ strategyInfo });
+        }
+    }
+
 
     handleSocket()
     {
@@ -910,21 +927,7 @@ class StrategyApp extends Component
             }
         });
 
-        socket.on('connect', () =>
-        {
-            console.log('connected');
-            this.reconnectCharts();
-
-            let { account, strategyInfo } = this.state;
-            if (Object.keys(strategyInfo).length > 0 && account.metadata && account.metadata.open_strategies.length > 0)
-            {
-                strategyInfo = this.retrieveStrategies(
-                    account,
-                    Object.keys(strategyInfo)
-                );
-                this.setState({ strategyInfo });
-            }
-        });
+        socket.on('connect', this.socketConnect.bind(this));
 
         socket.on('disconnect', () =>
         {
@@ -976,6 +979,8 @@ class StrategyApp extends Component
 
     async retrieveStrategies(account, strategy_ids)
     {
+        console.log('RETRIEVE STRATEGIES')
+
         const { REACT_APP_API_URL } = process.env;
         let { strategyInfo } = this.state;
 
@@ -1001,6 +1006,8 @@ class StrategyApp extends Component
         {
             this.setShowLoadScreen(false);
         }
+
+        console.log(strategyInfo);
 
         return strategyInfo;
     }
@@ -1085,10 +1092,12 @@ class StrategyApp extends Component
             credentials: 'include'
         }
 
-        return await fetch(
+        const res = await fetch(
             `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/transactions`,
             reqOptions
-        ).then(res => res.json());  
+        ).then(res => res.json());
+        console.log(res);
+        return res;
     }
 
     async updatePositions(broker_id)
