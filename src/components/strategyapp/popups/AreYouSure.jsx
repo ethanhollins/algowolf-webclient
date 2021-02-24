@@ -33,6 +33,7 @@ class AreYouSure extends Component
     {
         this.props.getPopup().func();
         this.props.close();
+        // console.log(this.props.getPopup());
     }
 
     onNo()

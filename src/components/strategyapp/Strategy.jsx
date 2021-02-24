@@ -278,6 +278,12 @@ class Strategy extends Component
         socket.on('connect', () =>
         {
             console.log('connected ' + this.props.id);
+            const current_account = this.getCurrentAccount();
+            if (current_account)
+            {
+                const broker_id = current_account.split('.')[0];
+                this.props.reconnectCharts(broker_id, true);
+            }
             this.subscribe();
             let strategy = this.getStrategyInfo();
             if (strategy.account)

@@ -2773,7 +2773,6 @@ class Chart extends Component
         const mouse_pos = this.props.getMousePos();
         const screen_pos = this.getScreenPos();
         const top_offset = this.props.getTopOffset() + screen_pos.y;
-        
         const top_window_id = this.props.getTopWindow(
             this.props.strategy_id, 
             { x: mouse_pos.x, y: mouse_pos.y - this.props.getTopOffset() }

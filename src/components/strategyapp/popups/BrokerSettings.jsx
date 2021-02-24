@@ -13,55 +13,110 @@ class BrokerSettings extends Component
 
     state = {
         modes: {},
-        brokers: {}
+        brokers: {},
+        is_loaded: false,
+        perform_scroll: false
     }
 
     async componentDidMount()
     {
-        let { modes, brokers } = this.state;
+        let { modes, brokers, is_loaded } = this.state;
         brokers = await this.props.retrieveAllBrokers();
         for (let broker_id in brokers)
         {
             modes[broker_id] = 'edit';
         }
-        this.setState({ modes, brokers });
+        is_loaded = true;
+        this.setState({ modes, brokers, is_loaded });
 
         const popup = this.props.getPopup();
         if (popup.opened === undefined)
             this.props.changeCategory(Object.keys(brokers)[0]);
+
+        this.setMainRef = elem => {
+            this.main = elem;
+        }
 
         this.setSpotwareInfo = elem => {
             this.spotwareInfo = elem;
         }
     }
 
+    componentDidUpdate()
+    {
+        let { perform_scroll } = this.state;
+        if (perform_scroll)
+        {
+            perform_scroll = false
+            this.main.scrollTo({
+                top: this.main.scrollHeight,
+                behavior: 'smooth'
+            });
+            this.setState({ perform_scroll });
+        }
+    }
+
     render()
     {
-        return(
-            <React.Fragment>
-            
-            <div className='popup header'>
-                <span>My Brokers</span>
-            </div>
-            <div className='popup content'>
-                <div className='popup category'>
-                    {this.getBrokers()}
-                    <div className='popup category-btn' onClick={this.addBroker} name='add-broker'>
-                        <span className='popup category-left'>
-                            Add Broker
-                        </span>
-                        <span className='popup category-right'><FontAwesomeIcon icon={faPlus} className='popup category-icon' /></span>
+        const { is_loaded } = this.state;
+        if (is_loaded)
+        {
+            return(
+                <React.Fragment>
+                
+                <div className='popup header'>
+                    <span>My Brokers</span>
+                </div>
+                <div className='popup content'>
+                    <div className='popup category'>
+                        {this.getBrokers()}
+                        <div className='popup category-btn' onClick={this.addBroker} name='add-broker'>
+                            <span className='popup category-left'>
+                                Add Broker
+                            </span>
+                            <span className='popup category-right'><FontAwesomeIcon icon={faPlus} className='popup category-icon' /></span>
+                        </div>
+                    </div>
+                    <div ref={this.setMainRef} className='popup main'>
+                        <div className='popup main-list'>
+                            {this.getItems()}
+                        </div>
                     </div>
                 </div>
-                <div className='popup main'>
-                    <div className='popup main-list'>
-                        {this.getItems()}
+    
+                </React.Fragment>
+            );
+        }
+        else
+        {
+            return(
+                <React.Fragment>
+                
+                <div className='popup header'>
+                    <span>My Brokers</span>
+                </div>
+                <div className='popup content'>
+                    <div className='popup category'>
+                    </div>
+                    <div ref={this.setMainRef} className='popup main'>
+                        <div className='popup main-list'>
+                            <div 
+                                className='popup load'
+                            >
+                                <div className='popup load-item'>
+                                    <div>
+                                        <ReactSVG className='popup load-img' src={process.env.PUBLIC_URL + "/wolf-logo.svg"} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            </React.Fragment>
-        );
+    
+                </React.Fragment>
+            );
+        }
+        
     }
 
     onChangeCategory = (e) =>
@@ -355,7 +410,7 @@ class BrokerSettings extends Component
 
     getAddMode = (selected) =>
     {
-        const { brokers } = this.state;
+        const { brokers, perform_scroll } = this.state;
         const broker_info = brokers[selected];
 
         let stage_one_elem;
@@ -365,6 +420,10 @@ class BrokerSettings extends Component
             {
                 stage_one_elem = (
                     <React.Fragment key={selected + '_one'}>
+
+                    <div className='popup row'>
+                        <div className='popup title large'>2. Enter your broker details.</div>
+                    </div>
 
                     <div className='popup input-center'>
                         <div id='popup_demo_selector'>
@@ -431,6 +490,10 @@ class BrokerSettings extends Component
             {
                 stage_one_elem = (
                     <React.Fragment key={selected + '_one'}>
+
+                    <div className='popup row'>
+                        <div className='popup title large'>2. Enter your broker details.</div>
+                    </div>
 
                     <div className='popup input-center'>
                         <div id='popup_demo_selector'>
@@ -512,6 +575,10 @@ class BrokerSettings extends Component
                     <React.Fragment key={selected + '_one'}>
 
                     <div className='popup row'>
+                        <div className='popup title large'>2. Connect to your broker.</div>
+                    </div>
+
+                    <div className='popup row'>
                         <div className='popup center' onClick={this.onConnect.bind(this)}>
                             <div className='popup connect-btn'>Connect</div>
                         </div>
@@ -524,15 +591,17 @@ class BrokerSettings extends Component
         else
         {
             stage_one_elem = (
-                <div key={selected + '_one'} className='popup row'>
-                    <div className='popup center'>Select your broker...</div>
-                </div>
+                <React.Fragment></React.Fragment>
             );
         }
 
         return (
             <React.Fragment key={selected + '_main'}>
-                
+            
+            <div className='popup row'>
+                <div className='popup title large'>1. Select your broker.</div>
+            </div>
+
             <div className='popup column'>
                 <div id='popup_broker_selector'>
                     <div 
@@ -747,9 +816,13 @@ class BrokerSettings extends Component
         const broker = e.target.getAttribute('name');
         const popup = this.props.getPopup();
         
-        let { brokers } = this.state;
+        let { brokers, perform_scroll } = this.state;
+        if (!perform_scroll)
+        {
+            perform_scroll = true;
+        }
         brokers[popup.opened].broker = broker;
-        this.setState({ brokers });
+        this.setState({ brokers, perform_scroll });
     }
 
     onTextInputChange(e)

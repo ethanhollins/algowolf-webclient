@@ -25,8 +25,8 @@ class Login extends Component
     state = {
         email: '',
         password: '',
+        remember_me: false,
         loginCheck: false
-
     }
 
     async componentDidMount()
@@ -89,6 +89,18 @@ class Login extends Component
                                     </span>
                                 </div>
                             </div>
+
+                            <div className="login horiz field">
+                                <label className='login checkbox'>
+                                    <input 
+                                        type='checkbox' 
+                                        defaultChecked={false}
+                                        onChange={this.onCheckboxInputChange.bind(this)}
+                                    />
+                                    <div className='login checkmark'></div>
+                                </label>
+                                <div className="login small-text">Remember Me</div>
+                            </div>
         
                             <div className="login field">
                                 <input type="submit" id="submit" className="login input" value="SIGN IN"/>
@@ -118,6 +130,13 @@ class Login extends Component
         {
             return <React.Fragment />;
         }
+    }
+
+    onCheckboxInputChange(e)
+    {
+        let { remember_me } = this.state;
+        remember_me = e.target.checked;
+        this.setState({ remember_me });
     }
 
     handleChange = (event) =>
@@ -151,7 +170,8 @@ class Login extends Component
         event.preventDefault();
         const raw = JSON.stringify({
             'email': this.state.email,
-            'password': this.state.password
+            'password': this.state.password,
+            'remember_me': this.state.remember_me
         });
         var requestOptions = {
             method: 'POST',

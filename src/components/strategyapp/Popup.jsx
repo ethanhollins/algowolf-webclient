@@ -124,9 +124,10 @@ class Popup extends Component
         // {
         //     this.props.onFirstVisit();
         // }
-        if (this.props.getPopup() && !this.props.getPopup().permanent)
+        if (!(this.props.getPopup() && this.props.getPopup().permanent))
         {
             this.props.setPopup(null);
+            this.props.setHovered('popup', false);
         }
     }
 

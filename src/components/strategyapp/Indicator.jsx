@@ -1,7 +1,6 @@
 
 class Indicator {
     /* Overlays */
-
     calc = (timestamps, asks, mids, bids) =>
     {
         this.cache_asks.splice(0, this.min_bars-1);
@@ -216,7 +215,7 @@ class ema extends Indicator
         if (i < this.min_bars || ohlc[i].every((x) => x === null))
             return [null]
     
-        if (i > 0 && values[i-1][0] !== null)
+        if (i > 0 && values[i-1])
         {
             const multi = 2 / (this.period + 1);
             const prev_ema = values[i-1][0];
@@ -272,7 +271,7 @@ class mae extends Indicator
         const percent = this.properties.Percent / 100;
 
         let ema;
-        if (i > 0 && values[i-1][0] !== null)
+        if (i > 0 && values[i-1])
         {
             const multi = 2 / (this.period + 1);
             const prev_ema = values[i-1][0];
@@ -375,7 +374,7 @@ class atr extends Indicator
             return [null]
 
         let atr;
-        if (values[i-1][0] !== null)
+        if (values[i-1])
         {
             const prev_close = ohlc[i-1][3];
             const high = ohlc[i][1];
@@ -470,7 +469,7 @@ class tr extends Indicator
         
 
         let atr = 0;
-        if (values[i-1][0] !== null)
+        if (values[i-1])
         {
             const prev_close = ohlc[i-1][3];
             const high = ohlc[i][1];

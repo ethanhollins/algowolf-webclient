@@ -135,9 +135,8 @@ class Register extends Component
                                     type='checkbox' 
                                     defaultChecked={false}
                                     onChange={this.onCheckboxInputChange.bind(this)}
-                                    name={'body'}
                                 />
-                                <div className='checkmark'></div>
+                                <div className='login checkmark'></div>
                             </label>
                             <div className="login small-text">Notify me by email about AlgoWolf updates.</div>
                         </div>

@@ -58,9 +58,13 @@ class StrategyApp extends Component
         this.onKeyDown = this.onKeyDown.bind(this);
         this.onKeyUp = this.onKeyUp.bind(this);
         
+        this.getPopup = this.getPopup.bind(this);
+        this.setPopup = this.setPopup.bind(this);
+        
         this.updateInfo = this.updateInfo.bind(this);
         this.loadChart = this.loadChart.bind(this);
         this.connectChart = this.connectChart.bind(this);
+        this.reconnectCharts = this.reconnectCharts.bind(this);
         this.retrieveAllBrokers = this.retrieveAllBrokers.bind(this);
         this.retrieveStrategies = this.retrieveStrategies.bind(this);
         this.retrieveAccountInfo = this.retrieveAccountInfo.bind(this);
@@ -565,6 +569,7 @@ class StrategyApp extends Component
                         getMousePos={this.getMousePos}
                         getSize={this.getSize}
                         getScale={this.getScale}
+                        reconnectCharts={this.reconnectCharts}
                         retrieveStrategies={this.retrieveStrategies}
                         retrieveAccountInfo={this.retrieveAccountInfo}
                         getStrategyInfo={this.getStrategyInfo}
@@ -899,7 +904,6 @@ class StrategyApp extends Component
     async socketConnect()
     {
         console.log('connected');
-        this.reconnectCharts();
 
         let { account, strategyInfo } = this.state;
         if (Object.keys(strategyInfo).length > 0 && account.metadata && account.metadata.open_strategies.length > 0)
@@ -945,7 +949,6 @@ class StrategyApp extends Component
     async retrieveGuiInfo()
     {
         const { REACT_APP_API_URL } = process.env;
-        let { account } = this.state;
 
         const reqOptions = {
             method: 'GET',
@@ -953,13 +956,19 @@ class StrategyApp extends Component
             credentials: 'include'
         }
 
-        account = await fetch(
+        const res = await fetch(
             `${REACT_APP_API_URL}/v1/account`,
             reqOptions
-        )
-            .then(res => res.json());
-
-        return account;
+        );
+            
+        if (res.status === 200)
+        {
+            return await res.json();
+        }
+        else if (res.status === 403)
+        {
+            window.location = '/logout';
+        }
     }
 
     async retrieveAllBrokers()
@@ -971,10 +980,19 @@ class StrategyApp extends Component
             credentials: 'include'
         }
 
-        return await fetch(
+        const res = await fetch(
             `${REACT_APP_API_URL}/broker`,
             reqOptions
-        ).then(res => res.json())
+        )
+
+        if (res.status === 200)
+        {
+            return await res.json();
+        }
+        else if (res.status === 403)
+        {
+            window.location = '/logout';
+        }
     }
 
     async retrieveStrategies(account, strategy_ids)
@@ -993,13 +1011,22 @@ class StrategyApp extends Component
 
         for (let i = 0; i < strategy_ids.length; i++)
         {
-            strategyInfo[strategy_ids[i]] = Object.assign(
-                {}, strategyInfo[strategy_ids[i]],
-                await fetch(
-                    `${REACT_APP_API_URL}/v1/strategy/${strategy_ids[i]}`,
-                    reqOptions
-                ).then(res => res.json())
+            const res = await fetch(
+                `${REACT_APP_API_URL}/v1/strategy/${strategy_ids[i]}`,
+                reqOptions
             );
+
+            if (res.status === 200)
+            {
+                strategyInfo[strategy_ids[i]] = Object.assign(
+                    {}, strategyInfo[strategy_ids[i]],
+                    await res.json()
+                );
+            }
+            else if (res.status === 403)
+            {
+                window.location = '/logout';
+            }
         }
 
         if (!(account.metadata.current_strategy in strategyInfo))
@@ -1026,9 +1053,16 @@ class StrategyApp extends Component
         const res = await fetch(
             `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/${broker_id}/${account_id}`,
             reqOptions
-        ).then(res => res.json());
-
-        return res
+        )
+        
+        if (res.status === 200)
+        {
+            return await res.json();
+        }
+        else if (res.status === 403)
+        {
+            window.location = '/logout';
+        }
     }
 
     async retrieveReport(strategy_id, broker_id, account_id, name)
@@ -1049,6 +1083,10 @@ class StrategyApp extends Component
         if (res.status === 200)
         {
             return await res.json();
+        }
+        else if (res.status === 403)
+        {
+            window.location = '/logout';
         }
         else
         {
@@ -1076,6 +1114,10 @@ class StrategyApp extends Component
         {
             return await res.json();
         }
+        else if (res.status === 403)
+        {
+            window.location = '/logout';
+        }
         else
         {
             return {};
@@ -1095,9 +1137,16 @@ class StrategyApp extends Component
         const res = await fetch(
             `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/transactions`,
             reqOptions
-        ).then(res => res.json());
-        console.log(res);
-        return res;
+        );
+
+        if (res.status === 200)
+        {
+            return await res.json();
+        }
+        else if (res.status === 403)
+        {
+            window.location = '/logout';
+        }
     }
 
     async updatePositions(broker_id)
@@ -1124,7 +1173,16 @@ class StrategyApp extends Component
         let res = await fetch(
             `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/variables`,
             reqOptions
-        ).then(res => res.json());
+        );
+
+        if (res.status === 200)
+        {
+            res = await res.json();
+        }
+        else if (res.status === 403)
+        {
+            window.location = '/logout';
+        }
 
         let strategy = this.getStrategyInfo(strategy_id);
         for (let name in res.input_variables)
@@ -1148,7 +1206,16 @@ class StrategyApp extends Component
         let res = await fetch(
             `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/variables/${broker_id}/${account_id}`,
             reqOptions
-        ).then(res => res.json());
+        );
+
+        if (res.status === 200)
+        {
+            res = await res.json();
+        }
+        else if (res.status === 403)
+        {
+            window.location = '/logout';
+        }
 
         return res.input_variables;
     }
@@ -1231,16 +1298,17 @@ class StrategyApp extends Component
         }
     }
 
-    async reconnectCharts()
+    async reconnectCharts(broker_id, reset)
     {
-        let { charts } = this.state;
+        let { charts, broker_charts } = this.state;
 
         for (let k in charts)
         {
             let chart = charts[k];
+            console.log(chart.period);
 
             // Reconnect chart live data
-            this.connectChart(chart.broker, chart.product, chart.period);
+            this.connectChart(broker_id, chart.broker, chart.product, chart.period);
 
             let data = await this.retrieveChartData(
                 chart.broker, chart.product, chart.period, 
@@ -1248,9 +1316,20 @@ class StrategyApp extends Component
                 moment(),
                 'Australia/Melbourne'
             )
-            this.addChart(chart.broker, chart.product, chart.period, data)
+            chart = this.addChart(chart.broker, chart.product, chart.period, data);
 
-            this.setState({ charts });
+            if (reset)
+            {
+                this.calculateAllChartIndicators(chart, reset);
+            }
+
+        }
+        this.setState({ charts });
+
+        for (let k in broker_charts)
+        {
+            let broker_chart = broker_charts[k];
+            this.connectChart(broker_id, broker_chart.broker, broker_chart.product, broker_chart.period);
         }
     }
 
@@ -1370,6 +1449,10 @@ class StrategyApp extends Component
         if (res.status === 200)
         {
             return true;
+        }
+        else if (res.status === 403)
+        {
+            window.location = '/logout';
         }
         else
         {
@@ -1767,9 +1850,16 @@ class StrategyApp extends Component
         return ind;
     }
 
-    calculateAllChartIndicators = (chart) =>
+    calculateAllChartIndicators = (chart, reset) =>
     {
-        chart = this.filterChart(chart, false);
+        if (reset)
+        {
+            chart = this.filterChart(chart, true);
+        }
+        else
+        {
+            chart = this.filterChart(chart, false);
+        }
 
         const { indicators } = this.state;
         for (let ind of indicators)
@@ -1780,6 +1870,11 @@ class StrategyApp extends Component
                 ind.chart_period === chart.period
             )
             {
+                if (reset)
+                {
+                    ind.reset();
+                }
+
                 ind.calc(
                     [...chart.filteredTimestamps], 
                     [...chart.filteredAsks], 
@@ -1856,6 +1951,10 @@ class StrategyApp extends Component
             }
             this.setState({ strategyInfo });
         }
+        else if (res.status === 403)
+        {
+            window.location = '/logout';
+        }
     }
 
     getAppContainer = () =>
@@ -1899,6 +1998,12 @@ class StrategyApp extends Component
 
     async startScript(broker_id, account_id, input_variables)
     {
+        const user_id = await this.props.checkAuthorization();
+        if (!user_id)
+        {
+            window.location = '/logout';
+        }
+
         this.toolbar.setStatusMsg('Initializing script...');
 
         const { account } = this.state;
@@ -1915,6 +2020,12 @@ class StrategyApp extends Component
 
     async stopScript(broker_id, account_id)
     {
+        const user_id = await this.props.checkAuthorization();
+        if (!user_id)
+        {
+            window.location = '/logout';
+        }
+
         this.toolbar.setStatusMsg('Stopping strategy...');
 
         const { account } = this.state;
@@ -2123,6 +2234,7 @@ class StrategyApp extends Component
 
     setPopup = (popup) =>
     {
+        console.log('SET ' + popup);
         this.setState({ popup });
     }
 
@@ -2430,7 +2542,11 @@ class StrategyApp extends Component
             const res = await fetch(`${REACT_APP_API_URL}/v1/strategy/${s_id}/gui`, requestOptions);
             const status = res.status;
 
-            if (status !== 200)
+            if (status === 403)
+            {
+                window.location = '/logout';
+            }
+            else if (status !== 200)
             {
                 // Re populate save with failed window IDs
                 for (let i of to_update[s_id].windows)
@@ -2455,7 +2571,11 @@ class StrategyApp extends Component
             const res = await fetch(`${REACT_APP_API_URL}/v1/strategy/${s_id}/gui`, requestOptions);
             const status = res.status;
 
-            if (status !== 200)
+            if (status === 403)
+            {
+                window.location = '/logout';
+            }
+            else if (status !== 200)
             {
                 // Re populate save with failed window IDs
                 for (let i of to_delete[s_id].windows)

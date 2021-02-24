@@ -71,6 +71,7 @@ label, input {
 .login.horiz {
     display: flex;
     align-items: center;
+    margin-top: 5px;
 }
 
 .login.logo > div > div > #algowolf {
@@ -185,6 +186,7 @@ label, input {
     width: 20px;
     height: 20px;
     margin-right: 10px;
+    margin-left: 5px;
 }
 
 .login.small-text {
