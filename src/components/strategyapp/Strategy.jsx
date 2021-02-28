@@ -1378,14 +1378,14 @@ class Strategy extends Component
             // Set Account Info
             if (account_info.transactions !== undefined)
             {
-                if (account_code in transactions)
-                {
-                    transactions[account_code] = account_info.transactions.concat(transactions[account_code]);
-                }
-                else
-                {
-                    transactions[account_code] = account_info.transactions;
-                }
+                // if (account_code in transactions)
+                // {
+                //     transactions[account_code] = account_info.transactions.concat(transactions[account_code]);
+                // }
+                // else
+                // {
+                transactions[account_code] = account_info.transactions;
+                // }
             }
             // if (account_info.drawings !== undefined)
             //     this.setDrawings(account_code, account_info.drawings);

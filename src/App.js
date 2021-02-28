@@ -8,6 +8,7 @@ import StrategyApp from './components/StrategyApp';
 import Login from './components/Login';
 import Logout from './components/Logout';
 import Auth from './components/Auth';
+import AccountSettings from './components/AccountSettings';
 import { config } from '@fortawesome/fontawesome-svg-core'
 import Cookies from 'universal-cookie';
 import moment from "moment-timezone";
@@ -41,6 +42,12 @@ class App extends Component
                         <Register 
                             getCookies={this.getCookies}
                             setUserId={this.setUserId}
+                        />
+                    </Route>
+                    <Route exact path="/account-settings">
+                        <AccountSettings 
+                            checkAuthorization={this.checkAuthorization}
+                            getHeaders={this.getHeaders}
                         />
                     </Route>
                     <Route exact path="/login">

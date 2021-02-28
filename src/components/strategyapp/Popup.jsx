@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import ChartSettings from './popups/ChartSettings';
 import BrokerSettings from './popups/BrokerSettings';
 import StrategySettings from './popups/StrategySettings';
-import AccountSettings from './popups/AccountSettings';
 import WelcomeDemo from './popups/WelcomeDemo';
 import NotAvailable from './popups/NotAvailable';
 import BetaUnavailable from './popups/BetaUnavailable';
@@ -186,6 +185,7 @@ class Popup extends Component
                     retrieveAllBrokers={this.props.retrieveAllBrokers}
                     getStrategyId={this.props.getStrategyId}
                     getStrategyInfo={this.props.getStrategyInfo}
+                    retrieveStrategies={this.props.retrieveStrategies}
                     updateStrategyInfo={this.props.updateStrategyInfo}
                     setHoverOn={this.setHoverOn}
                     setHoverOff={this.setHoverOff}
@@ -201,20 +201,6 @@ class Popup extends Component
                     getStrategyId={this.props.getStrategyId}
                     getStrategyInfo={this.props.getStrategyInfo}
                     getAllStrategyInfo={this.props.getAllStrategyInfo}
-                    updateStrategyInfo={this.props.updateStrategyInfo}
-                    setHoverOn={this.setHoverOn}
-                    setHoverOff={this.setHoverOff}
-                />
-            }
-            else if (popup.type === 'account-settings')
-            {
-                return <AccountSettings 
-                    getPopup={this.props.getPopup}
-                    onChangeCategory={this.onChangeCategory}
-                    changeCategory={this.changeCategory}
-                    getWindowInfo={this.props.getWindowInfo}
-                    getStrategyId={this.props.getStrategyId}
-                    getStrategyInfo={this.props.getStrategyInfo}
                     updateStrategyInfo={this.props.updateStrategyInfo}
                     setHoverOn={this.setHoverOn}
                     setHoverOff={this.setHoverOff}

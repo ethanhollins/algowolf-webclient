@@ -119,7 +119,7 @@ class StrategyApp extends Component
         const account = await this.retrieveGuiInfo();
         sio = this.handleSocket();
         this.setState({ sio });
-        const strategyInfo = await this.retrieveStrategies(account, account.metadata.open_strategies);
+        const strategyInfo = await this.retrieveStrategies(account.metadata.open_strategies, account);
         this.setState({ account, strategyInfo });
         
         // Retrieve user specific strategy informations
@@ -165,7 +165,7 @@ class StrategyApp extends Component
                     type: 'beta-unavailable',
                     size: {
                         width: 35,
-                        height: 40
+                        height: 45
                     }
                 };
                 this.setPopup(popup);
@@ -272,6 +272,7 @@ class StrategyApp extends Component
                         retrieveAllBrokers={this.retrieveAllBrokers}
                         getStrategyId={this.getStrategyId}
                         getStrategyInfo={this.getStrategyInfo}
+                        retrieveStrategies={this.retrieveStrategies}
                         getAllStrategyInfo={this.getAllStrategyInfo}
                         updateStrategyInfo={this.updateStrategyInfo}
                         setHovered={this.setHovered}
@@ -909,8 +910,8 @@ class StrategyApp extends Component
         if (Object.keys(strategyInfo).length > 0 && account.metadata && account.metadata.open_strategies.length > 0)
         {
             strategyInfo = await this.retrieveStrategies(
-                account,
-                Object.keys(strategyInfo)
+                Object.keys(strategyInfo),
+                account
             );
             this.setState({ strategyInfo });
         }
@@ -995,12 +996,17 @@ class StrategyApp extends Component
         }
     }
 
-    async retrieveStrategies(account, strategy_ids)
+    async retrieveStrategies(strategy_ids, account)
     {
         console.log('RETRIEVE STRATEGIES')
 
         const { REACT_APP_API_URL } = process.env;
         let { strategyInfo } = this.state;
+
+        if (!account)
+        {
+            account = this.state.account;
+        }
 
         /** Retrieve strategy info */
         const reqOptions = {

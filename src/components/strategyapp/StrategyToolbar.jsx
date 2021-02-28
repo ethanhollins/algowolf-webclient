@@ -578,14 +578,7 @@ class StrategyToolbar extends Component
         }
         else if (name === 'account')
         {
-            const popup = {
-                type: 'account-settings',
-                size: {
-                    width: 60,
-                    height: 75
-                }
-            }
-            this.props.setPopup(popup);
+            this.props.history.push('/account-settings');
         }
         else if (name === 'logout')
         {

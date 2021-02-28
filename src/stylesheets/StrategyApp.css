@@ -2695,6 +2695,11 @@
     height: 17px;
 }
 
+.auth {
+    margin: 10px;
+    font-style: italic;
+}
+
 #entry_line {
     width: 35px;
     margin-top: 4px;

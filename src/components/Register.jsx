@@ -174,11 +174,11 @@ class Register extends Component
         let { first_name, last_name, email, password, confirm_password } = this.state;
         if (event.target.name === 'first_name')
         {
-            first_name = event.target.value.toLowerCase();
+            first_name = event.target.value;
         }
         else if (event.target.name === 'last_name')
         {
-            last_name = event.target.value.toLowerCase();
+            last_name = event.target.value;
         }
         else if (event.target.name === 'email')
         {
@@ -193,12 +193,6 @@ class Register extends Component
             confirm_password = event.target.value;
         }
         this.setState({ first_name, last_name, email, password, confirm_password });
-    }
-
-    validateEmail(email) 
-    {
-        const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        return re.test(String(email).toLowerCase());
     }
 
     resetErrors()
@@ -230,6 +224,15 @@ class Register extends Component
             this.email.style['borderColor'] = '#e74c3c';
             this.email.style['borderWidth'] = '2px';
 
+            this.confirmPassword.value = '';
+        }
+        else if (this.passwordStrengthCheck(password))
+        {
+            this.errorMsg.textContent = "Password isn't strong enough.";
+            this.password.style['borderColor'] = '#e74c3c';
+            this.password.style['borderWidth'] = '2px';
+
+            this.password.value = '';
             this.confirmPassword.value = '';
         }
         else if (password !== confirm_password)
@@ -283,6 +286,44 @@ class Register extends Component
             {
                 this.errorMsg.textContent = data.message;
             }
+        }
+    }
+
+    validateEmail(email) 
+    {
+        const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    }
+
+    passwordStrengthCheck(password) {
+        var strongRegex = new RegExp("^(?=.{14,})(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*\\W).*$", "g");
+        var mediumRegex = new RegExp("^(?=.{10,})(((?=.*[A-Z])(?=.*[a-z]))|((?=.*[A-Z])(?=.*[0-9]))|((?=.*[a-z])(?=.*[0-9]))).*$", "g");
+        var enoughRegex = new RegExp("(?=.{8,}).*", "g");
+
+        if (password.length == 0) 
+        {
+            // Type password
+            return false;
+        } 
+        else if (false == enoughRegex.test(password)) 
+        {
+            // More Characters
+            return false;
+        } 
+        else if (strongRegex.test(password)) 
+        {
+            // Strong
+            return true;
+        } 
+        else if (mediumRegex.test(password)) 
+        {
+            // Medium
+            return true;
+        } 
+        else 
+        {
+            // Weak
+            return true;
         }
     }
 }

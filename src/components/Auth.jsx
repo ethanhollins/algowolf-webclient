@@ -17,7 +17,7 @@ class Auth extends Component
     async componentDidMount()
     {
         console.log(this.props);
-        this.handleAuth();
+        await this.handleAuth();
     }
 
     async handleAuth()
@@ -37,7 +37,7 @@ class Auth extends Component
             }
 
             console.log(`${REACT_APP_API_URL}/auth/spotware` + queryString);
-            fetch(
+            await fetch(
                 `${REACT_APP_API_URL}/auth/spotware` + queryString,
                 reqOptions
             )
@@ -57,8 +57,8 @@ class Auth extends Component
         else
         {
             return (
-                <div>
-                    Please wait...
+                <div className='auth'>
+                    Please wait while we connect your broker...
                 </div>
             );
         }

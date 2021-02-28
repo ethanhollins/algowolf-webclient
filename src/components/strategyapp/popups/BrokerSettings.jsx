@@ -128,12 +128,12 @@ class BrokerSettings extends Component
     {
         let { modes, brokers } = this.state;
         const broker_id = this.props.getPopup().opened;
-        const { REACT_APP_API_URL } = process.env;
+        const { REACT_APP_API_URL, REACT_APP_SPOTWARE_REDIRECT } = process.env;
 
         if (brokers[broker_id].broker === 'spotware')
         {
             // Call spotware OAuth
-            const url = `https://connect.spotware.com/apps/auth?client_id=2096_sEzU1jyvCjvNMo2ViU8YnZha8UQmuHokkaXJDVD7fVEoIc1wx3&redirect_uri=http://3.25.145.195:3002/auth/spotware&scope=trading`;
+            const url = `https://connect.spotware.com/apps/auth?client_id=2096_sEzU1jyvCjvNMo2ViU8YnZha8UQmuHokkaXJDVD7fVEoIc1wx3&redirect_uri=${REACT_APP_SPOTWARE_REDIRECT}&scope=trading`;
             window.location.href = url;
         }
         else
@@ -160,13 +160,13 @@ class BrokerSettings extends Component
                 modes[broker_id] = 'edit';
         
                 this.setState({ brokers });
+                this.props.retrieveStrategies([this.props.getStrategyId()]);
             }
             else
             {
                 return data.message;
             }
         }
-
     }
 
     async onSave(e)
@@ -211,7 +211,30 @@ class BrokerSettings extends Component
 
     async onDelete(e)
     {
+        let { modes, brokers } = this.state;
+        const broker_id = this.props.getPopup().opened;
+        const { REACT_APP_API_URL, REACT_APP_SPOTWARE_REDIRECT } = process.env;
 
+        // Call Api Connect EPT
+        const reqOptions = {
+            method: 'DELETE',
+            headers: this.props.getHeaders(),
+            credentials: 'include'
+        }
+
+        const res = await fetch(
+            `${REACT_APP_API_URL}/broker/${broker_id}`,
+            reqOptions
+        );
+
+        if (res.status === 200)
+        {
+            delete brokers[broker_id];
+            delete modes[broker_id];
+    
+            this.setState({ brokers });
+            this.props.retrieveStrategies([this.props.getStrategyId()]);
+        }
     }
 
     onEditBtn(e)
