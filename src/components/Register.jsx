@@ -226,7 +226,7 @@ class Register extends Component
 
             this.confirmPassword.value = '';
         }
-        else if (this.passwordStrengthCheck(password))
+        else if (!this.passwordStrengthCheck(password))
         {
             this.errorMsg.textContent = "Password isn't strong enough.";
             this.password.style['borderColor'] = '#e74c3c';
