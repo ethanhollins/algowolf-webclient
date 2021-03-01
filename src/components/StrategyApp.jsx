@@ -170,6 +170,7 @@ class StrategyApp extends Component
                 };
                 this.setPopup(popup);
             }
+            this.props.visitorCounter();
         }
 
         
