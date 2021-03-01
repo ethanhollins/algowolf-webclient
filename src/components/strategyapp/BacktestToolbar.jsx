@@ -63,7 +63,8 @@ class BacktestToolbar extends Component
         let onUtilsDropdownItem;
         if (this.props.isDemo)
         {
-            onMenuDropdownItem = this.onNotAvailableDropdownItem;
+            onMenuDropdownItem = this.onMenuDropdownItem;
+            // onMenuDropdownItem = this.onNotAvailableDropdownItem;
             onChartsDropdownItem = this.onNotAvailableDropdownItem;
             onStatsDropdownItem = this.onNotAvailableDropdownItem;
             onUtilsDropdownItem = this.onNotAvailableDropdownItem;
@@ -320,25 +321,39 @@ class BacktestToolbar extends Component
 
         if (name === 'brokers')
         {
-            const popup = {
-                type: 'broker-settings',
-                size: {
-                    width: 60,
-                    height: 75
-                }
+            if (this.props.isDemo)
+            {
+                this.onNotAvailableItem();
             }
-            this.props.setPopup(popup);
+            else
+            {
+                const popup = {
+                    type: 'broker-settings',
+                    size: {
+                        width: 60,
+                        height: 75
+                    }
+                }
+                this.props.setPopup(popup);
+            }
         }
         else if (name === 'strategies')
         {
-            const popup = {
-                type: 'strategy-settings',
-                size: {
-                    width: 60,
-                    height: 75
-                }
+            if (this.props.isDemo)
+            {
+                this.onNotAvailableItem();
             }
-            this.props.setPopup(popup);
+            else
+            {
+                const popup = {
+                    type: 'strategy-settings',
+                    size: {
+                        width: 60,
+                        height: 75
+                    }
+                }
+                this.props.setPopup(popup);
+            }
         }
         else if (name === 'account')
         {
