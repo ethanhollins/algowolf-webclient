@@ -24,10 +24,10 @@ class SignUpPrompt extends Component
                                     Sign Up for FREE to access the demo platform
                                 </div>
                             </div>
-                            <div className='sign-up-prompt message'>
+                            <span className='sign-up-prompt message'>
                                 Get live trading demos, insights, statistics, daily results and more. 
-                                Contact us at admin@algowolf.com to find out more about live trading with your broker and general info.
-                            </div>
+                                Contact us at <a id="email_link" href="mailto:admin@algowolf.com">admin@algowolf.com</a> to find out more about live trading with your broker and general info.
+                            </span>
                             <div className="login field">
                                 <div id="submit" className="login input" onClick={this.onSignUp.bind(this)}>
                                     SIGN UP

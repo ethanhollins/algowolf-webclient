@@ -350,6 +350,15 @@ class StrategyToolbar extends Component
         {
             return <React.Fragment />;
         }
+        else if (!this.props.hasBetaAccess())
+        {
+            return (
+                <div ref={this.setActivationElem} className='toolbox item row btn disabled'>
+                    <FontAwesomeIcon className='toolbox icon disabled' icon={faPlay} />
+                    <span className='toolbox label'>Start</span>
+                </div>
+            );
+        }
         else if (is_running)
         {
             return (
@@ -432,7 +441,7 @@ class StrategyToolbar extends Component
         let current_account = this.getCurrentAccount();
         const is_loaded = this.props.getStrategyComponent().isLoaded();
         
-        if (is_loaded && current_account !== undefined)
+        if (this.props.hasBetaAccess() && is_loaded && current_account !== undefined)
         {
             const broker_id = current_account.split('.')[0];
             const account_id = current_account.split('.')[1];

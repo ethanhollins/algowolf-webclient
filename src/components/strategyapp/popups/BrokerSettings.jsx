@@ -130,7 +130,11 @@ class BrokerSettings extends Component
         const broker_id = this.props.getPopup().opened;
         const { REACT_APP_API_URL, REACT_APP_SPOTWARE_REDIRECT } = process.env;
 
-        if (brokers[broker_id].broker === 'spotware')
+        if ([
+            'spotware', 'icmarkets', 'fxpro', 'pepperstone', 
+            'axiory', 'fondex', 'octafx', 'scandinavian_capital_markets',
+            'skilling', 'omf', 'tradeview'
+        ].includes(brokers[broker_id].broker))
         {
             // Call spotware OAuth
             const url = `https://connect.spotware.com/apps/auth?client_id=2096_sEzU1jyvCjvNMo2ViU8YnZha8UQmuHokkaXJDVD7fVEoIc1wx3&redirect_uri=${REACT_APP_SPOTWARE_REDIRECT}&scope=trading`;
@@ -669,7 +673,7 @@ class BrokerSettings extends Component
                     <div 
                         className={'popup broker' + this.isItemSelected('icmarkets', broker_info.broker)}
                         onClick={this.setBroker.bind(this)}
-                        name='spotware'
+                        name='icmarkets'
                     >
                         <img className='popup broker-img' src={process.env.PUBLIC_URL + '/ic_markets_logo.png'} />
                         <div className='popup broker-text'>IC Markets</div>
@@ -677,7 +681,7 @@ class BrokerSettings extends Component
                     <div 
                         className={'popup broker ' + this.isItemSelected('fxpro', broker_info.broker)}
                         onClick={this.setBroker.bind(this)}
-                        name='spotware'
+                        name='fxpro'
                     >
                         <img className='popup broker-img' src={process.env.PUBLIC_URL + '/fxpro_logo.png'} />
                         <div className='popup broker-text'>FxPro</div>
@@ -685,7 +689,7 @@ class BrokerSettings extends Component
                     <div 
                         className={'popup broker ' + this.isItemSelected('pepperstone', broker_info.broker)}
                         onClick={this.setBroker.bind(this)}
-                        name='spotware'
+                        name='pepperstone'
                     >
                         <img className='popup broker-img' src={process.env.PUBLIC_URL + '/pepperstone_logo.png'} />
                         <div className='popup broker-text'>Pepperstone</div>
@@ -693,7 +697,7 @@ class BrokerSettings extends Component
                     <div 
                         className={'popup broker' + this.isItemSelected('axiory', broker_info.broker)}
                         onClick={this.setBroker.bind(this)}
-                        name='spotware'
+                        name='axiory'
                     >
                         <img className='popup broker-img' src={process.env.PUBLIC_URL + '/axiory_logo.png'} />
                         <div className='popup broker-text'>Axiory Global</div>
@@ -705,7 +709,7 @@ class BrokerSettings extends Component
                     <div 
                         className={'popup broker' + this.isItemSelected('fondex', broker_info.broker)}
                         onClick={this.setBroker.bind(this)}
-                        name='spotware'
+                        name='fondex'
                     >
                         <img className='popup broker-img' src={process.env.PUBLIC_URL + '/fondex_logo.png'} />
                         <div className='popup broker-text'>Fondex</div>
@@ -713,7 +717,7 @@ class BrokerSettings extends Component
                     <div 
                         className={'popup broker' + this.isItemSelected('octafx', broker_info.broker)}
                         onClick={this.setBroker.bind(this)}
-                        name='spotware'
+                        name='octafx'
                     >
                         <img className='popup broker-img' src={process.env.PUBLIC_URL + '/octafx_logo.png'} />
                         <div className='popup broker-text'>OctaFX</div>
@@ -729,7 +733,7 @@ class BrokerSettings extends Component
                     <div 
                         className={'popup broker' + this.isItemSelected('skilling', broker_info.broker)}
                         onClick={this.setBroker.bind(this)}
-                        name='spotware'
+                        name='skilling'
                     >
                         <img className='popup broker-img' src={process.env.PUBLIC_URL + '/skilling_logo.png'} />
                         <div className='popup broker-text'>Skilling</div>
@@ -741,7 +745,7 @@ class BrokerSettings extends Component
                     <div 
                         className={'popup broker' + this.isItemSelected('omf', broker_info.broker)}
                         onClick={this.setBroker.bind(this)}
-                        name='spotware'
+                        name='omf'
                     >
                         <img className='popup broker-img' src={process.env.PUBLIC_URL + '/omf_logo.png'} />
                         <div className='popup broker-text'>OMF</div>
@@ -749,7 +753,7 @@ class BrokerSettings extends Component
                     <div 
                         className={'popup broker' + this.isItemSelected('tradeview', broker_info.broker)}
                         onClick={this.setBroker.bind(this)}
-                        name='spotware'
+                        name='tradeview'
                     >
                         <img className='popup broker-img' src={process.env.PUBLIC_URL + '/tradeview_logo.png'} />
                         <div className='popup broker-text'>Tradeview Markets</div>

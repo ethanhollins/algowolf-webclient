@@ -28,12 +28,12 @@ class BetaUnavailable extends Component
                                     <FontAwesomeIcon icon={faUnlockAlt} className='beta-unavailable icon' />
                                 </div>
                                 <div className='beta-unavailable header'>
-                                    Join the Closed Beta
+                                    Join the Live Beta
                                 </div>
                             </div>
-                            <div className='beta-unavailable message'>
-                                Live trading is currently only available to beta testers. Contact admin@algowolf.com to apply for access.
-                            </div>
+                            <span className='beta-unavailable message'>
+                                Live trading is currently only available to beta testers. Contact <a href="mailto:admin@algowolf.com">admin@algowolf.com</a> to apply for access.
+                            </span>
                             {this.generateGotoDemoBtn()}
                         </div>
                     </div>

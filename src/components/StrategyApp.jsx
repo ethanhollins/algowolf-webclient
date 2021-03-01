@@ -670,6 +670,7 @@ class StrategyApp extends Component
                     ref={this.setToolbarRef}
                     history={this.props.history}
                     isDemo={this.props.isDemo}
+                    hasBetaAccess={this.hasBetaAccess}
                     getCurrentStrategy={this.getCurrentStrategy}
                     updateStrategyInfo={this.updateStrategyInfo}
                     getStrategyComponent={this.getStrategyComponent}
@@ -2840,6 +2841,13 @@ class StrategyApp extends Component
             return Math.round(size * 100) / 100;
         }
     }
+
+    hasBetaAccess = () =>
+    {
+        const { account } = this.state;
+        return account.beta_access;
+    }
+    
 }
 
 const SPACEBAR = 32;

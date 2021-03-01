@@ -2521,6 +2521,10 @@
     text-align: center;
 }
 
+.beta-unavailable.message > a {
+    color: #000;
+}
+
 .beta-unavailable.icon {
     color: #ffa620;
     width: 125px;
@@ -2532,6 +2536,10 @@
     text-align: center;
     color: #ff8103;
     width: 125px;
+}
+
+#email_link {
+    text-decoration: underline;
 }
 
 .sign-up-prompt.body {

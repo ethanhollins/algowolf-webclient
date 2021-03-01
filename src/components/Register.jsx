@@ -38,7 +38,7 @@ class Register extends Component
         email: '',
         password: '',
         confirm_password: '',
-        notify_me: false
+        notify_me: true
     }
 
     async componentDidMount()
@@ -133,7 +133,7 @@ class Register extends Component
                             <label className='login checkbox'>
                                 <input 
                                     type='checkbox' 
-                                    defaultChecked={false}
+                                    defaultChecked={true}
                                     onChange={this.onCheckboxInputChange.bind(this)}
                                 />
                                 <div className='login checkmark'></div>
@@ -141,11 +141,11 @@ class Register extends Component
                             <div className="login small-text">Notify me by email about AlgoWolf updates.</div>
                         </div>
     
-                        <div className="login field">
+                        {/* <div className="login field">
                             <span className="login small-text">
                                 By continuing you indicate that you have read and agree to AlgoWolf's <a href="/terms-of-service" target="_blank">Terms of Service</a> and <a href="/privacy-policy" target="_blank">Privacy Policy</a>
                             </span>
-                        </div>
+                        </div> */}
 
                         <div className="login field">
                             <input type="submit" id="submit" className="login input" value="SIGN UP"/>
