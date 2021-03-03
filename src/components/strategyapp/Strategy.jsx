@@ -1297,7 +1297,7 @@ class Strategy extends Component
         let current_account = this.getCurrentAccount();
         let strategy = this.getStrategyInfo();
 
-        if (current_account === undefined)
+        if (!current_account)
         {
             strategy.account = this.props.id + '.papertrader';
             this.props.updateStrategyInfo();
