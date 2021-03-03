@@ -80,7 +80,7 @@ class Strategy extends Component
     }
 
     render() {
-        if (this.getCurrentAccount() !== undefined)
+        if (this.getCurrentAccount())
         {
             return (
                 <React.Fragment>
