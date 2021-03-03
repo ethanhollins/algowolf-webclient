@@ -2024,6 +2024,11 @@ class StrategyApp extends Component
             }, 
             'start'
         );
+
+        if (this.strategy)
+        {
+            this.strategy.clearScriptDrawings(broker_id, account_id);
+        }
     }
 
     async stopScript(broker_id, account_id)

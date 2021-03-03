@@ -443,6 +443,7 @@ class Strategy extends Component
     {
         let { transactions, current_timestamp } = this.state;
         let update = false;
+
         if (data.type === 'message_queue')
         {
             for (let i of data.item)
@@ -478,11 +479,7 @@ class Strategy extends Component
         }
         else if (data.type === 'live_backtest_uploaded')
         {
-            console.log('LIVE BACKTEST UPLOADED ', data.account_code);
-            let { info, transactions } = this.state;
-            info = {};
-            transactions[data.account_code] = [];
-            this.setState({ info, transactions });
+            // console.log('LIVE BACKTEST UPLOADED ', data.account_code);
             
             this.retrieveAccountInfo(data.account_code, true);
         }
@@ -906,7 +903,43 @@ class Strategy extends Component
     setInfo = (account_id, data) =>
     {
         let { info } = this.state;
-        info = Object.assign({}, info, data);
+        console.log('BEFORE: ');
+        console.log(info);
+        
+        // Get all products between both objects
+        let products = Object.keys(info).concat(Object.keys(data));
+        products = products.filter((item, pos) => products.indexOf(item) === pos);
+        for (let product of products)
+        {
+            let data_product;
+            if (product in data)
+            {
+                data_product = data[product];
+            }
+            else
+            {
+                data_product = {};
+            }
+
+            if (!(product in info))
+            {
+                info[product] = {}
+            }
+
+            // Get all periods between both objects
+            let periods = Object.keys(info[product]).concat(Object.keys(data_product));
+            periods = periods.filter((item, pos) => periods.indexOf(item) === pos);
+            for (let period of periods)
+            {
+                if (!(period in info[product]))
+                {
+                    info[product][period] = {};
+                }
+
+                info[product][period] = Object.assign({}, info[product][period], data_product[period]);
+            }
+        }
+        console.log(info);
         this.setState({ info });
     }
 
@@ -931,7 +964,7 @@ class Strategy extends Component
         this.setState({ info });
     }
 
-    handleTransactions = (dest_timestamp) =>
+    handleTransactions = (dest_timestamp, reset) =>
     {
         // TODO:
         //  - BLOCK LIVE TRANSACTION UPDATES IF CURRENT TIMESTAMP NOT NULL
@@ -945,8 +978,9 @@ class Strategy extends Component
         
         if (current_timestamp !== null && dest_timestamp === current_timestamp) return;
         else if (
-            (dest_timestamp !== null && current_timestamp === null) ||
-            dest_timestamp < current_timestamp
+            reset ||
+            ((dest_timestamp !== null && current_timestamp === null) ||
+            dest_timestamp < current_timestamp)
         )
         {
             // Reset all vars and start from beginning
@@ -1009,6 +1043,19 @@ class Strategy extends Component
             this.setState({ current_idx, current_timestamp, drawings, logs, positions, orders });
             this.updateInfo();
         }
+    }
+
+    clearScriptDrawings = (broker_id, account_id) =>
+    {
+        console.log('CLEAR EVERYTHING');
+
+        const account_code = broker_id + '.' + account_id;
+
+        let { info, transactions } = this.state;
+        info = {};
+        transactions[account_code] = [];
+        this.setState({ info, transactions });
+        this.handleTransactions(null, true);
     }
 
     getRoundedTimestamp = (timestamp) =>
@@ -1378,14 +1425,14 @@ class Strategy extends Component
             // Set Account Info
             if (account_info.transactions !== undefined)
             {
-                // if (account_code in transactions)
-                // {
-                //     transactions[account_code] = account_info.transactions.concat(transactions[account_code]);
-                // }
-                // else
-                // {
-                transactions[account_code] = account_info.transactions;
-                // }
+                if (account_code in transactions)
+                {
+                    transactions[account_code] = account_info.transactions.concat(transactions[account_code]);
+                }
+                else
+                {
+                    transactions[account_code] = account_info.transactions;
+                }
             }
             // if (account_info.drawings !== undefined)
             //     this.setDrawings(account_code, account_info.drawings);
@@ -1402,7 +1449,7 @@ class Strategy extends Component
     
             loaded.push(account_code);
             this.setState({ loaded, transactions });
-            this.setCurrentTimestamp(null);
+            this.handleTransactions(null, true);
         }
     }
 
