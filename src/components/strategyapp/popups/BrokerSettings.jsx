@@ -128,7 +128,7 @@ class BrokerSettings extends Component
     {
         let { modes, brokers } = this.state;
         const broker_id = this.props.getPopup().opened;
-        const { REACT_APP_API_URL, REACT_APP_SPOTWARE_REDIRECT } = process.env;
+        const { REACT_APP_API_URL, REACT_APP_SPOTWARE_REDIRECT, REACT_APP_SPOTWARE_CLIENT_ID } = process.env;
 
         if ([
             'spotware', 'icmarkets', 'fxpro', 'pepperstone', 
@@ -137,7 +137,7 @@ class BrokerSettings extends Component
         ].includes(brokers[broker_id].broker))
         {
             // Call spotware OAuth
-            const url = `https://connect.spotware.com/apps/auth?client_id=2096_sEzU1jyvCjvNMo2ViU8YnZha8UQmuHokkaXJDVD7fVEoIc1wx3&redirect_uri=${REACT_APP_SPOTWARE_REDIRECT}&scope=trading`;
+            const url = `https://connect.spotware.com/apps/auth?client_id=${REACT_APP_SPOTWARE_CLIENT_ID}&redirect_uri=${REACT_APP_SPOTWARE_REDIRECT}&scope=trading`;
             window.location.href = url;
         }
         else
