@@ -76,6 +76,39 @@ class ControlPanel extends Component
         );
     }
 
+    onVariableEnabledChange(e)
+    {
+        let { changed } = this.state;
+        const input_variables = this.getInputVariables();
+        
+        const name = e.target.getAttribute('name');
+        let value = e.target.checked;
+
+        if (value === input_variables[name].properties.enabled)
+        {
+            if (name in changed)
+            {
+                delete changed[name]['enabled'];
+                if (Object.keys(changed[name]).length === 0)
+                {
+                    delete changed[name];
+                }
+            }
+        }
+        else
+        {
+            if (!(name in changed))
+            {
+                changed[name] = {};
+            }
+
+            changed[name]['enabled'] = value;
+        }
+
+        this.setState({ changed });
+    }
+
+
     onVariableChange(e)
     {
         let { changed } = this.state;
@@ -112,12 +145,21 @@ class ControlPanel extends Component
         {
             if (name in changed)
             {
-                delete changed[name];
+                delete changed[name]['value'];
+                if (Object.keys(changed[name]).length === 0)
+                {
+                    delete changed[name];
+                }
             }
         }
         else
         {
-            changed[name] = value;
+            if (!(name in changed))
+            {
+                changed[name] = {};
+            }
+
+            changed[name]['value'] = value;
         }
 
         this.setState({ changed });
@@ -149,11 +191,25 @@ class ControlPanel extends Component
         {
             if (name in local_variables)
             {
-                local_variables[name].value = changed[name];
+                if ('value' in changed[name])
+                {
+                    local_variables[name].value = changed[name].value;
+                }
+                if ('enabled' in changed[name])
+                {
+                    local_variables[name].properties.enabled = changed[name].enabled;
+                }
             }
             else if (name in global_variables)
             {
-                global_variables[name].value = changed[name];
+                if ('value' in changed[name])
+                {
+                    global_variables[name].value = changed[name].value;
+                }
+                if ('enabled' in changed[name])
+                {
+                    global_variables[name].properties.enabled = changed[name].enabled;
+                }
             }
         }
 
@@ -203,7 +259,7 @@ class ControlPanel extends Component
                 }
                 else
                 {
-                    let type, step, icon, min, max;
+                    let type, step, icon, min, max, enabled;
                     if (item.type === 'integer')
                     {
                         field_ext += " no-icon";
@@ -237,16 +293,35 @@ class ControlPanel extends Component
                         min = item.properties.min
                     if (item.properties.max)
                         max = item.properties.max
+                    if (item.properties.enabled !== undefined)
+                    {
+                        enabled = (
+                            <div>
+                                <label className='control-panel checkbox'>
+                                    <input 
+                                        type='checkbox' 
+                                        defaultChecked={item.properties.enabled}
+                                        onChange={this.onVariableEnabledChange.bind(this)}
+                                        name={name}
+                                    />
+                                    <div className='control-panel checkmark'></div>
+                                </label>
+                            </div>
+                        )
+                    }
 
                     elem = (
                         <div key={current_account + name} className='control-panel row'>
                             <div className='control-panel item left'>
-                                <span className='control-panel item-title'>{name}</span>
-                                { 
-                                    item.properties.description 
-                                    ? <span className='control-panel item-description'>{item.properties.description}</span> 
-                                    : <React.Fragment/> 
-                                }
+                                <div className='control-panel item-main'>
+                                    
+                                    <span className='control-panel item-title'>{name}</span>
+                                    { 
+                                        item.properties.description 
+                                        ? <span className='control-panel item-description'>{item.properties.description}</span> 
+                                        : <React.Fragment/> 
+                                    }
+                                </div>
                             </div>
                             <div className='control-panel item right'>
                                 {icon}
@@ -257,6 +332,7 @@ class ControlPanel extends Component
                                     step={step} min={min} max={max}
                                     onChange={this.onVariableChange.bind(this)}
                                 />
+                                {enabled}
                             </div>
                         </div>
                     );

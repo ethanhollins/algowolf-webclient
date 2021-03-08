@@ -2191,10 +2191,15 @@
 
 .control-panel.item.left {
     display: flex;
-    flex-direction: column;
+    align-items: center;
     flex: 0 1 auto;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.control-panel.item-main {
+    display: flex;
+    flex-direction: column;
 }
 
 .control-panel.item-title {
@@ -2337,6 +2342,29 @@
 
 .control-panel.button.disabled:focus {
     outline: none;
+}
+
+.control-panel.checkbox {
+    width: 15px;
+    height: 15px;
+    margin-right: 0px;
+    margin-left: 10px;
+}
+
+.control-panel.checkmark {
+    border-radius: 3px;
+    border: 1px solid rgb(120,120,120);
+}
+
+.control-panel.checkbox .checkmark:after {
+    margin-bottom: 2px;
+    width: 3px;
+    height: 7px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
 }
 
 #reset_btn {
