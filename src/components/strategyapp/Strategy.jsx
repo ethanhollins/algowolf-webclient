@@ -479,8 +479,6 @@ class Strategy extends Component
         }
         else if (data.type === 'live_backtest_uploaded')
         {
-            // console.log('LIVE BACKTEST UPLOADED ', data.account_code);
-            
             this.retrieveAccountInfo(data.account_code, true);
         }
         else
@@ -903,9 +901,6 @@ class Strategy extends Component
     setInfo = (account_id, data) =>
     {
         let { info } = this.state;
-        console.log('BEFORE: ');
-        console.log(info);
-        
         // Get all products between both objects
         let products = Object.keys(info).concat(Object.keys(data));
         products = products.filter((item, pos) => products.indexOf(item) === pos);
@@ -939,7 +934,6 @@ class Strategy extends Component
                 info[product][period] = Object.assign({}, info[product][period], data_product[period]);
             }
         }
-        console.log(info);
         this.setState({ info });
     }
 
@@ -1047,8 +1041,6 @@ class Strategy extends Component
 
     clearScriptDrawings = (broker_id, account_id) =>
     {
-        console.log('CLEAR EVERYTHING');
-
         const account_code = broker_id + '.' + account_id;
 
         let { info, transactions } = this.state;
@@ -1246,7 +1238,7 @@ class Strategy extends Component
 
     getCurrentAccount = () =>
     {
-        const strategy = this.getStrategyInfo();
+        let strategy = this.getStrategyInfo();
         const brokers = this.getBrokers();
 
         if (brokers !== undefined && strategy.account !== undefined)
@@ -1297,7 +1289,13 @@ class Strategy extends Component
         let current_account = this.getCurrentAccount();
         let strategy = this.getStrategyInfo();
 
-        if (!current_account)
+        const broker_id = strategy.account.split('.')[0];
+        const account_id = strategy.account.split('.')[1];
+        if (
+            !current_account ||
+            !(broker_id in strategy.brokers) ||
+            !(account_id in strategy.brokers[broker_id].accounts)
+        )
         {
             strategy.account = this.props.id + '.papertrader';
             this.props.updateStrategyInfo();

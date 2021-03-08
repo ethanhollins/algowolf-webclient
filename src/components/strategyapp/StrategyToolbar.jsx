@@ -14,6 +14,7 @@ import {
     faSignOut
 } from '@fortawesome/pro-light-svg-icons';
 
+
 class StrategyToolbar extends Component
 {
     constructor(props)
@@ -91,9 +92,12 @@ class StrategyToolbar extends Component
                                 <span className='toolbox left'>My Brokers</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
-                            <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='strategies'>
+                            <div 
+                                className='dropdown-item disabled' name='strategies'
+                                // onClick={this.onMenuDropdownItem} 
+                            >
                                 <span className='toolbox left'>My Strategies</span>
-                                <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon disabled' /></span>
                             </div>
                             <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='account'>
                                 <span className='toolbox left'>Account Settings</span>
@@ -118,8 +122,11 @@ class StrategyToolbar extends Component
                     </div>
                     <div className='toolbox separator' />
                     <div className='toolbox item'>
-                        <div ref={this.setChartsElem} className='toolbox item row btn' onClick={this.onChartsDropdown}>
-                            <FontAwesomeIcon className='toolbox icon orange_btn' icon={faChartLine} />
+                        <div 
+                            ref={this.setChartsElem} className='toolbox item row btn disabled' 
+                            // onClick={this.onChartsDropdown}
+                        >
+                            <FontAwesomeIcon className='toolbox icon orange_btn disabled' icon={faChartLine} />
                             <span className='toolbox label'>Charts</span>
                         </div>
                         <div ref={this.setChartsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
@@ -150,8 +157,11 @@ class StrategyToolbar extends Component
                         </div>
                     </div>
                     <div className='toolbox item'>
-                        <div ref={this.setStatsElem} className='toolbox item row btn' onClick={this.onStatsDropdown}>
-                            <FontAwesomeIcon className='toolbox icon orange_btn' icon={faChartPie} />
+                        <div 
+                            ref={this.setStatsElem} className='toolbox item row btn disabled' 
+                            // onClick={this.onStatsDropdown}
+                        >
+                            <FontAwesomeIcon className='toolbox icon orange_btn disabled' icon={faChartPie} />
                             <span className='toolbox label'>Stats</span>
                         </div>
                         <div ref={this.setStatsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
@@ -170,8 +180,11 @@ class StrategyToolbar extends Component
                         </div>
                     </div>
                     <div className='toolbox item'>
-                        <div ref={this.setUtilsElem} className='toolbox item row btn' onClick={this.onUtilsDropdown}>
-                            <FontAwesomeIcon className='toolbox icon orange_btn' icon={faLightbulb} />
+                        <div 
+                            ref={this.setUtilsElem} className='toolbox item row btn disabled'
+                            // onClick={this.onUtilsDropdown}
+                        >
+                            <FontAwesomeIcon className='toolbox icon orange_btn disabled' icon={faLightbulb} />
                             <span className='toolbox label'>Utilities</span>
                         </div>
                         <div ref={this.setUtilsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
@@ -214,8 +227,11 @@ class StrategyToolbar extends Component
                         </div>
                     </div>
                     <div className='toolbox item'>
-                        <div ref={this.setToolsElem} className='toolbox item row btn' onClick={this.onToolsDropdown}>
-                            <FontAwesomeIcon className='toolbox icon orange_btn' icon={faTools} />
+                        <div 
+                            ref={this.setToolsElem} className='toolbox item row btn disabled' 
+                            // onClick={this.onToolsDropdown}
+                        >
+                            <FontAwesomeIcon className='toolbox icon orange_btn disabled' icon={faTools} />
                             <span className='toolbox label'>Tools</span>
                         </div>
                         <div ref={this.setToolsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
@@ -237,15 +253,21 @@ class StrategyToolbar extends Component
                         </div>
                     </div>
                     <div className='toolbox separator' />
-                    <div className='toolbox item' onClick={this.onNotAvailableItem}>
-                        <div ref={this.setScriptElem} className='toolbox item row btn'>
-                            <FontAwesomeIcon className='toolbox icon blue_btn' icon={faCode} />
+                    <div 
+                        className='toolbox item' 
+                        // onClick={this.onNotAvailableItem}
+                    >
+                        <div ref={this.setScriptElem} className='toolbox item row btn disabled'>
+                            <FontAwesomeIcon className='toolbox icon blue_btn disabled' icon={faCode} />
                             <span className='toolbox label'>Script</span>
                         </div>
                     </div>
-                    <div className='toolbox item' onClick={this.onNotAvailableItem}>
-                        <div ref={this.setBacktestElem} className='toolbox item row btn'>
-                            <FontAwesomeIcon className='toolbox icon blue_btn' icon={faHistory} />
+                    <div 
+                        className='toolbox item' 
+                        // onClick={this.onNotAvailableItem}
+                    >
+                        <div ref={this.setBacktestElem} className='toolbox item row btn disabled'>
+                            <FontAwesomeIcon className='toolbox icon blue_btn disabled' icon={faHistory} />
                             <span className='toolbox label'>Backtest</span>
                         </div>
                     </div>
@@ -265,6 +287,7 @@ class StrategyToolbar extends Component
 
             let account_elems = [];
             let class_name;
+            let current_display_name;
             for (let broker_id of brokers)
             {
                 const broker_name = strategy.brokers[broker_id].name;
@@ -307,6 +330,7 @@ class StrategyToolbar extends Component
                     if (account_code === current_account)
                     {
                         class_name = 'toolbox dropdown-item selected';
+                        current_display_name = display_name;
                     }
                     else
                     {
@@ -324,10 +348,17 @@ class StrategyToolbar extends Component
             return (
                 <React.Fragment>
     
-                <span className='toolbox label right-space'>
-                    {current_account !== undefined ? this.getAccountDisplayName(current_account.split('.')[1]) : ''}
-                </span>
-                <div className='toolbox item btn' onClick={this.onAccountsDropdown}>
+                <div 
+                    className='toolbox label right-space'
+                    data-tooltip='Select from your trading accounts.'
+                >
+                    {/* {current_account !== undefined ? this.getAccountDisplayName(current_account.split('.')[1]) : ''} */}
+                    {current_display_name}
+                </div>
+                <div 
+                    className='toolbox item btn' onClick={this.onAccountsDropdown}
+                    data-tooltip='Select from your trading accounts.'
+                >
                     <FontAwesomeIcon className='toolbox selection-icon' icon={faChevronDown} />
                 </div>
                 <div ref={this.setAccountsDropdown} className='toolbox dropdown small' style={{display: 'none'}}>
@@ -353,7 +384,10 @@ class StrategyToolbar extends Component
         else if (!this.props.hasBetaAccess())
         {
             return (
-                <div ref={this.setActivationElem} className='toolbox item row btn disabled'>
+                <div 
+                    ref={this.setActivationElem} className='toolbox item row btn disabled'
+                    data-tooltip='Beta access required to run script.'
+                >
                     <FontAwesomeIcon className='toolbox icon disabled' icon={faPlay} />
                     <span className='toolbox label'>Start</span>
                 </div>
@@ -362,7 +396,10 @@ class StrategyToolbar extends Component
         else if (is_running)
         {
             return (
-                <div ref={this.setActivationElem} className='toolbox item row btn'>
+                <div 
+                    ref={this.setActivationElem} className='toolbox item row btn'
+                    data-tooltip='Stop script.'
+                >
                     <FontAwesomeIcon id='stop_status' className='toolbox icon' icon={faStop} />
                     <span className='toolbox label'>Stop</span>
                 </div>
@@ -373,7 +410,10 @@ class StrategyToolbar extends Component
             if (statusMsg !== null)
             {
                 return (
-                    <div ref={this.setActivationElem} className='toolbox item row btn disabled'>
+                    <div 
+                        ref={this.setActivationElem} className='toolbox item row btn disabled'
+                        data-tooltip='Start script.'
+                    >
                         <FontAwesomeIcon className='toolbox icon disabled' icon={faPlay} />
                         <span className='toolbox label'>Start</span>
                     </div>
@@ -382,7 +422,10 @@ class StrategyToolbar extends Component
             else
             {
                 return (
-                    <div ref={this.setActivationElem} className='toolbox item row btn'>
+                    <div 
+                        ref={this.setActivationElem} className='toolbox item row btn'
+                        data-tooltip='Script loading...'
+                    >
                         <FontAwesomeIcon id='play_status' className='toolbox icon' icon={faPlay} />
                         <span className='toolbox label'>Start</span>
                     </div>
@@ -753,10 +796,17 @@ class StrategyToolbar extends Component
             {
                 const broker_id = current[0];
                 const current_account = current[1];
-                const accounts = this.getAccounts(broker_id);
-                if (accounts !== undefined && accounts.includes(current_account))
+
+                if (
+                    broker_id in strategy.brokers &&
+                    current_account in strategy.brokers[broker_id].accounts
+                )
                 {
-                    return strategy.account;
+                    const accounts = this.getAccounts(broker_id);
+                    if (accounts !== undefined && accounts.includes(current_account))
+                    {
+                        return strategy.account;
+                    }
                 }
             }
         }

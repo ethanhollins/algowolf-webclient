@@ -227,15 +227,27 @@ class ControlPanel extends Component
                         field_ext += " no-icon";
                         type = 'text';
                     }
+                    else if (item.type === 'time')
+                    {
+                        field_ext += " no-icon";
+                        type = 'time';
+                    }
 
-                    if (item.properties.min !== undefined)
+                    if (item.properties.min)
                         min = item.properties.min
-                    if (item.properties.max !== undefined)
+                    if (item.properties.max)
                         max = item.properties.max
 
                     elem = (
-                        <div key={current_account + name} className='info row'>
-                            <div className='control-panel item left'>{name}</div>
+                        <div key={current_account + name} className='control-panel row'>
+                            <div className='control-panel item left'>
+                                <span className='control-panel item-title'>{name}</span>
+                                { 
+                                    item.properties.description 
+                                    ? <span className='control-panel item-description'>{item.properties.description}</span> 
+                                    : <React.Fragment/> 
+                                }
+                            </div>
                             <div className='control-panel item right'>
                                 {icon}
                                 <input 
@@ -268,9 +280,9 @@ class ControlPanel extends Component
                 <React.Fragment key={current_account + local_preset + '-local'}>
                 <div className='control-panel scope-body'>
                     <div className='control-panel scope-header'>Account</div>
-                    <div className='control-panel scope-dropdown'>
+                    {/* <div className='control-panel scope-dropdown'>
                         {local_preset}<FontAwesomeIcon className='control-panel scope-dropdown-icon' icon={faChevronDown} />
-                    </div>
+                    </div> */}
                 </div>
                 {local_items}
                 </React.Fragment>
@@ -282,9 +294,9 @@ class ControlPanel extends Component
                 <React.Fragment key={current_account + global_preset + '-global'}>
                 <div className='control-panel scope-body'>
                     <div className='control-panel scope-header'>Strategy</div>
-                    <div className='control-panel scope-dropdown'>
+                    {/* <div className='control-panel scope-dropdown'>
                         {global_preset}<FontAwesomeIcon className='control-panel scope-dropdown-icon' icon={faChevronDown} />
-                    </div>
+                    </div> */}
                 </div>
                 {global_items}  
                 </React.Fragment>

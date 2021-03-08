@@ -238,6 +238,14 @@ class BrokerSettings extends Component
     
             this.setState({ brokers });
             this.props.retrieveStrategies([this.props.getStrategyId()]);
+
+            let strategy = this.props.getStrategyInfo(this.props.getStrategyId());
+            const current_broker_id = strategy.account.split('.')[0];
+            if (current_broker_id === broker_id)
+            {
+                strategy.account = this.props.getStrategyId() + '.papertrader';
+                this.props.updateStrategyInfo();
+            }
         }
     }
 
@@ -357,7 +365,7 @@ class BrokerSettings extends Component
                     <div key={account_id} className='popup account-item'>
 
                         <div>
-                            <label className='popup checkbox'>
+                            {/* <label className='popup checkbox'>
                                 <input 
                                     type='checkbox' 
                                     defaultChecked={account_info.active}
@@ -365,7 +373,7 @@ class BrokerSettings extends Component
                                     name={account_id}
                                 />
                                 <div className='checkmark'></div>
-                            </label>
+                            </label> */}
                             <div>{display_account + broker}</div>
                         </div>
                         <div className='popup input small'>
@@ -632,16 +640,17 @@ class BrokerSettings extends Component
             <div className='popup column'>
                 <div id='popup_broker_selector'>
                     <div 
-                        className={'popup broker ' + this.isItemSelected('oanda', broker_info.broker)}
-                        onClick={this.setBroker.bind(this)}
+                        className={'popup broker disabled' + this.isItemSelected('oanda', broker_info.broker)}
+                        // onClick={this.setBroker.bind(this)}
                         name='oanda'
                     >
                         <ReactSVG className='popup broker-svg' src={process.env.PUBLIC_URL + '/oanda_logo.svg'} />
                         <div className='popup broker-text'>Oanda</div>
+                        <div className='popup broker-description'>Coming Soon</div>
                     </div>
                     <div 
                         className={'popup broker disabled' + this.isItemSelected('fxcm', broker_info.broker)}
-                        onClick={this.setBroker.bind(this)}
+                        // onClick={this.setBroker.bind(this)}
                         name='fxcm'
                     >
                         <ReactSVG className='popup broker-svg' src={process.env.PUBLIC_URL + '/fxcm_logo.svg'} />
@@ -650,7 +659,7 @@ class BrokerSettings extends Component
                     </div>
                     <div 
                         className={'popup broker disabled' + this.isItemSelected('interactive_brokers', broker_info.broker)}
-                        onClick={this.setBroker.bind(this)}
+                        // onClick={this.setBroker.bind(this)}
                         name='interactive_brokers'
                     >
                         <img className='popup broker-img' src={process.env.PUBLIC_URL + '/interactive_brokers_logo.png'} />

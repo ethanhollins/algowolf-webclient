@@ -33,7 +33,6 @@ class Login extends Component
     {
         let { loginCheck } = this.state;
         const user_id = await this.props.checkAuthorization();
-        console.log(user_id);
         if (user_id === null)
         {
             loginCheck = true;
@@ -189,7 +188,6 @@ class Login extends Component
 
         if (status === 200)
         {
-            console.log(data);
             this.props.getCookies().set('Authorization', data.token, {
                 path: '/'
             })

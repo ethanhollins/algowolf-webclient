@@ -266,6 +266,15 @@
     color: rgb(140,140,140);
 }
 
+.toolbox.label {
+    display: -webkit-box;
+    max-width: 150px;
+    /* white-space: nowrap; */
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 .toolbox.item.status > .toolbox.label {
     font-size: 0.75em;
     color: rgb(140,140,140);
@@ -305,6 +314,7 @@
     position: absolute;
     cursor: context-menu;
     overflow: hidden;
+    width: 200px;
     top: 30px;
     border: 1px solid rgb(220,220,220);
     border-radius: 4px;
@@ -334,7 +344,7 @@
     pointer-events: none;
 }
 
-.toolbox.dropdown > .dropdown-item:hover {
+.toolbox.dropdown > .dropdown-item:not(.disabled):hover {
     background-color: #fff5e9;
     color: #ff8103;
     cursor: pointer;
@@ -343,6 +353,10 @@
 .toolbox.dropdown-item.selected {
     background-color: #fff5e9;
     /* color: #ff8103; */
+}
+
+.dropdown-item.disabled {
+    color: rgb(180,180,180);
 }
 
 .dropdown-separator {
@@ -392,7 +406,7 @@
     color: rgb(120,120,120);
 }
 
-.toolbox.dropdown > div:hover .toolbox.right-icon {
+.toolbox.dropdown > div:hover .toolbox.right-icon:not(.disabled) {
     color: #ff8103;
     transform: translateX(3px);
     transition: transform 0.2s ease-out;
@@ -442,11 +456,11 @@
     color: #3498db;
 }
 
-.toolbox.item.btn:hover .blue_btn {
+.toolbox.item.btn:not(.disabled):hover .blue_btn {
     color: #40c5ff;
 }
 
-.toolbox.item.btn:active .blue_btn {
+.toolbox.item.btn:not(.disabled):active .blue_btn {
     color: #297fa5;
 }
 
@@ -454,11 +468,11 @@
     color: #f39c12;
 }
 
-.toolbox.item.btn:hover .orange_btn {
+.toolbox.item.btn:not(.disabled):hover .orange_btn {
     color: #ffb64d;
 }
 
-.toolbox.item.btn:active .orange_btn {
+.toolbox.item.btn:not(.disabled):active .orange_btn {
     color: #bf7810;
 }
 
@@ -466,11 +480,11 @@
     color: #e74c3c;
 }
 
-.toolbox.item.btn:hover .red_btn {
+.toolbox.item.btn:not(.disabled):hover .red_btn {
     color: #ff6861;
 }
 
-.toolbox.item.btn:active .red_btn {
+.toolbox.item.btn:not(.disabled):active .red_btn {
     color: #b23630;
 }
 
@@ -478,11 +492,11 @@
     color: #1abc9c;
 }
 
-.toolbox.item.btn:hover .green_btn {
+.toolbox.item.btn:not(.disabled):hover .green_btn {
     color: #21dbb7;
 }
 
-.toolbox.item.btn:active .green_btn {
+.toolbox.item.btn:not(.disabled):active .green_btn {
     color: #158972;
 }
 
@@ -490,11 +504,11 @@
     color: #f1c40f;
 }
 
-.toolbox.item.btn:hover .yellow_btn {
+.toolbox.item.btn:not(.disabled):hover .yellow_btn {
     color: #ffc050;
 }
 
-.toolbox.item.btn:active .yellow_btn {
+.toolbox.item.btn:not(.disabled):active .yellow_btn {
     color: #cea90f;
 }
 
@@ -502,11 +516,11 @@
     color: #9b59b6;
 }
 
-.toolbox.item.btn:hover .purple_btn {
+.toolbox.item.btn:not(.disabled):hover .purple_btn {
     color: #c877ed;
 }
 
-.toolbox.item.btn:active .purple_btn {
+.toolbox.item.btn:not(.disabled):active .purple_btn {
     color: #6e4182;
 }
 
@@ -514,11 +528,11 @@
     color: rgb(140,140,140);
 }
 
-.toolbox.item.btn:hover .grey_btn {
+.toolbox.item.btn:not(.disabled):hover .grey_btn {
     color: rgb(80,80,80);
 }
 
-.toolbox.item.btn:active .grey_btn {
+.toolbox.item.btn:not(.disabled):active .grey_btn {
     color: #000;
 }
 
@@ -2129,6 +2143,12 @@
     color: rgb(80,80,80);
 }
 
+.control-panel.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
 .control-panel.background {
     width: 100%;
     height: calc(100% - (28px + 30px));
@@ -2164,15 +2184,37 @@
 }
 
 .control-panel.item {
-    color: rgb(80,80,80);
+    color: rgb(40,40,40);
     padding: 6px 10px 6px 10px;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
 }
 
 .control-panel.item.left {
+    display: flex;
+    flex-direction: column;
     flex: 0 1 auto;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.control-panel.item-title {
+    font-size: 0.9em;
+}
+
+.control-panel.item-description {
+    display: -webkit-box;
+    /* white-space: nowrap; */
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.8em;
+    color: rgb(120,120,120);
+}
+
+.control-panel.row:hover .control-panel.item-description {
+    display: block;
+    overflow: visible;
 }
 
 .control-panel.item.right {

@@ -17,7 +17,7 @@ class NotAvailable extends Component
                     <div className='popup main-list'>
                         <div className='not-available body'>
                             <div className='not-available message'>
-                                Sorry this feature isn't available on the demo.
+                                Sorry this feature is unavailable.
                             </div>
                             <div>
                                 <FontAwesomeIcon icon={faSadTear} className='not-available icon' />

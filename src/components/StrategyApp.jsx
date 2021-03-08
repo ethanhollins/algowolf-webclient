@@ -128,19 +128,19 @@ class StrategyApp extends Component
         {
             if (user_id)
             {
-                if (!account.beta_access)
-                {
-                    const popup = {
-                        type: 'beta-unavailable',
-                        size: {
-                            width: 35,
-                            height: 55
-                        },
-                        fade: true,
-                        permanent: true
-                    };
-                    this.setPopup(popup);
-                }
+                // if (!account.beta_access)
+                // {
+                //     const popup = {
+                //         type: 'beta-unavailable',
+                //         size: {
+                //             width: 35,
+                //             height: 55
+                //         },
+                //         fade: true,
+                //         permanent: true
+                //     };
+                //     this.setPopup(popup);
+                // }
             }
         }
         else
@@ -308,7 +308,7 @@ class StrategyApp extends Component
 
     onDragStart(e)
     {
-        e.preventDefault();
+        // e.preventDefault();
     }
 
     showLoadScreen = () =>
@@ -1000,8 +1000,6 @@ class StrategyApp extends Component
 
     async retrieveStrategies(strategy_ids, account)
     {
-        console.log('RETRIEVE STRATEGIES')
-
         const { REACT_APP_API_URL } = process.env;
         let { strategyInfo } = this.state;
 
@@ -1041,8 +1039,6 @@ class StrategyApp extends Component
         {
             this.setShowLoadScreen(false);
         }
-
-        console.log(strategyInfo);
 
         return strategyInfo;
     }
@@ -1313,7 +1309,6 @@ class StrategyApp extends Component
         for (let k in charts)
         {
             let chart = charts[k];
-            console.log(chart.period);
 
             // Reconnect chart live data
             this.connectChart(broker_id, chart.broker, chart.product, chart.period);
@@ -2247,7 +2242,6 @@ class StrategyApp extends Component
 
     setPopup = (popup) =>
     {
-        console.log('SET ' + popup);
         this.setState({ popup });
     }
 

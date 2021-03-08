@@ -112,8 +112,8 @@ class WindowWrapper extends Component
                 <div ref={this.setWindowBtnsRef} className='window btns'>
                     <div ref={this.setInnerWindowBtnsRef}>
                         <FontAwesomeIcon className='window item small' icon={faSquare} onClick={this.onMaximise} />
-                        <FontAwesomeIcon className='window item small' icon={faWindowMaximize} onClick={this.notAvailable} />
-                        <FontAwesomeIcon className='window item' icon={faMinus} onClick={this.notAvailable} />
+                        {/* <FontAwesomeIcon className='window item small' icon={faWindowMaximize} onClick={this.notAvailable} /> */}
+                        {/* <FontAwesomeIcon className='window item' icon={faMinus} onClick={this.notAvailable} /> */}
                         <FontAwesomeIcon className='window item' icon={faTimes} onClick={this.notAvailable} />
                     </div>
                 </div>
@@ -368,7 +368,7 @@ class WindowWrapper extends Component
             {
                 this.props.setTopWindow(this.getStrategyId(), this.getItemId());
                 
-                e.preventDefault();
+                // e.preventDefault();
                 this.props.hideShadows(true);
 
                 if (hovered.resize !== false)

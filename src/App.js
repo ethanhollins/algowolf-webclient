@@ -95,14 +95,11 @@ class App extends Component
     {
         const queryString = window.location.search;
         let params = new URLSearchParams(queryString);
-        
-        console.log(this.state.user_id);
 
         if (this.state.user_id !== null)
         {
             const redirect = params.get('redirect');
             params.delete('redirect');
-            console.log(redirect);
             if (redirect === 'demo')
             {
                 return <Redirect to="/holygrail/demo"/>;
@@ -177,7 +174,6 @@ class App extends Component
             {
                 // Redirect to App
                 const data = await res.json();
-                console.log(data);
                 user_id = data.user_id;
             }
             else
