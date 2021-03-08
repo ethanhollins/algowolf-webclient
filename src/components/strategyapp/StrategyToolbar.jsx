@@ -634,7 +634,7 @@ class StrategyToolbar extends Component
         }
         else if (name === 'logout')
         {
-            this.props.history.push('/logout');
+            window.location = '/logout';
         }
         
     }
