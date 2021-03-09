@@ -2007,7 +2007,7 @@ class StrategyApp extends Component
             window.location = '/logout';
         }
 
-        this.toolbar.setStatusMsg('Initializing script...');
+        // this.toolbar.setStatusMsg('Initializing script...');
 
         const { account } = this.state;
         const strategy_id = account.metadata.current_strategy;

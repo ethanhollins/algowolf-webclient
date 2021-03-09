@@ -411,6 +411,7 @@ class Dockable extends Component
                 getCurrentLocalVariablesPreset={this.props.getCurrentLocalVariablesPreset}
                 updateInputVariables={this.props.updateInputVariables}
                 getCurrentAccount={this.props.getCurrentAccount}
+                getBalance={this.props.getBalance}
                 isLoaded={this.props.isLoaded}
             />
         }

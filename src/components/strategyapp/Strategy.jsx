@@ -41,7 +41,8 @@ class Strategy extends Component
         event_queue: [],
         current_idx: 0,
         current_timestamp: 0,
-        selected_offset: 0
+        selected_offset: 0,
+        balances: {}
     }
 
     async componentDidMount()
@@ -232,6 +233,7 @@ class Strategy extends Component
                             getLocalInputVariables={this.getLocalInputVariables}
                             getCurrentLocalVariablesPreset={this.getCurrentLocalVariablesPreset}
                             updateInputVariables={this.updateInputVariables}
+                            getBalance={this.getBalance}
                             isLoaded={this.isLoaded}
                         />
                     )
@@ -1185,7 +1187,7 @@ class Strategy extends Component
         {
             return strategy.input_variables;
         }
-        return {};
+        return null;
     }
 
     getLocalInputVariables = () =>
@@ -1195,7 +1197,7 @@ class Strategy extends Component
         {
             return this.state.input_variables[current_account];
         }
-        return {};
+        return null;
     }
 
     getCurrentTimestamp = () =>
@@ -1289,14 +1291,16 @@ class Strategy extends Component
         let current_account = this.getCurrentAccount();
         let strategy = this.getStrategyInfo();
 
-        const broker_id = strategy.account.split('.')[0];
-        const account_id = strategy.account.split('.')[1];
+        let broker_id = strategy.account.split('.')[0];
+        let account_id = strategy.account.split('.')[1];
         if (
             !current_account ||
             !(broker_id in strategy.brokers) ||
             !(account_id in strategy.brokers[broker_id].accounts)
         )
         {
+            broker_id = this.props.id;
+            account_id = 'papertrader';
             strategy.account = this.props.id + '.papertrader';
             this.props.updateStrategyInfo();
         }
@@ -1412,10 +1416,11 @@ class Strategy extends Component
 
     async retrieveAccountInfo(account_code, override)
     {
-        let { loaded, transactions } = this.state;
+        let { loaded, transactions, balances } = this.state;
 
         if (!loaded.includes(account_code) || override)
         {
+            const strategy = this.getStrategyInfo();
             const broker_id = account_code.split('.')[0];
             const account_id = account_code.split('.')[1];
             const account_info = await this.props.retrieveAccountInfo(this.props.id, broker_id, account_id);
@@ -1432,6 +1437,8 @@ class Strategy extends Component
                     transactions[account_code] = account_info.transactions;
                 }
             }
+
+            balances[account_code] = strategy.brokers[broker_id].accounts[account_id].balance;
             // if (account_info.drawings !== undefined)
             //     this.setDrawings(account_code, account_info.drawings);
             // if (account_info.logs !== undefined)
@@ -1446,7 +1453,7 @@ class Strategy extends Component
                 this.setCurrentLocalVariablesPreset();
     
             loaded.push(account_code);
-            this.setState({ loaded, transactions });
+            this.setState({ loaded, transactions, balances });
             this.handleTransactions(null, true);
         }
     }
@@ -1468,6 +1475,11 @@ class Strategy extends Component
     removeWindowsRef = (elem) =>
     {
         this.windows.splice(this.windows.indexOf(elem), 1);
+    }
+
+    getBalance = (account_code) =>
+    {
+        return Math.round(this.state.balances[account_code] * 100) / 100;
     }
 
 }

@@ -19,11 +19,25 @@ class ControlPanel extends Component
     }
     
     state = {
-        changed: {}
+        changed: {},
+        is_loaded: false
+    }
+
+    componentDidUpdate()
+    {
+        let { is_loaded } = this.state;
+
+        if (!is_loaded && this.isLoaded())
+        {
+            this.initCustomVariables();
+            is_loaded = true;
+            this.setState({ is_loaded });
+        }
     }
 
     render()
     {
+        
         return (
             <React.Fragment>
 
@@ -65,15 +79,33 @@ class ControlPanel extends Component
         }
     }
 
+    isLoaded = () =>
+    {
+        const global_preset = this.props.getCurrentGlobalVariablesPreset();
+        const local_preset = this.props.getCurrentLocalVariablesPreset();
+
+        const local_vars = this.props.getLocalInputVariables();
+        const global_vars = this.props.getGlobalInputVariables();
+
+        return local_vars && local_preset in local_vars && global_vars && global_preset in global_vars;
+    }
+
     getInputVariables = () =>
     {
         const global_preset = this.props.getCurrentGlobalVariablesPreset();
         const local_preset = this.props.getCurrentLocalVariablesPreset();
-        return Object.assign(
-            {}, this.props.getLocalInputVariables()[local_preset],
-            this.props.getGlobalInputVariables()[global_preset]
-            
-        );
+
+        const local_vars = this.props.getLocalInputVariables();
+        const global_vars = this.props.getGlobalInputVariables();
+
+        if (local_vars && global_vars)
+        {
+            return Object.assign(
+                {}, local_vars[local_preset], global_vars[global_preset]
+            );
+        }
+        
+        return {};
     }
 
     onVariableEnabledChange(e)
@@ -105,13 +137,181 @@ class ControlPanel extends Component
             changed[name]['enabled'] = value;
         }
 
+        this.handleCustomVariables(null, null);
+
         this.setState({ changed });
     }
 
+    getTotalBank()
+    {
+        const current_account = this.props.getCurrentAccount();
+        const account_balance = this.props.getBalance(current_account);
+        const maximum_bank = this.getVariableValue('Maximum Bank');
+        const external_bank = this.getVariableValue('External Bank');
+        const fixed_bank = this.getVariableValue('Fixed Bank');
+
+        let value;
+        if (fixed_bank)
+        {
+            value = Math.min(fixed_bank, maximum_bank);
+        }
+        else
+        {
+            value = Math.min(account_balance + external_bank, maximum_bank)
+        }
+
+        const total_bank_elem = this.getInputElem('Total Bank');
+        if (total_bank_elem)
+        {
+            total_bank_elem.value = value;
+        }
+
+        return value;
+    }
+
+    initCustomVariables()
+    {
+        const input_variables = this.getInputVariables();
+
+        for (let name in input_variables)
+        {
+            if ('properties' in input_variables[name] && input_variables[name].properties.custom)
+            {
+                if (input_variables[name].properties.custom === 'risk_percentage')
+                {
+                    const bank = this.getTotalBank();
+                    const value = input_variables[name].value
+                    const new_cash_value = Math.round(bank * (value / 100) * 100)/100;
+
+                    if ('Risk ($)' in input_variables)
+                    {
+                        input_variables['Risk ($)'].value = new_cash_value;
+                    }
+                    const elem = this.getInputElem('Risk ($)');
+                    if (elem)
+                        elem.value = new_cash_value;
+                }
+            }
+        }
+    }
+
+    handleCustomVariables(name, value)
+    {
+        const input_variables = this.getInputVariables();
+        
+        // Handle Custom
+        const bank = this.getTotalBank();
+
+        if (name && 'properties' in input_variables[name] && input_variables[name].properties.custom === 'risk_percentage')
+        {
+            const new_cash_value = Math.round(bank * (value / 100) * 100)/100;
+            this.setVariableChange('Risk ($)', new_cash_value);
+            const elem = this.getInputElem('Risk ($)');
+            if (elem)
+                elem.value = new_cash_value;
+        }
+        else if (name && 'properties' in input_variables[name] && input_variables[name].properties.custom === 'risk_cash')
+        {
+            const perc_elem = this.getInputElem('Risk (%)');
+            const cash_elem = this.getInputElem('Risk ($)');
+            value = Math.max(Math.min(Math.round(bank * 0.01 * 100)/100, value), 0);
+
+            const new_perc_value = Math.round((value / bank) * 100 * 100)/100;
+            this.setVariableChange('Risk (%)', new_perc_value);
+            if (perc_elem && cash_elem)
+            {
+                cash_elem.value = value;
+                perc_elem.value = new_perc_value;
+            }
+        }
+        else
+        {
+            const perc_value = input_variables['Risk (%)'].value;
+            const new_cash_value = Math.round(bank * (perc_value / 100) * 100)/100;
+            const cash_elem = this.getInputElem('Risk ($)');
+            this.setVariableChange('Risk ($)', new_cash_value);
+
+            if (cash_elem)
+                cash_elem.value = new_cash_value;
+        }
+    }
+
+    getInputElem(name)
+    {
+        for (let i of this.inputs)
+        {
+            if (i.getAttribute('name') === name)
+            {
+                return i;
+            }
+        }
+    }
+
+    getVariableValue(name)
+    {
+        let { changed } = this.state;
+        const input_variables = this.getInputVariables();
+
+        if (name in input_variables)
+        {
+            let enabled = true;
+            if (name in changed && 'enabled' in changed[name])
+            {
+                enabled = changed[name].enabled;
+            }
+            else if ('properties' in input_variables[name] && input_variables[name].properties.enabled !== undefined)
+            {
+                enabled = input_variables[name].properties.enabled;
+            }
+
+            if (!enabled)
+            {
+                return null;
+            }
+            else if (name in changed && 'value' in changed[name])
+            {
+                return changed[name].value;
+            }
+            else
+            {
+                return input_variables[name].value;
+            }
+        }
+
+        return null;
+    }
+
+    setVariableChange(name, value, )
+    {
+        let { changed } = this.state;
+        const input_variables = this.getInputVariables();
+
+        if (value === input_variables[name].value)
+        {
+            if (name in changed)
+            {
+                delete changed[name]['value'];
+                if (Object.keys(changed[name]).length === 0)
+                {
+                    delete changed[name];
+                }
+            }
+        }
+        else
+        {
+            if (!(name in changed))
+            {
+                changed[name] = {};
+            }
+
+            changed[name]['value'] = value;
+        }
+
+        this.setState({ changed });
+    }
 
     onVariableChange(e)
     {
-        let { changed } = this.state;
         const input_variables = this.getInputVariables();
         
         const name = e.target.getAttribute('name');
@@ -141,28 +341,9 @@ class ControlPanel extends Component
             }
         }
 
-        if (value === input_variables[name].value)
-        {
-            if (name in changed)
-            {
-                delete changed[name]['value'];
-                if (Object.keys(changed[name]).length === 0)
-                {
-                    delete changed[name];
-                }
-            }
-        }
-        else
-        {
-            if (!(name in changed))
-            {
-                changed[name] = {};
-            }
+        this.handleCustomVariables(name, value);
 
-            changed[name]['value'] = value;
-        }
-
-        this.setState({ changed });
+        this.setVariableChange(name, value);
     }
 
     reset()
@@ -241,11 +422,16 @@ class ControlPanel extends Component
             {
                 let item = input_variables[name];
                 let value = input_variables[name].value;
+                let enabled = input_variables[name].properties.enabled;
                 let field_ext = '';
                 let icon_ext = '';
+                let type, step, icon, min, max, enabled_elem;
                 if (name in changed)
                 {
-                    value = changed[name];
+                    if ('value' in changed[name])
+                        value = changed[name].value;
+                    if ('enabled' in changed[name])
+                        enabled = changed[name].enabled;
                     field_ext += ' changed';
                     icon_ext += ' changed';
                 }
@@ -257,18 +443,76 @@ class ControlPanel extends Component
                         </div>
                     );
                 }
+                else if (item.type === 'balance')
+                {
+                    icon = <span className={'control-panel icon' + icon_ext}>USD</span>;
+                    elem = (
+                        <div key={current_account + name} className='control-panel row'>
+                            <div className='control-panel item left'>
+                                <div className='control-panel item-main'>
+                                    <span className='control-panel item-title'>{name}</span>
+                                    { 
+                                        item.properties.description 
+                                        ? <span className='control-panel item-description'>{item.properties.description}</span> 
+                                        : <React.Fragment/> 
+                                    }
+                                </div>
+                            </div>
+                            <div className='control-panel item right'>
+                                {icon}
+                                <input 
+                                    ref={this.addInputRef}
+                                    className={'control-panel field' + field_ext} 
+                                    name={name} type='number' defaultValue={this.props.getBalance(current_account)}
+                                    readOnly
+                                />
+                            </div>
+                        </div>
+                    );
+                }
+                else if (item.type === 'custom')
+                {
+                    if (name === 'Total Bank')
+                    {
+                        icon = <span className={'control-panel icon' + icon_ext}>USD</span>;
+                        elem = (
+                            <div key={current_account + name} className='control-panel row'>
+                                <div className='control-panel item left'>
+                                    <div className='control-panel item-main'>
+                                        <span className='control-panel item-title'>{name}</span>
+                                        { 
+                                            item.properties.description 
+                                            ? <span className='control-panel item-description'>{item.properties.description}</span> 
+                                            : <React.Fragment/> 
+                                        }
+                                    </div>
+                                </div>
+                                <div className='control-panel item right'>
+                                    {icon}
+                                    <input 
+                                        ref={this.addInputRef}
+                                        className={'control-panel field' + field_ext} 
+                                        name={name} type='number' defaultValue={this.getTotalBank()}
+                                        readOnly
+                                    />
+                                </div>
+                            </div>
+                        );
+                    }
+                    else
+                    {
+                        elem = <React.Fragment key={current_account + name} />;
+                    }
+                }
                 else
                 {
-                    let type, step, icon, min, max, enabled;
                     if (item.type === 'integer')
                     {
-                        field_ext += " no-icon";
                         type = 'number';
                         step = '1';
                     }
                     else if (item.type === 'decimal')
                     {
-                        field_ext += " no-icon";
                         type = 'number';
                         step = '.01';
                     }
@@ -278,29 +522,47 @@ class ControlPanel extends Component
                         step = '.01';
                         icon = <span className={'control-panel icon' + icon_ext}>%</span>;
                     }
+                    else if (item.type === 'cash')
+                    {
+                        type = 'number';
+                        step = '.01';
+                    }
                     else if (item.type === 'text')
                     {
-                        field_ext += " no-icon";
                         type = 'text';
                     }
                     else if (item.type === 'time')
                     {
-                        field_ext += " no-icon";
                         type = 'time';
                     }
 
                     if (item.properties.min)
-                        min = item.properties.min
-                    if (item.properties.max)
-                        max = item.properties.max
-                    if (item.properties.enabled !== undefined)
                     {
-                        enabled = (
+                        min = item.properties.min
+                    }
+                    if (item.properties.max)
+                    {
+                        max = item.properties.max
+                    }
+                    if (item.properties.currency)
+                    {
+                        icon = <span className={'control-panel icon' + icon_ext}>USD</span>;
+                    }
+
+                    if (!icon)
+                        field_ext += " no-icon";
+
+                    if (enabled !== undefined)
+                    {
+                        if (!enabled)
+                            field_ext += " disabled";
+
+                        enabled_elem = (
                             <div>
                                 <label className='control-panel checkbox'>
                                     <input 
                                         type='checkbox' 
-                                        defaultChecked={item.properties.enabled}
+                                        defaultChecked={enabled}
                                         onChange={this.onVariableEnabledChange.bind(this)}
                                         name={name}
                                     />
@@ -332,7 +594,7 @@ class ControlPanel extends Component
                                     step={step} min={min} max={max}
                                     onChange={this.onVariableChange.bind(this)}
                                 />
-                                {enabled}
+                                {enabled_elem}
                             </div>
                         </div>
                     );

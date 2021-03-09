@@ -117,9 +117,7 @@ class StrategyToolbar extends Component
                     <div className='toolbox item row status right-space'>
                         {this.generateStatusLabel()}
                     </div>
-                    <div className='toolbox item' onClick={this.onScriptSwitch}>
-                        {this.generateScriptBtn()}
-                    </div>
+                    {this.generateScriptBtn()}
                     <div className='toolbox separator' />
                     <div className='toolbox item'>
                         <div 
@@ -384,24 +382,28 @@ class StrategyToolbar extends Component
         else if (!this.props.hasBetaAccess())
         {
             return (
-                <div 
-                    ref={this.setActivationElem} className='toolbox item row btn disabled'
-                    data-tooltip='Beta access required to run script.'
-                >
-                    <FontAwesomeIcon className='toolbox icon disabled' icon={faPlay} />
-                    <span className='toolbox label'>Start</span>
+                <div className='toolbox item'>
+                    <div 
+                        ref={this.setActivationElem} className='toolbox item row btn disabled'
+                        data-tooltip='Beta access required to run script.'
+                    >
+                        <FontAwesomeIcon className='toolbox icon disabled' icon={faPlay} />
+                        <span className='toolbox label'>Start</span>
+                    </div>
                 </div>
             );
         }
         else if (is_running)
         {
             return (
-                <div 
-                    ref={this.setActivationElem} className='toolbox item row btn'
-                    data-tooltip='Stop script.'
-                >
-                    <FontAwesomeIcon id='stop_status' className='toolbox icon' icon={faStop} />
-                    <span className='toolbox label'>Stop</span>
+                <div className='toolbox item' onClick={this.onScriptSwitch}>
+                    <div 
+                        ref={this.setActivationElem} className='toolbox item row btn'
+                        data-tooltip='Stop script.'
+                    >
+                        <FontAwesomeIcon id='stop_status' className='toolbox icon' icon={faStop} />
+                        <span className='toolbox label'>Stop</span>
+                    </div>
                 </div>
             );
         }
@@ -410,24 +412,28 @@ class StrategyToolbar extends Component
             if (statusMsg !== null)
             {
                 return (
-                    <div 
-                        ref={this.setActivationElem} className='toolbox item row btn disabled'
-                        data-tooltip='Start script.'
-                    >
-                        <FontAwesomeIcon className='toolbox icon disabled' icon={faPlay} />
-                        <span className='toolbox label'>Start</span>
+                    <div className='toolbox item'>
+                        <div 
+                            ref={this.setActivationElem} className='toolbox item row btn disabled'
+                            data-tooltip='Start script.'
+                        >
+                            <FontAwesomeIcon className='toolbox icon disabled' icon={faPlay} />
+                            <span className='toolbox label'>Start</span>
+                        </div>
                     </div>
                 );
             }
             else
             {
                 return (
-                    <div 
-                        ref={this.setActivationElem} className='toolbox item row btn'
-                        data-tooltip='Script loading...'
-                    >
-                        <FontAwesomeIcon id='play_status' className='toolbox icon' icon={faPlay} />
-                        <span className='toolbox label'>Start</span>
+                    <div className='toolbox item' onClick={this.onScriptSwitch}>
+                        <div 
+                            ref={this.setActivationElem} className='toolbox item row btn'
+                            data-tooltip='Script loading...'
+                        >
+                            <FontAwesomeIcon id='play_status' className='toolbox icon' icon={faPlay} />
+                            <span className='toolbox label'>Start</span>
+                        </div>
                     </div>
                 );
             }
@@ -497,6 +503,7 @@ class StrategyToolbar extends Component
             else
             {
                 const input_variables = this.props.getStrategyComponent().getAllCurrentInputVariables();
+                this.setStatusMsg('Initializing script...');
                 this.props.startScript(broker_id, account_id, input_variables);
             }
         }
