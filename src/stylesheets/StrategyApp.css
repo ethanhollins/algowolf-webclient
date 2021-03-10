@@ -2874,8 +2874,12 @@
     font-weight: 500;
 }
 
+#current_account {
+    font-weight: 600;
+}
+
 #live_status {
-    color: #ff6861;
+    color: #2ecc71;
 }
 
 #offline_status {

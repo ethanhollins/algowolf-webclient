@@ -137,9 +137,8 @@ class ControlPanel extends Component
             changed[name]['enabled'] = value;
         }
 
-        this.handleCustomVariables(null, null);
-
         this.setState({ changed });
+        this.handleCustomVariables(null, null);
     }
 
     getTotalBank()
@@ -153,17 +152,25 @@ class ControlPanel extends Component
         let value;
         if (fixed_bank)
         {
-            value = Math.min(fixed_bank, maximum_bank);
+            if (maximum_bank)
+            {
+                value = Math.min(fixed_bank, maximum_bank);
+            }
+            else
+            {
+                value = fixed_bank;
+            }
         }
         else
         {
-            value = Math.min(account_balance + external_bank, maximum_bank)
-        }
-
-        const total_bank_elem = this.getInputElem('Total Bank');
-        if (total_bank_elem)
-        {
-            total_bank_elem.value = value;
+            if (maximum_bank)
+            {
+                value = Math.min(account_balance + external_bank, maximum_bank)
+            }
+            else
+            {
+                value = account_balance + external_bank;
+            }
         }
 
         return value;
@@ -226,7 +233,7 @@ class ControlPanel extends Component
         }
         else
         {
-            const perc_value = input_variables['Risk (%)'].value;
+            const perc_value = this.getVariableValue('Risk (%)');
             const new_cash_value = Math.round(bank * (perc_value / 100) * 100)/100;
             const cash_elem = this.getInputElem('Risk ($)');
             this.setVariableChange('Risk ($)', new_cash_value);
@@ -281,7 +288,7 @@ class ControlPanel extends Component
         return null;
     }
 
-    setVariableChange(name, value, )
+    setVariableChange(name, value)
     {
         let { changed } = this.state;
         const input_variables = this.getInputVariables();
@@ -341,22 +348,14 @@ class ControlPanel extends Component
             }
         }
 
-        this.handleCustomVariables(name, value);
-
         this.setVariableChange(name, value);
+        this.handleCustomVariables(name, value);
     }
 
     reset()
     {
         let { changed } = this.state;
         changed = {};
-
-        const input_variables = this.getInputVariables();
-        for (let i of this.inputs)
-        {
-            i.value = input_variables[i.getAttribute('name')].value;
-        }
-
         this.setState({ changed });
     }
 
@@ -435,6 +434,20 @@ class ControlPanel extends Component
                     field_ext += ' changed';
                     icon_ext += ' changed';
                 }
+
+                if (item.properties.min)
+                {
+                    min = item.properties.min
+                }
+                if (item.properties.max)
+                {
+                    max = item.properties.max
+                }
+                if (item.properties.currency)
+                {
+                    icon = <span className={'control-panel icon' + icon_ext}>USD</span>;
+                }
+
                 if (item.type === 'header')
                 {
                     elem = (
@@ -463,7 +476,7 @@ class ControlPanel extends Component
                                 <input 
                                     ref={this.addInputRef}
                                     className={'control-panel field' + field_ext} 
-                                    name={name} type='number' defaultValue={this.props.getBalance(current_account)}
+                                    name={name} type='number' value={this.props.getBalance(current_account)}
                                     readOnly
                                 />
                             </div>
@@ -474,6 +487,8 @@ class ControlPanel extends Component
                 {
                     if (name === 'Total Bank')
                     {
+                        const total_bank = Math.min(this.getTotalBank(), max);
+
                         icon = <span className={'control-panel icon' + icon_ext}>USD</span>;
                         elem = (
                             <div key={current_account + name} className='control-panel row'>
@@ -492,7 +507,8 @@ class ControlPanel extends Component
                                     <input 
                                         ref={this.addInputRef}
                                         className={'control-panel field' + field_ext} 
-                                        name={name} type='number' defaultValue={this.getTotalBank()}
+                                        name={name} type='number' value={total_bank}
+                                        min={min} max={max}
                                         readOnly
                                     />
                                 </div>
@@ -536,19 +552,6 @@ class ControlPanel extends Component
                         type = 'time';
                     }
 
-                    if (item.properties.min)
-                    {
-                        min = item.properties.min
-                    }
-                    if (item.properties.max)
-                    {
-                        max = item.properties.max
-                    }
-                    if (item.properties.currency)
-                    {
-                        icon = <span className={'control-panel icon' + icon_ext}>USD</span>;
-                    }
-
                     if (!icon)
                         field_ext += " no-icon";
 
@@ -562,7 +565,7 @@ class ControlPanel extends Component
                                 <label className='control-panel checkbox'>
                                     <input 
                                         type='checkbox' 
-                                        defaultChecked={enabled}
+                                        checked={enabled}
                                         onChange={this.onVariableEnabledChange.bind(this)}
                                         name={name}
                                     />
@@ -590,7 +593,7 @@ class ControlPanel extends Component
                                 <input 
                                     ref={this.addInputRef}
                                     className={'control-panel field' + field_ext} name={name}
-                                    type={type} defaultValue={value}
+                                    type={type} value={value}
                                     step={step} min={min} max={max}
                                     onChange={this.onVariableChange.bind(this)}
                                 />

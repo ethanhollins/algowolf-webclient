@@ -348,14 +348,15 @@ class StrategyToolbar extends Component
     
                 <div 
                     className='toolbox label right-space'
-                    data-tooltip='Select from your trading accounts.'
+                    id="current_accont"
+                    title='Select from your trading accounts.'
                 >
                     {/* {current_account !== undefined ? this.getAccountDisplayName(current_account.split('.')[1]) : ''} */}
                     {current_display_name}
                 </div>
                 <div 
                     className='toolbox item btn' onClick={this.onAccountsDropdown}
-                    data-tooltip='Select from your trading accounts.'
+                    title='Select from your trading accounts.'
                 >
                     <FontAwesomeIcon className='toolbox selection-icon' icon={faChevronDown} />
                 </div>
@@ -385,7 +386,7 @@ class StrategyToolbar extends Component
                 <div className='toolbox item'>
                     <div 
                         ref={this.setActivationElem} className='toolbox item row btn disabled'
-                        data-tooltip='Beta access required to run script.'
+                        title='Beta access required to run script.'
                     >
                         <FontAwesomeIcon className='toolbox icon disabled' icon={faPlay} />
                         <span className='toolbox label'>Start</span>
@@ -399,7 +400,7 @@ class StrategyToolbar extends Component
                 <div className='toolbox item' onClick={this.onScriptSwitch}>
                     <div 
                         ref={this.setActivationElem} className='toolbox item row btn'
-                        data-tooltip='Stop script.'
+                        title='Stop script.'
                     >
                         <FontAwesomeIcon id='stop_status' className='toolbox icon' icon={faStop} />
                         <span className='toolbox label'>Stop</span>
@@ -415,7 +416,7 @@ class StrategyToolbar extends Component
                     <div className='toolbox item'>
                         <div 
                             ref={this.setActivationElem} className='toolbox item row btn disabled'
-                            data-tooltip='Start script.'
+                            title='Start script.'
                         >
                             <FontAwesomeIcon className='toolbox icon disabled' icon={faPlay} />
                             <span className='toolbox label'>Start</span>
@@ -429,7 +430,7 @@ class StrategyToolbar extends Component
                     <div className='toolbox item' onClick={this.onScriptSwitch}>
                         <div 
                             ref={this.setActivationElem} className='toolbox item row btn'
-                            data-tooltip='Script loading...'
+                            title='Script loading...'
                         >
                             <FontAwesomeIcon id='play_status' className='toolbox icon' icon={faPlay} />
                             <span className='toolbox label'>Start</span>
