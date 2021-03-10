@@ -16,7 +16,6 @@ class Logout extends Component
 
     componentDidMount()
     {
-        console.log('LOGOUT');
         this.handleLogout();
     }
 
@@ -39,9 +38,7 @@ class Logout extends Component
         //     this.props.setUserId(null);
         // }
 
-        console.log(this.props.getCookies().get('Authorization'));
         this.props.getCookies().remove('Authorization');
-        console.log(this.props.getCookies().get('Authorization'));
         this.props.setUserId(null);
         this.props.history.push('/login');
     }
