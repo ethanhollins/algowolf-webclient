@@ -120,8 +120,8 @@ class Chart extends Component
         /* Initialize Chart */
         if (this.getChart() === undefined)
             await this.addChart();
-        if (!this.isBacktest() && this.getBrokerChart() === undefined)
-            await this.addBrokerChart();
+        // if (!this.isBacktest() && this.getBrokerChart() === undefined)
+        //     await this.addBrokerChart();
 
         let pos = { x: -50, y: 0 };
         let scale = { x: 200.0, y:0.2 };
