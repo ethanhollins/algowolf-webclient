@@ -128,19 +128,18 @@ class StrategyApp extends Component
         {
             if (user_id)
             {
-                // if (!account.beta_access)
-                // {
-                //     const popup = {
-                //         type: 'beta-unavailable',
-                //         size: {
-                //             width: 35,
-                //             height: 55
-                //         },
-                //         fade: true,
-                //         permanent: true
-                //     };
-                //     this.setPopup(popup);
-                // }
+                if (!account.beta_access)
+                {
+                    const popup = {
+                        type: 'beta-unavailable',
+                        size: {
+                            width: 35,
+                            height: 45
+                        },
+                        fade: true
+                    };
+                    this.setPopup(popup);
+                }
             }
         }
         else

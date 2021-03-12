@@ -785,25 +785,25 @@ class Chart extends Component
         const elem = (
             <React.Fragment>
 
-            <div className='context-menu item separator' onClick={this.onContextMenuItem.bind(this)} name={'trade'}>
+            <div className='context-menu item separator disabled' onClick={this.onContextMenuItem.bind(this)} name={'trade'}>
                 <FontAwesomeIcon icon={faCoin} />
                 Trade
             </div>
-            <div className='context-menu item left-space' onClick={this.onContextMenuItem.bind(this)} name={'bar-types'}>Bar Types</div>
-            <div className='context-menu item' onClick={this.onContextMenuItem.bind(this)} name={'price'}>
+            <div className='context-menu item left-space disabled' onClick={this.onContextMenuItem.bind(this)} name={'bar-types'}>Bar Types</div>
+            <div className='context-menu item disabled' onClick={this.onContextMenuItem.bind(this)} name={'price'}>
                 <FontAwesomeIcon icon={faDollarSign} />
                 Price
             </div>
-            <div className='context-menu item' onClick={this.onContextMenuItem.bind(this)} name={'show'}>
+            <div className='context-menu item disabled' onClick={this.onContextMenuItem.bind(this)} name={'show'}>
                 <FontAwesomeIcon icon={faEye} />
                 Show
             </div>
-            <div className='context-menu item left-space separator' onClick={this.onContextMenuItem.bind(this)} name={'layouts'}>Layouts</div>
-            <div className='context-menu item' onClick={this.onContextMenuItem.bind(this)} name={'reset'}>
+            <div className='context-menu item left-space separator disabled' onClick={this.onContextMenuItem.bind(this)} name={'layouts'}>Layouts</div>
+            <div className='context-menu item disabled' onClick={this.onContextMenuItem.bind(this)} name={'reset'}>
                 <FontAwesomeIcon icon={faUndo} />
                 Reset
             </div>
-            <div className='context-menu item' onClick={this.onContextMenuItem.bind(this)} name={'settings'}>
+            <div className='context-menu item disabled' onClick={this.onContextMenuItem.bind(this)} name={'settings'}>
                 <FontAwesomeIcon icon={faCog} />
                 Settings
             </div>
@@ -836,37 +836,37 @@ class Chart extends Component
         e.preventDefault();
 
         this.props.getContextMenu().style.display = 'none';
-        let popup;
-        if (this.props.isDemo)
-        {
-            popup = {
-                type: 'not-available',
-                size: {
-                    width: 30,
-                    height: 30
-                }
-            }
-        }
-        else 
-        {
-            const name = e.target.getAttribute('name');
+        // let popup;
+        // if (this.props.isDemo)
+        // {
+        //     popup = {
+        //         type: 'not-available',
+        //         size: {
+        //             width: 30,
+        //             height: 30
+        //         }
+        //     }
+        // }
+        // else 
+        // {
+        //     const name = e.target.getAttribute('name');
             
-            if (name === 'settings')
-            {
-                popup = {
-                    type: 'chart-settings',
-                    size: {
-                        width: 60,
-                        height: 75
-                    },
-                    opened: 'general',
-                    properties: {
-                        item_id: this.getItemId()
-                    }
-                }
-            }
-        }
-        this.props.setPopup(popup);
+        //     if (name === 'settings')
+        //     {
+        //         popup = {
+        //             type: 'chart-settings',
+        //             size: {
+        //                 width: 60,
+        //                 height: 75
+        //             },
+        //             opened: 'general',
+        //             properties: {
+        //                 item_id: this.getItemId()
+        //             }
+        //         }
+        //     }
+        // }
+        // this.props.setPopup(popup);
     }
 
     clampScale = (x) =>

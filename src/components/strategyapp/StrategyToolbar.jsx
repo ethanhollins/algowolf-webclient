@@ -348,7 +348,7 @@ class StrategyToolbar extends Component
     
                 <div 
                     className='toolbox label right-space'
-                    id="current_accont"
+                    id="current_account"
                     title='Select from your trading accounts.'
                 >
                     {/* {current_account !== undefined ? this.getAccountDisplayName(current_account.split('.')[1]) : ''} */}

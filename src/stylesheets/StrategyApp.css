@@ -2424,9 +2424,13 @@
     border-bottom: 1px solid rgb(220,220,220);
 }
 
-.context-menu.item:hover {
+.context-menu.item:not(.disabled):hover {
     background-color: rgb(240,240,240);
     cursor: pointer;
+}
+
+.context-menu.item.disabled {
+    color: rgb(180,180,180);
 }
 
 .spreadsheet.background {
@@ -2886,6 +2890,7 @@
 }
 
 #current_account {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     font-weight: 600;
 }
 
