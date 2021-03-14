@@ -155,9 +155,10 @@ class StrategyApp extends Component
                 const popup = {
                     type: 'sign-up-prompt',
                     size: {
-                        width: 40,
-                        height: 65
+                        pixelWidth: 550,
+                        pixelHeight: 525
                     },
+                    image: '/beta_launch_popup.png',
                     fade: true,
                     permanent: true
                 };
@@ -1963,6 +1964,10 @@ class StrategyApp extends Component
         else if (res.status === 403)
         {
             window.location = '/logout';
+        }
+        else
+        {
+            this.toolbar.setStatusMsg(null);
         }
     }
 

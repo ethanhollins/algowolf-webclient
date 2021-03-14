@@ -829,7 +829,10 @@ class StrategyToolbar extends Component
             current_account = current_account.split('.');
             const broker_id = current_account[0];
             const account_id = current_account[1];
-            return strategy.brokers[broker_id].accounts[account_id]['strategy_status'];
+            return (
+                strategy.brokers[broker_id].accounts[account_id]['strategy_status'] !== null &&
+                strategy.brokers[broker_id].accounts[account_id]['strategy_status'] !== false
+            );
         }
 
         return null;
