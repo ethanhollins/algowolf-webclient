@@ -25,16 +25,17 @@ class BetaUnavailable extends Component
 
                             <div>
                                 <div>
-                                    <FontAwesomeIcon icon={faUnlockAlt} className='beta-unavailable icon' />
+                                    {/* <FontAwesomeIcon icon={faUnlockAlt} className='beta-unavailable icon' /> */}
+                                    <img className='beta-unavailable icon' src={process.env.PUBLIC_URL + this.props.getPopup().image} />
                                 </div>
-                                <div className='beta-unavailable header'>
+                                {/* <div className='beta-unavailable header'>
                                     Join the Live Beta
-                                </div>
+                                </div> */}
                             </div>
                             <span className='beta-unavailable message'>
-                                Live trading is currently only available to beta testers. Contact <a href="mailto:admin@algowolf.com">admin@algowolf.com</a> to apply for access.
+                                Algo trading is currently only available to beta testers. Contact <a href="mailto:admin@algowolf.com">admin@algowolf.com</a> to apply for access.
                             </span>
-                            {this.generateGotoDemoBtn()}
+                            {/* {this.generateGotoDemoBtn()} */}
                         </div>
                     </div>
                 </div>

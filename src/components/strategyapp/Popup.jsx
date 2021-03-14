@@ -307,10 +307,22 @@ class Popup extends Component
     {
         const popup = this.props.getPopup();
         const container_size = this.props.getSize();
-        const width = Math.max(Math.min(container_size.width * (popup.size.width / 100), 1200), 600);
-        const height = container_size.height * (popup.size.height / 100);
+
+        let width;
+        let height;
+        if ('pixelWidth' in popup.size && 'pixelHeight' in popup.size )
+        {
+            width = popup.size.pixelWidth;
+            height = popup.size.pixelHeight;
+            this.getPopupElem().style.top = parseInt((container_size.height/2) - height/2) + 'px';
+        }
+        else
+        {
+            width = Math.max(Math.min(container_size.width * (popup.size.width / 100), 1200), 600);
+            height = container_size.height * (popup.size.height / 100);
+            this.getPopupElem().style.top = parseInt((container_size.height/2) * (1 - (popup.size.height / 100))) + 'px';
+        }
         // Handle Sizing
-        this.getPopupElem().style.top = parseInt((container_size.height/2) * (1 - (popup.size.height / 100))) + 'px';
         this.getPopupElem().style.left = parseInt((container_size.width/2) * (1 - (width / container_size.width))) + 'px';
         this.getPopupElem().style.width = parseInt(width) + 'px';
         this.getPopupElem().style.height = parseInt(height) + 'px';

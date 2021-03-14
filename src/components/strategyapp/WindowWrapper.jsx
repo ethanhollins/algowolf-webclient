@@ -812,11 +812,18 @@ class WindowWrapper extends Component
             window_wrapper.style.left = Math.round(screen_pos.x) + "px";
             window_wrapper.style.top = Math.round(screen_pos.y) + "px";
             window_wrapper.style.width = (
-                Math.round(screen_size.x) - Math.max(Math.round(screen_pos.x) + Math.round(screen_size.x) - container_size.width, 0)
+                Math.round(screen_size.x)
             ) + "px";
             window_wrapper.style.height = (
-                Math.round(screen_size.y) - Math.max(Math.round(screen_pos.y) + Math.round(screen_size.y) - container_size.height, 0)
+                Math.round(screen_size.y)
             ) + "px";
+
+            // window_wrapper.style.width = (
+            //     Math.round(screen_size.x) - Math.max(Math.round(screen_pos.x) + Math.round(screen_size.x) - container_size.width, 0)
+            // ) + "px";
+            // window_wrapper.style.height = (
+            //     Math.round(screen_size.y) - Math.max(Math.round(screen_pos.y) + Math.round(screen_size.y) - container_size.height, 0)
+            // ) + "px";
         }
     }
 

@@ -133,12 +133,17 @@ class StrategyApp extends Component
                     const popup = {
                         type: 'beta-unavailable',
                         size: {
-                            width: 35,
-                            height: 45
+                            pixelWidth: 550,
+                            pixelHeight: 350
                         },
+                        image: '/get_access_popup.png',
                         fade: true
                     };
                     this.setPopup(popup);
+                }
+                else
+                {
+
                 }
             }
         }
@@ -163,9 +168,11 @@ class StrategyApp extends Component
                 const popup = {
                     type: 'beta-unavailable',
                     size: {
-                        width: 35,
-                        height: 45
-                    }
+                        pixelWidth: 550,
+                        pixelHeight: 350
+                    },
+                    image: '/get_access_popup.png',
+                    fade: true
                 };
                 this.setPopup(popup);
             }

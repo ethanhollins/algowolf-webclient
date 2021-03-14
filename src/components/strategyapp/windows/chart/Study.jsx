@@ -292,8 +292,8 @@ class Study extends Component
                                     pos, size, scale
                                 );
                                 ctx.moveTo(
-                                    current_pos.x + start_pos.x,
-                                    current_pos.y + start_pos.y
+                                    Math.round((current_pos.x + start_pos.x) * window.devicePixelRatio),
+                                    Math.round((current_pos.y + start_pos.y) * window.devicePixelRatio)
                                 );
                             }
                             continue
@@ -314,8 +314,8 @@ class Study extends Component
                             ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.2)`;
                             ctx.beginPath();
                             ctx.moveTo(
-                                current_pos.x + start_pos.x,
-                                current_pos.y + start_pos.y
+                                Math.round((current_pos.x + start_pos.x) * window.devicePixelRatio),
+                                Math.round((current_pos.y + start_pos.y) * window.devicePixelRatio)
                             );
                         }
 
@@ -330,8 +330,8 @@ class Study extends Component
                         // );
 
                         ctx.lineTo(
-                            current_pos.x + start_pos.x, 
-                            current_pos.y + start_pos.y
+                            Math.round((current_pos.x + start_pos.x) * window.devicePixelRatio), 
+                            Math.round((current_pos.y + start_pos.y) * window.devicePixelRatio)
                         );
                         if (x_pos < pos.x-1) break;
 
@@ -384,12 +384,12 @@ class Study extends Component
 
             ctx.beginPath();
             ctx.moveTo(
-                0, start_pos.y + screen_point.y
+                0, Math.round((start_pos.y + screen_point.y) * window.devicePixelRatio)
                 
             ); 
             ctx.lineTo(
-                seg_size.width,
-                start_pos.y + screen_point.y
+                Math.round(seg_size.width * window.devicePixelRatio),
+                Math.round((start_pos.y + screen_point.y) * window.devicePixelRatio)
             );
             ctx.stroke();
 
@@ -430,13 +430,13 @@ class Study extends Component
             {
                 ctx.strokeText(
                     c_y.toFixed(5), 
-                    seg_size.width - 5, 
-                    start_pos.y + screen_y + (3/4 * (font_size/2))
+                    Math.round((seg_size.width - 5) * window.devicePixelRatio), 
+                    Math.round((start_pos.y + screen_y + (3/4 * (font_size/2))) * window.devicePixelRatio)
                 );
                 ctx.fillText(
                     c_y.toFixed(5), 
-                    seg_size.width - 5, 
-                    start_pos.y + screen_y + (3/4 * (font_size/2))
+                    Math.round((seg_size.width - 5) * window.devicePixelRatio), 
+                    Math.round((start_pos.y + screen_y + (3/4 * (font_size/2))) * window.devicePixelRatio)
                 );
             }
         }
@@ -467,12 +467,12 @@ class Study extends Component
 
             ctx.beginPath();
             ctx.moveTo(
-                screen_x, start_pos.y
-                
+                Math.round(screen_x * window.devicePixelRatio), 
+                Math.round(start_pos.y * window.devicePixelRatio)
             ); 
             ctx.lineTo(
-                screen_x,
-                start_pos.y + seg_size.height
+                Math.round(screen_x * window.devicePixelRatio),
+                Math.round((start_pos.y + seg_size.height) * window.devicePixelRatio)
             );
             ctx.stroke();
         }
@@ -485,7 +485,12 @@ class Study extends Component
 
         // Separator Line
         ctx.fillStyle = `rgba(180, 180, 180, 1.0)`;
-        ctx.fillRect(0, Math.round(start_pos.y), seg_size.width, 1.0);
+        ctx.fillRect(
+            0, 
+            Math.round(start_pos.y * window.devicePixelRatio), 
+            Math.round(seg_size.width * window.devicePixelRatio), 
+            1.0
+        );
     }
 
     getPos = () =>

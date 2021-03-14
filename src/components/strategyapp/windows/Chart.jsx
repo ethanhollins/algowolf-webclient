@@ -1306,8 +1306,15 @@ class Chart extends Component
     {
         const chart_size = this.getSize();
         const canvas = this.getCanvas();
-        canvas.setAttribute('width', Math.round(chart_size.width-1));
-        canvas.setAttribute('height', Math.round(chart_size.height-1));
+
+        const width = Math.round(chart_size.width-1);
+        const height = Math.round(chart_size.height-1);
+
+        canvas.style.width = Math.round((width*2) / window.devicePixelRatio) + 'px';
+        canvas.style.height = Math.round((height*2) / window.devicePixelRatio) + 'px';
+
+        canvas.width = width * 2;
+        canvas.height = height * 2;
     }
 
     updateItems()
@@ -1840,12 +1847,12 @@ class Chart extends Component
 
             ctx.beginPath();
             ctx.moveTo(
-                0, screen_y
+                0, Math.round(screen_y * window.devicePixelRatio)
                 
             ); 
             ctx.lineTo(
-                seg_size.width,
-                screen_y
+                Math.round(seg_size.width * window.devicePixelRatio),
+                Math.round(screen_y * window.devicePixelRatio)
             );
             ctx.stroke();
 
@@ -1911,12 +1918,11 @@ class Chart extends Component
 
                 ctx.beginPath();
                 ctx.moveTo(
-                    screen_x, 0
-                    
+                    Math.round(screen_x * window.devicePixelRatio), 0
                 ); 
                 ctx.lineTo(
-                    screen_x,
-                    seg_size.height
+                    Math.round(screen_x * window.devicePixelRatio),
+                    Math.round(seg_size.height * window.devicePixelRatio)
                 );
                 ctx.stroke();
                 data.push(i);
@@ -1951,8 +1957,16 @@ class Chart extends Component
                 { x: 0, y: c_y }, pos, seg_size, scale
             ).y;
             
-            ctx.strokeText(c_y.toFixed(5), seg_size.width - 5, screen_y + (3/4 * (font_size/2)));
-            ctx.fillText(c_y.toFixed(5), seg_size.width - 5, screen_y + (3/4 * (font_size/2)));
+            ctx.strokeText(
+                c_y.toFixed(5), 
+                Math.round((seg_size.width - 5) * window.devicePixelRatio), 
+                Math.round(screen_y + (3/4 * (font_size/2)) * window.devicePixelRatio)
+            );
+            ctx.fillText(
+                c_y.toFixed(5), 
+                Math.round((seg_size.width - 5) * window.devicePixelRatio), 
+                Math.round((screen_y + (3/4 * (font_size/2))) * window.devicePixelRatio)
+            );
         }
     }
 
@@ -1999,8 +2013,14 @@ class Chart extends Component
             ctx.lineWidth = 0.9;
 
             ctx.beginPath();
-            ctx.moveTo(screen_x, start_pos.y); 
-            ctx.lineTo(screen_x, start_pos.y + seg_size.height);
+            ctx.moveTo(
+                Math.round(screen_x * window.devicePixelRatio), 
+                Math.round(start_pos.y * window.devicePixelRatio)
+            ); 
+            ctx.lineTo(
+                Math.round(screen_x * window.devicePixelRatio), 
+                Math.round((start_pos.y + seg_size.height) * window.devicePixelRatio)
+            );
             ctx.stroke();
 
             if (time !== undefined)
@@ -2009,19 +2029,22 @@ class Chart extends Component
                 ctx.lineWidth = 2.0;
                 ctx.strokeText(
                     time.format(this.getCurrentShortPriceFormat()), 
-                    screen_x, 
-                    start_pos.y + seg_size.height - 4
+                    Math.round(screen_x * window.devicePixelRatio), 
+                    Math.round((start_pos.y + seg_size.height - 4) * window.devicePixelRatio)
                 );
                 ctx.fillText(
                     time.format(this.getCurrentShortPriceFormat()), 
-                    screen_x, 
-                    start_pos.y + seg_size.height - 4
+                    Math.round(screen_x * window.devicePixelRatio), 
+                    Math.round((start_pos.y + seg_size.height - 4) * window.devicePixelRatio)
                 );
             }
         }
 
         ctx.fillStyle = 'rgb(180, 180, 180)';
-        ctx.fillRect(0, start_pos.y, seg_size.width, 1); 
+        ctx.fillRect(
+            0, Math.round(start_pos.y * window.devicePixelRatio), 
+            Math.round(seg_size.width * window.devicePixelRatio), 1
+        ); 
     }
 
     degsToRads(degs) { return degs / (180/Math.PI); }
@@ -2082,16 +2105,22 @@ class Chart extends Component
             // SL Line
             ctx.strokeStyle = '#e74c3c';
             ctx.beginPath();
-            ctx.moveTo(0, Math.floor(sl_pos.y));
-            ctx.lineTo(seg_size.width, Math.floor(sl_pos.y));
+            ctx.moveTo(0, Math.floor(sl_pos.y * window.devicePixelRatio));
+            ctx.lineTo(
+                Math.round(seg_size.width * window.devicePixelRatio), 
+                Math.floor(sl_pos.y * window.devicePixelRatio)
+            );
             ctx.setLineDash([5, 3]);
             ctx.stroke();
 
             // TP Line
             ctx.strokeStyle = '#2ecc71';
             ctx.beginPath();
-            ctx.moveTo(0, Math.floor(tp_pos.y));
-            ctx.lineTo(seg_size.width, Math.floor(tp_pos.y));
+            ctx.moveTo(0, Math.floor(tp_pos.y * window.devicePixelRatio));
+            ctx.lineTo(
+                Math.round(seg_size.width * window.devicePixelRatio), 
+                Math.floor(tp_pos.y * window.devicePixelRatio)
+            );
             ctx.setLineDash([5, 3]);
             ctx.stroke();
 
@@ -2101,15 +2130,24 @@ class Chart extends Component
 
             // Dashed line
             ctx.beginPath();
-            ctx.moveTo(0, entry_pos.y);
-            ctx.lineTo(entry_pos.x, entry_pos.y);
+            ctx.moveTo(0, Math.round(entry_pos.y * window.devicePixelRatio));
+            ctx.lineTo(
+                Math.round(entry_pos.x * window.devicePixelRatio), 
+                Math.round(entry_pos.y * window.devicePixelRatio)
+            );
             ctx.setLineDash([8, 5]);
             ctx.stroke();
 
             // Solid line
             ctx.beginPath();
-            ctx.moveTo(entry_pos.x, entry_pos.y);
-            ctx.lineTo(seg_size.width, entry_pos.y);
+            ctx.moveTo(
+                Math.round(entry_pos.x * window.devicePixelRatio), 
+                Math.round(entry_pos.y * window.devicePixelRatio)
+            );
+            ctx.lineTo(
+                Math.round(seg_size.width * window.devicePixelRatio), 
+                Math.round(entry_pos.y * window.devicePixelRatio)
+            );
             ctx.setLineDash([0, 0]);
             ctx.stroke();
 
@@ -2139,50 +2177,51 @@ class Chart extends Component
 
                 // Fill Rect
                 ctx.fillRect(
-                    Math.floor(entry_pos.x - trade_icon_size/2)+0.5, 
-                    Math.floor(entry_pos.y - trade_icon_size/2)+0.5, 
+                    Math.floor((entry_pos.x - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
+                    Math.floor((entry_pos.y - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
                     trade_icon_size, trade_icon_size,
                 );
                 ctx.strokeRect(
-                    Math.floor(entry_pos.x - trade_icon_size/2)+0.5, 
-                    Math.floor(entry_pos.y - trade_icon_size/2)+0.5, 
+                    Math.floor((entry_pos.x - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
+                    Math.floor((entry_pos.y - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
                     trade_icon_size, trade_icon_size,
                 );
 
                 // Fill Rect
                 ctx.fillRect(
-                    trade_label_off+0.5, 
-                    Math.floor(entry_pos.y - trade_label_height/2)+0.5, 
-                    trade_label_width, trade_label_height,
+                    Math.round(trade_label_off * window.devicePixelRatio)+0.5, 
+                    Math.floor((entry_pos.y - trade_label_height/2) * window.devicePixelRatio)+0.5, 
+                    Math.round(trade_label_width * window.devicePixelRatio), 
+                    Math.round(trade_label_height * window.devicePixelRatio)
                 );
                 ctx.strokeRect(
-                    trade_label_off+0.5, 
-                    Math.floor(entry_pos.y - trade_label_height/2)+0.5, 
-                    trade_label_width, trade_label_height,
+                    Math.round(trade_label_off * window.devicePixelRatio)+0.5, 
+                    Math.floor((entry_pos.y - trade_label_height/2) * window.devicePixelRatio)+0.5, 
+                    Math.round(trade_label_width * window.devicePixelRatio), Math.round(trade_label_height * window.devicePixelRatio),
                 );
 
                 // Label Inside
                 ctx.fillStyle = direction_color;
                 ctx.fillText(
-                    text, (trade_label_off+0.5) + trade_label_inside_off,
-                    Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2
+                    text, Math.round(((trade_label_off+0.5) + trade_label_inside_off) * window.devicePixelRatio),
+                    Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
                 );
                 
                 ctx.beginPath();
                 ctx.moveTo(
-                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2, 
-                    Math.floor(entry_pos.y - trade_label_height/2) + 0.5
+                    (Math.round(trade_label_off * window.devicePixelRatio)+0.5) + Math.round((Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
+                    Math.round((Math.floor(entry_pos.y - trade_label_height/2) + 0.5) * window.devicePixelRatio)
                 );
                 ctx.lineTo(
-                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2, 
-                    Math.floor(entry_pos.y - trade_label_height/2) + 0.5 + trade_label_height
+                    Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
+                    Math.round((Math.floor(entry_pos.y - trade_label_height/2) + 0.5 + trade_label_height) * window.devicePixelRatio)
                 );
                 ctx.stroke();
 
                 ctx.fillText(
                     String(lotsize), 
-                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3,
-                    Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2
+                    Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3) * window.devicePixelRatio),
+                    Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
                 );
             }
             else if (c_trade.order_type === 'stoporder')
@@ -2205,50 +2244,53 @@ class Chart extends Component
 
                 // Fill Rect
                 ctx.fillRect(
-                    Math.floor(entry_pos.x - trade_icon_size/2)+0.5, 
-                    Math.floor(entry_pos.y - trade_icon_size/2)+0.5, 
+                    Math.floor((entry_pos.x - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
+                    Math.floor((entry_pos.y - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
                     trade_icon_size, trade_icon_size,
                 );
                 ctx.strokeRect(
-                    Math.floor(entry_pos.x - trade_icon_size/2)+0.5, 
-                    Math.floor(entry_pos.y - trade_icon_size/2)+0.5, 
-                    trade_icon_size, trade_icon_size,
+                    Math.floor((entry_pos.x - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
+                    Math.floor((entry_pos.y - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
+                    Math.round(trade_icon_size * window.devicePixelRatio), 
+                    Math.round(trade_icon_size * window.devicePixelRatio),
                 );
 
                 // Fill Rect
                 ctx.fillRect(
-                    trade_label_off+0.5, 
-                    Math.floor(entry_pos.y - trade_label_height/2)+0.5, 
-                    trade_label_width, trade_label_height,
+                    Math.round(trade_label_off * window.devicePixelRatio)+0.5, 
+                    Math.floor((entry_pos.y - trade_label_height/2) * window.devicePixelRatio)+0.5, 
+                    Math.round(trade_label_width * window.devicePixelRatio), 
+                    Math.round(trade_label_height * window.devicePixelRatio),
                 );
                 ctx.strokeRect(
-                    trade_label_off+0.5, 
-                    Math.floor(entry_pos.y - trade_label_height/2)+0.5, 
-                    trade_label_width, trade_label_height,
+                    Math.round(trade_label_off * window.devicePixelRatio)+0.5, 
+                    Math.floor((entry_pos.y - trade_label_height/2) * window.devicePixelRatio)+0.5, 
+                    Math.round(trade_label_width * window.devicePixelRatio), 
+                    Math.round(trade_label_height * window.devicePixelRatio),
                 );
 
                 // Label Inside
                 ctx.fillStyle = direction_color;
                 ctx.fillText(
-                    text, (trade_label_off+0.5) + trade_label_inside_off,
-                    Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2
+                    text, Math.round(((trade_label_off+0.5) + trade_label_inside_off) * window.devicePixelRatio),
+                    Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
                 );
                 
                 ctx.beginPath();
                 ctx.moveTo(
-                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2, 
-                    Math.floor(entry_pos.y - trade_label_height/2) + 0.5
+                    Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
+                    Math.floor((entry_pos.y - trade_label_height/2) * window.devicePixelRatio) + 0.5
                 );
                 ctx.lineTo(
-                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2, 
-                    Math.floor(entry_pos.y - trade_label_height/2) + 0.5 + trade_label_height
+                    Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
+                    Math.round((Math.floor(entry_pos.y - trade_label_height/2) + 0.5 + trade_label_height) * window.devicePixelRatio)
                 );
                 ctx.stroke();
 
                 ctx.fillText(
                     String(lotsize), 
-                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3,
-                    Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2
+                    Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3) * window.devicePixelRatio),
+                    Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
                 );
             }
             else
@@ -2269,46 +2311,47 @@ class Chart extends Component
                 // Fill Circle
                 ctx.beginPath();
                 ctx.arc(
-                    Math.floor(entry_pos.x)+0.5, Math.floor(entry_pos.y)+0.5, 
-                    trade_icon_size/2, 0, 2 * Math.PI
+                    Math.floor(entry_pos.x * window.devicePixelRatio)+0.5, Math.floor(entry_pos.y * window.devicePixelRatio)+0.5, 
+                    Math.round((trade_icon_size/2) * window.devicePixelRatio), 0, 2 * Math.PI
                 );
                 ctx.fill();
                 ctx.stroke();
 
                 // Fill Rect
                 ctx.fillRect(
-                    trade_label_off+0.5, 
-                    Math.floor(entry_pos.y - trade_label_height/2)+0.5, 
-                    trade_label_width, trade_label_height,
+                    Math.round(trade_label_off * window.devicePixelRatio)+0.5, 
+                    Math.floor((entry_pos.y - trade_label_height/2) * window.devicePixelRatio)+0.5, 
+                    Math.round(trade_label_width * window.devicePixelRatio), Math.round(trade_label_height * window.devicePixelRatio),
                 );
                 ctx.strokeRect(
-                    trade_label_off+0.5, 
-                    Math.floor(entry_pos.y - trade_label_height/2)+0.5, 
-                    trade_label_width, trade_label_height,
+                    Math.round(trade_label_off * window.devicePixelRatio)+0.5, 
+                    Math.floor((entry_pos.y - trade_label_height/2) * window.devicePixelRatio)+0.5, 
+                    Math.round(trade_label_width * window.devicePixelRatio), 
+                    Math.round(trade_label_height * window.devicePixelRatio),
                 );
 
                 // Label Inside
                 ctx.fillStyle = color;
                 ctx.fillText(
-                    text, (trade_label_off+0.5) + trade_label_inside_off,
-                    Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2
+                    text, Math.round(((trade_label_off+0.5) + trade_label_inside_off) * window.devicePixelRatio),
+                    Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
                 );
                 
                 ctx.beginPath();
                 ctx.moveTo(
-                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2, 
-                    Math.floor(entry_pos.y - trade_label_height/2) + 0.5
+                    Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
+                    Math.floor((entry_pos.y - trade_label_height/2) * window.devicePixelRatio) + 0.5
                 );
                 ctx.lineTo(
-                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2, 
-                    Math.floor(entry_pos.y - trade_label_height/2) + 0.5 + trade_label_height
+                    Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
+                    Math.round((Math.floor(entry_pos.y - trade_label_height/2) + 0.5 + trade_label_height) * window.devicePixelRatio)
                 );
                 ctx.stroke();
 
                 ctx.fillText(
                     String(lotsize), 
-                    (trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3,
-                    Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2
+                    Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3) * window.devicePixelRatio),
+                    Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
                 );
             }
             
@@ -2351,22 +2394,52 @@ class Chart extends Component
             ctx.fillStyle = `rgba(180, 180, 180, 1.0)`;
             ctx.strokeStyle = `rgba(180, 180, 180, 1.0)`;
 
-            ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
-            ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+            ctx.fillRect(
+                Math.round(rect.x * window.devicePixelRatio) - 0.5, 
+                Math.round(rect.y * window.devicePixelRatio) - 0.5, 
+                Math.round(rect.width * window.devicePixelRatio), 
+                Math.round(rect.height * window.devicePixelRatio)
+            );
+            ctx.strokeRect(
+                Math.round(rect.x * window.devicePixelRatio) - 0.5, 
+                Math.round(rect.y * window.devicePixelRatio) - 0.5, 
+                Math.round(rect.width * window.devicePixelRatio), 
+                Math.round(rect.height * window.devicePixelRatio)
+            );
 
             ctx.fillStyle = `rgba(255, 255, 255, 1.0)`;
-            ctx.fillRect(rect.x + handle_middle_off/2, Math.round(start_pos.y), rect.width - handle_middle_off, 1);
+            ctx.fillRect(
+                Math.round((rect.x + handle_middle_off/2) * window.devicePixelRatio), 
+                Math.round(start_pos.y * window.devicePixelRatio), 
+                Math.round((rect.width - handle_middle_off) * window.devicePixelRatio), 
+                1
+            );
         }
         else
         {
             ctx.fillStyle = `rgba(255, 255, 255, 1.0)`;
             ctx.strokeStyle = `rgba(180, 180, 180, 1.0)`;
 
-            ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
-            ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
+            ctx.fillRect(
+                Math.round(rect.x * window.devicePixelRatio) - 0.5, 
+                Math.round(rect.y * window.devicePixelRatio) - 0.5, 
+                rect.width, 
+                rect.height
+            );
+            ctx.strokeRect(
+                Math.round(rect.x * window.devicePixelRatio) - 0.5, 
+                Math.round(rect.y * window.devicePixelRatio) - 0.5, 
+                rect.width, 
+                rect.height
+            );
 
             ctx.fillStyle = `rgba(180, 180, 180, 1.0)`;
-            ctx.fillRect(rect.x + handle_middle_off/2, Math.round(start_pos.y), rect.width - handle_middle_off, 1);
+            ctx.fillRect(
+                Math.round((rect.x + handle_middle_off/2) * window.devicePixelRatio), 
+                Math.round(start_pos.y * window.devicePixelRatio), 
+                rect.width - handle_middle_off, 
+                1
+            );
         }
     }
 
@@ -2388,7 +2461,11 @@ class Chart extends Component
             let c_y = 0;
             while (c_y < chart_size.height)
             {
-                ctx.fillRect(x, c_y, properties.scale, line_width);
+                ctx.fillRect(
+                    Math.round(x * window.devicePixelRatio), 
+                    Math.round(c_y * window.devicePixelRatio), 
+                    properties.scale, line_width
+                );
                 c_y += line_width + line_space;
             }
 
@@ -2397,7 +2474,9 @@ class Chart extends Component
         {
              // Handle properties
             ctx.fillStyle = properties.colors[0];
-            ctx.fillRect(x, 0, properties.scale, chart_size.height);
+            ctx.fillRect(
+                Math.round(x * window.devicePixelRatio), 0, properties.scale, chart_size.height
+            );
         }
 
        
@@ -2419,7 +2498,12 @@ class Chart extends Component
             let c_x = 0;
             while (c_x < chart_size.width)
             {
-                ctx.fillRect(c_x, y, line_width, properties.scale);
+                ctx.fillRect(
+                    Math.round(c_x * window.devicePixelRatio), 
+                    Math.round(y * window.devicePixelRatio), 
+                    line_width, 
+                    properties.scale
+                );
                 c_x += line_width + line_space;
             }
 
@@ -2436,7 +2520,12 @@ class Chart extends Component
             let c_x = 0;
             while (c_x < chart_size.width)
             {
-                ctx.fillRect(c_x, y, line_width, properties.scale);
+                ctx.fillRect(
+                    Math.round(c_x * window.devicePixelRatio), 
+                    Math.round(y * window.devicePixelRatio), 
+                    line_width, 
+                    properties.scale
+                );
                 c_x += line_width + line_space;
             }
 
@@ -2445,7 +2534,12 @@ class Chart extends Component
         {
             // Handle properties
             ctx.fillStyle = properties.colors[0];
-            ctx.fillRect(0, y, chart_size.width, properties.scale);
+            ctx.fillRect(
+                0, 
+                Math.round(y * window.devicePixelRatio), 
+                chart_size.width, 
+                properties.scale
+            );
         }
 
     }
@@ -2468,8 +2562,8 @@ class Chart extends Component
 
         ctx.fillText(
             properties.text, 
-            start_pos.x + screen_pos.x, 
-            Math.round(start_pos.y + screen_pos.y + (3/4 * (font_size/2)))
+            Math.round((start_pos.x + screen_pos.x) * window.devicePixelRatio), 
+            Math.round((start_pos.y + screen_pos.y + (3/4 * (font_size/2))) * window.devicePixelRatio)
         );
     }
 
@@ -2485,15 +2579,21 @@ class Chart extends Component
 
         // Move to position
         ctx.translate(
-            start_pos.x + screen_pos.x - (width*drawing_scale),
-            start_pos.y + screen_pos.y - (height*drawing_scale)
+            Math.round((start_pos.x + screen_pos.x - (width*drawing_scale)) * window.devicePixelRatio),
+            Math.round((start_pos.y + screen_pos.y - (height*drawing_scale)) * window.devicePixelRatio)
         );
         ctx.scale(drawing_scale, drawing_scale);
 
         // Rotate around center
-        ctx.translate(width, height);
+        ctx.translate(
+            Math.round(width * window.devicePixelRatio), 
+            Math.round(height * window.devicePixelRatio)
+        );
         ctx.rotate(rotation);
-        ctx.translate(-width/2, -height/2);
+        ctx.translate(
+            -Math.round(width * window.devicePixelRatio)/2, 
+            -Math.round(height * window.devicePixelRatio)/2
+        );
         
         ctx.fillStyle = d_props.properties.colors[0];
         // Fill Path
@@ -2699,18 +2799,18 @@ class Chart extends Component
         const box_width = Math.round(text_size.width + 12);
 
         ctx.fillRect(
-            Math.round(seg_size.width - box_width), 
-            Math.round(screen_pos.y - box_height/2),
-            seg_size.width,
-            box_height
+            Math.round((seg_size.width * window.devicePixelRatio) - box_width), 
+            Math.round((screen_pos.y * window.devicePixelRatio) - box_height/2),
+            Math.round(seg_size.width),
+            Math.round(box_height)
         );
 
         ctx.fillStyle = 'rgb(255, 255, 255)';
 
         ctx.fillText(
             c_close.toFixed(5), 
-            seg_size.width - 7, 
-            Math.round(screen_pos.y + (3/4 * (font_size/2)))
+            Math.round((seg_size.width * window.devicePixelRatio) - 7), 
+            Math.round((screen_pos.y * window.devicePixelRatio) + (3/4 * (font_size/2)))
         );
     }
 
@@ -2741,9 +2841,17 @@ class Chart extends Component
             while (c_x < chart_size.width)
             {
                 ctx.fillStyle = this.getAskLineColor();
-                ctx.fillRect(c_x, Math.floor(screen_ask_pos.y), line_width, 1);
+                ctx.fillRect(
+                    Math.round(c_x * window.devicePixelRatio), 
+                    Math.floor(screen_ask_pos.y * window.devicePixelRatio), 
+                    line_width, 1
+                );
                 ctx.fillStyle = this.getBidLineColor();
-                ctx.fillRect(c_x, Math.floor(screen_bid_pos.y), line_width, 1);
+                ctx.fillRect(
+                    Math.round(c_x * window.devicePixelRatio), 
+                    Math.floor(screen_bid_pos.y * window.devicePixelRatio), 
+                    line_width, 1
+                );
                 c_x += line_width + line_space;
             }
         }
@@ -2762,7 +2870,12 @@ class Chart extends Component
         // Properties
         ctx.fillStyle = this.getPriceLineColor();
 
-        ctx.fillRect(0, Math.floor(screen_price_pos.y), seg_size.width, 1);
+        ctx.fillRect(
+            0, 
+            Math.floor(screen_price_pos.y * window.devicePixelRatio), 
+            Math.round(seg_size.width * window.devicePixelRatio), 
+            1
+        );
     }
 
     handleCrosshairs(ctx)
@@ -2854,9 +2967,12 @@ class Chart extends Component
                     ctx.fillStyle = this.getCrosshairColor();
         
                     let c_y = 0;
-                    while (c_y < chart_size.height + this.getBottomOff())
+                    while (c_y < (chart_size.height + this.getBottomOff()) * window.devicePixelRatio)
                     {
-                        ctx.fillRect(Math.round(snap_x), c_y, 1, line_width);
+                        ctx.fillRect(
+                            Math.round(snap_x * window.devicePixelRatio), 
+                            c_y, 1, line_width
+                        );
                         c_y += line_width + line_space;
                     }
     
@@ -2867,7 +2983,8 @@ class Chart extends Component
                     const time = moment.utc(
                         my_timestamp*1000
                     ).tz(tz).format(top_chart.getCurrentPriceFormat());
-                    const box_height = Math.round(3/4 * (font_size) + 12);
+                    // const box_height = Math.round(3/4 * (font_size) + 12);
+                    let box_height = Math.round(this.getBottomOff() * window.devicePixelRatio) - 1;
                     let text_size = ctx.measureText(time);
                     let box_width = Math.round((text_size.width + 12)/2)*2+1;
         
@@ -2875,18 +2992,18 @@ class Chart extends Component
                     ctx.textAlign = 'left';
         
                     ctx.fillRect(
-                        Math.round(snap_x - box_width/2),
-                        Math.round(chart_size.height - box_height + this.getBottomOff()), 
-                        box_width,
-                        box_height
+                        Math.round((snap_x * window.devicePixelRatio) - box_width/2),
+                        Math.round(((chart_size.height + this.getBottomOff()) * window.devicePixelRatio) - box_height), 
+                        Math.round(box_width),
+                        Math.round(box_height * window.devicePixelRatio)
                     );
         
                     ctx.fillStyle = 'rgb(255, 255, 255)';
                     ctx.fillText(
                         time, 
-                        Math.round(snap_x - text_size.width/2), 
+                        Math.round((snap_x * window.devicePixelRatio) - text_size.width/2), 
                         Math.round(
-                            chart_size.height - box_height/2 + (3/4 * (font_size/2)) + this.getBottomOff()
+                            ((chart_size.height + this.getBottomOff()) * window.devicePixelRatio) - box_height/2 + (3/4 * (font_size/2))
                         )
                     );
     
@@ -2896,32 +3013,33 @@ class Chart extends Component
                         ctx.fillStyle = this.getCrosshairColor();
         
                         let c_x = 0;
-                        while (c_x < chart_size.width)
+                        while (c_x < chart_size.width * window.devicePixelRatio)
                         {
-                            ctx.fillRect(c_x, Math.round(mouse_pos.y - top_offset), line_width, 1);
+                            ctx.fillRect(c_x, Math.round((mouse_pos.y - top_offset) * window.devicePixelRatio), line_width, 1);
                             c_x += line_width + line_space;
                         }
     
                         // Box Settings
                         ctx.fillStyle = this.getCrosshairColor();
-                        
+                        box_height = Math.round(3/4 * (font_size) + 12);
+
                         // Draw Prices Box
                         text_size = ctx.measureText(String(mouse_world_pos.y.toFixed(5)));
                         box_width = Math.round((text_size.width + 12)/2)*2+1;
                         ctx.textAlign = 'right';
                         ctx.fillRect(
-                            Math.round(chart_size.width - box_width), 
-                            Math.round(mouse_pos.y - top_offset - box_height/2),
-                            box_width,
-                            box_height
+                            Math.round((chart_size.width * window.devicePixelRatio) - box_width), 
+                            Math.round(((mouse_pos.y - top_offset) * window.devicePixelRatio) - box_height/2),
+                            Math.round(box_width),
+                            Math.round(box_height)
                         );
                 
                         ctx.fillStyle = 'rgb(255, 255, 255)';
                 
                         ctx.fillText(
                             mouse_world_pos.y.toFixed(5), 
-                            top_chart_size.width - 7, 
-                            Math.round(mouse_pos.y - top_offset + (3/4 * (font_size/2)))
+                            (top_chart_size.width * window.devicePixelRatio) - 7, 
+                            Math.round(((mouse_pos.y - top_offset) * window.devicePixelRatio) + (3/4 * (font_size/2)))
                         );
                     }
                 }
@@ -2936,10 +3054,10 @@ class Chart extends Component
             ctx.beginPath();
                 // Define clipping area
                 ctx.rect(
-                    start_pos.x,
-                    start_pos.y,
-                    segment_size.width,
-                    segment_size.height
+                    Math.round(start_pos.x * window.devicePixelRatio),
+                    Math.round(start_pos.y * window.devicePixelRatio),
+                    Math.round(segment_size.width * window.devicePixelRatio),
+                    Math.round(segment_size.height * window.devicePixelRatio)
                 );
                 ctx.clip();
     }

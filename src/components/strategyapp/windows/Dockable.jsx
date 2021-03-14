@@ -96,7 +96,9 @@ class Dockable extends Component
 
     handleTabDropdown()
     {
-        const header_width = this.header.clientWidth - this.props.getWindowBtnsWidth();
+        // const header_width = this.header.clientWidth - this.props.getWindowBtnsWidth();
+        const WINDOW_BTNS_WIDTH = 53;
+        const header_width = this.header.clientWidth - WINDOW_BTNS_WIDTH;
         let tab_width = 0;
 
         let { dropdown, tabs } = this.state;

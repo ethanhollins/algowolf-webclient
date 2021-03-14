@@ -112,7 +112,7 @@ class Overlay extends Component
                                     { x: x_pos, y: ind_values[i][c_x][y] },
                                     pos, size, scale
                                 );
-                                ctx.moveTo(Math.floor(current_pos.x), Math.floor(current_pos.y));
+                                ctx.moveTo(Math.floor(current_pos.x * window.devicePixelRatio), Math.floor(current_pos.y * window.devicePixelRatio));
                             }
                             continue
                         }
@@ -128,14 +128,14 @@ class Overlay extends Component
                             ctx.stroke();
                             ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.2)`;
                             ctx.beginPath();
-                            ctx.moveTo(current_pos.x, current_pos.y);
+                            ctx.moveTo(current_pos.x * window.devicePixelRatio, current_pos.y * window.devicePixelRatio);
                         }
     
                         current_pos = camera.convertWorldPosToScreenPos(
                             { x: x_pos, y: Math.round(i_val * 100000) / 100000 },
                             pos, size, scale
                         );
-                        ctx.lineTo(Math.floor(current_pos.x), Math.floor(current_pos.y));
+                        ctx.lineTo(Math.floor(current_pos.x * window.devicePixelRatio), Math.floor(current_pos.y * window.devicePixelRatio));
     
                         if (x_pos < pos.x-1) break;
     

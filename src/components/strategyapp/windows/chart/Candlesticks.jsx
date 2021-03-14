@@ -114,15 +114,15 @@ class Candlesticks extends Component
             {
                 const w_up_y = body_pos.y - body_size.y/2 + 1;
                 ctx.fillRect(
-                    Math.floor(w_x), Math.floor(w_up_y - wick_up_size.y),
-                    Math.floor(Math.max(w_width, 1)), Math.floor(Math.max(wick_up_size.y, 1))
+                    Math.floor(w_x * window.devicePixelRatio), Math.floor((w_up_y - wick_up_size.y) * window.devicePixelRatio),
+                    Math.floor(Math.max(w_width * window.devicePixelRatio, 1)), Math.floor(Math.max(wick_up_size.y, 1) * window.devicePixelRatio)
                 );
     
                 // Draw Wick Down
                 const w_down_y = body_pos.y + body_size.y / 2 - 1;
                 ctx.fillRect(
-                    Math.floor(w_x), Math.floor(w_down_y),
-                    Math.floor(Math.max(w_width, 1)), Math.floor(Math.max(wick_down_size.y, 1))
+                    Math.floor(w_x * window.devicePixelRatio), Math.floor(w_down_y * window.devicePixelRatio),
+                    Math.floor(Math.max(w_width * window.devicePixelRatio, 1)), Math.floor(Math.max(wick_down_size.y, 1) * window.devicePixelRatio)
                 );
             }
 
@@ -130,17 +130,17 @@ class Candlesticks extends Component
             ctx.strokeStyle = outline_color;
             // Draw Body
             ctx.fillRect(
-                Math.floor(c_x), Math.floor(c_y),
-                Math.floor(Math.max(body_size.x, 1)),
-                Math.floor(Math.max(body_size.y, 1))
+                Math.floor(c_x * window.devicePixelRatio), Math.floor(c_y * window.devicePixelRatio),
+                Math.floor(Math.max(body_size.x, 1) * window.devicePixelRatio),
+                Math.floor(Math.max(body_size.y, 1) * window.devicePixelRatio)
             );
 
             if (scale.x < 500)
             {
                 ctx.strokeRect(
-                    Math.floor(c_x)+0.5, Math.floor(c_y)-0.5,
-                    Math.floor(Math.max(body_size.x, 1)),
-                    Math.floor(Math.max(body_size.y, 1))
+                    Math.floor(c_x * window.devicePixelRatio)+0.5, Math.floor(c_y * window.devicePixelRatio)-0.5,
+                    Math.floor(Math.max(body_size.x, 1) * window.devicePixelRatio),
+                    Math.floor(Math.max(body_size.y, 1) * window.devicePixelRatio)
                 );
             }
 
