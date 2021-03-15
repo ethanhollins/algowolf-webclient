@@ -1278,7 +1278,7 @@ class Chart extends Component
             // Set time range to 1000 bars before earliest loaded date
             const to_dt = moment(ts[0] * 1000);
             let from_dt = this.props.getCountDateFromDate(
-                this.getPeriod(), 1000, to_dt.clone(), -1
+                this.getPeriod(), NUM_LOAD_BARS, to_dt.clone(), -1
             );
 
             // Clamp time
@@ -3932,7 +3932,7 @@ class Chart extends Component
         }
         else
         {
-            start = this.props.getCountDateFromDate(this.getPeriod(), 1000, moment.utc(), -1);
+            start = this.props.getCountDateFromDate(this.getPeriod(), NUM_LOAD_BARS, moment.utc(), -1);
             end = moment();
         }
 
@@ -4161,6 +4161,8 @@ class Chart extends Component
 
 const SPACEBAR = 32;
 const MIN_PORTION_SIZE = 0.1
+
+const NUM_LOAD_BARS = 500
 
 const UNIVERSAL_DRAWINGS = ['verticalLine'];
 

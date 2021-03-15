@@ -1294,7 +1294,7 @@ class StrategyApp extends Component
                 const uri = `${REACT_APP_API_URL}/v1/prices/${broker}/\
                 ${product}/${period}\
                 ?from=${from.format('YYYY-MM-DDTHH:mm:ss')}Z\
-                &count=1000&tz=${tz}`.replace(/\s/g, '');
+                &count=${NUM_LOAD_BARS}&tz=${tz}`.replace(/\s/g, '');
 
                 return await fetch(uri, reqOptions)
                     .then(res => res = res.text())
@@ -1308,7 +1308,7 @@ class StrategyApp extends Component
         {
             const uri = `${REACT_APP_API_URL}/v1/prices/${broker}/\
                 ${product}/${period}\
-                ?count=1000`.replace(/\s/g, '');
+                ?count=${NUM_LOAD_BARS}`.replace(/\s/g, '');
             return await fetch(uri, reqOptions)
                 .then(res => res = res.text())
                 .then(res => {
@@ -1331,7 +1331,7 @@ class StrategyApp extends Component
 
             let data = await this.retrieveChartData(
                 chart.broker, chart.product, chart.period, 
-                this.getCountDateFromDate(chart.period, 1000, moment.utc(), -1), 
+                this.getCountDateFromDate(chart.period, NUM_LOAD_BARS, moment.utc(), -1), 
                 moment(),
                 'Australia/Melbourne'
             )
@@ -2872,5 +2872,6 @@ class StrategyApp extends Component
 
 const SPACEBAR = 32;
 const WAIT_FOR_SAVE = 5;
+const NUM_LOAD_BARS = 500;
 
 export default withRouter(StrategyApp);
