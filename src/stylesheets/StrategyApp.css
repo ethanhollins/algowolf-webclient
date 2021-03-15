@@ -2640,6 +2640,16 @@
     width: 125px;
 }
 
+.ready-to-launch.message {
+    color: #000;
+    padding-left: 30px;
+    padding-right: 30px;
+    padding-bottom: 25px;
+    text-align: center;
+    font-size: 1.25em;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 #email_link {
     text-decoration: underline;
     text-decoration-thickness: 1px;

@@ -143,7 +143,16 @@ class StrategyApp extends Component
                 }
                 else
                 {
-
+                    const popup = {
+                        type: 'ready-to-launch',
+                        size: {
+                            pixelWidth: 550,
+                            pixelHeight: 350
+                        },
+                        image: '/ready_to_launch.png',
+                        fade: true
+                    };
+                    this.setPopup(popup);
                 }
             }
         }

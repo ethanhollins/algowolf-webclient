@@ -5,6 +5,7 @@ import StrategySettings from './popups/StrategySettings';
 import WelcomeDemo from './popups/WelcomeDemo';
 import NotAvailable from './popups/NotAvailable';
 import BetaUnavailable from './popups/BetaUnavailable';
+import ReadyToLaunch from './popups/ReadyToLaunch';
 import SignUpPrompt from './popups/SignUpPrompt';
 import AreYouSure from './popups/AreYouSure';
 import EmailSubscribe from './popups/EmailSubscribe';
@@ -251,6 +252,14 @@ class Popup extends Component
             else if (popup.type === 'beta-unavailable')
             {
                 return <BetaUnavailable
+                    isDemo={this.props.isDemo}
+                    history={this.props.history}
+                    getPopup={this.props.getPopup}
+                />
+            }
+            else if (popup.type === 'ready-to-launch')
+            {
+                return <ReadyToLaunch
                     isDemo={this.props.isDemo}
                     history={this.props.history}
                     getPopup={this.props.getPopup}
