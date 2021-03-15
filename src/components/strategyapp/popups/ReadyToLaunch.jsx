@@ -20,7 +20,7 @@ class ReadyToLaunch extends Component
                                 </div>
                             </div>
                             <span className='ready-to-launch message'>
-                                You're ready to Start! After reviewing your <span id="sp_bold">Control Panel</span> settings on your <span id="sp_bold">broker's acccount</span>. Press the <span id="sp_bold">Start</span> button to begin.
+                                You're ready to Start! After reviewing your <span id="sp_bold">Control Panel</span> settings on your <span id="sp_bold">broker's account</span>. Press the <span id="sp_bold">Start</span> button to begin.
                             </span>
                         </div>
                     </div>
