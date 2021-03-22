@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { ReactSVG } from 'react-svg';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-    faArrowAltCircleRight, faUser, faLock, faEnvelope
+    faArrowAltCircleRight, faUser, faLock, faEnvelope, faSignOut
 } from '@fortawesome/pro-regular-svg-icons';
 
 class AccountSettings extends Component
@@ -104,10 +104,16 @@ class AccountSettings extends Component
                             <div className='account-settings header'>Account Settings</div>
                         </div>
                     </div>
-                    <a className='account-settings btn' href='/app'>
-                        <FontAwesomeIcon className='account-settings icon' icon={faArrowAltCircleRight} />
-                        <span>Goto App</span>
-                    </a>
+                    <div className='account-settings nav-group'>
+                        <a className='account-settings btn' href='/app'>
+                            <FontAwesomeIcon className='account-settings icon' icon={faArrowAltCircleRight} />
+                            <span>Goto App</span>
+                        </a>
+                        <a className='account-settings btn' href='/logout'>
+                            <FontAwesomeIcon className='account-settings icon' icon={faSignOut} />
+                            <span>Logout</span>
+                        </a>
+                    </div>
                 </nav>
     
                 <div className='account-settings container'>

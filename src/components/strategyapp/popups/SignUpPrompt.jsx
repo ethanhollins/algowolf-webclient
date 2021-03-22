@@ -21,9 +21,12 @@ class SignUpPrompt extends Component
                                     <img className='sign-up-prompt icon' src={process.env.PUBLIC_URL + this.props.getPopup().image} />
                                 </div>
                             </div>
-                            <span className='sign-up-prompt message'>
+                            {/* <span className='sign-up-prompt message'>
                                 Get live trading demos, insights, statistics, daily results and more. 
                                 Contact us at <a id="email_link" href="mailto:admin@algowolf.com">admin@algowolf.com</a> to find out more about live trading with your broker and general info.
+                            </span> */}
+                            <span className='sign-up-prompt message'>
+                                <span id="sp_bold">Sign Up</span> and <span id="sp_bold">Request Access</span> to the exclusive <span id="sp_bold">Prison Paycheck</span> demo. Here you can get daily results, the latest statistics, insights and more.
                             </span>
                             <div className='sign-up-prompt column'>
                                 <div className="login field">
@@ -49,7 +52,7 @@ class SignUpPrompt extends Component
 
     onSignUp(e)
     {
-        this.props.history.push('/register?redirect=demo');
+        this.props.history.push('/register?redirect=holygrail%2Fdemo');
     }
 
 }

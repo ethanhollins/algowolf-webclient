@@ -165,9 +165,9 @@ class StrategyApp extends Component
                     type: 'sign-up-prompt',
                     size: {
                         pixelWidth: 550,
-                        pixelHeight: 525
+                        pixelHeight: 490
                     },
-                    image: '/beta_launch_popup.png',
+                    image: '/request_access_prison_paycheck.png',
                     fade: true,
                     permanent: true
                 };
@@ -175,16 +175,71 @@ class StrategyApp extends Component
             }
             else
             {
-                const popup = {
-                    type: 'beta-unavailable',
-                    size: {
-                        pixelWidth: 550,
-                        pixelHeight: 350
-                    },
-                    image: '/get_access_popup.png',
-                    fade: true
-                };
-                this.setPopup(popup);
+                
+                const user_data = await this.retrieveHolyGrailUser();
+                if (Object.keys(user_data).length > 0)
+                {
+                    if (!user_data.approved)
+                    {
+                        const popup = {
+                            type: 'request-demo-access',
+                            size: {
+                                pixelWidth: 550,
+                                pixelHeight: 420
+                            },
+                            image: '/request_access_prison_paycheck.png',
+                            fade: true,
+                            permanent: true,
+                            properties: {
+                                user_data: user_data,
+                                hasRequested: true
+                            }
+                        };
+                        this.setPopup(popup);
+                    }
+                    else
+                    {
+                        const popup = {
+                            type: 'beta-unavailable',
+                            size: {
+                                pixelWidth: 550,
+                                pixelHeight: 350
+                            },
+                            image: '/get_access_popup.png',
+                            fade: true
+                        };
+                        this.setPopup(popup);
+                    }
+                }
+                else
+                {
+                    const popup = {
+                        type: 'request-demo-access',
+                        size: {
+                            pixelWidth: 550,
+                            pixelHeight: 420
+                        },
+                        image: '/request_access_prison_paycheck.png',
+                        fade: true,
+                        permanent: true,
+                        properties: {
+                            user_data: {},
+                            hasRequested: false
+                        }
+                    };
+                    this.setPopup(popup);
+                }
+
+                // const popup = {
+                //     type: 'request-demo-access',
+                //     size: {
+                //         pixelWidth: 550,
+                //         pixelHeight: 350
+                //     },
+                //     image: '/get_access_popup.png',
+                //     fade: true
+                // };
+                // this.setPopup(popup);
             }
             this.props.visitorCounter();
         }
@@ -274,6 +329,7 @@ class StrategyApp extends Component
                     <Popup
                         isDemo={this.props.isDemo}
                         history={this.props.history}
+                        getUserId={this.props.getUserId}
                         getHeaders={this.props.getHeaders}
                         addWindow={this.addWindow}
                         windowExists={this.windowExists}
@@ -1978,6 +2034,27 @@ class StrategyApp extends Component
         {
             this.toolbar.setStatusMsg(null);
         }
+    }
+
+    async retrieveHolyGrailUser()
+    {
+        const { REACT_APP_API_URL } = process.env;
+
+        var requestOptions = {
+            method: 'GET',
+            headers: this.props.getHeaders(),
+            credentials: 'include'
+        };
+
+        const res = await fetch(`${REACT_APP_API_URL}/v1/holygrail/${this.props.getUserId()}`, requestOptions);
+
+        if (res.status === 200)
+        {
+            const data = await res.json();
+            return data
+        }
+
+        return {};
     }
 
     getAppContainer = () =>

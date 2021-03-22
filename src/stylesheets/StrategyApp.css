@@ -2482,7 +2482,7 @@
 }
 
 .spreadsheet.cell > div {
-    display: -webkit-box;
+    display: -webkit-inline-flex;
     white-space: nowrap;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
@@ -2573,6 +2573,28 @@
     background: rgb(80,80,80);
 }
 
+.spreadsheet.options {
+    float: right;
+    cursor: pointer;
+}
+
+.spreadsheet.options-item {
+    margin-right: 10px;
+}
+
+.spreadsheet.options-item > * {
+    pointer-events: none;
+}
+
+.spreadsheet.options-item > svg {
+    width: 14px;
+    height: 14px;
+}
+
+.spreadsheet.options-item:hover {
+    color: #ff8500;
+}
+
 .not-available.body {
     display: flex;
     flex-direction: column;
@@ -2648,6 +2670,17 @@
     text-align: center;
     font-size: 1.25em;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.request-demo-access.message {
+    font-size: 1.25em;
+    font-weight: 500;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding-bottom: 40px;
+}
+
+.request-demo-access.login.field {
+    padding-bottom: 20px;
 }
 
 #email_link {

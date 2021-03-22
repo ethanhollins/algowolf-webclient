@@ -118,7 +118,7 @@ class Login extends Component
                             <span>OR</span>
                         </div>
                         <div className="login field create-account">
-                            <span><a href='/register'>Create a free account</a> to get started with AlgoWolf</span>
+                            <span><a href={'/register'+ window.location.search}>Create a free account</a> to get started with AlgoWolf</span>
                         </div>
                     </div>
 

@@ -8,6 +8,7 @@ import StrategyApp from './components/StrategyApp';
 import Login from './components/Login';
 import Logout from './components/Logout';
 import Auth from './components/Auth';
+import Invite from './components/Invite';
 import AccountSettings from './components/AccountSettings';
 import { config } from '@fortawesome/fontawesome-svg-core'
 import Cookies from 'universal-cookie';
@@ -82,6 +83,9 @@ class App extends Component
                             firstVisitorCounter={this.firstVisitorCounter}
                         />
                     </Route>
+                    <Route exact path="/holygrail/invite">
+                        {this.getConditionalInviteComponent()}
+                    </Route>
 
                     <Route>
                         404
@@ -98,16 +102,22 @@ class App extends Component
 
         if (this.state.user_id !== null)
         {
-            const redirect = params.get('redirect');
+            let redirect;
+            if (params.get('redirect'))
+            {
+                redirect = decodeURIComponent(params.get('redirect'));
+            }
+            
             params.delete('redirect');
-            if (redirect === 'demo')
+            if (redirect)
             {
-                return <Redirect to="/holygrail/demo"/>;
+                return <Redirect to={`/${redirect}?${params.toString()}`}/>;
             }
-            else if (redirect)
-            {
-                return <Redirect to={`/auth/${redirect}?${params.toString()}`}/>;
-            }
+            // if (redirect)
+            // {
+            //     console.log()
+            //     return <Redirect to={`/auth/${redirect}?${params.toString()}`}/>;
+            // }
             else
             {
                 return <Redirect to={"/app?"+params.toString()}/>;
@@ -140,6 +150,23 @@ class App extends Component
                 getHeaders={this.getHeaders}
                 getUserId={this.getUserId}
                 checkAuthorization={this.checkAuthorization}
+            />
+        }
+    }
+
+    getConditionalInviteComponent()
+    {
+        const queryString = window.location.search;
+        if (this.state.user_id === null)
+        {
+            return <Redirect to={"/login?redirect=holygrail%2Finvite"}/>;
+        }
+        else
+        {
+            return <Invite
+                getURI={this.getURI}
+                getHeaders={this.getHeaders}
+                getUserId={this.getUserId}
             />
         }
     }

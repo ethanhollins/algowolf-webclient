@@ -22,7 +22,7 @@ class BetaUnavailable extends Component
                                 </div>
                             </div>
                             <span className='beta-unavailable message'>
-                                Algo trading is currently only available to beta testers. Contact <a href="mailto:admin@algowolf.com">admin@algowolf.com</a> to apply for access.
+                                Live algo trading is currently only available to beta testers. Contact <a href="mailto:admin@algowolf.com">admin@algowolf.com</a> to apply for access.
                             </span>
                         </div>
                     </div>
