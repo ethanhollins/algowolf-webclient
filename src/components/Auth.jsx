@@ -49,7 +49,7 @@ class Auth extends Component
         }
         else if (provider === 'holygrail')
         {
-            message = 'Please wait while redirect you to Holy Grail...';
+            message = 'Please wait while we redirect you to Holy Grail...';
             this.setState({ message });
 
             const reqOptions = {
