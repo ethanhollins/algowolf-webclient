@@ -165,7 +165,7 @@ class StrategyApp extends Component
                     type: 'sign-up-prompt',
                     size: {
                         pixelWidth: 550,
-                        pixelHeight: 490
+                        pixelHeight: 540
                     },
                     image: '/request_access_prison_paycheck.png',
                     fade: true,
@@ -175,7 +175,6 @@ class StrategyApp extends Component
             }
             else
             {
-                
                 const user_data = await this.retrieveHolyGrailUser();
                 if (Object.keys(user_data).length > 0)
                 {
@@ -185,7 +184,7 @@ class StrategyApp extends Component
                             type: 'request-demo-access',
                             size: {
                                 pixelWidth: 550,
-                                pixelHeight: 420
+                                pixelHeight: 390
                             },
                             image: '/request_access_prison_paycheck.png',
                             fade: true,
@@ -229,17 +228,6 @@ class StrategyApp extends Component
                     };
                     this.setPopup(popup);
                 }
-
-                // const popup = {
-                //     type: 'request-demo-access',
-                //     size: {
-                //         pixelWidth: 550,
-                //         pixelHeight: 350
-                //     },
-                //     image: '/get_access_popup.png',
-                //     fade: true
-                // };
-                // this.setPopup(popup);
             }
             this.props.visitorCounter();
         }

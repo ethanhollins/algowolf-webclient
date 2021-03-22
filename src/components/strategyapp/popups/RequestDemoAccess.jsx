@@ -25,14 +25,6 @@ class RequestDemoAccess extends Component
                 <div className='popup main'>
                     <div className='popup main-list'>
                         <div className='beta-unavailable body'>
-                            <div>
-                                <div>
-                                    <img className='beta-unavailable icon' src={process.env.PUBLIC_URL + this.props.getPopup().image} />
-                                </div>
-                            </div>
-                            <span className='sign-up-prompt message'>
-                                To see the demo, click <span id="sp_bold">REQUEST ACCESS</span> once you've purchased the <span id="sp_bold">Prison Paycheck</span> course.
-                            </span>
                             {this.generateRequestAccessBtn()}
                         </div>
                     </div>
@@ -69,19 +61,38 @@ class RequestDemoAccess extends Component
         if (hasRequested)
         {
             return (
-                <div className='request-demo-access message'>
-                    Your request has been received. Waiting for a response.
+                <div>
+                    <div>
+                        <img className='beta-unavailable icon' src={process.env.PUBLIC_URL + this.props.getPopup().image} />
+                    </div>
+                    <div className='sign-up-prompt message'>
+                        <span id="sp_bold">Your request has been received.</span><br/>Please allow up to 24 hours for your request to be processed. Contact <a id="email_popup" href="mailto:admin@algowolf.com">admin@algowolf.com</a> if you're having any difficulties.
+                    </div>
                 </div>
+
             );
         }
         else
         {
             return (
+                <React.Fragment>
+
+                <div>
+                    <div>
+                        <img className='beta-unavailable icon' src={process.env.PUBLIC_URL + this.props.getPopup().image} />
+                    </div>
+                </div>
+
+                <span className='sign-up-prompt message'>
+                    To see the demo, click <span id="sp_bold">REQUEST ACCESS</span> once you've purchased the <span id="sp_bold">Prison Paycheck</span> course.
+                </span>
                 <div className="request-demo-access login field">
                     <div id="submit" className="login input" onClick={this.requestAccess.bind(this)}>
                         REQUEST ACCESS
                     </div>
                 </div>
+
+                </React.Fragment>
             );
         }
     }

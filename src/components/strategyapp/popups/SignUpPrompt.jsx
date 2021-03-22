@@ -26,7 +26,7 @@ class SignUpPrompt extends Component
                                 Contact us at <a id="email_link" href="mailto:admin@algowolf.com">admin@algowolf.com</a> to find out more about live trading with your broker and general info.
                             </span> */}
                             <span className='sign-up-prompt message'>
-                                <span id="sp_bold">Sign Up</span> and <span id="sp_bold">Request Access</span> to the exclusive <span id="sp_bold">Prison Paycheck</span> demo. Here you can get daily results, the latest statistics, insights and more.
+                            As a subscriber to Scott Phillips trading course you have been granted exclusive use of the<br/><span id="sp_bold">Prison Paycheck Algorithmic Demo & Training Platform</span> (aka Holy Grail).<br/><span id="sp_bold">Login/Sign Up</span> to request access.
                             </span>
                             <div className='sign-up-prompt column'>
                                 <div className="login field">
