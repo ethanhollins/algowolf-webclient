@@ -2758,6 +2758,13 @@
     width: 125px;
 }
 
+.welcome-demo-page.icon {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 21px;
+}
+
 #email_popup {
     text-decoration: underline;
     text-decoration-thickness: 1px;
@@ -2843,6 +2850,14 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
 }
 
+.welcome.message a {
+    color: inherit;
+}
+
+.welcome.message a:visited {
+    color: #000;
+}
+
 .welcome.message li {
     list-style-type: none;
 }
@@ -2872,6 +2887,40 @@
     /* font-size: 1.0em; */
     width: 17px;
     height: 17px;
+}
+
+.welcome.align {
+    display: flex;
+    align-items: center;
+}
+
+.welcome.circle-list li {
+    list-style-type : disc !important;
+    margin-bottom: 5px;
+    padding: 15px; 
+    color: #2c3e50;
+    /* border-bottom: 1px solid #2c3e50; */
+    /* background-color: #34495e; */
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+.welcome.header-img {
+    margin-top: 20px;
+}
+
+.welcome.footer {
+    margin-top: 30px;
+}
+
+.welcome.grey {
+    color: rgb(40,40,40);
+}
+
+.welcome.icon {
+    width: 17px;
+    height: 17px;
+    margin-right: 7px;
 }
 
 .auth {
@@ -2964,6 +3013,15 @@
 
 #sp_bold {
     font-weight: 500;
+}
+
+#sp_header {
+    /* color: #2c3e50; */
+    font-size: 1.4em;
+}
+
+#sp_blue {
+    color: #2c3e50;
 }
 
 #current_account {

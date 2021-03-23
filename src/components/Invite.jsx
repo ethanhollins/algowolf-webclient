@@ -297,7 +297,7 @@ class Invite extends Component
         }
         else
         {
-            window.location = '/login';
+            window.location = '/holygrail';
         }
     }
 

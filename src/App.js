@@ -9,6 +9,7 @@ import Login from './components/Login';
 import Logout from './components/Logout';
 import Auth from './components/Auth';
 import Invite from './components/Invite';
+import WelcomeDemoPage from './components/WelcomeDemoPage';
 import AccountSettings from './components/AccountSettings';
 import { config } from '@fortawesome/fontawesome-svg-core'
 import Cookies from 'universal-cookie';
@@ -68,7 +69,10 @@ class App extends Component
                         {this.getConditionalAuthComponent()}
                     </Route>
                     <Route exact path="/holygrail">
-                        <Redirect to="/holygrail/demo"/>
+                        <WelcomeDemoPage
+                            getUserId={this.getUserId}
+                        />
+                        {/* <Redirect to="/holygrail/demo"/> */}
                     </Route>
                     <Route exact path="/holygrail/demo">
                         <StrategyApp
@@ -84,6 +88,9 @@ class App extends Component
                         />
                     </Route>
                     <Route exact path="/holygrail/invite">
+                        <Redirect to="/holygrail"/>
+                    </Route>
+                    <Route exact path="/holygrail/admin">
                         {this.getConditionalInviteComponent()}
                     </Route>
 
@@ -159,7 +166,7 @@ class App extends Component
         const queryString = window.location.search;
         if (this.state.user_id === null)
         {
-            return <Redirect to={"/login?redirect=holygrail%2Finvite"}/>;
+            return <Redirect to={"/login?redirect=holygrail%2Fadmin"}/>;
         }
         else
         {
