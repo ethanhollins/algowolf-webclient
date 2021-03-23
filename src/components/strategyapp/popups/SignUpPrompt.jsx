@@ -38,7 +38,7 @@ class SignUpPrompt extends Component
                                     OR
                                 </div>
                                 <div className='sign-up-prompt message'>
-                                    <a href='/login?redirect=holygrail%demo'>Sign in with an existing account</a>
+                                    <a href='/login?redirect=holygrail%2Fdemo'>Sign in with an existing account</a>
                                 </div>
                             </div>
                         </div>
