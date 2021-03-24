@@ -199,12 +199,12 @@ class StrategyApp extends Component
                     else
                     {
                         const popup = {
-                            type: 'beta-unavailable',
+                            type: 'live-signal-service',
                             size: {
                                 pixelWidth: 550,
                                 pixelHeight: 350
                             },
-                            image: '/get_access_popup.png',
+                            image: '/live_signal_service.png',
                             fade: true
                         };
                         this.setPopup(popup);

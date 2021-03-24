@@ -5,6 +5,7 @@ import StrategySettings from './popups/StrategySettings';
 import WelcomeDemo from './popups/WelcomeDemo';
 import NotAvailable from './popups/NotAvailable';
 import BetaUnavailable from './popups/BetaUnavailable';
+import LiveSignalService from './popups/LiveSignalService';
 import RequestDemoAccess from './popups/RequestDemoAccess';
 import ReadyToLaunch from './popups/ReadyToLaunch';
 import SignUpPrompt from './popups/SignUpPrompt';
@@ -253,6 +254,14 @@ class Popup extends Component
             else if (popup.type === 'beta-unavailable')
             {
                 return <BetaUnavailable
+                    isDemo={this.props.isDemo}
+                    history={this.props.history}
+                    getPopup={this.props.getPopup}
+                />
+            }
+            else if (popup.type === 'live-signal-service')
+            {
+                return <LiveSignalService
                     isDemo={this.props.isDemo}
                     history={this.props.history}
                     getPopup={this.props.getPopup}

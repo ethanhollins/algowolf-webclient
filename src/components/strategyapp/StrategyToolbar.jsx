@@ -376,7 +376,7 @@ class StrategyToolbar extends Component
         const is_loaded = this.props.getStrategyComponent().isLoaded();
         const { statusMsg } = this.state;
 
-        if (is_running === null || !is_loaded)
+        if (is_running === null || !is_loaded || this.props.isDemo)
         {
             return <React.Fragment />;
         }
