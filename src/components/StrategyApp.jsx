@@ -966,11 +966,14 @@ class StrategyApp extends Component
     }
 
     async socketConnect()
-    {
-        const user_id = await this.props.checkAuthorization();
-        if (!user_id)
+    {   
+        if (!this.props.isDemo)
         {
-            window.location = '/logout';
+            const user_id = await this.props.checkAuthorization();
+            if (!user_id)
+            {
+                window.location = '/logout';
+            }
         }
 
         console.log('connected');
