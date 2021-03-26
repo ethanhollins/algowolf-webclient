@@ -11,7 +11,7 @@ import {
 import { 
     faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
     faFileInvoice, faChartBar, faTicketAlt, faLayerGroup, faUser,
-    faSignOut
+    faSignOut, faHome
 } from '@fortawesome/pro-light-svg-icons';
 
 
@@ -104,6 +104,10 @@ class StrategyToolbar extends Component
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
                             <div className='dropdown-separator'></div>
+                            <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='home'>
+                                <span className='toolbox left'>Home</span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faHome} className='toolbox right-icon' /></span>
+                            </div>
                             <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='logout'>
                                 <span className='toolbox left'>Logout</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faSignOut} className='toolbox right-icon' /></span>
@@ -639,6 +643,11 @@ class StrategyToolbar extends Component
         else if (name === 'account')
         {
             this.props.history.push('/account-settings');
+        }
+        else if (name === 'home')
+        {
+            const { REACT_APP_FRONT_BASE_URL } = process.env;
+            window.location.href = REACT_APP_FRONT_BASE_URL;
         }
         else if (name === 'logout')
         {

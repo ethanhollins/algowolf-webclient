@@ -130,16 +130,17 @@ class StrategyApp extends Component
             {
                 if (!account.beta_access)
                 {
-                    const popup = {
-                        type: 'beta-unavailable',
-                        size: {
-                            pixelWidth: 550,
-                            pixelHeight: 350
-                        },
-                        image: '/get_access_popup.png',
-                        fade: true
-                    };
-                    this.setPopup(popup);
+                    // const popup = {
+                    //     type: 'beta-unavailable',
+                    //     size: {
+                    //         pixelWidth: 550,
+                    //         pixelHeight: 350
+                    //     },
+                    //     image: '/get_access_popup.png',
+                    //     fade: true
+                    // };
+                    // this.setPopup(popup);
+                    window.location = '/holygrail/demo';
                 }
                 else
                 {
@@ -966,6 +967,12 @@ class StrategyApp extends Component
 
     async socketConnect()
     {
+        const user_id = await this.props.checkAuthorization();
+        if (!user_id)
+        {
+            window.location = '/logout';
+        }
+
         console.log('connected');
 
         let { account, strategyInfo } = this.state;

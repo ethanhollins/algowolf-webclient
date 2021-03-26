@@ -12,4 +12,20 @@
     height: 100%;
 }
 
+.header_dark {
+    background-color: #ffa801;
+}
 
+.header_transparent {
+    background-color: #ffa80100;
+}
+
+.logo-default {
+    opacity: 0;
+    transition: opacity 10s ease-in;
+}
+
+.logo-fade-in {
+    opacity: 100;
+    transition: opacity 10s ease-in;
+}
