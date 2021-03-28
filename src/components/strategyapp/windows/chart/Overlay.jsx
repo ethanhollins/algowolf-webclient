@@ -117,7 +117,7 @@ class Overlay extends Component
                             continue
                         }
     
-                        if (ind_values[i][c_x] === undefined) continue;
+                        if (!ind_values[i][c_x]) continue;
                         
                         let i_val = ind_values[i][c_x][y];
                         if (i_val === null || ohlc === undefined || ohlc[x][0] === null) continue;

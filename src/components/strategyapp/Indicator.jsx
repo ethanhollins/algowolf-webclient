@@ -1,11 +1,11 @@
 
 class Indicator {
     /* Overlays */
-    calc = (timestamps, asks, mids, bids) =>
+    calc = (timestamps, mids) =>
     {
-        this.cache_asks.splice(0, this.min_bars-1);
+        // this.cache_asks.splice(0, this.min_bars-1);
         this.cache_mids.splice(0, this.min_bars-1);
-        this.cache_bids.splice(0, this.min_bars-1);
+        // this.cache_bids.splice(0, this.min_bars-1);
 
         // Calculate new values before
         let start = undefined;
@@ -15,17 +15,17 @@ class Indicator {
             start = timestamps.filter((x) => x < this.cache_ts[0]).length;
             for (let i = start-1; i > 0; i--)
             {
-                ask = this.get_value(i, asks, this.cache_asks);
+                // ask = this.get_value(i, asks, this.cache_asks);
                 mid = this.get_value(i, mids, this.cache_mids);
-                bid = this.get_value(i, bids, this.cache_bids);
+                // bid = this.get_value(i, bids, this.cache_bids);
 
-                if (ask[0] !== null || asks[i].every((x) => x === null))
+                if (mid[0] !== null || mids[i].every((x) => x === null))
                 {
                     this.cache_ts.unshift(timestamps[i]);
                 }
-                this.cache_asks.unshift(ask);
+                // this.cache_asks.unshift(ask);
                 this.cache_mids.unshift(mid);
-                this.cache_bids.unshift(bid);
+                // this.cache_bids.unshift(bid);
             }
         }
 
@@ -33,11 +33,11 @@ class Indicator {
         start = timestamps.lastIndexOf(this.cache_ts[this.cache_ts.length-1]);
         while (start > 0)
         {
-            if (!(asks[start].every((x) => x === null)) || asks[start][0] !== null)
+            if (!(mids[start].every((x) => x === null)) || mids[start][0] !== null)
             {
-                this.cache_asks[start] = this.get_value(start, asks, this.cache_asks);
+                // this.cache_asks[start] = this.get_value(start, asks, this.cache_asks);
                 this.cache_mids[start] = this.get_value(start, mids, this.cache_mids);
-                this.cache_bids[start] = this.get_value(start, bids, this.cache_bids);
+                // this.cache_bids[start] = this.get_value(start, bids, this.cache_bids);
                 break;
             }
             else
@@ -55,25 +55,25 @@ class Indicator {
 
         for (let i = start; i < timestamps.length; i++) 
         {
-            ask = this.get_value(i, asks, this.cache_asks);
+            // ask = this.get_value(i, asks, this.cache_asks);
             mid = this.get_value(i, mids, this.cache_mids);
-            bid = this.get_value(i, bids, this.cache_bids);
-            if (ask[0] !== null || asks[i].every((x) => x === null))
+            // bid = this.get_value(i, bids, this.cache_bids);
+            if (mid[0] !== null || mids[i].every((x) => x === null))
             {
                 this.cache_ts.push(timestamps[i]);
             }
-            this.cache_asks.push(ask);
+            // this.cache_asks.push(ask);
             this.cache_mids.push(mid);
-            this.cache_bids.push(bid);
+            // this.cache_bids.push(bid);
         }
     }
 
     reset = () =>
     {
         this.cache_ts = [];
-        this.cache_asks = [];
+        // this.cache_asks = [];
         this.cache_mids = [];
-        this.cache_bids = [];
+        // this.cache_bids = [];
     }
 }
 
@@ -101,9 +101,9 @@ class boll extends Indicator
         this.display_name = `BOLL\n${this.period}, ${this.properties.StdDev}`;
 
         this.cache_ts = [];
-        this.cache_asks = [];
+        // this.cache_asks = [];
         this.cache_mids = [];
-        this.cache_bids = [];
+        // this.cache_bids = [];
     }
 
     get_value(i, ohlc, values)
@@ -159,9 +159,9 @@ class donch extends Indicator
         this.display_name = `DONCH\n${this.period}`;
 
         this.cache_ts = [];
-        this.cache_asks = [];
+        // this.cache_asks = [];
         this.cache_mids = [];
-        this.cache_bids = [];
+        // this.cache_bids = [];
     }
 
     get_value(i, ohlc, values)
@@ -204,9 +204,9 @@ class ema extends Indicator
         this.display_name = `EMA ${this.period}`;
 
         this.cache_ts = [];
-        this.cache_asks = [];
+        // this.cache_asks = [];
         this.cache_mids = [];
-        this.cache_bids = [];
+        // this.cache_bids = [];
     }
 
     get_value(i, ohlc, values)
@@ -215,7 +215,7 @@ class ema extends Indicator
         if (i < this.min_bars || ohlc[i].every((x) => x === null))
             return [null]
     
-        if (i > 0 && values[i-1])
+        if (i > this.period && values[i-1])
         {
             const multi = 2 / (this.period + 1);
             const prev_ema = values[i-1][0];
@@ -257,9 +257,9 @@ class mae extends Indicator
         this.display_name = `MAE\n${this.period}, ${this.properties.Percent}`;
 
         this.cache_ts = [];
-        this.cache_asks = [];
+        // this.cache_asks = [];
         this.cache_mids = [];
-        this.cache_bids = [];
+        // this.cache_bids = [];
     }
 
     get_value(i, ohlc, values)
@@ -315,9 +315,9 @@ class sma extends Indicator
         this.display_name = `SMA ${this.period}`;
         
         this.cache_ts = [];
-        this.cache_asks = [];
+        // this.cache_asks = [];
         this.cache_mids = [];
-        this.cache_bids = [];
+        // this.cache_bids = [];
     }
 
     get_value(i, ohlc, values)
@@ -362,9 +362,9 @@ class atr extends Indicator
         this.display_name = `ATR ${this.period}`;
 
         this.cache_ts = [];
-        this.cache_asks = [];
+        // this.cache_asks = [];
         this.cache_mids = [];
-        this.cache_bids = [];
+        // this.cache_bids = [];
     }
 
     get_value(i, ohlc, values)
@@ -374,7 +374,7 @@ class atr extends Indicator
             return [null]
 
         let atr;
-        if (values[i-1])
+        if (i > this.period && values[i-1])
         {
             const prev_close = ohlc[i-1][3];
             const high = ohlc[i][1];
@@ -455,9 +455,9 @@ class tr extends Indicator
         this.display_name = `ATR ${this.period}`;
 
         this.cache_ts = [];
-        this.cache_asks = [];
+        // this.cache_asks = [];
         this.cache_mids = [];
-        this.cache_bids = [];
+        // this.cache_bids = [];
     }
 
     get_value(i, ohlc, values)
@@ -465,8 +465,6 @@ class tr extends Indicator
         // Validation Check
         if (i < this.min_bars || ohlc[i].every((x) => x === null))
             return [null]
-
-        
 
         let atr = 0;
         if (values[i-1])

@@ -4160,9 +4160,9 @@ class Chart extends Component
 }
 
 const SPACEBAR = 32;
-const MIN_PORTION_SIZE = 0.1
+const MIN_PORTION_SIZE = 0.1;
 
-const NUM_LOAD_BARS = 500
+const NUM_LOAD_BARS = 500;
 
 const UNIVERSAL_DRAWINGS = ['verticalLine'];
 
