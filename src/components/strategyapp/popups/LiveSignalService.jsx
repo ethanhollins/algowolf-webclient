@@ -18,7 +18,7 @@ class LiveSignalService extends Component
                                 </div>
                             </div>
                             <span className='beta-unavailable message'>
-                                Watch the Prison Paycheck setups in real time with the <span id="sp_bold">LIVE Signal Charts</span> available on this page early next week.
+                                Watch the Prison Paycheck setups in <span id="sp_bold">REAL TIME</span> with the <span id="sp_bold">LIVE Signal Charts</span> available <br/><span id="sp_bold">RIGHT HERE on WEDNESDAY!</span>
                             </span>
                         </div>
                     </div>
