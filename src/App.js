@@ -14,6 +14,8 @@ import { config } from '@fortawesome/fontawesome-svg-core'
 import Cookies from 'universal-cookie';
 import moment from "moment-timezone";
 import Register from './components/Register';
+import SendPasswordReset from './components/SendPasswordReset';
+import ResetPassword from './components/ResetPassword';
 
 class App extends Component 
 {
@@ -90,6 +92,16 @@ class App extends Component
                     </Route> */}
                     <Route exact path="/holygrail/admin">
                         {this.getConditionalInviteComponent()}
+                    </Route>
+                    <Route exact path="/send-reset">
+                        <SendPasswordReset
+                            getHeaders={this.getHeaders}
+                        />
+                    </Route>
+                    <Route exact path="/reset">
+                        <ResetPassword
+                            getHeaders={this.getHeaders}
+                        />
                     </Route>
 
                     <Route>

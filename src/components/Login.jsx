@@ -106,7 +106,7 @@ class Login extends Component
                             </div>
         
                             <div className="login field center">
-                                <span>Forgot <a href='/login#'>Password</a>?</span>
+                                <span><a href='/send-reset'>Forgot Password?</a></span>
                             </div>
         
                             <div className="login field center">
