@@ -60,7 +60,7 @@ class Info extends Component
             if (prices !== undefined)
             {
                 const tz = 'America/New_York';
-                const time = moment.utc(
+                const time = moment(
                     prices.timestamp*1000
                 ).tz(tz).format(chart.getCurrentPriceFormat());
 
