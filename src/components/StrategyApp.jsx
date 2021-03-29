@@ -1386,7 +1386,7 @@ class StrategyApp extends Component
             let data = await this.retrieveChartData(
                 chart.broker, chart.product, chart.period, 
                 this.getCountDateFromDate(chart.period, NUM_LOAD_BARS, moment.utc(), -1), 
-                moment(),
+                moment.utc(),
                 'Australia/Melbourne'
             )
             chart = this.addChart(chart.broker, chart.product, chart.period, data);
@@ -2819,7 +2819,7 @@ class StrategyApp extends Component
         const off = this.getPeriodOffsetSeconds(period);
         const direction = -1
 
-        let ts = moment().unix();
+        let ts = moment.utc().unix();
         let i = 0;
         let x = 0;
         while (x < count)

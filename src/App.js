@@ -250,7 +250,7 @@ class App extends Component
             last_visit = 0;
         }
 
-        if (!moment().startOf('day').isSame(moment(last_visit), 'day'))
+        if (!moment.utc().startOf('day').isSame(moment(last_visit), 'day'))
         {
             const { REACT_APP_API_URL } = process.env;
             var requestOptions = {
@@ -263,7 +263,7 @@ class App extends Component
             };
     
             await fetch(`${REACT_APP_API_URL}/v1/analytics/visitors/daily`, requestOptions);
-            this.getCookies().set('last-visit', moment().format());
+            this.getCookies().set('last-visit', moment.utc().format());
         }
     }
 

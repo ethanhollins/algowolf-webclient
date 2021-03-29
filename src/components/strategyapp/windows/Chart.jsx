@@ -3933,7 +3933,7 @@ class Chart extends Component
         else
         {
             start = this.props.getCountDateFromDate(this.getPeriod(), NUM_LOAD_BARS, moment.utc(), -1);
-            end = moment();
+            end = moment.utc();
         }
 
         if (!this.isBacktest())
