@@ -2792,7 +2792,7 @@ class StrategyApp extends Component
         const sun = 0;
         ts *= 1000;
         
-        const dt = moment(ts).tz("America/New_York");
+        const dt = moment.utc(ts).tz("America/New_York");
         const fri_dist = dow.slice(dt.day()).indexOf(fri);
         const sun_dist = dow.slice(dt.day()).slice(fri_dist).indexOf(sun) + fri_dist;
 

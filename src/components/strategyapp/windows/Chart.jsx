@@ -1276,13 +1276,13 @@ class Chart extends Component
             this.setState({ is_loading });
 
             // Set time range to 1000 bars before earliest loaded date
-            const to_dt = moment(ts[0] * 1000);
+            const to_dt = moment.utc(ts[0] * 1000);
             let from_dt = this.props.getCountDateFromDate(
                 this.getPeriod(), NUM_LOAD_BARS, to_dt.clone(), -1
             );
 
             // Clamp time
-            from_dt = moment(this.clampLimit(from_dt.unix()) * 1000);
+            from_dt = moment.utc(this.clampLimit(from_dt.unix()) * 1000);
 
             if (from_dt !== to_dt && from_dt < to_dt)
             {
@@ -1686,7 +1686,7 @@ class Chart extends Component
         const sun = 0;
         ts *= 1000;
         
-        const dt = moment(ts).tz(this.getTimezone());
+        const dt = moment.utc(ts).tz(this.getTimezone());
         const fri_dist = dow.slice(dt.day()).indexOf(fri);
         const sun_dist = dow.slice(dt.day()).slice(fri_dist).indexOf(sun) + fri_dist;
 
@@ -1701,14 +1701,14 @@ class Chart extends Component
     isWrapTime(ts)
     {
         ts *= 1000;
-        const dt = moment(ts).tz(this.getTimezone());
+        const dt = moment.utc(ts).tz(this.getTimezone());
         return dt.day() > 5 || (dt.day() === 5 && dt.hour() >= 17);
     }
 
     wrapTime(ts)
     {
         ts *= 1000;
-        const dt = moment(ts).tz(this.getTimezone());
+        const dt = moment.utc(ts).tz(this.getTimezone());
         if (dt.day() > 5 || (dt.day() === 5 && dt.hour() >= 17))
         {
             const open_off = moment.duration(7 % dt.day(), "d");
@@ -1899,7 +1899,7 @@ class Chart extends Component
 
         const tz = this.getTimezone();
         let time = this.getWeekendDates(
-            moment(ts*1000).subtract(7, 'd').unix()
+            moment.utc(ts*1000).subtract(7, 'd').unix()
         )[1].tz(tz);
 
         let x_off = Math.ceil((ts - time.unix()) / off);
@@ -2002,7 +2002,7 @@ class Chart extends Component
             let time = undefined;
             if (c_x >= -num_extra)
             {
-                time = moment(all_timestamps[idx]*1000).tz(tz);
+                time = moment.utc(all_timestamps[idx]*1000).tz(tz);
             }
 
             let screen_x = camera.convertWorldPosToScreenPos(
@@ -3310,7 +3310,7 @@ class Chart extends Component
             last_ts = future_timestamps[future_timestamps.length-1];
 
         const off = this.getPeriodOffsetSeconds(this.getPeriod());
-        let ts = moment(last_ts*1000).unix();
+        let ts = moment.utc(last_ts*1000).unix();
 
         let i = future_timestamps.length;
         let c_weekend = this.getWeekendDates(ts);
