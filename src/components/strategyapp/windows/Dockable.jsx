@@ -398,6 +398,8 @@ class Dockable extends Component
                 getInfo={this.props.getInfo}
                 getCurrentAccount={this.props.getCurrentAccount}
                 getSelectedChart={this.props.getSelectedChart}
+                getBanner={this.props.getBanner}
+                setBanner={this.props.setBanner}
             />;
         }
         else if (type === 'control_panel')

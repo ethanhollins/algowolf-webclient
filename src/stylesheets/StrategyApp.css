@@ -2147,6 +2147,68 @@
     color: rgb(80,80,80);
 }
 
+.info.banner-body {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #FFF;
+}
+
+.info.banner-body > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: calc(100% - 14px);
+    height: 100%;
+    padding: 0 7px 0 7px;
+    color: rgb(80,80,80);
+    text-align: center;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+.info.banner-body > div > p {
+    text-align: center;
+    margin: 0;
+    margin-bottom: 8px;
+    font-size: 1.0em;
+}
+
+.info.banner-body > div > h1 {
+    text-align: center;
+    font-size: 1.8em;
+    margin: 0;
+    margin-bottom: 30px;
+}
+
+.info.banner-body > div > h2 {
+    text-align: center;
+    font-size: 1.4em;
+    margin: 0;
+    margin-bottom: 20px;
+}
+
+.info.banner-body > div > h3 {
+    text-align: center;
+    font-size: 1.2em;
+    margin: 0;
+    margin-bottom: 15px;
+}
+
+.info.close-btn {
+    padding: 5px 20px 5px 20px;
+    margin-top: 10px;
+    border: 1px solid rgb(80,80,80);
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.info.close-btn:hover {
+    color: #f39c12;
+    border-color: #f39c12;
+}
+
 .control-panel.row {
     display: flex;
     align-items: center;
@@ -2638,7 +2700,7 @@
     color: #000;
     padding-left: 60px;
     padding-right: 60px;
-    padding-bottom: 25px;
+    padding-bottom: 5px;
     text-align: center;
     font-size: 1.25em;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -2660,6 +2722,10 @@
     text-align: center;
     color: #ff8103;
     width: 125px;
+}
+
+.beta-unavailable.body > .login > .input {
+    margin-bottom: 20px;
 }
 
 .ready-to-launch.message {

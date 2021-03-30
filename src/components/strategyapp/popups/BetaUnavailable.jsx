@@ -24,6 +24,11 @@ class BetaUnavailable extends Component
                             <span className='beta-unavailable message'>
                                 <span id="sp_bold">LIVE</span> algo trading for this strategy is available to beta testers. Contact <a href="mailto:admin@algowolf.com">admin@algowolf.com</a> to apply for access.
                             </span>
+                            <div className="login field">
+                                <div id="submit" className="login input" onClick={this.onGotoDemo.bind(this)}>
+                                    GOTO DEMO
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

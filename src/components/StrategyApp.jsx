@@ -130,17 +130,17 @@ class StrategyApp extends Component
             {
                 if (!account.beta_access)
                 {
-                    // const popup = {
-                    //     type: 'beta-unavailable',
-                    //     size: {
-                    //         pixelWidth: 550,
-                    //         pixelHeight: 350
-                    //     },
-                    //     image: '/get_access_popup.png',
-                    //     fade: true
-                    // };
-                    // this.setPopup(popup);
-                    window.location = '/holygrail/demo';
+                    const popup = {
+                        type: 'beta-unavailable',
+                        size: {
+                            pixelWidth: 550,
+                            pixelHeight: 420
+                        },
+                        image: '/get_access_popup.png',
+                        fade: true
+                    };
+                    this.setPopup(popup);
+                    // window.location = '/holygrail/demo';
                 }
                 else
                 {

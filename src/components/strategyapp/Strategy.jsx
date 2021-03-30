@@ -42,7 +42,8 @@ class Strategy extends Component
         current_idx: 0,
         current_timestamp: 0,
         selected_offset: 0,
-        balances: {}
+        balances: {},
+        banner: null
     }
 
     async componentDidMount()
@@ -193,6 +194,8 @@ class Strategy extends Component
                             retrieveReport={this.retrieveReport}
                             moveWindow={this.props.moveWindow}
                             hideShadows={this.hideShadows}
+                            getBanner={this.getBanner}
+                            setBanner={this.setBanner}
                             // History Functions
                             addHistory={this.props.addHistory}
                             getHistory={this.props.getHistory}
@@ -432,6 +435,20 @@ class Strategy extends Component
         else if (data.type === 'create_info')
         {
             this.createInfo(data.account_id, data);
+        }
+        else if (data.type === 'create_banner')
+        {
+            // Add banner to all info windows
+            let { banner } = this.state;
+            banner = data.item;
+            this.setState({ banner });
+            // for (let i of this.windows)
+            // {
+            //     if (i && i.getElementType() === 'dockable')
+            //     {
+            //         i.getInnerElement().innerWindow.
+            //     }
+            // }
         }
         else if (data.type === 'activation')
         {
@@ -1480,6 +1497,16 @@ class Strategy extends Component
     getBalance = (account_code) =>
     {
         return Math.round(this.state.balances[account_code] * 100) / 100;
+    }
+
+    getBanner = () =>
+    {
+        return this.state.banner;
+    }
+
+    setBanner = (banner) =>
+    {
+        return this.setState({ banner });
     }
 
 }
