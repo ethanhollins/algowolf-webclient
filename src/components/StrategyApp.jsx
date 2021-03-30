@@ -128,33 +128,45 @@ class StrategyApp extends Component
         {
             if (user_id)
             {
-                if (!account.beta_access)
-                {
-                    const popup = {
-                        type: 'beta-unavailable',
-                        size: {
-                            pixelWidth: 550,
-                            pixelHeight: 420
-                        },
-                        image: '/get_access_popup.png',
-                        fade: true
-                    };
-                    this.setPopup(popup);
-                    // window.location = '/holygrail/demo';
-                }
-                else
-                {
-                    const popup = {
-                        type: 'ready-to-launch',
-                        size: {
-                            pixelWidth: 550,
-                            pixelHeight: 350
-                        },
-                        image: '/ready_to_launch.png',
-                        fade: true
-                    };
-                    this.setPopup(popup);
-                }
+                // if (!account.beta_access)
+                // {
+                //     const popup = {
+                //         type: 'beta-unavailable',
+                //         size: {
+                //             pixelWidth: 550,
+                //             pixelHeight: 420
+                //         },
+                //         image: '/get_access_popup.png',
+                //         fade: true
+                //     };
+                //     this.setPopup(popup);
+                //     // window.location = '/holygrail/demo';
+                // }
+                // else
+                // {
+                //     const popup = {
+                //         type: 'ready-to-launch',
+                //         size: {
+                //             pixelWidth: 550,
+                //             pixelHeight: 350
+                //         },
+                //         image: '/ready_to_launch.png',
+                //         fade: true
+                //     };
+                //     this.setPopup(popup);
+                // }
+
+                const popup = {
+                    type: 'down-for-maintenance',
+                    size: {
+                        pixelWidth: 550,
+                        pixelHeight: 320
+                    },
+                    image: '/down_for_maintenance.png',
+                    fade: true,
+                    permanent: true
+                };
+                this.setPopup(popup);
             }
         }
         else

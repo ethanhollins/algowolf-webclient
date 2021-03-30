@@ -20,6 +20,7 @@ import {
 import { 
     faTimes
 } from '@fortawesome/pro-light-svg-icons';
+import DownForMaintenance from './popups/DownForMaintenance';
 
 class Popup extends Component
 {
@@ -254,6 +255,14 @@ class Popup extends Component
             else if (popup.type === 'beta-unavailable')
             {
                 return <BetaUnavailable
+                    isDemo={this.props.isDemo}
+                    history={this.props.history}
+                    getPopup={this.props.getPopup}
+                />
+            }
+            else if (popup.type === 'down-for-maintenance')
+            {
+                return <DownForMaintenance
                     isDemo={this.props.isDemo}
                     history={this.props.history}
                     getPopup={this.props.getPopup}

@@ -2728,6 +2728,16 @@
     margin-bottom: 20px;
 }
 
+.down-for-maintenance.message {
+    color: #000;
+    padding-left: 60px;
+    padding-right: 60px;
+    padding-bottom: 20px;
+    text-align: center;
+    font-size: 1.25em;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 .ready-to-launch.message {
     color: #000;
     padding-left: 30px;
