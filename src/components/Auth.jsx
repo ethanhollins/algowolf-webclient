@@ -40,12 +40,26 @@ class Auth extends Component
                 credentials: 'include'
             }
 
-            await fetch(
+            const res = await fetch(
                 `${REACT_APP_API_URL}/auth/spotware` + queryString,
                 reqOptions
             )
+            const data = await res.json();
 
-            window.location = '/app';
+            if (res.status === 200)
+            {
+                const broker_id = data.broker_id;
+                window.location = `/app?brokerSuccess=Successfully added broker to your account%2E&broker=${broker_id}`;
+            }
+            else if (res.status === 400)
+            {
+                const msg = data.message;
+                window.location = `/app?brokerError=${encodeURIComponent(msg)}`
+            }
+            else
+            {
+                window.location = `/app?brokerError=Failed to add broker%2E`
+            }            
         }
         else if (provider === 'holygrail')
         {

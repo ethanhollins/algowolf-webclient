@@ -21,6 +21,9 @@ import {
     faTimes
 } from '@fortawesome/pro-light-svg-icons';
 import DownForMaintenance from './popups/DownForMaintenance';
+import BrokerMessage from './popups/BrokerMessage';
+import StartFailed from './popups/StartFailed';
+import Notice from './popups/Notice';
 
 class Popup extends Component
 {
@@ -260,9 +263,33 @@ class Popup extends Component
                     getPopup={this.props.getPopup}
                 />
             }
+            else if (popup.type === 'broker-message')
+            {
+                return <BrokerMessage
+                    isDemo={this.props.isDemo}
+                    history={this.props.history}
+                    getPopup={this.props.getPopup}
+                />
+            }
             else if (popup.type === 'down-for-maintenance')
             {
                 return <DownForMaintenance
+                    isDemo={this.props.isDemo}
+                    history={this.props.history}
+                    getPopup={this.props.getPopup}
+                />
+            }
+            else if (popup.type === 'start-failed')
+            {
+                return <StartFailed
+                    isDemo={this.props.isDemo}
+                    history={this.props.history}
+                    getPopup={this.props.getPopup}
+                />
+            }
+            else if (popup.type === 'notice')
+            {
+                return <Notice
                     isDemo={this.props.isDemo}
                     history={this.props.history}
                     getPopup={this.props.getPopup}

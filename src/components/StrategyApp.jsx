@@ -128,54 +128,85 @@ class StrategyApp extends Component
         {
             if (user_id)
             {
-                if (account.admin)
-                {
-
-                }
-                else
-                {
-                    const popup = {
-                        type: 'down-for-maintenance',
-                        size: {
-                            pixelWidth: 550,
-                            pixelHeight: 320
-                        },
-                        image: '/down_for_maintenance.png',
-                        fade: true,
-                        permanent: true
-                    };
-                    this.setPopup(popup);
-                }
-
-                // if (!account.beta_access)
+                // if (account.admin)
                 // {
-                //     const popup = {
-                //         type: 'beta-unavailable',
-                //         size: {
-                //             pixelWidth: 550,
-                //             pixelHeight: 420
-                //         },
-                //         image: '/get_access_popup.png',
-                //         fade: true
-                //     };
-                //     this.setPopup(popup);
-                //     // window.location = '/holygrail/demo';
+                    
                 // }
                 // else
                 // {
                 //     const popup = {
-                //         type: 'ready-to-launch',
+                //         type: 'down-for-maintenance',
                 //         size: {
                 //             pixelWidth: 550,
-                //             pixelHeight: 350
+                //             pixelHeight: 320
                 //         },
-                //         image: '/ready_to_launch.png',
-                //         fade: true
+                //         image: '/down_for_maintenance.png',
+                //         fade: true,
+                //         permanent: true
                 //     };
                 //     this.setPopup(popup);
                 // }
 
                 
+
+
+                if (!account.beta_access)
+                {
+                    const popup = {
+                        type: 'beta-unavailable',
+                        size: {
+                            pixelWidth: 550,
+                            pixelHeight: 420
+                        },
+                        image: '/get_access_popup.png',
+                        fade: true
+                    };
+                    this.setPopup(popup);
+                    // window.location = '/holygrail/demo';
+                }
+                else
+                {
+                    const queryString = window.location.search;
+                    let params = new URLSearchParams(queryString);
+                    if (params.get('brokerSuccess'))
+                    {
+                        const popup = {
+                            type: 'broker-message',
+                            size: {
+                                pixelWidth: 550,
+                                pixelHeight: 300
+                            },
+                            image: '/broker_success.png',
+                            message: params.get('brokerSuccess')
+                        };
+                        this.setPopup(popup);
+                    }
+                    else if (params.get('brokerError'))
+                    {
+                        const popup = {
+                            type: 'broker-message',
+                            size: {
+                                pixelWidth: 550,
+                                pixelHeight: 300
+                            },
+                            image: '/broker_failed.png',
+                            message: params.get('brokerError')
+                        };
+                        this.setPopup(popup);
+                    }
+                    else
+                    {
+                        const popup = {
+                            type: 'notice',
+                            size: {
+                                pixelWidth: 550,
+                                pixelHeight: 420
+                            },
+                            fade: true
+                        };
+                        this.setPopup(popup);
+                    }
+                }
             }
         }
         else
@@ -2052,6 +2083,16 @@ class StrategyApp extends Component
         else
         {
             this.toolbar.setStatusMsg(null);
+
+            const popup = {
+                type: 'start-failed',
+                size: {
+                    pixelWidth: 550,
+                    pixelHeight: 320
+                },
+                image: '/start_failed.png'
+            };
+            this.setPopup(popup);
         }
     }
 
