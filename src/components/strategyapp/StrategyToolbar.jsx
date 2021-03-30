@@ -384,7 +384,7 @@ class StrategyToolbar extends Component
         {
             return <React.Fragment />;
         }
-        else if (!this.props.hasBetaAccess())
+        else // if (!this.props.hasBetaAccess())
         {
             return (
                 <div className='toolbox item'>
@@ -398,51 +398,51 @@ class StrategyToolbar extends Component
                 </div>
             );
         }
-        else if (is_running)
-        {
-            return (
-                <div className='toolbox item' onClick={this.onScriptSwitch}>
-                    <div 
-                        ref={this.setActivationElem} className='toolbox item row btn'
-                        title='Stop script.'
-                    >
-                        <FontAwesomeIcon id='stop_status' className='toolbox icon' icon={faStop} />
-                        <span className='toolbox label'>Stop</span>
-                    </div>
-                </div>
-            );
-        }
-        else
-        {
-            if (statusMsg !== null)
-            {
-                return (
-                    <div className='toolbox item'>
-                        <div 
-                            ref={this.setActivationElem} className='toolbox item row btn disabled'
-                            title='Start script.'
-                        >
-                            <FontAwesomeIcon className='toolbox icon disabled' icon={faPlay} />
-                            <span className='toolbox label'>Start</span>
-                        </div>
-                    </div>
-                );
-            }
-            else
-            {
-                return (
-                    <div className='toolbox item' onClick={this.onScriptSwitch}>
-                        <div 
-                            ref={this.setActivationElem} className='toolbox item row btn'
-                            title='Script loading...'
-                        >
-                            <FontAwesomeIcon id='play_status' className='toolbox icon' icon={faPlay} />
-                            <span className='toolbox label'>Start</span>
-                        </div>
-                    </div>
-                );
-            }
-        }
+        // else if (is_running)
+        // {
+        //     return (
+        //         <div className='toolbox item' onClick={this.onScriptSwitch}>
+        //             <div 
+        //                 ref={this.setActivationElem} className='toolbox item row btn'
+        //                 title='Stop script.'
+        //             >
+        //                 <FontAwesomeIcon id='stop_status' className='toolbox icon' icon={faStop} />
+        //                 <span className='toolbox label'>Stop</span>
+        //             </div>
+        //         </div>
+        //     );
+        // }
+        // else
+        // {
+        //     if (statusMsg !== null)
+        //     {
+        //         return (
+        //             <div className='toolbox item'>
+        //                 <div 
+        //                     ref={this.setActivationElem} className='toolbox item row btn disabled'
+        //                     title='Start script.'
+        //                 >
+        //                     <FontAwesomeIcon className='toolbox icon disabled' icon={faPlay} />
+        //                     <span className='toolbox label'>Start</span>
+        //                 </div>
+        //             </div>
+        //         );
+        //     }
+        //     else
+        //     {
+        //         return (
+        //             <div className='toolbox item' onClick={this.onScriptSwitch}>
+        //                 <div 
+        //                     ref={this.setActivationElem} className='toolbox item row btn'
+        //                     title='Script loading...'
+        //                 >
+        //                     <FontAwesomeIcon id='play_status' className='toolbox icon' icon={faPlay} />
+        //                     <span className='toolbox label'>Start</span>
+        //                 </div>
+        //             </div>
+        //         );
+        //     }
+        // }
     }
 
     generateStatusLabel = () =>

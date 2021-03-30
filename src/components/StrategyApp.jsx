@@ -146,10 +146,6 @@ class StrategyApp extends Component
                 //     };
                 //     this.setPopup(popup);
                 // }
-
-                
-
-
                 if (!account.beta_access)
                 {
                     const popup = {
@@ -200,9 +196,10 @@ class StrategyApp extends Component
                             type: 'notice',
                             size: {
                                 pixelWidth: 550,
-                                pixelHeight: 420
+                                pixelHeight: 460
                             },
-                            fade: true
+                            fade: true,
+                            permanent: true
                         };
                         this.setPopup(popup);
                     }
