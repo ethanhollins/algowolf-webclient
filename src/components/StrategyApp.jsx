@@ -128,6 +128,25 @@ class StrategyApp extends Component
         {
             if (user_id)
             {
+                if (account.admin)
+                {
+
+                }
+                else
+                {
+                    const popup = {
+                        type: 'down-for-maintenance',
+                        size: {
+                            pixelWidth: 550,
+                            pixelHeight: 320
+                        },
+                        image: '/down_for_maintenance.png',
+                        fade: true,
+                        permanent: true
+                    };
+                    this.setPopup(popup);
+                }
+
                 // if (!account.beta_access)
                 // {
                 //     const popup = {
@@ -156,17 +175,7 @@ class StrategyApp extends Component
                 //     this.setPopup(popup);
                 // }
 
-                const popup = {
-                    type: 'down-for-maintenance',
-                    size: {
-                        pixelWidth: 550,
-                        pixelHeight: 320
-                    },
-                    image: '/down_for_maintenance.png',
-                    fade: true,
-                    permanent: true
-                };
-                this.setPopup(popup);
+                
             }
         }
         else
