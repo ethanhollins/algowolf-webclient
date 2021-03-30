@@ -30,7 +30,6 @@ class Info extends Component
                     <div ref={this.setInfoBodyRef} className='info body'>
                         {this.state.current_info}
                     </div>
-                    {this.generateBanner()}
                 </div>
             );
         }
@@ -62,35 +61,35 @@ class Info extends Component
         //     <p>CE 5m, 10m:<br/><strong style="color: #27ae60">B, T</strong></p>
         // `
 
-        const banner = this.props.getBanner();
+        // const banner = this.props.getBanner();
 
-        if (banner)
-        {
-            return (
-                <React.Fragment>
+        // if (banner)
+        // {
+        //     return (
+        //         <React.Fragment>
                 
-                <div className='info banner-body'>
-                    <div>
-                        <div dangerouslySetInnerHTML={{__html: banner}}></div>
-                        {/* <h1>Order Placed</h1>
-                        <h3 style={{color: "#3498db"}}><strong>RTV LONG</strong></h3>
-                        <p>Entry:<br/><strong style={{color: "#3498db"}}>1.17870</strong></p>
-                        <p>Stop:<br/><strong style={{color: "#e74c3c"}}>1.17845</strong></p>
-                        <p>1.1R Target:<br/><strong style={{color: "#27ae60"}}>1.17903</strong></p>
-                        <p>H&T:<br/><strong style={{color: "#9b59b6"}}>1.17910</strong></p> */}
-                        <div className='info close-btn' onClick={this.closeBanner}>
-                            OK
-                        </div>
-                    </div>
-                </div>
+        //         <div className='info banner-body'>
+        //             <div>
+        //                 <div dangerouslySetInnerHTML={{__html: banner}}></div>
+        //                 {/* <h1>Order Placed</h1>
+        //                 <h3 style={{color: "#3498db"}}><strong>RTV LONG</strong></h3>
+        //                 <p>Entry:<br/><strong style={{color: "#3498db"}}>1.17870</strong></p>
+        //                 <p>Stop:<br/><strong style={{color: "#e74c3c"}}>1.17845</strong></p>
+        //                 <p>1.1R Target:<br/><strong style={{color: "#27ae60"}}>1.17903</strong></p>
+        //                 <p>H&T:<br/><strong style={{color: "#9b59b6"}}>1.17910</strong></p> */}
+        //                 <div className='info close-btn' onClick={this.closeBanner}>
+        //                     OK
+        //                 </div>
+        //             </div>
+        //         </div>
     
-                </React.Fragment>
-            );
-        }
-        else
-        {
-            return <React.Fragment/>;
-        }
+        //         </React.Fragment>
+        //     );
+        // }
+        // else
+        // {
+        //     return <React.Fragment/>;
+        // }
     }
 
     updateInfo = (mouse_pos) =>
