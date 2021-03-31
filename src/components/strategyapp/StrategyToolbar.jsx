@@ -502,18 +502,17 @@ class StrategyToolbar extends Component
                 <React.Fragment>
 
                 <div className='toolbox separator' />
-                <a 
-                    href={REACT_APP_FRONT_BASE_URL + '/holygrail/getting-started'}
+                <div 
                     className='toolbox item' 
-                    target="_blank"
+                    onClick={this.onHelpItem.bind(this)}
                     // onClick={this.onNotAvailableItem}
                 >
                     <div ref={this.setScriptElem} className='toolbox item row btn'>
                         <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faQuestionCircle} />
                         <span className='toolbox label'>Help</span>
                     </div>
-                </a>
-                <a 
+                </div>
+                {/* <a 
                     href={REACT_APP_FRONT_BASE_URL + '/holygrail/faq'}
                     className='toolbox item' 
                     target="_blank"
@@ -523,7 +522,7 @@ class StrategyToolbar extends Component
                         <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faInfoCircle} />
                         <span className='toolbox label'>FAQ</span>
                     </div>
-                </a>
+                </a> */}
                 <div className='toolbox separator' />
                 <a 
                     href={REACT_APP_FRONT_BASE_URL + '/automated-trading'}
@@ -532,7 +531,7 @@ class StrategyToolbar extends Component
                     // onClick={this.onNotAvailableItem}
                 >
                     <div ref={this.setBacktestElem} className='toolbox item row btn'>
-                        <FontAwesomeIcon className='toolbox icon red_btn' icon={faRobot} />
+                        <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faRobot} />
                         <span className='toolbox label'>Automated Trading</span>
                     </div>
                 </a>
@@ -714,6 +713,19 @@ class StrategyToolbar extends Component
             window.location = '/logout';
         }
         
+    }
+
+    onHelpItem = (e) =>
+    {
+        const popup = {
+            type: 'welcome-demo',
+            size: {
+                width: 40,
+                height: 70
+            },
+            fade: true
+        }
+        this.props.setPopup(popup);
     }
 
     onAccountsDropdownItem = (e) =>

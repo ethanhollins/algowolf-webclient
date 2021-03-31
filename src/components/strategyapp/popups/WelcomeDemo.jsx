@@ -154,9 +154,6 @@ class WelcomeDemo extends Component
                                     Once a position is entered, it's no longer tracked under <FontAwesomeIcon className='welcome message-icon steal-blue_btn' icon={faInfoCircle} /> <span className='steal-blue_btn' id='sp_bold'>Chart Info</span>, but can still be monitored on the candle chart.
                                 </p>
                                 <p>
-                                    Click on <FontAwesomeIcon className='welcome message-icon steal-blue_btn' icon={faEnvelope} /> <span className='steal-blue_btn' id='sp_bold'>Notify Me</span> to subscribe for email updates.
-                                </p>
-                                <p>
                                     Click on the <FontAwesomeIcon className='welcome message-icon steal-blue_btn' icon={faQuestionCircle} /> <span className='steal-blue_btn' id='sp_bold'>Help</span> icon to read this message again.
                                 </p>
                                 <p>
