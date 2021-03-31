@@ -247,16 +247,16 @@ class StrategyApp extends Component
                     }
                     else
                     {
-                        const popup = {
-                            type: 'live-signal-service',
-                            size: {
-                                pixelWidth: 550,
-                                pixelHeight: 350
-                            },
-                            image: '/live_signal_service.png',
-                            fade: true
-                        };
-                        this.setPopup(popup);
+                        // const popup = {
+                        //     type: 'live-signal-service',
+                        //     size: {
+                        //         pixelWidth: 550,
+                        //         pixelHeight: 350
+                        //     },
+                        //     image: '/live_signal_service.png',
+                        //     fade: true
+                        // };
+                        // this.setPopup(popup);
                     }
                 }
                 else
