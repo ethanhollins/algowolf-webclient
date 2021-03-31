@@ -399,8 +399,6 @@ class Strategy extends Component
             transactions[data.account_id] = [];
         }
 
-        console.log(data);
-
         if (data.type === 'create_drawing')
         {
             // this.createDrawing(data.account_id, data.item.layer, data.item);
