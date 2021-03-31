@@ -164,45 +164,44 @@ class StrategyApp extends Component
                 {
                     const queryString = window.location.search;
                     let params = new URLSearchParams(queryString);
-                    if (params.get('brokerSuccess'))
-                    {
-                        const popup = {
-                            type: 'broker-message',
-                            size: {
-                                pixelWidth: 550,
-                                pixelHeight: 300
-                            },
-                            image: '/broker_success.png',
-                            message: params.get('brokerSuccess')
-                        };
-                        this.setPopup(popup);
-                    }
-                    else if (params.get('brokerError'))
-                    {
-                        const popup = {
-                            type: 'broker-message',
-                            size: {
-                                pixelWidth: 550,
-                                pixelHeight: 300
-                            },
-                            image: '/broker_failed.png',
-                            message: params.get('brokerError')
-                        };
-                        this.setPopup(popup);
-                    }
-                    else
-                    {
-                        // const popup = {
-                        //     type: 'notice',
-                        //     size: {
-                        //         pixelWidth: 550,
-                        //         pixelHeight: 460
-                        //     },
-                        //     fade: true,
-                        //     permanent: true
-                        // };
-                        // this.setPopup(popup);
-                    }
+                    // if (params.get('brokerSuccess'))
+                    // {
+                    //     const popup = {
+                    //         type: 'broker-message',
+                    //         size: {
+                    //             pixelWidth: 550,
+                    //             pixelHeight: 300
+                    //         },
+                    //         image: '/broker_success.png',
+                    //         message: params.get('brokerSuccess')
+                    //     };
+                    //     this.setPopup(popup);
+                    // }
+                    // else if (params.get('brokerError'))
+                    // {
+                    //     const popup = {
+                    //         type: 'broker-message',
+                    //         size: {
+                    //             pixelWidth: 550,
+                    //             pixelHeight: 300
+                    //         },
+                    //         image: '/broker_failed.png',
+                    //         message: params.get('brokerError')
+                    //     };
+                    //     this.setPopup(popup);
+                    // }
+                    // else
+                    // {
+                    const popup = {
+                        type: 'notice',
+                        size: {
+                            pixelWidth: 550,
+                            pixelHeight: 300
+                        },
+                        fade: true
+                    };
+                    this.setPopup(popup);
+                    // }
                 }
             }
         }

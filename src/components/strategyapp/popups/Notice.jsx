@@ -18,16 +18,13 @@ class Notice extends Component
                             <div className='welcome message'>
                                 <h2>Hi there.</h2>
                                 <p>
-                                    The server is currently undergoing maintenance and won't be available for today's trading session.
+                                    As we have been upgrading the server, you may need to reconnect your broker and restart the script.
                                 </p>
-                                <p>
+                                {/* <p>
                                     We're working on various enchancements to the platform and improving the performance of our server, as well as fixing some of the issues we've come across such as not saving the System Results correctly.
-                                </p>
+                                </p> */}
                                 <p>
-                                    Sorry for this inconvenience. Please check back in tomorrow, as we will be up and running again. You may need to reconnect your broker and restart the script.
-                                </p>
-                                <p>
-                                    Thank you for your help.
+                                    Sorry for the inconvenience.
                                 </p>
                                 <p>
                                     <span id='sp_bold'>The AlgoWolf Team.</span>
