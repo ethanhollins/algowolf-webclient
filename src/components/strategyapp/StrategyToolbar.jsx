@@ -6,7 +6,8 @@ import {
 import { 
     faBars,  faChartLine, faChartPie, faPlay, faStop,
     faLightbulb, faCode, faHistory, faChevronRight, faChevronDown, 
-    faTools, faExpandArrowsAlt, faLink, faExpandAlt
+    faTools, faExpandArrowsAlt, faLink, faExpandAlt, faQuestionCircle,
+    faInfoCircle, faRobot
 } from '@fortawesome/pro-regular-svg-icons';
 import { 
     faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
@@ -273,6 +274,7 @@ class StrategyToolbar extends Component
                             <span className='toolbox label'>Backtest</span>
                         </div>
                     </div>
+                    {this.generateDemoToolbarBtns()}
                 </div>
             </div> 
         );
@@ -484,6 +486,56 @@ class StrategyToolbar extends Component
 
                 <FontAwesomeIcon id='offline_status' className='toolbox icon' icon={faCircle} />
                 <span id='offline_status' className='toolbox label'>Strategy Stopped</span>
+
+                </React.Fragment>
+            );
+        }
+    }
+
+    generateDemoToolbarBtns = () =>
+    {
+        const { REACT_APP_FRONT_BASE_URL } = process.env;
+        
+        if (this.props.isDemo)
+        {
+            return (
+                <React.Fragment>
+
+                <div className='toolbox separator' />
+                <a 
+                    href={REACT_APP_FRONT_BASE_URL + '/holygrail/getting-started'}
+                    className='toolbox item' 
+                    target="_blank"
+                    // onClick={this.onNotAvailableItem}
+                >
+                    <div ref={this.setScriptElem} className='toolbox item row btn'>
+                        <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faQuestionCircle} />
+                        <span className='toolbox label'>Help</span>
+                    </div>
+                </a>
+                <a 
+                    href={REACT_APP_FRONT_BASE_URL + '/holygrail/faq'}
+                    className='toolbox item' 
+                    target="_blank"
+                    // onClick={this.onNotAvailableItem}
+                >
+                    <div ref={this.setBacktestElem} className='toolbox item row btn'>
+                        <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faInfoCircle} />
+                        <span className='toolbox label'>FAQ</span>
+                    </div>
+                </a>
+                <div className='toolbox separator' />
+                <a 
+                    href={REACT_APP_FRONT_BASE_URL + '/automated-trading'}
+                    className='toolbox item' 
+                    target="_blank"
+                    // onClick={this.onNotAvailableItem}
+                >
+                    <div ref={this.setBacktestElem} className='toolbox item row btn'>
+                        <FontAwesomeIcon className='toolbox icon red_btn' icon={faRobot} />
+                        <span className='toolbox label'>Automated Trading</span>
+                    </div>
+                </a>
 
                 </React.Fragment>
             );

@@ -2787,7 +2787,16 @@ class Chart extends Component
         );
 
         // Properties
-        ctx.fillStyle = this.getPriceLineColor();
+        // ctx.fillStyle = this.getPriceLineColor();
+        const lastPrice = this.getLastPrice();
+        if (c_close >= lastPrice)
+        {
+            ctx.fillStyle = '#2ecc71';
+        }
+        else
+        {
+            ctx.fillStyle = '#e74c3c';
+        }
 
         // Font settings
         const font_size = this.getFontSize();
@@ -2868,7 +2877,17 @@ class Chart extends Component
         );
 
         // Properties
-        ctx.fillStyle = this.getPriceLineColor();
+        // ctx.fillStyle = this.getPriceLineColor();
+        const lastPrice = this.getLastPrice();
+        if (c_close >= lastPrice)
+        {
+            ctx.fillStyle = '#2ecc71';
+        }
+        else
+        {
+            ctx.fillStyle = '#e74c3c';
+        }
+
 
         ctx.fillRect(
             0, 
@@ -4006,6 +4025,11 @@ class Chart extends Component
     getOhlc = () =>
     {
         return this.getChart()[this.getPrice()];
+    }
+
+    getLastPrice = () =>
+    {
+        return this.getChart().lastPrice;
     }
 
     getBrokerChart = () =>

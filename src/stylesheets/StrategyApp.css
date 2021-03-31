@@ -227,6 +227,11 @@
     align-items: center;
     height: 100%;
     border-radius: 2px;
+    text-decoration: none;
+}
+
+.toolbox.item:visited {
+    color: inherit;
 }
 
 .toolbox.item.btn:not(.disabled):hover {

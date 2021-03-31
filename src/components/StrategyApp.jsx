@@ -1492,7 +1492,8 @@ class StrategyApp extends Component
             // asks: ohlc_data.ohlc.asks,
             mids: ohlc_data.ohlc.mids,
             // bids: ohlc_data.ohlc.bids,
-            next_timestamp: null
+            next_timestamp: null,
+            lastPrice: 0
         };
 
         this.generateMissingBars(charts[key]);
@@ -1772,6 +1773,7 @@ class StrategyApp extends Component
                 {
                     // On Bar End
                     // chart.asks[chart.asks.length-1] = item['item']['ask'];
+                    chart.lastPrice = chart.mids[chart.mids.length-1][3];
                     chart.mids[chart.mids.length-1] = item['item']['mid'];
                     // chart.bids[chart.bids.length-1] = item['item']['bid'];
                     this.generateNextTimestamp(chart, item['timestamp']);
@@ -1792,6 +1794,7 @@ class StrategyApp extends Component
                 {
                     // Update Latest Bar
                     // chart.asks[chart.asks.length-1] = item['item']['ask'];
+                    chart.lastPrice = chart.mids[chart.mids.length-1][3];
                     chart.mids[chart.mids.length-1] = item['item']['mid'];
                     // chart.bids[chart.bids.length-1] = item['item']['bid'];
                 }
