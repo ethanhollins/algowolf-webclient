@@ -2675,6 +2675,12 @@
     width: 100px;
 }
 
+.start-failed.message {
+    padding: 10px;
+    text-align: center;
+    font-size: 1.0em;
+}
+
 .beta-unavailable.body {
     display: flex;
     flex-direction: column;

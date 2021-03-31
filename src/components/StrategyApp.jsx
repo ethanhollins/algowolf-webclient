@@ -192,16 +192,16 @@ class StrategyApp extends Component
                     }
                     else
                     {
-                        const popup = {
-                            type: 'notice',
-                            size: {
-                                pixelWidth: 550,
-                                pixelHeight: 460
-                            },
-                            fade: true,
-                            permanent: true
-                        };
-                        this.setPopup(popup);
+                        // const popup = {
+                        //     type: 'notice',
+                        //     size: {
+                        //         pixelWidth: 550,
+                        //         pixelHeight: 460
+                        //     },
+                        //     fade: true,
+                        //     permanent: true
+                        // };
+                        // this.setPopup(popup);
                     }
                 }
             }
@@ -1300,11 +1300,35 @@ class StrategyApp extends Component
 
         if (res.status === 200)
         {
+            const popup = {
+                type: 'control-panel-update-message',
+                size: {
+                    pixelWidth: 550,
+                    pixelHeight: 300
+                },
+                title: 'Update Successful',
+                message: 'Your input variables have been updated successfully. Please restart the script if you wish to utilize your updates now.'
+            };
+            this.setPopup(popup);
+            
             res = await res.json();
         }
         else if (res.status === 403)
         {
             window.location = '/logout';
+        }
+        else
+        {
+            const popup = {
+                type: 'control-panel-update-message',
+                size: {
+                    pixelWidth: 550,
+                    pixelHeight: 300
+                },
+                title: 'Failed to Update',
+                message: 'Your input variables failed to update. Please try again.'
+            };
+            this.setPopup(popup);
         }
 
         let strategy = this.getStrategyInfo(strategy_id);
@@ -2085,7 +2109,7 @@ class StrategyApp extends Component
                 type: 'start-failed',
                 size: {
                     pixelWidth: 550,
-                    pixelHeight: 320
+                    pixelHeight: 300
                 },
                 image: '/start_failed.png'
             };

@@ -176,6 +176,8 @@ class Backtest extends Component
                             moveWindow={this.props.moveWindow}
                             hideShadows={this.hideShadows}
                             setChartPositionsByTimestamp={this.setChartPositionsByTimestamp}
+                            getBanner={this.getBanner}
+                            setBanner={this.setBanner}
                             // History Functions
                             addHistory={this.props.addHistory}
                             getHistory={this.props.getHistory}

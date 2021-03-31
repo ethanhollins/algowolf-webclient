@@ -237,6 +237,8 @@ class WindowWrapper extends Component
                 getTransactions={this.props.getTransactions}
                 getWindowBtnsWidth={this.getWindowBtnsWidth}
                 getBalance={this.props.getBalance}
+                getBanner={this.props.getBanner}
+                setBanner={this.props.setBanner}
                 isLoaded={this.props.isLoaded}
             />;
         }

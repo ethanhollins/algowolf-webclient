@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-class StartFailed extends Component
+class ControlPanelUpdateMessage extends Component
 {
 
     render()
@@ -9,14 +9,14 @@ class StartFailed extends Component
             <React.Fragment>
             
             <div className='popup header'>
-                <span>Strategy Already Running</span>
+                <span>{this.props.getPopup().title}</span>
             </div>
             <div className='popup content'>
                 <div className='popup main'>
                     <div className='popup main-list'>
                         <div className='not-available body'>
                             <div className='start-failed message'>
-                                You can only run this strategy on one account. Please stop all running accounts before starting the script.
+                                {this.props.getPopup().message}
                             </div>
                             <div className='info close-btn' onClick={this.props.close}>
                                 OK
@@ -31,4 +31,4 @@ class StartFailed extends Component
     }
 }
 
-export default StartFailed;
+export default ControlPanelUpdateMessage;

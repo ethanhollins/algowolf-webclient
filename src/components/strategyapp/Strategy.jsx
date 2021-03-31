@@ -194,6 +194,8 @@ class Strategy extends Component
                             retrieveReport={this.retrieveReport}
                             moveWindow={this.props.moveWindow}
                             hideShadows={this.hideShadows}
+                            getBanner={this.getBanner}
+                            setBanner={this.setBanner}
                             // History Functions
                             addHistory={this.props.addHistory}
                             getHistory={this.props.getHistory}
@@ -396,6 +398,8 @@ class Strategy extends Component
         {
             transactions[data.account_id] = [];
         }
+
+        console.log(data);
 
         if (data.type === 'create_drawing')
         {

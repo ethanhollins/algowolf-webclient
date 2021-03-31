@@ -24,6 +24,7 @@ import DownForMaintenance from './popups/DownForMaintenance';
 import BrokerMessage from './popups/BrokerMessage';
 import StartFailed from './popups/StartFailed';
 import Notice from './popups/Notice';
+import ControlPanelUpdateMessage from './popups/ControlPanelUpdateMessage';
 
 class Popup extends Component
 {
@@ -285,6 +286,16 @@ class Popup extends Component
                     isDemo={this.props.isDemo}
                     history={this.props.history}
                     getPopup={this.props.getPopup}
+                    close={this.close}
+                />
+            }
+            else if (popup.type === 'control-panel-update-message')
+            {
+                return <ControlPanelUpdateMessage
+                    isDemo={this.props.isDemo}
+                    history={this.props.history}
+                    getPopup={this.props.getPopup}
+                    close={this.close}
                 />
             }
             else if (popup.type === 'notice')
