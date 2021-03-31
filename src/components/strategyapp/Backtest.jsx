@@ -777,6 +777,15 @@ class Backtest extends Component
         this.windows.splice(this.windows.indexOf(elem), 1);
     }
 
+    getBanner = () =>
+    {
+        return null;
+    }
+
+    setBanner = (banner) =>
+    {
+        
+    }
 }
 
 const ARROW_LEFT = 37;
