@@ -192,15 +192,15 @@ class StrategyApp extends Component
                     // }
                     // else
                     // {
-                    const popup = {
-                        type: 'notice',
-                        size: {
-                            pixelWidth: 550,
-                            pixelHeight: 300
-                        },
-                        fade: true
-                    };
-                    this.setPopup(popup);
+                    // const popup = {
+                    //     type: 'notice',
+                    //     size: {
+                    //         pixelWidth: 550,
+                    //         pixelHeight: 300
+                    //     },
+                    //     fade: true
+                    // };
+                    // this.setPopup(popup);
                     // }
                 }
             }
