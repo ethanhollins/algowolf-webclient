@@ -19,6 +19,7 @@ class StrategyApp extends Component
 {
     state = {
         checkLogin: false,
+        user_id: null,
         sio: null,
         keys: [],
         account: {},
@@ -44,7 +45,8 @@ class StrategyApp extends Component
         history: [],
         undone: [],
         lastChange: null,
-        show_load_screen: true
+        show_load_screen: true,
+        strategyOnConnect: null
     }
 
     constructor(props)
@@ -64,6 +66,7 @@ class StrategyApp extends Component
         this.updateInfo = this.updateInfo.bind(this);
         this.loadChart = this.loadChart.bind(this);
         this.connectChart = this.connectChart.bind(this);
+        this.socketConnect = this.socketConnect.bind(this);
         this.reconnectCharts = this.reconnectCharts.bind(this);
         this.retrieveAllBrokers = this.retrieveAllBrokers.bind(this);
         this.retrieveStrategies = this.retrieveStrategies.bind(this);
@@ -111,7 +114,7 @@ class StrategyApp extends Component
         
         const user_id = await this.props.checkAuthorization();
         checkLogin = true;
-        this.setState({ checkLogin });
+        this.setState({ user_id, checkLogin });
 
         let { sio } = this.state;
         
@@ -700,6 +703,7 @@ class StrategyApp extends Component
                         setShowLoadScreen={this.setShowLoadScreen}
                         getTimezones={this.getTimezones}
                         convertIncomingPositionSize={this.convertIncomingPositionSize}
+                        setStrategyOnConnect={this.setStrategyOnConnect}
                         // Window Funcs
                         closeWindow={this.closeWindow}
                         windowExists={this.windowExists}
@@ -1015,7 +1019,7 @@ class StrategyApp extends Component
 
     async socketConnect()
     {   
-        if (!this.props.isDemo)
+        if (!this.props.isDemo || (this.props.isDemo && this.state.user_id))
         {
             const user_id = await this.props.checkAuthorization();
             if (!user_id)
@@ -1035,6 +1039,23 @@ class StrategyApp extends Component
             );
             this.setState({ strategyInfo });
         }
+
+        const { strategyOnConnect } = this.state;
+        if (strategyOnConnect)
+        {
+            strategyOnConnect();
+        }
+    }
+
+    reconnect = (socket) =>
+    {
+        socket.connect();
+        setTimeout(() => {
+            if (!socket.connected)
+            {
+                this.reconnect(socket);
+            }
+        }, 5*1000);
     }
 
 
@@ -1043,6 +1064,7 @@ class StrategyApp extends Component
         const { REACT_APP_STREAM_URL } = process.env;
         const endpoint = `${REACT_APP_STREAM_URL}/user`
         const socket = io(endpoint, {
+            reconnection: false,
             transportOptions: {
                 polling: {
                     extraHeaders: {
@@ -1056,6 +1078,7 @@ class StrategyApp extends Component
 
         socket.on('disconnect', () =>
         {
+            this.reconnect(socket);
             console.log('Disconnected.')
         });
 
@@ -3027,7 +3050,12 @@ class StrategyApp extends Component
         const { account } = this.state;
         return account.beta_access;
     }
-    
+
+    setStrategyOnConnect = (strategyOnConnect) =>
+    {
+        this.setState({ strategyOnConnect });
+    }
+
 }
 
 const SPACEBAR = 32;

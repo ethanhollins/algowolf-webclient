@@ -63,9 +63,19 @@ class Strategy extends Component
         await this.setCurrentAccount();
         this.setCurrentGlobalVariablesPreset();
 
-        const sio = this.handleSocket();
+        // const sio = this.handleSocket();
 
-        this.setState({ sio });
+        // this.setState({ sio });
+
+        if (this.props.getSio())
+        {
+            this.handleSocket();
+            if (this.props.getSio().connected)
+            {
+                this.socketConnect();
+            }
+        }
+        this.props.setStrategyOnConnect(this.socketConnect.bind(this));
 
         this.props.setShowLoadScreen(false);
     }
@@ -77,8 +87,13 @@ class Strategy extends Component
 
     componentWillUnmount()
     {
-        const { sio } = this.state;
-        if (sio !== undefined) sio.disconnect();
+        const sio = this.props.getSio();
+
+        sio.off('ontrade');
+        sio.off('ongui');
+        
+        // const { sio } = this.state;
+        // if (sio !== undefined) sio.disconnect();
     }
 
     render() {
@@ -267,43 +282,70 @@ class Strategy extends Component
         return String.fromCharCode.apply(null, myUint8Arr);
     }
 
+    socketConnect = () =>
+    {   
+        console.log('connected ' + this.props.id);
+        const current_account = this.getCurrentAccount();
+        if (current_account)
+        {
+            const broker_id = current_account.split('.')[0];
+            this.props.reconnectCharts(broker_id, true);
+        }
+        this.subscribe();
+        let strategy = this.getStrategyInfo();
+        if (strategy.account)
+        {
+            this.retrieveAccountInfo(strategy.account);
+        }
+    }
+
+    reconnect = (socket) =>
+    {
+        socket.connect();
+        setTimeout(() => {
+            if (!socket.connected)
+            {
+                console.log('NOT CONNECTED');
+                this.reconnect(socket);
+            }
+            else
+            {
+                console.log('IS CONNECTED');
+                this.socketConnect();
+            }
+        }, 5*1000);
+    }
+
     handleSocket()
     {
-        const { REACT_APP_STREAM_URL } = process.env;
-        const socket = io(`${REACT_APP_STREAM_URL}/user`, {
-            transportOptions: {
-                polling: {
-                    extraHeaders: {
-                        Authorization: `Bearer ${this.props.getCookies().get('Authorization')}`
-                    }
-                }
-            }
-        });
+        // const { REACT_APP_STREAM_URL } = process.env;
+        // const socket = io(`${REACT_APP_STREAM_URL}/user`, {
+        //     transportOptions: {
+        //         polling: {
+        //             extraHeaders: {
+        //                 Authorization: `Bearer ${this.props.getCookies().get('Authorization')}`
+        //             }
+        //         }
+        //     }
+        // });
 
-        socket.on('connect', () =>
-        {
-            console.log('connected ' + this.props.id);
-            const current_account = this.getCurrentAccount();
-            if (current_account)
-            {
-                const broker_id = current_account.split('.')[0];
-                this.props.reconnectCharts(broker_id, true);
-            }
-            this.subscribe();
-            let strategy = this.getStrategyInfo();
-            if (strategy.account)
-            {
-                this.retrieveAccountInfo(strategy.account);
-            }
-        });
+        const socket = this.props.getSio();
 
-        socket.on('disconnect', () =>
-        {
-            console.log('Disconnected ' + this.props.id)
-        });
+        // socket.on('connect', () =>
+        // {
+        //     this.socketConnect();
+        // });
+
+        // socket.on('disconnect', () =>
+        // {
+        //     this.reconnect(socket)
+        //     console.log('Disconnected ' + this.props.id)
+        // });
 
         socket.on('ontrade', (data) =>
         {
+            console.log(data);
+
             const { current_timestamp, transactions } = this.state;
 
             for (let k in data)
@@ -370,8 +412,6 @@ class Strategy extends Component
         });
 
         socket.on('ongui', this.addToEventQueue);
-
-        return socket;
     }
 
     addToEventQueue = (data) =>
@@ -513,7 +553,7 @@ class Strategy extends Component
 
     subscribe()
     {
-        const { sio } = this.state;
+        const sio = this.props.getSio();
         let strategy = this.getStrategyInfo();
         for (let broker_id in strategy.brokers)
         {
