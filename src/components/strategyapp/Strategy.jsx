@@ -305,12 +305,10 @@ class Strategy extends Component
         setTimeout(() => {
             if (!socket.connected)
             {
-                console.log('NOT CONNECTED');
                 this.reconnect(socket);
             }
             else
             {
-                console.log('IS CONNECTED');
                 this.socketConnect();
             }
         }, 5*1000);
@@ -344,8 +342,6 @@ class Strategy extends Component
 
         socket.on('ontrade', (data) =>
         {
-            console.log(data);
-
             const { current_timestamp, transactions } = this.state;
 
             for (let k in data)
