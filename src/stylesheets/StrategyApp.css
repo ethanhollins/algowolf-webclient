@@ -271,6 +271,34 @@
     color: rgb(140,140,140);
 }
 
+.toolbox.title-blue {
+    display: -webkit-box;
+    white-space: nowrap;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    padding: 2px 7px 2px 7px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: 500;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #3498db;
+    color: #FFF;
+}
+
+.toolbox.title-red {
+    display: -webkit-box;
+    white-space: nowrap;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    padding: 2px 7px 2px 7px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: 500;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #e74c3c;
+    color: #FFF;
+}
+
 .toolbox.label {
     display: -webkit-box;
     max-width: 150px;
@@ -402,6 +430,15 @@
     margin-left: 20px;
     transform: translateX(0px);
     transition: transform 0.2s ease-out;
+}
+
+.toolbox.right-icon.medium {
+    width: 14px;
+    height: 14px;
+    margin-left: 20px;
+    transform: translateX(0px);
+    transition: transform 0.2s ease-out;
+    color: rgb(80,80,80);
 }
 
 .toolbox.right-icon.large {

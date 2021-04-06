@@ -22,13 +22,9 @@ class WelcomeDemo extends Component
                     <div className='popup main-list'>
                         <div className='welcome body'>
                             <div className='welcome message'>
-                                <p>Welcome to the AlgoWolf demo platform.</p>
+                                <p>Welcome to the AlgoWolf automated platform.</p>
                                 <p>
-                                    This demo contains a recent day's backtest results, based on <span id='sp_bold'>Scott Phillip's Prison Paycheck</span> (aka Holy Grail) strategy, as determined by our algorithmic systems. 
-                                    These results are indicitive of the live signals our trading system produces.
-                                </p>
-                                <p>
-                                    Our algorithms can be used to generate precise trading signals and may be fully automated through your broker on our automated platform.
+                                    Our algorithms can be used to generate precise trading signals and are fully automated through your broker's platform.
                                 </p>
                                 <h2>Here's how to use it.</h2>
                                 <p>On our charts you will find icons and text drawn. Please refer to the legend below to see what they all mean.</p>
@@ -53,17 +49,11 @@ class WelcomeDemo extends Component
                                 <p>
                                     At the bottom of the screen you will see separate pages you can switch between.
                                     On the second page, you will find the spreadsheet results of the backtest for that session.
-                                    As this is a Paper Trader Demo, "Slippage" and "Real Entry" are not applicable.
-                                </p>
-                                <p>
                                     Clicking on the timestamp will set the charts on the main page to that time.
                                     Click back on the Main page to see that trade setup.
                                 </p>
                                 <p>
                                     The green/red vertical lines denote the start and finish of the trading session based on New York time 0300 - 0800.
-                                </p>
-                                <p>
-                                    The position sizing is based on a hypothetical $10K (USD) trading bank and a 1% risk.
                                 </p>
                                 <p>
                                     <span id='sp_bold'>Please Note:</span> Under <FontAwesomeIcon className='welcome message-icon steal-blue_btn' icon={faInfoCircle} /> <span className='steal-blue_btn' id='sp_bold'>Chart Info</span>, 'Pending' denotes a setup has commenced but still awaiting either H&T, CE or H/SS confirmation.

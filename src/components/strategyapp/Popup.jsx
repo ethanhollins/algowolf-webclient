@@ -3,6 +3,7 @@ import ChartSettings from './popups/ChartSettings';
 import BrokerSettings from './popups/BrokerSettings';
 import StrategySettings from './popups/StrategySettings';
 import WelcomeDemo from './popups/WelcomeDemo';
+import WelcomeLive from './popups/WelcomeLive';
 import NotAvailable from './popups/NotAvailable';
 import BetaUnavailable from './popups/BetaUnavailable';
 import LiveSignalService from './popups/LiveSignalService';
@@ -247,6 +248,12 @@ class Popup extends Component
             else if (popup.type === 'welcome-demo')
             {
                 return <WelcomeDemo
+                    getPopup={this.props.getPopup}
+                />
+            }
+            else if (popup.type === 'welcome-live')
+            {
+                return <WelcomeLive
                     getPopup={this.props.getPopup}
                 />
             }

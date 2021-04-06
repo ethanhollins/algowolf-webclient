@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faBars,  faChartLine, faChartPie,
     faLightbulb, faCode, faHistory, faChevronRight,
-    faQuestionCircle, faEnvelope
+    faQuestionCircle, faEnvelope, faArrowAltCircleRight
 } from '@fortawesome/pro-regular-svg-icons';
 import { 
     faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
@@ -98,6 +98,10 @@ class BacktestToolbar extends Component
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
                             <div className='dropdown-separator'></div>
+                            <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='my-dashboard'>
+                                <span className='toolbox left'>My Dashboard</span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faArrowAltCircleRight} className='toolbox right-icon' /></span>
+                            </div>
                             <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='home'>
                                 <span className='toolbox left'>Home</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faHome} className='toolbox right-icon' /></span>
@@ -108,6 +112,7 @@ class BacktestToolbar extends Component
                             </div>
                         </div>
                     </div>
+                    {this.generateTitle()}
                     <div className='toolbox item'>
                         <div ref={this.setChartsElem} className='toolbox item row btn' onClick={this.onChartsDropdown}>
                             <FontAwesomeIcon className='toolbox icon orange_btn' icon={faChartLine} />
@@ -363,6 +368,10 @@ class BacktestToolbar extends Component
         {
             this.props.history.push('/account-settings');
         }
+        else if (name === 'my-dashboard')
+        {
+            window.location = '/app';
+        }
         else if (name === 'home')
         {
             const { REACT_APP_FRONT_BASE_URL } = process.env;
@@ -481,6 +490,36 @@ class BacktestToolbar extends Component
         {
             if (!this.props.isWithinBounds(this.utilsDropdown.getBoundingClientRect(), mouse_pos))
                 this.utilsDropdown.style.display = 'none';
+        }
+    }
+
+    generateTitle = () =>
+    {
+        if (this.props.isDemo)
+        {
+            return (
+                <div 
+                    className='toolbox item' 
+                    // onClick={this.onNotAvailableItem}
+                >
+                    <div className='toolbox item row'>
+                        <span className='toolbox title-red'>Demo</span>
+                    </div>
+                </div>
+            );
+        }
+        else
+        {
+            return (
+                <div 
+                    className='toolbox item' 
+                    // onClick={this.onNotAvailableItem}
+                >
+                    <div className='toolbox item row'>
+                        <span className='toolbox title-blue'>My Dashboard</span>
+                    </div>
+                </div>
+            );
         }
     }
 }

@@ -2173,7 +2173,16 @@ class Chart extends Component
                 }
                 let text_width = ctx.measureText(text).width;
                 let position_size_width = ctx.measureText(String(lotsize)).width
-                let trade_label_width = trade_label_inside_off*4 + Math.floor(text_width) + Math.floor(position_size_width);
+
+                let trade_label_width;
+                if (this.props.isDemo)
+                {
+                    trade_label_width = trade_label_inside_off*4 + Math.floor(text_width) + Math.floor(position_size_width);
+                }
+                else
+                {
+                    trade_label_width = trade_label_inside_off*2 + Math.floor(text_width);
+                }
 
                 // Fill Rect
                 ctx.fillRect(
@@ -2207,22 +2216,25 @@ class Chart extends Component
                     Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
                 );
                 
-                ctx.beginPath();
-                ctx.moveTo(
-                    (Math.round(trade_label_off * window.devicePixelRatio)+0.5) + Math.round((Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
-                    Math.round((Math.floor(entry_pos.y - trade_label_height/2) + 0.5) * window.devicePixelRatio)
-                );
-                ctx.lineTo(
-                    Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
-                    Math.round((Math.floor(entry_pos.y - trade_label_height/2) + 0.5 + trade_label_height) * window.devicePixelRatio)
-                );
-                ctx.stroke();
-
-                ctx.fillText(
-                    String(lotsize), 
-                    Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3) * window.devicePixelRatio),
-                    Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
-                );
+                if (this.props.isDemo)
+                {
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        (Math.round(trade_label_off * window.devicePixelRatio)+0.5) + Math.round((Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
+                        Math.round((Math.floor(entry_pos.y - trade_label_height/2) + 0.5) * window.devicePixelRatio)
+                    );
+                    ctx.lineTo(
+                        Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
+                        Math.round((Math.floor(entry_pos.y - trade_label_height/2) + 0.5 + trade_label_height) * window.devicePixelRatio)
+                    );
+                    ctx.stroke();
+    
+                    ctx.fillText(
+                        String(lotsize), 
+                        Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3) * window.devicePixelRatio),
+                        Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
+                    );
+                }
             }
             else if (c_trade.order_type === 'stoporder')
             {
@@ -2240,7 +2252,15 @@ class Chart extends Component
                 }
                 let text_width = ctx.measureText(text).width;
                 let position_size_width = ctx.measureText(String(lotsize)).width
-                let trade_label_width = trade_label_inside_off*4 + Math.floor(text_width) + Math.floor(position_size_width);
+                let trade_label_width;
+                if (this.props.isDemo)
+                {
+                    trade_label_width = trade_label_inside_off*4 + Math.floor(text_width) + Math.floor(position_size_width);
+                }
+                else
+                {
+                    trade_label_width = trade_label_inside_off*2 + Math.floor(text_width);
+                }
 
                 // Fill Rect
                 ctx.fillRect(
@@ -2276,22 +2296,25 @@ class Chart extends Component
                     Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
                 );
                 
-                ctx.beginPath();
-                ctx.moveTo(
-                    Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
-                    Math.floor((entry_pos.y - trade_label_height/2) * window.devicePixelRatio) + 0.5
-                );
-                ctx.lineTo(
-                    Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
-                    Math.round((Math.floor(entry_pos.y - trade_label_height/2) + 0.5 + trade_label_height) * window.devicePixelRatio)
-                );
-                ctx.stroke();
+                if (this.props.isDemo)
+                {
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
+                        Math.floor((entry_pos.y - trade_label_height/2) * window.devicePixelRatio) + 0.5
+                    );
+                    ctx.lineTo(
+                        Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
+                        Math.round((Math.floor(entry_pos.y - trade_label_height/2) + 0.5 + trade_label_height) * window.devicePixelRatio)
+                    );
+                    ctx.stroke();
 
-                ctx.fillText(
-                    String(lotsize), 
-                    Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3) * window.devicePixelRatio),
-                    Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
-                );
+                    ctx.fillText(
+                        String(lotsize), 
+                        Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3) * window.devicePixelRatio),
+                        Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
+                    );
+                }
             }
             else
             {
@@ -2306,7 +2329,15 @@ class Chart extends Component
                 }
                 let text_width = ctx.measureText(text).width;
                 let position_size_width = ctx.measureText(String(lotsize)).width
-                let trade_label_width = trade_label_inside_off*4 + Math.floor(text_width) + Math.floor(position_size_width);
+                let trade_label_width;
+                if (this.props.isDemo)
+                {
+                    trade_label_width = trade_label_inside_off*4 + Math.floor(text_width) + Math.floor(position_size_width);
+                }
+                else
+                {
+                    trade_label_width = trade_label_inside_off*2 + Math.floor(text_width);
+                }
 
                 // Fill Circle
                 ctx.beginPath();
@@ -2337,22 +2368,25 @@ class Chart extends Component
                     Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
                 );
                 
-                ctx.beginPath();
-                ctx.moveTo(
-                    Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
-                    Math.floor((entry_pos.y - trade_label_height/2) * window.devicePixelRatio) + 0.5
-                );
-                ctx.lineTo(
-                    Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
-                    Math.round((Math.floor(entry_pos.y - trade_label_height/2) + 0.5 + trade_label_height) * window.devicePixelRatio)
-                );
-                ctx.stroke();
+                if (this.props.isDemo)
+                {
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
+                        Math.floor((entry_pos.y - trade_label_height/2) * window.devicePixelRatio) + 0.5
+                    );
+                    ctx.lineTo(
+                        Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*2) * window.devicePixelRatio), 
+                        Math.round((Math.floor(entry_pos.y - trade_label_height/2) + 0.5 + trade_label_height) * window.devicePixelRatio)
+                    );
+                    ctx.stroke();
 
-                ctx.fillText(
-                    String(lotsize), 
-                    Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3) * window.devicePixelRatio),
-                    Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
-                );
+                    ctx.fillText(
+                        String(lotsize), 
+                        Math.round(((trade_label_off+0.5) + Math.floor(text_width) + trade_label_inside_off*3) * window.devicePixelRatio),
+                        Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
+                    );
+                }
             }
             
         }

@@ -79,6 +79,7 @@ class StrategyApp extends Component
         this.updateAccountInputVariables = this.updateAccountInputVariables.bind(this);
         this.subscribeEmail = this.subscribeEmail.bind(this);
         this.handleSocket = this.handleSocket.bind(this);
+        this.updateCurrentAccount = this.updateCurrentAccount.bind(this);
 
         this.setAppContainerRef = elem => {
             this.appContainer = elem;
@@ -793,6 +794,7 @@ class StrategyApp extends Component
                     stopScript={this.stopScript.bind(this)}
                     isWithinBounds={this.isWithinBounds}
                     setPopup={this.setPopup}
+                    updateCurrentAccount={this.updateCurrentAccount}
                 />
             }
         }
@@ -1227,7 +1229,13 @@ class StrategyApp extends Component
         );
         if (res.status === 200)
         {
-            return await res.json();
+            // .then(res => res.text())
+            //         .then(res => {
+            //             res = res.replace(/\bNaN\b/g, null);
+            //             return JSON.parse(res);
+            //         });
+            const data = await res.text();
+            return JSON.parse(data.replace(/\bNaN\b/g, null));
         }
         else if (res.status === 403)
         {
@@ -1803,6 +1811,11 @@ class StrategyApp extends Component
                     // chart.asks.push([null,null,null,null]);
                     chart.mids.push([null,null,null,null]);
                     // chart.bids.push([null,null,null,null]);
+
+                    if (this.strategy)
+                    {
+                        this.strategy.advanceBar(this.getPeriodOffsetSeconds(item['period']));
+                    }
                 }
                 else if (item['timestamp'] >= chart.next_timestamp)
                 {
@@ -2700,6 +2713,30 @@ class StrategyApp extends Component
         if (lastChange !== null)
         {
             return (new Date().getTime() - lastChange/1000) >= WAIT_FOR_SAVE;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    async updateCurrentAccount(strategy_id, account_code)
+    {
+        const { REACT_APP_API_URL } = process.env;
+        var requestOptions = {
+            method: 'PUT',
+            credentials: 'include',
+            headers: this.props.getHeaders(),
+            body: JSON.stringify({
+                account_code: account_code
+            })
+        };
+
+        const res = await fetch(`${REACT_APP_API_URL}/v1/strategy/${strategy_id}/current_account`, requestOptions);
+
+        if (res.status === 200)
+        {
+            return true;
         }
         else
         {

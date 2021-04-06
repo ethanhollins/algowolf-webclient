@@ -614,6 +614,20 @@ class Strategy extends Component
         }
     }
 
+    advanceBar = (chart_offset) =>
+    {
+        const { current_timestamp, selected_offset } = this.state;
+
+        if (current_timestamp && chart_offset == selected_offset)
+        {
+            console.log('-----');
+            console.log(current_timestamp);
+            console.log(selected_offset);
+            console.log(this.getRoundedTimestamp(current_timestamp + selected_offset));
+            this.handleTransactions(this.getRoundedTimestamp(current_timestamp + selected_offset));
+        }
+    }
+
     addPosition = (position) =>
     {
         let strategy = this.getStrategyInfo();

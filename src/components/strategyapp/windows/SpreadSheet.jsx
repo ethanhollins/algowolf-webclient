@@ -175,9 +175,13 @@ class SpreadSheet extends Component
                     else
                     {
                         const col_name = Object.keys(data)[j-1];
-                        const cell = data[col_name][i];
+                        let cell = data[col_name][i];
 
-                        if (col_name in format)
+                        if (cell === null)
+                        {
+                            cell = 'N/A';
+                        }
+                        else if (col_name in format)
                         {
                             if (format[col_name].type !== undefined)
                             {
@@ -310,7 +314,7 @@ class SpreadSheet extends Component
                         else
                         {
                             const col_name = Object.keys(data)[j-1];
-                            const cell = data[col_name][i];
+                            let cell = data[col_name][i];
                             
                             // TEMP
                             if (col_name === 'R Profit')
@@ -322,8 +326,11 @@ class SpreadSheet extends Component
                                 old_exit += parseFloat(cell);
                             }
     
-    
-                            if (col_name in format)
+                            if (cell === null)
+                            {
+                                cell = 'N/A';
+                            }
+                            else if (col_name in format)
                             {
                                 if (format[col_name].type !== undefined)
                                 {

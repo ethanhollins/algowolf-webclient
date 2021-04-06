@@ -7,7 +7,7 @@ import {
     faBars,  faChartLine, faChartPie, faPlay, faStop,
     faLightbulb, faCode, faHistory, faChevronRight, faChevronDown, 
     faTools, faExpandArrowsAlt, faLink, faExpandAlt, faQuestionCircle,
-    faInfoCircle, faRobot
+    faInfoCircle, faRobot, faArrowAltCircleRight
 } from '@fortawesome/pro-regular-svg-icons';
 import { 
     faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
@@ -105,16 +105,21 @@ class StrategyToolbar extends Component
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
                             <div className='dropdown-separator'></div>
+                            <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='my-dashboard'>
+                                <span className='toolbox left'>My Dashboard</span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faArrowAltCircleRight} className='toolbox right-icon medium' /></span>
+                            </div>
                             <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='home'>
                                 <span className='toolbox left'>Home</span>
-                                <span className='toolbox right'><FontAwesomeIcon icon={faHome} className='toolbox right-icon' /></span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faHome} className='toolbox right-icon medium' /></span>
                             </div>
                             <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='logout'>
                                 <span className='toolbox left'>Logout</span>
-                                <span className='toolbox right'><FontAwesomeIcon icon={faSignOut} className='toolbox right-icon' /></span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faSignOut} className='toolbox right-icon medium' /></span>
                             </div>
                         </div>
                     </div>
+                    {this.generateTitle()}
                     <div ref={this.setAccountsElem} className='toolbox item row'>
                         <FontAwesomeIcon className='toolbox icon small black' icon={faUser} />
                         {this.generateAccounts()}
@@ -274,6 +279,7 @@ class StrategyToolbar extends Component
                             <span className='toolbox label'>Backtest</span>
                         </div>
                     </div>
+                    {this.generateLiveToolbarBtns()}
                     {this.generateDemoToolbarBtns()}
                 </div>
             </div> 
@@ -492,6 +498,73 @@ class StrategyToolbar extends Component
         }
     }
 
+    generateTitle = () =>
+    {
+        if (this.props.isDemo)
+        {
+            return (
+                <div 
+                    className='toolbox item' 
+                    // onClick={this.onNotAvailableItem}
+                >
+                    <div className='toolbox item row'>
+                        <span className='toolbox title-red'>Demo</span>
+                    </div>
+                </div>
+            );
+        }
+        else
+        {
+            return (
+                <div 
+                    className='toolbox item' 
+                    // onClick={this.onNotAvailableItem}
+                >
+                    <div className='toolbox item row'>
+                        <span className='toolbox title-blue'>My Dashboard</span>
+                    </div>
+                </div>
+            );
+        }
+    }
+
+    generateLiveToolbarBtns = () =>
+    {
+        const { REACT_APP_FRONT_BASE_URL } = process.env;
+        
+        if (!this.props.isDemo)
+        {
+            return (
+                <React.Fragment>
+
+                <div className='toolbox separator' />
+                <div 
+                    className='toolbox item' 
+                    onClick={this.onLiveHelpItem.bind(this)}
+                    // onClick={this.onNotAvailableItem}
+                >
+                    <div className='toolbox item row btn'>
+                        <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faQuestionCircle} />
+                        <span className='toolbox label'>Help</span>
+                    </div>
+                </div>
+                <a 
+                    className='toolbox item' 
+                    href='/holygrail/demo'
+                    // onClick={this.onLiveHelpItem.bind(this)}
+                    // onClick={this.onNotAvailableItem}
+                >
+                    <div className='toolbox item row btn'>
+                        <FontAwesomeIcon className='toolbox icon red_btn' icon={faArrowAltCircleRight} />
+                        <span className='toolbox label'>Goto Demo</span>
+                    </div>
+                </a>
+
+                </React.Fragment>
+            );
+        }
+    }
+
     generateDemoToolbarBtns = () =>
     {
         const { REACT_APP_FRONT_BASE_URL } = process.env;
@@ -504,10 +577,10 @@ class StrategyToolbar extends Component
                 <div className='toolbox separator' />
                 <div 
                     className='toolbox item' 
-                    onClick={this.onHelpItem.bind(this)}
+                    onClick={this.onDemoHelpItem.bind(this)}
                     // onClick={this.onNotAvailableItem}
                 >
-                    <div ref={this.setScriptElem} className='toolbox item row btn'>
+                    <div className='toolbox item row btn'>
                         <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faQuestionCircle} />
                         <span className='toolbox label'>Help</span>
                     </div>
@@ -530,7 +603,7 @@ class StrategyToolbar extends Component
                     target="_blank"
                     // onClick={this.onNotAvailableItem}
                 >
-                    <div ref={this.setBacktestElem} className='toolbox item row btn'>
+                    <div className='toolbox item row btn'>
                         <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faRobot} />
                         <span className='toolbox label'>Automated Trading</span>
                     </div>
@@ -703,6 +776,10 @@ class StrategyToolbar extends Component
         {
             this.props.history.push('/account-settings');
         }
+        else if (name === 'my-dashboard')
+        {
+            window.location = '/app';
+        }
         else if (name === 'home')
         {
             const { REACT_APP_FRONT_BASE_URL } = process.env;
@@ -715,7 +792,20 @@ class StrategyToolbar extends Component
         
     }
 
-    onHelpItem = (e) =>
+    onLiveHelpItem = (e) =>
+    {
+        const popup = {
+            type: 'welcome-live',
+            size: {
+                width: 40,
+                height: 70
+            },
+            fade: true
+        }
+        this.props.setPopup(popup);
+    }
+
+    onDemoHelpItem = (e) =>
     {
         const popup = {
             type: 'welcome-demo',
@@ -849,6 +939,7 @@ class StrategyToolbar extends Component
             strategy.account = account_id;
             strategy_component.retrieveAccountInfo(account_id);
             this.props.updateStrategyInfo();
+            this.props.updateCurrentAccount(this.props.getCurrentStrategy(), strategy.account);
         }
     }
 
