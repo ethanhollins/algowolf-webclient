@@ -7,12 +7,11 @@ import {
     faBars,  faChartLine, faChartPie, faPlay, faStop,
     faLightbulb, faCode, faHistory, faChevronRight, faChevronDown, 
     faTools, faExpandArrowsAlt, faLink, faExpandAlt, faQuestionCircle,
-    faInfoCircle, faRobot, faArrowAltCircleRight
+    faInfoCircle, faRobot, faArrowAltCircleRight, faHome, faSignOut
 } from '@fortawesome/pro-regular-svg-icons';
 import { 
     faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
-    faFileInvoice, faChartBar, faTicketAlt, faLayerGroup, faUser,
-    faSignOut, faHome
+    faFileInvoice, faChartBar, faTicketAlt, faLayerGroup, faUser
 } from '@fortawesome/pro-light-svg-icons';
 
 

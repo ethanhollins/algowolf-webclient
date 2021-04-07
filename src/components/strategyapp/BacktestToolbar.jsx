@@ -3,12 +3,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faBars,  faChartLine, faChartPie,
     faLightbulb, faCode, faHistory, faChevronRight,
-    faQuestionCircle, faEnvelope, faArrowAltCircleRight
+    faQuestionCircle, faEnvelope, faArrowAltCircleRight, faHome, faSignOut
 } from '@fortawesome/pro-regular-svg-icons';
 import { 
     faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
     faFileInvoice, faChartBar, faTicketAlt, faLayerGroup,
-    faSignOut, faInfoCircle, faScroll, faHome
+    faInfoCircle, faScroll
 } from '@fortawesome/pro-light-svg-icons';
 
 class BacktestToolbar extends Component
@@ -100,15 +100,15 @@ class BacktestToolbar extends Component
                             <div className='dropdown-separator'></div>
                             <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='my-dashboard'>
                                 <span className='toolbox left'>My Dashboard</span>
-                                <span className='toolbox right'><FontAwesomeIcon icon={faArrowAltCircleRight} className='toolbox right-icon' /></span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faArrowAltCircleRight} className='toolbox right-icon medium' /></span>
                             </div>
                             <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='home'>
                                 <span className='toolbox left'>Home</span>
-                                <span className='toolbox right'><FontAwesomeIcon icon={faHome} className='toolbox right-icon' /></span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faHome} className='toolbox right-icon medium' /></span>
                             </div>
                             <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='logout'>
                                 <span className='toolbox left'>Logout</span>
-                                <span className='toolbox right'><FontAwesomeIcon icon={faSignOut} className='toolbox right-icon' /></span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faSignOut} className='toolbox right-icon medium' /></span>
                             </div>
                         </div>
                     </div>
