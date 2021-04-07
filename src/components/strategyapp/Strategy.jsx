@@ -620,10 +620,6 @@ class Strategy extends Component
 
         if (current_timestamp && chart_offset == selected_offset)
         {
-            console.log('-----');
-            console.log(current_timestamp);
-            console.log(selected_offset);
-            console.log(this.getRoundedTimestamp(current_timestamp + selected_offset));
             this.handleTransactions(this.getRoundedTimestamp(current_timestamp + selected_offset));
         }
     }

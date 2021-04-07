@@ -786,6 +786,11 @@ class Backtest extends Component
     {
         
     }
+
+    advanceBar = (chart_offset) =>
+    {
+        
+    }
 }
 
 const ARROW_LEFT = 37;

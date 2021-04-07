@@ -2175,7 +2175,7 @@ class Chart extends Component
                 let position_size_width = ctx.measureText(String(lotsize)).width
 
                 let trade_label_width;
-                if (this.props.isDemo)
+                if (!this.props.isDemo)
                 {
                     trade_label_width = trade_label_inside_off*4 + Math.floor(text_width) + Math.floor(position_size_width);
                 }
@@ -2216,7 +2216,7 @@ class Chart extends Component
                     Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
                 );
                 
-                if (this.props.isDemo)
+                if (!this.props.isDemo)
                 {
                     ctx.beginPath();
                     ctx.moveTo(
@@ -2253,7 +2253,7 @@ class Chart extends Component
                 let text_width = ctx.measureText(text).width;
                 let position_size_width = ctx.measureText(String(lotsize)).width
                 let trade_label_width;
-                if (this.props.isDemo)
+                if (!this.props.isDemo)
                 {
                     trade_label_width = trade_label_inside_off*4 + Math.floor(text_width) + Math.floor(position_size_width);
                 }
@@ -2296,7 +2296,7 @@ class Chart extends Component
                     Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
                 );
                 
-                if (this.props.isDemo)
+                if (!this.props.isDemo)
                 {
                     ctx.beginPath();
                     ctx.moveTo(
@@ -2330,7 +2330,7 @@ class Chart extends Component
                 let text_width = ctx.measureText(text).width;
                 let position_size_width = ctx.measureText(String(lotsize)).width
                 let trade_label_width;
-                if (this.props.isDemo)
+                if (!this.props.isDemo)
                 {
                     trade_label_width = trade_label_inside_off*4 + Math.floor(text_width) + Math.floor(position_size_width);
                 }
@@ -2368,7 +2368,7 @@ class Chart extends Component
                     Math.round((Math.floor(entry_pos.y) + 0.5 + (3/4 * font_size)/2) * window.devicePixelRatio)
                 );
                 
-                if (this.props.isDemo)
+                if (!this.props.isDemo)
                 {
                     ctx.beginPath();
                     ctx.moveTo(

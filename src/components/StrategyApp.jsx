@@ -1812,10 +1812,10 @@ class StrategyApp extends Component
                     chart.mids.push([null,null,null,null]);
                     // chart.bids.push([null,null,null,null]);
 
-                    if (this.strategy)
-                    {
-                        this.strategy.advanceBar(this.getPeriodOffsetSeconds(item['period']));
-                    }
+                    // if (this.strategy)
+                    // {
+                    //     this.strategy.advanceBar(this.getPeriodOffsetSeconds(item['period']));
+                    // }
                 }
                 else if (item['timestamp'] >= chart.next_timestamp)
                 {
