@@ -9,8 +9,10 @@ import Transactions from './Transactions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faScroll, faInfoCircle, faSlidersVSquare, 
-    faFileInvoice, faSort, faReceipt, faChevronDown 
+    faFileInvoice, faSort, faReceipt, faChevronDown, faChartPie
 } from '@fortawesome/pro-regular-svg-icons';
+import Graph from './Graph';
+import ResultsPage from './ResultsPage';
 
 class Dockable extends Component
 {
@@ -238,6 +240,28 @@ class Dockable extends Component
                     </div>
                 );
             }
+            else if (w.type === 'graph')
+            {
+                elem = (
+                    <div key={w.id} ref={this.addTabElem} className={class_name} name={w.id} onClick={this.onTabClick.bind(this)}>
+    
+                    <FontAwesomeIcon icon={faChartPie} className='dockable icon' />
+                    <div>Graph</div>
+                    
+                    </div>
+                );
+            }
+            else if (w.type === 'results-page')
+            {
+                elem = (
+                    <div key={w.id} ref={this.addTabElem} className={class_name} name={w.id} onClick={this.onTabClick.bind(this)}>
+    
+                    <FontAwesomeIcon icon={faChartPie} className='dockable icon' />
+                    <div>Results Page</div>
+                    
+                    </div>
+                );
+            }
 
             if (elem !== undefined)
             {
@@ -346,6 +370,28 @@ class Dockable extends Component
         
                         <FontAwesomeIcon icon={faReceipt} className='dockable icon' />
                         <div>Transactions</div>
+                        
+                        </div>
+                    );
+                }
+                else if (w.type === 'graph')
+                {
+                    elem = (
+                        <div key={i} name={w.id} className={class_name}>
+        
+                        <FontAwesomeIcon icon={faChartPie} className='dockable icon' />
+                        <div>Graph</div>
+                        
+                        </div>
+                    );
+                }
+                else if (w.type === 'results-page')
+                {
+                    elem = (
+                        <div key={i} name={w.id} className={class_name}>
+        
+                        <FontAwesomeIcon icon={faChartPie} className='dockable icon' />
+                        <div>Results Page</div>
                         
                         </div>
                     );
@@ -498,6 +544,28 @@ class Dockable extends Component
                 setChartPositionsByTimestamp={this.props.setChartPositionsByTimestamp}
                 getTransactions={this.props.getTransactions}
             />
+        }
+        else if (type === 'graph')
+        {
+            return <Graph 
+                key={this.props.item_id}
+                ref={this.setInnerWindowRef}
+                strategy_id={this.props.strategy_id}
+                item_id={window.id}
+                info={window}
+                retrieveReport={this.props.retrieveReport}
+            />;
+        }
+        else if (type === 'results-page')
+        {
+            return <ResultsPage
+                key={this.props.item_id}
+                ref={this.setInnerWindowRef}
+                strategy_id={this.props.strategy_id}
+                item_id={window.id}
+                info={window}
+                retrieveReport={this.props.retrieveReport}
+            />;
         }
     }
 
