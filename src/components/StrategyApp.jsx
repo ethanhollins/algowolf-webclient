@@ -571,10 +571,34 @@ class StrategyApp extends Component
                 {
                     className += ' selected'
                 }
+
+                let background_color = "#ffffff";
+                if (s.backgroundColor)
+                {
+                    background_color = s.backgroundColor;
+                }
+
+                const rgb = this.hexToRgb(background_color);
+                let text_color;
+                let close_btn_class = '';
+                if (this.useBlackText(rgb))
+                {
+                    text_color = "#000";
+                }
+                else
+                {
+                    text_color = "#FFF";
+                    close_btn_class = " light"
+                }
+
                 tabs.push(
-                    <div key={i} className={className} name={i} onClick={this.setOpenStrategy.bind(this)}>
+                    <div 
+                        key={i} className={className} name={i} 
+                        onClick={this.setOpenStrategy.bind(this)}
+                        style={{ backgroundColor: background_color, borderBottomColor: background_color, color: text_color }}
+                    >
                         <span>{s.name}</span>
-                        <FontAwesomeIcon className='tab btn' icon={faTimes} onClick={this.onNotAvailableItem} />
+                        <FontAwesomeIcon className={'tab btn' + close_btn_class} icon={faTimes} onClick={this.onNotAvailableItem} />
                     </div>
                 );      
             }
@@ -3091,6 +3115,21 @@ class StrategyApp extends Component
     setStrategyOnConnect = (strategyOnConnect) =>
     {
         this.setState({ strategyOnConnect });
+    }
+
+    hexToRgb(hex) 
+    {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+          r: parseInt(result[1], 16),
+          g: parseInt(result[2], 16),
+          b: parseInt(result[3], 16)
+        } : null;
+    }
+
+    useBlackText(rgb)
+    {
+        return rgb.r*0.299 + rgb.g*0.587 + rgb.b*0.114 > 186;
     }
 
 }

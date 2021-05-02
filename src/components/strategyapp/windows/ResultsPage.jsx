@@ -4,6 +4,7 @@ import StatLarge from './StatLarge';
 import moment from "moment-timezone";
 import StatTable from './StatTable';
 import HeaderBlock from './HeaderBlock';
+import BtnBlock from './BtnBlock';
 
 class ResultsPage extends Component
 {
@@ -161,6 +162,13 @@ class ResultsPage extends Component
                         description={item.properties.description}
                     />
                 }
+                else if (item.type === 'btn-block')
+                {
+                    elem = <BtnBlock 
+                        value={item.properties.value}
+                        link={item.properties.link}
+                    />
+                }
 
                 items.push(
                     <div
@@ -218,200 +226,7 @@ class ResultsPage extends Component
    
     getItems()
     {
-        return [{
-            type: 'header',
-            x: 0,
-            y: 0,
-            width: 6,
-            height: 1,
-            properties: {
-                title: 'Prison Paycheck Optimized System',
-                description: 'This algorithm takes advantage of the best features the Prison Paycheck system has to offer, and throws out unprofitable aspects. The strategy has been built with commisions in mind so that at the end of the day, you can come away with real money.'
-            }
-        },
-        {
-            type: 'graph',
-            x: 0,
-            y: 1,
-            width: 6,
-            height: 4,
-            properties: {
-                title: 'Equity (R)',
-                description: 'Total R profit before commisions.',
-                data: {
-                    x: [{
-                        report: {
-                            name: "System Results",
-                            col: "Time",
-                            type: "date",
-                            formatting: {
-                                timezone: 'Australia/Melbourne'
-                            }
-                        }
-                    }],
-                    y: [{
-                        report: {
-                            name: "System Results",
-                            col: "R Profit",
-                            type: "aggregate"
-                        }
-                    }]
-                }
-            }
-        },
-        {
-            type: 'stat-large',
-            x: 0,
-            y: 5,
-            width: 2,
-            height: 1,
-            properties: {
-                type: 'aggregate',
-                title: 'Return (R)',
-                data: {
-                    report: {
-                        name: "System Results",
-                        col: "R Profit",
-                        type: "decimal"
-                    }
-                }
-            }
-        },
-        {
-            type: 'stat-large',
-            x: 2,
-            y: 5,
-            width: 2,
-            height: 1,
-            properties: {
-                type: 'win-percentage',
-                title: 'Win Percentage',
-                data: {
-                    report: {
-                        name: "System Results",
-                        col: "R Profit",
-                        type: "decimal"
-                    }
-                }
-            }
-        },
-        {
-            type: 'stat-large',
-            x: 4,
-            y: 5,
-            width: 2,
-            height: 1,
-            properties: {
-                type: 'expectancy-ratio',
-                title: 'Expectancy Ratio',
-                data: {
-                    report: {
-                        name: "System Results",
-                        col: "R Profit",
-                        type: "decimal"
-                    }
-                }
-            }
-        },
-        {
-            type: 'graph',
-            x: 3,
-            y: 6,
-            width: 3,
-            height: 4,
-            properties: {
-                title: 'Compounded (R) inc. Comms',
-                description: 'Total compounded R profit before commisions.',
-                data: {
-                    x: [{
-                        report: {
-                            name: "System Results",
-                            col: "Time",
-                            type: "date",
-                            formatting: {
-                                timezone: 'Australia/Melbourne'
-                            }
-                        }
-                    }],
-                    y: [{
-                        report: {
-                            name: "System Results",
-                            cols: [
-                                "R Profit", "Lotsize"
-                            ],
-                            type: "compounded-commision-aggregate"
-                        }
-                    }]
-                }
-            }
-        },
-        {
-            type: 'stat-table',
-            x: 0,
-            y: 6,
-            width: 3,
-            height: 4,
-            properties: {
-                data: {
-                    datasets: [{
-                        type: 'total-trades',
-                        title: 'Total Trades',
-                        report: {
-                            name: "System Results",
-                            col: "R Profit",
-                            type: "decimal"
-                        }
-                    },
-                    {
-                        type: 'drawdown',
-                        title: 'Drawdown (R)',
-                        report: {
-                            name: "System Results",
-                            col: "R Profit",
-                            type: "decimal"
-                        }
-                    },
-                    {
-                        type: 'sharpe-ratio',
-                        title: 'Sharpe Ratio',
-                        report: {
-                            name: "System Results",
-                            col: "R Profit",
-                            type: "decimal"
-                        }
-                    },
-                    {
-                        type: 'profit-factor',
-                        title: 'Profit Factor',
-                        report: {
-                            name: "System Results",
-                            col: "R Profit",
-                            type: "decimal"
-                        }
-                    },
-                    {
-                        type: 'commision-total',
-                        title: 'Total Commisions (R)',
-                        report: {
-                            name: "System Results",
-                            col: "Lotsize",
-                            type: "decimal"
-                        }
-                    },
-                    {
-                        type: 'compounded-commision-total',
-                        title: 'Total Compounded (R) inc. Comms',
-                        report: {
-                            name: "System Results",
-                            cols: [
-                                "R Profit", "Lotsize"
-                            ],
-                            type: "decimal"
-                        }
-                    }]
-                }
-            }
-        }];
+        return this.props.info.properties.items;
     }
 
     async retrieveReport(name)
@@ -472,8 +287,6 @@ class ResultsPage extends Component
     {
         const r_profit = x[0];
         const lotsizes = x[1];
-        console.log('compounded comm');
-        console.log(x);
         
         const start_bank = 10000;
         const comm_price = 7.0;
@@ -518,6 +331,27 @@ class ResultsPage extends Component
             {
                 dt = dt.format('YYYY-MM-DD HH:mm:ss');
             }
+            result.push(dt);
+        }
+        return result;
+    }
+
+    processMomentDates(x, props)
+    {
+        x = x[0];
+        let result = [];
+        for (let i of x)
+        {
+            let dt;
+            if ('formatting' in props && 'timezone' in props.formatting)
+            {
+                dt = moment(i).tz(props.formatting.timezone);
+            }
+            else
+            {
+                dt = moment(i).tz('UTC');
+            }
+
             result.push(dt);
         }
         return result;
@@ -656,6 +490,49 @@ class ResultsPage extends Component
         return Math.round(comm_total / bank * 10000)/100;
     }
 
+    processSqn(x, props)
+    {
+        x = x[0];
+
+        let rx = this.processAggregate([x], {});
+        rx = rx[rx.length-1];
+        const mean = rx / x.length;
+
+        let sum = 0;
+        for (let i of x)
+        {
+            sum += Math.pow(i - mean, 2);
+        }
+        const std = Math.sqrt(sum/x.length);
+
+        return Math.sqrt(x.length) * mean / std;
+    }
+
+    processSqn100(x, props)
+    {
+        x = x[0];
+        x = x.slice(x.length-100, x.length);
+
+        let rx = this.processAggregate([x], {});
+        rx = rx[rx.length-1];
+        const mean = rx / x.length;
+
+        let sum = 0;
+        for (let i of x)
+        {
+            sum += Math.pow(i - mean, 2);
+        }
+        const std = Math.sqrt(sum/x.length);
+
+        return Math.sqrt(x.length) * mean / std;
+    }
+
+    processDaysTotal(x, props)
+    {
+        x = x[0];
+        return Math.ceil(Math.abs(x[0].diff(x[x.length-1], 'days', true)));
+    }
+
     getDataTypeProcessor = (x) =>
     {
         if (x === 'number')
@@ -683,6 +560,10 @@ class ResultsPage extends Component
         {
             return this.processDates;
         }
+        else if (x === 'moment-date')
+        {
+            return this.processMomentDates;
+        }
         else
         {
             return this.processNoType;
@@ -707,8 +588,21 @@ class ResultsPage extends Component
             {
                 col = formatting.cols;
             }
-            const data_type = formatting.type;
-            const data_type_processor = this.getDataTypeProcessor(data_type);
+
+            let data_type_processor = [];
+            if ('type' in formatting)
+            {
+                const data_type = formatting.type;
+                data_type_processor.push(this.getDataTypeProcessor(data_type));
+            }
+            else if ('types' in formatting)
+            {
+                const data_types = formatting.types;
+                for (let i of data_types)
+                {
+                    data_type_processor.push(this.getDataTypeProcessor(i))
+                }
+            }
 
             let data_cols = [];
             for (let i=0; i < col.length; i++)
@@ -718,17 +612,17 @@ class ResultsPage extends Component
 
             if (type === 'graph')
             {
-                return data_type_processor(data_cols, formatting);
+                return data_type_processor[0](data_cols, formatting);
             }
             else if (type === 'aggregate')
             {
-                let result = data_type_processor(data_cols, formatting);
+                let result = data_type_processor[0](data_cols, formatting);
                 result = this.processAggregate([result], {});
                 return result[result.length-1].toFixed(2);
             }
             else if (type === 'expectancy-ratio')
             {
-                let result = data_type_processor(data_cols, formatting);
+                let result = data_type_processor[0](data_cols, formatting);
                 const num_win_loss = this.processWinLoss([result], {});
                 const avg_win_loss = this.processAvgWinLoss([result], {});
                 const total_trades = num_win_loss[0] + num_win_loss[1];
@@ -740,38 +634,38 @@ class ResultsPage extends Component
             }
             else if (type === 'win-percentage')
             {
-                let result = data_type_processor(data_cols, formatting);
+                let result = data_type_processor[0](data_cols, formatting);
                 result = this.processWinLoss([result]);
                 return ((result[0] / (result[0] + result[1])) * 100).toFixed(2) + '%';
             }
             else if (type === 'total-trades')
             {
-                let result = data_type_processor(data_cols, formatting);
+                let result = data_type_processor[0](data_cols, formatting);
                 return result.length;
             }
             else if (type === 'drawdown')
             {
-                let result = data_type_processor(data_cols, formatting);
+                let result = data_type_processor[0](data_cols, formatting);
                 return this.processDrawdown([result], {}).toFixed(2);
             }
             else if (type === 'sharpe-ratio')
             {
-                let result = data_type_processor(data_cols, formatting);
+                let result = data_type_processor[0](data_cols, formatting);
                 return this.processSharpeRatio([result]).toFixed(2);
             }
             else if (type === 'profit-factor')
             {
-                let result = data_type_processor(data_cols, formatting);
+                let result = data_type_processor[0](data_cols, formatting);
                 return this.processProfitFactor([result]).toFixed(2);
             }
             else if (type === 'commision-total')
             {
-                let result = data_type_processor(data_cols, formatting);
+                let result = data_type_processor[0](data_cols, formatting);
                 return this.processCommisionTotal([result]).toFixed(2);
             }
             else if (type === 'compounded-total')
             {
-                let result = data_type_processor(data_cols, formatting);
+                let result = data_type_processor[0](data_cols, formatting);
                 result = this.processCompoundedAggregate([result]);
                 return result[result.length-1].toFixed(2);
             }
@@ -780,6 +674,67 @@ class ResultsPage extends Component
                 // let result = data_type_processor(data_cols, formatting);
                 let result = this.processCompoundedCommisionAggregate(data_cols, formatting);
                 return result[result.length-1].toFixed(2);
+            }
+            else if (type === 'sqn')
+            {
+                let result = data_type_processor[0](data_cols, formatting);
+                result = this.processSqn([result]);
+                return result.toFixed(2);
+            }
+            else if (type === 'sqn100')
+            {
+                let result = data_type_processor[0](data_cols, formatting);
+                result = this.processSqn100([result]);
+                return result.toFixed(2);
+            }
+            else if (type === 'days-total')
+            {
+                let result = data_type_processor[0](data_cols, formatting);
+                result = this.processDaysTotal([result]);
+                return result;
+            }
+            else if (type === 'weeks-total')
+            {
+                let result = data_type_processor[0](data_cols, formatting);
+                console.log(result);
+                result = this.processDaysTotal([result]);
+                return (result / 7).toFixed(1);
+            }
+            else if (type === 'months-total')
+            {
+                let result = data_type_processor[0](data_cols, formatting);
+                result = this.processDaysTotal([result]);
+                return (result / (365/12)).toFixed(1);
+            }
+            else if (type === 'years-total')
+            {
+                let result = data_type_processor[0](data_cols, formatting);
+                result = this.processDaysTotal([result]);
+                return (result / 365).toFixed(1);
+            }
+            else if (type === 'per-annum')
+            {
+                let times = data_type_processor[0]([data_cols[0]], formatting);
+                let numbers = data_type_processor[1]([data_cols[1]], formatting);
+                let num_days = this.processDaysTotal([times]);
+                let agg = this.processAggregate([numbers]);
+                agg = agg[agg.length-1];
+
+                return (agg / (num_days / 365)).toFixed(2);
+            }
+            else if (type === 'per-week')
+            {
+                let times = data_type_processor[0]([data_cols[0]], formatting);
+                let numbers = data_type_processor[1]([data_cols[1]], formatting);
+                let num_days = this.processDaysTotal([times]);
+                let agg = this.processAggregate([numbers]);
+                agg = agg[agg.length-1];
+
+                return (agg / (num_days / 365) / 52).toFixed(2);
+            }
+            else
+            {
+                return '';
             }
             
         }
