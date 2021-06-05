@@ -31,7 +31,7 @@ class Auth extends Component
 
         if (provider === 'spotware')
         {
-            message = 'Please wait while we connect your broker...';
+            message = 'Connecting your broker...';
             this.setState({ message });
 
             const reqOptions = {
@@ -63,7 +63,7 @@ class Auth extends Component
         }
         else if (provider === 'holygrail')
         {
-            message = 'Please wait while we redirect you to Holy Grail...';
+            message = 'Redirecting you to Holy Grail...';
             this.setState({ message });
 
             const reqOptions = {
@@ -79,6 +79,28 @@ class Auth extends Component
 
             window.location = '/holygrail/demo';
         }
+        else if (provider === 'ib')
+        {
+            message = 'Connecting your broker...';
+            this.setState({ message });
+
+            let params = new URLSearchParams(queryString);
+            let port = params.get('uid');
+            const reqOptions = {
+                method: 'POST',
+                headers: this.props.getHeaders(),
+                credentials: 'include',
+                body: JSON.stringify({ port: port })
+            }
+
+            await fetch(
+                `${REACT_APP_API_URL}/v1/ib/auth/confirmed`,
+                reqOptions
+            )
+
+            window.location = `/app`
+        }
+
 
         // let { auth_complete } = this.state;
         // auth_complete = true;
@@ -87,21 +109,81 @@ class Auth extends Component
 
     render()
     {
-        const { message } = this.state;
-
-        // if (this.state.auth_complete)
-        // {
-        //     return <Redirect to="/app" />;
-        // }
-        // else
-        // {
+        console.log('??');
         return (
-            <div className='auth'>
-                {message}
+            <div className='auth-login background'>
+                {this.getLoadingGUI()}
             </div>
         );
-        // }
         
+    }
+
+    getLoadingGUI()
+    {
+        const { message } = this.state;
+        const paths = this.props.location.pathname.split('/');
+        const provider = paths[paths.length-1];
+        
+        if (provider === 'oanda')
+        {
+            return (
+                <div className='auth-login body oanda'>
+                    <a href='#' target="_blank">
+                        <img class='auth-login logo oanda' src={process.env.PUBLIC_URL + '/oanda_logo_large.png'} />
+                    </a>
+                    <div className='auth-login message'>Connecting your broker...</div>
+                    <div class="dot-flashing"></div>
+                </div>
+            );
+        }
+        else if (provider === 'ib')
+        {
+            return (
+                <div className='auth-login body ib'>
+                    <a href='#' target="_blank">
+                        <img class='auth-login logo ib' src={process.env.PUBLIC_URL + '/interactive_brokers_logo_large.png'} />
+                    </a>
+                    <div className='auth-login message'>Connecting your broker...</div>
+                    <div class="dot-flashing"></div>
+                </div>
+            );
+        }
+        else if (provider === 'fxcm')
+        {
+            return (
+                <div className='auth-login body fxcm'>
+                    <a href='#' target="_blank">
+                        <img class='auth-login logo fxcm' src={process.env.PUBLIC_URL + '/fxcm_logo_large.png'} />
+                    </a>
+                    <div className='auth-login message'>Connecting your broker...</div>
+                    <div class="dot-flashing"></div>
+                </div>
+            );
+        }
+        else if (provider === 'spotware')
+        {
+            return (
+                <div className='auth-login body spotware'>
+                    <a href='#' target="_blank">
+                        <img class='auth-login logo spotware' src={process.env.PUBLIC_URL + '/ctrader_logo_large.png'} />
+                    </a>
+                    <div className='auth-login message'>Connecting your broker...</div>
+                    <div class="dot-flashing"></div>
+                </div>
+            );
+        }
+        else if (provider === 'holygrail')
+        {
+            return (
+                <div className='auth-login body holygrail'>
+                    <a href='#' target="_blank">
+                        <img class='auth-login logo holygrail' src={process.env.PUBLIC_URL + '/holygrail_icon.jpg'} />
+                    </a>
+                    <div className='auth-login message'>Redirecting you to Holy Grail...</div>
+                    <div class="dot-flashing"></div>
+                </div>
+            );
+        }
     }
 }
 

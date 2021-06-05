@@ -6,6 +6,7 @@ import io from 'socket.io-client';
 import moment from "moment-timezone";
 import _ from 'underscore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowAltCircleUp } from '@fortawesome/pro-regular-svg-icons';
 import { faTimes, faPlus, faMinus, faAngleRight, faAngleLeft } from '@fortawesome/pro-light-svg-icons';
 import Strategy from './strategyapp/Strategy';
 import StrategyToolbar from './strategyapp/StrategyToolbar';
@@ -14,6 +15,7 @@ import Backtest from './strategyapp/Backtest';
 import BacktestToolbar from './strategyapp/BacktestToolbar';
 import Popup from './strategyapp/Popup';
 import { ReactSVG } from 'react-svg';
+import NotificationWindow from './strategyapp/NotificationWindow';
 
 class StrategyApp extends Component
 {
@@ -46,7 +48,9 @@ class StrategyApp extends Component
         undone: [],
         lastChange: null,
         show_load_screen: true,
-        strategyOnConnect: null
+        strategyOnConnect: null,
+        notifications: [],
+        notifTimerSet: false
     }
 
     constructor(props)
@@ -59,6 +63,7 @@ class StrategyApp extends Component
         this.updateWindowDimensions = this.updateWindowDimensions.bind(this);
         this.onKeyDown = this.onKeyDown.bind(this);
         this.onKeyUp = this.onKeyUp.bind(this);
+        this.onWindowFocus = this.onWindowFocus.bind(this);
         
         this.getPopup = this.getPopup.bind(this);
         this.setPopup = this.setPopup.bind(this);
@@ -110,6 +115,7 @@ class StrategyApp extends Component
         window.addEventListener("resize", this.update);
         window.addEventListener("keydown", this.onKeyDown);
         window.addEventListener("keyup", this.onKeyUp);
+        window.addEventListener("focus", this.onWindowFocus);
 
         let { checkLogin } = this.state;
         
@@ -124,92 +130,16 @@ class StrategyApp extends Component
         sio = this.handleSocket();
         this.setState({ sio });
         const strategyInfo = await this.retrieveStrategies(account.metadata.open_strategies, account);
+
         this.setState({ account, strategyInfo });
-        
-        // Retrieve user specific strategy informations
     
-        if (!this.props.isDemo)
-        {
-            if (user_id)
-            {
-                // if (account.admin)
-                // {
-                    
-                // }
-                // else
-                // {
-                //     const popup = {
-                //         type: 'down-for-maintenance',
-                //         size: {
-                //             pixelWidth: 550,
-                //             pixelHeight: 320
-                //         },
-                //         image: '/down_for_maintenance.png',
-                //         fade: true,
-                //         permanent: true
-                //     };
-                //     this.setPopup(popup);
-                // }
-                if (!account.beta_access)
-                {
-                    const popup = {
-                        type: 'beta-unavailable',
-                        size: {
-                            pixelWidth: 550,
-                            pixelHeight: 420
-                        },
-                        image: '/get_access_popup.png',
-                        fade: true
-                    };
-                    this.setPopup(popup);
-                    // window.location = '/holygrail/demo';
-                }
-                else
-                {
-                    const queryString = window.location.search;
-                    let params = new URLSearchParams(queryString);
-                    // if (params.get('brokerSuccess'))
-                    // {
-                    //     const popup = {
-                    //         type: 'broker-message',
-                    //         size: {
-                    //             pixelWidth: 550,
-                    //             pixelHeight: 300
-                    //         },
-                    //         image: '/broker_success.png',
-                    //         message: params.get('brokerSuccess')
-                    //     };
-                    //     this.setPopup(popup);
-                    // }
-                    // else if (params.get('brokerError'))
-                    // {
-                    //     const popup = {
-                    //         type: 'broker-message',
-                    //         size: {
-                    //             pixelWidth: 550,
-                    //             pixelHeight: 300
-                    //         },
-                    //         image: '/broker_failed.png',
-                    //         message: params.get('brokerError')
-                    //     };
-                    //     this.setPopup(popup);
-                    // }
-                    // else
-                    // {
-                    // const popup = {
-                    //     type: 'notice',
-                    //     size: {
-                    //         pixelWidth: 550,
-                    //         pixelHeight: 300
-                    //     },
-                    //     fade: true
-                    // };
-                    // this.setPopup(popup);
-                    // }
-                }
-            }
-        }
-        else
+        setTimeout(() => {
+            this.addNotification();
+            this.addNotification();
+        }, 10*1000);
+
+        // Retrieve user specific strategy informations
+        if (this.props.isDemo)
         {
             const user_id = await this.props.checkAuthorization();
             if (!user_id)
@@ -218,7 +148,7 @@ class StrategyApp extends Component
                     type: 'sign-up-prompt',
                     size: {
                         pixelWidth: 550,
-                        pixelHeight: 540
+                        pixelHeight: 520
                     },
                     image: '/request_access_prison_paycheck.png',
                     fade: true,
@@ -237,7 +167,7 @@ class StrategyApp extends Component
                             type: 'request-demo-access',
                             size: {
                                 pixelWidth: 550,
-                                pixelHeight: 390
+                                pixelHeight: 340
                             },
                             image: '/request_access_prison_paycheck.png',
                             fade: true,
@@ -249,19 +179,6 @@ class StrategyApp extends Component
                         };
                         this.setPopup(popup);
                     }
-                    else
-                    {
-                        // const popup = {
-                        //     type: 'live-signal-service',
-                        //     size: {
-                        //         pixelWidth: 550,
-                        //         pixelHeight: 350
-                        //     },
-                        //     image: '/live_signal_service.png',
-                        //     fade: true
-                        // };
-                        // this.setPopup(popup);
-                    }
                 }
                 else
                 {
@@ -269,7 +186,7 @@ class StrategyApp extends Component
                         type: 'request-demo-access',
                         size: {
                             pixelWidth: 550,
-                            pixelHeight: 420
+                            pixelHeight: 340
                         },
                         image: '/request_access_prison_paycheck.png',
                         fade: true,
@@ -285,21 +202,6 @@ class StrategyApp extends Component
             this.props.visitorCounter();
         }
 
-        
-        // if (this.props.isDemo)
-        // {
-        //     const popup = {
-        //         type: 'welcome-demo',
-        //         size: {
-        //             width: 40,
-        //             height: 70
-        //         },
-        //         fade: true
-        //     };
-        //     this.setPopup(popup);
-        //     this.props.visitorCounter();
-        // }
-
         this.is_loaded = true;
     }
 
@@ -310,6 +212,7 @@ class StrategyApp extends Component
         window.removeEventListener("resize", this.update);
         window.removeEventListener("keydown", this.onKeyDown);
         window.removeEventListener("keyup", this.onKeyUp);
+        window.addEventListener("focus", this.onWindowFocus);
 
         this.is_loaded = false;
     }
@@ -332,7 +235,7 @@ class StrategyApp extends Component
         if (checkLogin && (this.props.getUserId() !== null || this.props.isDemo))
         {
             return (
-                <div className='main container'>
+                <div className='main-app container'>
 
                 <div 
                     className='chart_app' 
@@ -367,6 +270,8 @@ class StrategyApp extends Component
                     {this.generateToolbar()}
                     <div className='toolbox_shadow'/> 
 
+                    {this.generateNotifications()}
+
                     <Popup
                         isDemo={this.props.isDemo}
                         history={this.props.history}
@@ -393,7 +298,12 @@ class StrategyApp extends Component
                         subscribeEmail={this.subscribeEmail}
                         onFirstVisit={this.onFirstVisit}
                         getTimezones={this.getTimezones}
+                        resetIndicators={this.resetIndicators}
+                        findIndicator={this.findIndicator}
+                        calculateAllChartIndicators={this.calculateAllChartIndicators}
+                        addToSave={this.addToSave}
                     />
+                    
                     
                 </div>
                 
@@ -839,6 +749,81 @@ class StrategyApp extends Component
         }
     }
 
+    generateNotifications()
+    {
+        const { notifications, show_load_screen } = this.state;
+
+        if (!show_load_screen)
+        {
+            let result = [];
+            for (let i=0; i < notifications.length; i++)
+            {
+                const notif = notifications[i];
+                result.push(
+                    <NotificationWindow 
+                        key={i} idx={i}
+                        header={notif.header}
+                        description={notif.description}
+                    />
+                );
+            }
+    
+            return result;
+        }
+    }
+
+    addNotification()
+    {
+        let { notifications } = this.state;
+        if (notifications.length === 0)
+        {
+            this.deleteNotification();
+        }
+
+        notifications.push(
+            {
+                header: <span>Long Position Entered</span>,
+                description: (
+                    <React.Fragment>
+
+                    <FontAwesomeIcon className='notif icon' icon={faArrowAltCircleUp} />
+                    <span className='notif text'><strong>EUR/USD</strong> Long Position entered at <strong>1.12543</strong></span>
+
+                    </React.Fragment>
+                )
+            }
+        );
+        this.setState({ notifications });
+    }
+
+    deleteNotification()
+    {
+        let { notifications, notifTimerSet } = this.state;
+        notifTimerSet = true;
+        this.setState({ notifTimerSet });
+
+        setTimeout(() => {
+            if (!document.hidden)
+            {
+                notifications.splice(0, 1);
+                if (notifications.length > 0)
+                {
+                    this.deleteNotification();
+                }
+                else
+                {
+                    notifTimerSet = false;
+                }
+            }
+            else
+            {
+                notifTimerSet = false;
+            }
+            this.setState({ notifications, notifTimerSet });
+
+        }, 11*1000);
+    }
+
     mobileCheck() 
     {
         let check = false;
@@ -946,7 +931,7 @@ class StrategyApp extends Component
                 }
             }
             // Add to history
-            this.addToSave(strategy_id, this.getStrategyWindowIds(strategy_id));
+            this.addToSave(strategy_id, this.getStrategyWindowIds(strategy_id), WAIT_FOR_SAVE);
     
             this.setState({ strategyInfo });
         }
@@ -1035,6 +1020,15 @@ class StrategyApp extends Component
         {
             keys.splice(keys.indexOf(e.keyCode));
             this.setState({ keys });
+        }
+    }
+
+    onWindowFocus(e)
+    {
+        const { notifications, notifTimerSet } = this.state;
+        if (notifications.length > 0 && !notifTimerSet)
+        {
+            this.deleteNotification();
         }
     }
 
@@ -2640,7 +2634,7 @@ class StrategyApp extends Component
         return true;
     }
 
-    addToSave = (strategy_id, item_ids) =>
+    addToSave = (strategy_id, item_ids, timeout) =>
     {
         if (!strategy_id.includes('/backtest/'))
         {
@@ -2655,7 +2649,7 @@ class StrategyApp extends Component
             }
     
             lastChange = new Date().getTime();
-            this.onSaveTimeout();
+            this.onSaveTimeout(timeout);
             this.setState({ toSave, lastChange });
         }
     }
@@ -2663,7 +2657,7 @@ class StrategyApp extends Component
     addHistory = (strategy_id, new_item) =>
     {
         let { history } = this.state;
-        this.addToSave(strategy_id, [new_item.id]);
+        this.addToSave(strategy_id, [new_item.id], WAIT_FOR_SAVE);
         
         if (!history.hasOwnProperty(strategy_id))
         {
@@ -2694,7 +2688,7 @@ class StrategyApp extends Component
 
     }
 
-    onSaveTimeout = () =>
+    onSaveTimeout = (timeout) =>
     {
         setTimeout(() => {
             let { toSave, lastChange } = this.state;
@@ -2705,7 +2699,7 @@ class StrategyApp extends Component
                 toSave = {};
                 this.setState({ toSave, lastChange });
             }
-        }, (WAIT_FOR_SAVE+1)*1000);
+        }, (timeout+1)*1000);
     } 
 
     handleSaveResult(result)
@@ -2865,10 +2859,10 @@ class StrategyApp extends Component
     onNotAvailableItem = (e) =>
     {
         const popup = {
-            type: 'not-available',
+            type: 'coming-soon',
             size: {
-                width: 30,
-                height: 30
+                pixelWidth: 600,
+                pixelHeight: 760
             }
         }
         this.setPopup(popup);
@@ -3098,7 +3092,7 @@ class StrategyApp extends Component
         }
         else if (broker === 'oanda')
         {
-            return Math.round(size / 1000000 * 10000) / 10000;
+            return Math.round(size / 100000 * 100000) / 100000;
         }
         else
         {

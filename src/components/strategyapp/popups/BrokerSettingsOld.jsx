@@ -14,7 +14,9 @@ class BrokerSettings extends Component
     state = {
         modes: {},
         brokers: {},
-        is_loaded: false
+        is_loaded: false,
+        perform_scroll: false,
+        waitUrl: ''
     }
 
     async componentDidMount()
@@ -39,6 +41,20 @@ class BrokerSettings extends Component
         this.setSpotwareInfo = elem => {
             this.spotwareInfo = elem;
         }
+    }
+
+    componentDidUpdate()
+    {
+        // let { perform_scroll } = this.state;
+        // if (perform_scroll)
+        // {
+        //     perform_scroll = false
+        //     this.main.scrollTo({
+        //         top: this.main.scrollHeight,
+        //         behavior: 'smooth'
+        //     });
+        //     this.setState({ perform_scroll });
+        // }
     }
 
     render()
@@ -111,7 +127,7 @@ class BrokerSettings extends Component
 
     async onConnect(e)
     {
-        let { modes, brokers } = this.state;
+        let { modes, brokers, waitUrl } = this.state;
         const broker_id = this.props.getPopup().opened;
         const { REACT_APP_API_URL, REACT_APP_SPOTWARE_REDIRECT, REACT_APP_SPOTWARE_CLIENT_ID, REACT_APP_IB_REDIRECT_BASE } = process.env;
 
@@ -165,7 +181,9 @@ class BrokerSettings extends Component
                     const url = `${REACT_APP_IB_REDIRECT_BASE}:${data.port}/?token=${data.token}`;
                     console.log(url);
                     
-                    this.setState({ modes });
+                    waitUrl = `/auth/ib?port=${data.port}`;
+                    modes[broker_id] = 'wait';
+                    this.setState({ modes, waitUrl });
 
                     window.open(url);
                 }
@@ -286,6 +304,12 @@ class BrokerSettings extends Component
                 this.props.updateStrategyInfo();
             }
         }
+    }
+
+    onWait()
+    {
+        const { waitUrl } = this.state;
+        window.location = waitUrl;
     }
 
     onEditBtn(e)
@@ -484,8 +508,208 @@ class BrokerSettings extends Component
 
     getAddMode = (selected) =>
     {
-        const { brokers } = this.state;
+        const { brokers, perform_scroll } = this.state;
         const broker_info = brokers[selected];
+
+        let stage_one_elem;
+        if (broker_info.broker !== undefined)
+        {
+            if (broker_info.broker === 'oanda')
+            {
+                stage_one_elem = (
+                    <React.Fragment key={selected + '_one'}>
+
+                    <div className='popup row'>
+                        <div className='popup title large'>2. Enter your broker details.</div>
+                    </div>
+
+                    <div className='popup input-center'>
+                        <div id='popup_demo_selector'>
+                            <div 
+                                id='popup_demo_left' 
+                                className={this.isItemSelected(false, broker_info.is_demo)}
+                                onClick={this.setIsDemo.bind(this)}
+                                name='live'
+                            >
+                                Live
+                            </div>
+                            <div 
+                                id='popup_demo_right' 
+                                className={this.isItemSelected(true, broker_info.is_demo)}
+                                onClick={this.setIsDemo.bind(this)}
+                                name='demo'
+                            >
+                                Demo
+                            </div>
+                        </div>
+                    </div>
+                    <div className='popup input-center'>
+                        <div className='popup input'>
+                            <div className='popup title'>Name</div>
+                            <input 
+                                className='popup text-input'
+                                defaultValue={broker_info.name}
+                                onChange={this.onTextInputChange.bind(this)} 
+                                placeholder='Set Broker Name'
+                                name='name'
+                            />
+                        </div>
+                    </div>
+                    <div className='popup input-center'>
+                        <div className='popup input'>
+                            <div className='popup title'>Access Token</div>
+                            <input 
+                                className='popup text-input' onChange={this.onTextInputChange.bind(this)} 
+                                placeholder='Set Oanda Access Token' name='key' 
+                            />
+                        </div>
+                    </div>
+                    <div className='popup input-center'>
+                        <div className='popup info'>
+                            <span>Instructions to find your access token, or <a href="https://www.oanda.com/demo-account/tpa/personal_token" target="_blank">Click Here</a></span>
+                            <ol>
+                                <li>Log into your Oanda account <a href="https://www.oanda.com/account/login" target="_blank">here</a>.</li>
+                                <li>Scroll down to <strong>My Services</strong> and navigate to <strong>Manage API Acess</strong>.</li>
+                                <li>Click on the <strong>Generate</strong> button.</li>
+                                <li>Copy the token and paste it into the above text box.</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div className='popup input-center'>
+                        <div className='popup center' onClick={this.onConnect.bind(this)}>
+                            <div className='popup connect-btn'>Connect</div>
+                        </div>
+                    </div>
+
+                    </React.Fragment>
+                );
+            }
+            else if (broker_info.broker === 'ig')
+            {
+                stage_one_elem = (
+                    <React.Fragment key={selected + '_one'}>
+
+                    <div className='popup row'>
+                        <div className='popup title large'>2. Enter your broker details.</div>
+                    </div>
+
+                    <div className='popup input-center'>
+                        <div id='popup_demo_selector'>
+                            <div 
+                                id='popup_demo_left' 
+                                className={this.isItemSelected(false, broker_info.is_demo)}
+                                onClick={this.setIsDemo.bind(this)}
+                                name='live'
+                            >
+                                Live
+                            </div>
+                            <div 
+                                id='popup_demo_right' 
+                                className={this.isItemSelected(true, broker_info.is_demo)}
+                                onClick={this.setIsDemo.bind(this)}
+                                name='demo'
+                            >
+                                Demo
+                            </div>
+                        </div>
+                    </div>
+                    <div className='popup input-center'>
+                        <div className='popup input'>
+                            <div className='popup title'>Name</div>
+                            <input 
+                                className='popup text-input'
+                                defaultValue={broker_info.name}
+                                onChange={this.onTextInputChange.bind(this)} 
+                                placeholder='Set Broker Name'
+                                name='name'
+                            />
+                        </div>
+                    </div>
+                    <div className='popup input-center'>
+                        <div className='popup input'>
+                            <div className='popup title'>Username</div>
+                            <input 
+                                className='popup text-input' defaultValue={broker_info.username} 
+                                onChange={this.onTextInputChange.bind(this)} name='username' 
+                                placeholder='Set IG Username'
+                            />
+                        </div>
+                    </div>
+                    <div className='popup input-center'>
+                        <div className='popup input'>
+                            <div className='popup title'>Password</div>
+                            <input 
+                                className='popup text-input' type='password'
+                                onChange={this.onTextInputChange.bind(this)} name='password' 
+                                placeholder='Set IG Password'
+                            />
+                        </div>
+                    </div>
+                    <div className='popup input-center'>
+                        <div className='popup input'>
+                            <div className='popup title'>Access Token</div>
+                            <input 
+                                className='popup text-input' onChange={this.onTextInputChange.bind(this)} 
+                                placeholder='Set IG Access Token' name='key'
+                            />
+                        </div>
+                    </div>
+                    <div className='popup row'>
+                        <div className='popup center' onClick={this.onConnect.bind(this)}>
+                            <div className='popup connect-btn'>Connect</div>
+                        </div>
+                    </div>
+
+                    </React.Fragment>
+                );
+            }
+            else if (broker_info.broker === 'ib')
+            {
+                stage_one_elem = (
+                    <React.Fragment key={selected + '_one'}>
+
+                    <div className='popup row'>
+                        <div className='popup title large'>2. Connect to your broker.</div>
+                    </div>
+
+                    <div className='popup row'>
+                        <div className='popup center' onClick={this.onConnect.bind(this)}>
+                            <div className='popup connect-btn'>Connect</div>
+                        </div>
+                    </div>
+
+                    </React.Fragment>
+                );
+            }
+            else if ([
+                'spotware', 'icmarkets', 'fxpro', 'pepperstone', 
+                'axiory', 'fondex', 'octafx', 'scandinavian_capital_markets',
+                'skilling', 'omf', 'tradeview'
+            ].includes(broker_info.broker))
+            {
+                stage_one_elem = (
+                    <React.Fragment key={selected + '_one'}>
+
+                    <div className='popup row'>
+                        <div className='popup title large'>2. Connect to your broker.</div>
+                    </div>
+
+                    <div className='popup row'>
+                        <div className='popup center' onClick={this.onConnect.bind(this)}>
+                            <div className='popup connect-btn'>Connect</div>
+                        </div>
+                    </div>
+
+                    </React.Fragment>
+                );
+            }
+        }
+        else
+        {
+            stage_one_elem = (
+                <React.Fragment></React.Fragment>
+            );
+        }
 
         return (
             <React.Fragment key={selected + '_main'}>
@@ -626,8 +850,20 @@ class BrokerSettings extends Component
                     </div>
                 </div>
             </div>
+            {/* {stage_one_elem} */}
 
             </React.Fragment>
+        );
+    }
+
+    getWaitMode = (mode, selected) =>
+    {
+        return (
+            <div className='popup row'>
+                <div className='popup center' onClick={this.onWait.bind(this)}>
+                    <div className='popup connect-btn'>Click Once Logged In</div>
+                </div>
+            </div>
         );
     }
 
@@ -764,8 +1000,12 @@ class BrokerSettings extends Component
                 {
                     const data = await res.json();
                     console.log(data);
+
+                    const url = `${REACT_APP_IB_REDIRECT_BASE}:${data.port}/?token=${data.token}`;
+                    console.log(url);
                     
-                    window.location = `/auth/ib/login?uid=${data.port}&token=${data.token}&sid=${this.props.getStrategyId()}`;
+                    window.open(url);
+                    window.location = `/auth/ib/login?uid=${data.port}`;
                 }
                 else
                 {
@@ -864,18 +1104,6 @@ class BrokerSettings extends Component
                 >
                     <img className='popup broker-img' src={process.env.PUBLIC_URL + '/ctrader_logo.png'} />
                     <div className='popup broker-text'>cTrader</div>
-                </div>
-            );
-        }
-        else if (broker_name === 'ib')
-        {
-            return (
-                <div 
-                    className='popup broker disabled selected'
-                    name='ib'
-                >
-                    <img className='popup broker-img' src={process.env.PUBLIC_URL + '/interactive_brokers_logo.png'} />
-                    <div className='popup broker-text'>Interactive Brokers</div>
                 </div>
             );
         }

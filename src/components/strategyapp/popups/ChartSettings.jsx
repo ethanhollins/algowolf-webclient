@@ -25,7 +25,8 @@ class ChartSettings extends Component
     }
 
     state = {
-        selected_dropdown: null
+        selected_dropdown: null,
+        changed: {}
     }
 
     componentDidMount()
@@ -82,7 +83,7 @@ class ChartSettings extends Component
             </div>
             <div className='popup footer'>
                 <div className='popup dropdown'>
-                    <div className='popup dropdown-btn layout-dropdown' onClick={this.onDropdownClick}>
+                    <div className='popup dropdown-btn layout-dropdown disabled' onClick={this.onDropdownClick}>
                         <span>Layout 1</span>
                         <FontAwesomeIcon icon={faChevronDown} />
                     </div>
@@ -182,30 +183,6 @@ class ChartSettings extends Component
                                 <div className='popup dropdown-item' name={'font-size value'} value={20}>28</div>
                                 <div className='popup dropdown-item' name={'font-size value'} value={20}>32</div>
                                 <div className='popup dropdown-item' name={'font-size value'} value={20}>40</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div className='popup table-row'>
-                <div className='popup table-cell'>
-                    <div className='popup left'>Precision</div>
-                </div>
-                <div className='popup table-cell'>
-                    <div className='popup right'>
-                        <div ref={this.addDropdownRef} className='popup dropdown'>
-                            <div className='popup dropdown-btn' onClick={this.onDropdownClick}>
-                                <span>{settings['precision'].value}</span>
-                                <FontAwesomeIcon icon={faChevronDown} />
-                            </div>
-                            <div className='popup dropdown-content' onClick={this.onDropdownSelectGeneral}>
-                                <div className='popup dropdown-item' name={'precision value'} value={'1/1'}>{'1/1'}</div>
-                                <div className='popup dropdown-item' name={'precision value'} value={'1/10'}>{'1/10'}</div>
-                                <div className='popup dropdown-item' name={'precision value'} value={'1/100'}>{'1/100'}</div>
-                                <div className='popup dropdown-item' name={'precision value'} value={'1/1000'}>{'1/1000'}</div>
-                                <div className='popup dropdown-item' name={'precision value'} value={'1/10000'}>{'1/10000'}</div>
-                                <div className='popup dropdown-item' name={'precision value'} value={'1/100000'}>{'1/100000'}</div>
-                                <div className='popup dropdown-item' name={'precision value'} value={'1/1000000'}>{'1/1000000'}</div>
                             </div>
                         </div>
                     </div>
@@ -335,46 +312,6 @@ class ChartSettings extends Component
                             category={'appearance'}
                             sub={'wick'}
                             name={'short'}
-                            getProperty={this.getProperty}
-                            setProperty={this.setProperty}
-                            setHoverOn={this.props.setHoverOn}
-                            setHoverOff={this.props.setHoverOff}
-                        />
-                    </div>
-                </div>
-            </div>
-            <div className='popup table-row'>
-                <div className='popup table-cell'>
-                    <div className='popup left'>
-                        <label className='popup checkbox'>
-                            <input 
-                                type='checkbox' 
-                                defaultChecked={settings['bid-ask-line']['enabled']}
-                                onChange={this.onAppearanceCheckboxInputChange.bind(this)}
-                                name={'bid-ask-line'}
-                            />
-                            <div className='checkmark'></div>
-                        </label>
-                        <div>Bid/Ask Line</div>
-                    </div>
-                </div>
-                <div className='popup table-cell'>
-                    <div className='popup right'>
-                        <ColorSwatch 
-                            key={'bid-ask-line'}
-                            category={'appearance'}
-                            sub={'bid-ask-line'}
-                            name={'bid'}
-                            getProperty={this.getProperty}
-                            setProperty={this.setProperty}
-                            setHoverOn={this.props.setHoverOn}
-                            setHoverOff={this.props.setHoverOff}
-                        />
-                        <ColorSwatch 
-                            key={'bid-ask-line'}
-                            category={'appearance'}
-                            sub={'bid-ask-line'}
-                            name={'ask'}
                             getProperty={this.getProperty}
                             setProperty={this.setProperty}
                             setHoverOn={this.props.setHoverOn}
@@ -522,6 +459,7 @@ class ChartSettings extends Component
                             <input 
                                 type='checkbox' 
                                 defaultChecked={settings['show-positions']['enabled']}
+                                onChange={this.onTradingCheckboxInputChange.bind(this)}
                             />
                             <div className='checkmark'></div>
                         </label>
@@ -540,6 +478,7 @@ class ChartSettings extends Component
                             <input 
                                 type='checkbox' 
                                 defaultChecked={settings['show-orders']['enabled']}
+                                onChange={this.onTradingCheckboxInputChange.bind(this)}
                             />
                             <div className='checkmark'></div>
                         </label>
@@ -609,6 +548,13 @@ class ChartSettings extends Component
 
     setProperty = (category, sub, name, value) =>
     {
+        let { changed } = this.state;
+        if (!(category+':'+sub+':'+name in changed))
+        {
+            changed[category+':'+sub+':'+name] = this.getChartSettings()[category][sub][name];
+            this.setState({ changed });
+        }
+
         this.getChartSettings()[category][sub][name] = value;
         this.props.updateStrategyInfo();
     }
@@ -665,6 +611,13 @@ class ChartSettings extends Component
     onDropdownSelect = (e, category, sub, name, value) =>
     {
         this.resetSelectedDropdown();
+
+        let { changed } = this.state;
+        if (!(category+':'+sub+':'+name in changed))
+        {
+            changed[category+':'+sub+':'+name] = this.getChartSettings()[category][sub][name];
+            this.setState({ changed });
+        }
 
         this.getChartSettings()[category][sub][name] = value;
         this.props.updateStrategyInfo();
@@ -731,6 +684,14 @@ class ChartSettings extends Component
         this.onEnabledToggle('appearance', sub, checked);
     }
 
+    onTradingCheckboxInputChange(e)
+    {
+        const checked = e.target.checked;
+        const sub = e.target.getAttribute('name');
+        
+        this.onEnabledToggle('trading', sub, checked);
+    }
+
     getLayouts = () =>
     {
         const settings = this.props.getStrategyInfo(this.props.getStrategyId()).settings['chart-settings'];
@@ -756,11 +717,24 @@ class ChartSettings extends Component
 
     onCancel = () =>
     {
+        let { changed } = this.state;
+
+        for (let i in changed)
+        {
+            const category = i.split(':')[0];
+            const sub = i.split(':')[1];
+            const name = i.split(':')[2];
+            const value = changed[i];
+            this.getChartSettings()[category][sub][name] = value;
+        }
+        this.props.updateStrategyInfo();
+        
         this.props.close();
     }
 
     onApply = () =>
     {
+        this.props.addToSave(this.props.getStrategyId(), [], 0);
         this.props.close();
     }
 }

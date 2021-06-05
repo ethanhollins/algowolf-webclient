@@ -75,6 +75,17 @@ class Indicator {
         this.cache_mids = [];
         // this.cache_bids = [];
     }
+
+    setProperties = (broker, product, chart_period, properties, appearance) =>
+    {
+        this.broker = broker;
+        this.product = product;
+        this.chart_period = chart_period;
+        this.properties = properties;
+        this.appearance = appearance;
+        this.period = properties.Period.value;
+        this.min_bars = this.period;
+    }
 }
 
 /**
@@ -522,6 +533,257 @@ class tr extends Indicator
 }
 
 
+// Relative Strength Index
+class rsi extends Indicator
+{
+    constructor(broker, product, chart_period, properties, appearance)
+    {
+        super();
+
+        this.type = 'rsi';
+        this.broker = broker;
+        this.product = product;
+        this.chart_period = chart_period;
+        this.properties = properties;
+        this.appearance = appearance;
+        this.period = properties.Period.value;
+        this.min_bars = this.period;
+        this.precision = 5;
+
+        this.display_name = `RSI ${this.period}`;
+
+        this.cache_ts = [];
+        // this.cache_asks = [];
+        this.cache_mids = [];
+        // this.cache_bids = [];
+        this.cache_rsi = [];
+    }
+
+    get_value(i, ohlc, values)
+    {
+        // Validation Check
+        if (i < this.min_bars)
+        {
+            this.cache_rsi.push([null, null]);
+            return [null];
+        }
+        else if (ohlc[i].every((x) => x === null))
+        {
+            this.cache_rsi.push(this.cache_rsi[i-1]);
+            return [null];
+        }
+
+        let prev_gain;
+        let prev_loss;
+
+        prev_gain = this.cache_rsi[i-1][0];
+        prev_loss = this.cache_rsi[i-1][1];
+
+        let gain_sum = 0;
+        let loss_sum = 0;
+        let chng;
+        let gain_avg;
+        let loss_avg;
+        if (prev_gain)
+        {
+            chng = ohlc[i][3] - ohlc[i-1][3];
+            if (chng >= 0)
+            {
+                gain_sum += chng;
+            }
+            else
+            {
+                loss_sum += Math.abs(chng);
+            }
+
+            gain_avg = (prev_gain * (this.period-1) + gain_sum)/this.period;
+            loss_avg = (prev_loss * (this.period-1) + loss_sum)/this.period;
+        }
+        else
+        {
+            for (let x = i+1-this.period; x < i+1; x++)
+            {
+                chng = ohlc[x][3] - ohlc[x-1][3];
+
+                if (chng >= 0)
+                {
+                    gain_sum += chng;
+                }
+                else
+                {
+                    loss_sum += Math.abs(chng)
+                }
+            }
+            
+            gain_avg = gain_sum / this.period;
+            loss_avg = loss_sum / this.period;
+        }
+
+        if (i > this.cache_rsi.length-1)
+        {
+            this.cache_rsi.push([gain_avg, loss_avg]);
+        }
+        else
+        {
+            this.cache_rsi[i] = [gain_avg, loss_avg];
+        }
+
+        if (loss_avg == 0.0)
+        {
+            return [100.0]
+        }
+        else
+        {
+            return [100.0 - (100.0 / (1.0 + gain_avg/loss_avg))];
+        }
+    }
+
+    reset = () =>
+    {
+        this.cache_ts = [];
+        // this.cache_asks = [];
+        this.cache_mids = [];
+        // this.cache_bids = [];
+        this.cache_rsi = [];
+    }
+}
+
+// Relative Strength Index
+class macd extends Indicator
+{
+    constructor(broker, product, chart_period, properties, appearance)
+    {
+        console.log('????');
+        console.log(appearance);
+        console.log(properties);
+
+        super();
+
+        this.type = 'macd';
+        this.broker = broker;
+        this.product = product;
+        this.chart_period = chart_period;
+        this.properties = properties;
+        this.appearance = appearance;
+        this.period = properties.Period.value;
+        this.fast_period = properties['Fast Period'].value;
+        this.slow_period = properties['Slow Period'].value;
+        this.signal_period = properties['Signal Period'].value;
+        this.min_bars = this.slow_period+1;
+        this.precision = 5;
+
+        this.display_name = `MACD ${this.fast_period}, ${this.slow_period}, ${this.signal_period}`;
+
+        this.cache_ts = [];
+        // this.cache_asks = [];
+        this.cache_mids = [];
+        // this.cache_bids = [];
+        this.cache_macd = [];
+    }
+
+    get_value(i, ohlc, values)
+    {
+        // Validation Check
+        if (i < this.min_bars)
+        {
+            this.cache_macd.push([null, null, null]);
+            return [null, null, null];
+        }
+        else if (ohlc[i].every((x) => x === null))
+        {
+            this.cache_macd.push(this.cache_macd[i-1]);
+            return [null, null, null];
+        }
+
+        let fast_ema;
+        let slow_ema;
+        let signal_ema;
+        const prev_fast_ema = this.cache_macd[i-1][0];
+        const prev_slow_ema = this.cache_macd[i-1][1];
+        const prev_signal_ema = this.cache_macd[i-1][2];
+        // Fast EMA
+        if (prev_fast_ema)
+        {
+            const multi = 2 / (this.fast_period + 1);
+            fast_ema = (ohlc[i][3] - prev_fast_ema) * multi + prev_fast_ema;
+        }
+        else
+        {
+            let ma = 0
+            for (let j = i+1-this.fast_period; j < i+1; j++)
+            {
+                ma = ma + ohlc[i - j][3];
+            }
+            fast_ema = ma / this.fast_period;
+        }
+
+        // Slow EMA
+        if (prev_slow_ema)
+        {
+            const multi = 2 / (this.slow_period + 1);
+            slow_ema = (ohlc[i][3] - prev_slow_ema) * multi + prev_slow_ema;
+        }
+        else
+        {
+            let ma = 0
+            for (let j = i+1-this.slow_period; j < i+1; j++)
+            {
+                ma = ma + ohlc[i - j][3];
+            }
+            slow_ema = ma / this.slow_period;
+        }
+
+        const macd_val = fast_ema - slow_ema;
+
+        // Signal EMA
+        if (prev_signal_ema)
+        {
+            const multi = 2 / (this.signal_period + 1);
+            signal_ema = (macd_val - prev_signal_ema) * multi + prev_signal_ema;
+        }
+        else
+        {
+            signal_ema = macd_val / this.signal_period;
+        }
+
+        if (i > this.cache_macd.length-1)
+        {
+            this.cache_macd.push([fast_ema, slow_ema, signal_ema]);
+        }
+        else
+        {
+            this.cache_macd[i] = [fast_ema, slow_ema, signal_ema];
+        }
+
+        const hist = macd_val - signal_ema;
+
+        return [macd_val, signal_ema, hist];
+    }
+
+    reset = () =>
+    {
+        this.cache_ts = [];
+        // this.cache_asks = [];
+        this.cache_mids = [];
+        // this.cache_bids = [];
+        this.cache_macd = [];
+    }
+
+    setProperties = (broker, product, chart_period, properties, appearance) =>
+    {
+        this.broker = broker;
+        this.product = product;
+        this.chart_period = chart_period;
+        this.properties = properties;
+        this.appearance = appearance;
+        this.period = properties.Period.value;
+        this.fast_period = properties['Fast Period'].value;
+        this.slow_period = properties['Slow Period'].value;
+        this.signal_period = properties['Signal Period'].value;
+        this.min_bars = this.slow_period;
+    }
+}
+
 export default {
-    boll, donch, ema, mae, sma, atr, tr
+    boll, donch, ema, mae, sma, atr, tr, rsi, macd
 };

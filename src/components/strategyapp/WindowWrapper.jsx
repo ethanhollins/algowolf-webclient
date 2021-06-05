@@ -834,8 +834,8 @@ class WindowWrapper extends Component
         const popup = {
             type: 'not-available',
             size: {
-                width: 30,
-                height: 30
+                pixelWidth: 600,
+                pixelHeight: 300
             }
         }
         this.props.setPopup(popup);

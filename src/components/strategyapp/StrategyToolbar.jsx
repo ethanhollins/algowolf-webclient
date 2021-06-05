@@ -134,7 +134,7 @@ class StrategyToolbar extends Component
                             // onClick={this.onChartsDropdown}
                         >
                             <FontAwesomeIcon className='toolbox icon orange_btn disabled' icon={faChartLine} />
-                            <span className='toolbox label'>Charts</span>
+                            <span className='toolbox label collapse'>Charts</span>
                         </div>
                         <div ref={this.setChartsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
                             <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem} name='cryptocurrencies'>
@@ -169,7 +169,7 @@ class StrategyToolbar extends Component
                             // onClick={this.onStatsDropdown}
                         >
                             <FontAwesomeIcon className='toolbox icon orange_btn disabled' icon={faChartPie} />
-                            <span className='toolbox label'>Stats</span>
+                            <span className='toolbox label collapse'>Stats</span>
                         </div>
                         <div ref={this.setStatsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
                             <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
@@ -192,7 +192,7 @@ class StrategyToolbar extends Component
                             // onClick={this.onUtilsDropdown}
                         >
                             <FontAwesomeIcon className='toolbox icon orange_btn disabled' icon={faLightbulb} />
-                            <span className='toolbox label'>Utilities</span>
+                            <span className='toolbox label collapse'>Utilities</span>
                         </div>
                         <div ref={this.setUtilsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
                             <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
@@ -239,7 +239,7 @@ class StrategyToolbar extends Component
                             // onClick={this.onToolsDropdown}
                         >
                             <FontAwesomeIcon className='toolbox icon orange_btn disabled' icon={faTools} />
-                            <span className='toolbox label'>Tools</span>
+                            <span className='toolbox label collapse'>Tools</span>
                         </div>
                         <div ref={this.setToolsDropdown} className='toolbox dropdown' style={{display: 'none'}}>
                             <div className='dropdown-item' onClick={this.onNotAvailableDropdownItem}>
@@ -266,7 +266,7 @@ class StrategyToolbar extends Component
                     >
                         <div ref={this.setScriptElem} className='toolbox item row btn disabled'>
                             <FontAwesomeIcon className='toolbox icon blue_btn disabled' icon={faCode} />
-                            <span className='toolbox label'>Script</span>
+                            <span className='toolbox label collapse'>Script</span>
                         </div>
                     </div>
                     <div 
@@ -275,7 +275,7 @@ class StrategyToolbar extends Component
                     >
                         <div ref={this.setBacktestElem} className='toolbox item row btn disabled'>
                             <FontAwesomeIcon className='toolbox icon blue_btn disabled' icon={faHistory} />
-                            <span className='toolbox label'>Backtest</span>
+                            <span className='toolbox label collapse'>Backtest</span>
                         </div>
                     </div>
                     {this.generateLiveToolbarBtns()}
@@ -544,7 +544,7 @@ class StrategyToolbar extends Component
                 >
                     <div className='toolbox item row btn'>
                         <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faQuestionCircle} />
-                        <span className='toolbox label'>Help</span>
+                        <span className='toolbox label collapse'>Help</span>
                     </div>
                 </div>
                 <a 
@@ -581,7 +581,7 @@ class StrategyToolbar extends Component
                 >
                     <div className='toolbox item row btn'>
                         <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faQuestionCircle} />
-                        <span className='toolbox label'>Help</span>
+                        <span className='toolbox label collapse'>Help</span>
                     </div>
                 </div>
                 {/* <a 
@@ -873,8 +873,8 @@ class StrategyToolbar extends Component
         const popup = {
             type: 'not-available',
             size: {
-                width: 30,
-                height: 30
+                pixelWidth: 600,
+                pixelHeight: 300
             }
         }
         this.props.setPopup(popup);
@@ -887,8 +887,8 @@ class StrategyToolbar extends Component
         const popup = {
             type: 'not-available',
             size: {
-                width: 30,
-                height: 30
+                pixelWidth: 600,
+                pixelHeight: 300
             }
         }
         this.props.setPopup(popup);
@@ -937,8 +937,10 @@ class StrategyToolbar extends Component
         {
             strategy.account = account_id;
             strategy_component.retrieveAccountInfo(account_id);
+            this.props.setPopup(null);
             this.props.updateStrategyInfo();
             this.props.updateCurrentAccount(this.props.getCurrentStrategy(), strategy.account);
+            this.checkAuth();
         }
     }
 
@@ -1024,6 +1026,32 @@ class StrategyToolbar extends Component
     setStatusMsg = (statusMsg) =>
     {
         this.setState({ statusMsg });
+    }
+
+    checkAuth = () =>
+    {
+        let strategy = this.props.getStrategyInfo(this.props.getCurrentStrategy());
+        let broker_id = strategy.account.split('.')[0];
+        console.log(strategy);
+        if (!strategy.brokers[broker_id].is_auth)
+        {
+            const popup = {
+                type: 'account-logged-out',
+                size: {
+                    pixelWidth: 400,
+                    pixelHeight: 250
+                },
+                properties: {
+                    broker: strategy.brokers[broker_id].broker,
+                    broker_id: broker_id,
+                    name: strategy.brokers[broker_id].name,
+                },
+                fade: true,
+                permanent: true,
+                blockAppOnly: true
+            };
+            this.props.setPopup(popup);
+        }
     }
 
 }

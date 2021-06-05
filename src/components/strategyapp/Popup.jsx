@@ -26,6 +26,8 @@ import BrokerMessage from './popups/BrokerMessage';
 import StartFailed from './popups/StartFailed';
 import Notice from './popups/Notice';
 import ControlPanelUpdateMessage from './popups/ControlPanelUpdateMessage';
+import ComingSoon from './popups/ComingSoon';
+import AccountLoggedOut from './popups/AccountLoggedOut';
 
 class Popup extends Component
 {
@@ -69,14 +71,13 @@ class Popup extends Component
         return(
             <React.Fragment>
 
-            <div key={'fade'} ref={this.setPopupFade} className='popup fade'></div>
+            <div key={'fade'} ref={this.setPopupFade} className={'popup fade' + this.isBlockAppOnly()}></div>
 
             <div 
                 key={'body'}
                 ref={this.setPopupBody} className='popup body' 
                 onMouseEnter={this.setMainHoverOn} onMouseLeave={this.setMainHoverOff}
             >
-
                 {this.generatePopup()}
                 {this.generateCloseIcon()}
                 
@@ -230,6 +231,7 @@ class Popup extends Component
                     setHoverOn={this.setHoverOn}
                     setHoverOff={this.setHoverOff}
                     getTimezones={this.props.getTimezones}
+                    addToSave={this.props.addToSave}
                 />
             }
             else if (popup.type === 'indicator-settings')
@@ -243,6 +245,9 @@ class Popup extends Component
                     getWindowInfo={this.props.getWindowInfo}
                     getStrategyId={this.props.getStrategyId}
                     getStrategyInfo={this.props.getStrategyInfo}
+                    resetIndicators={this.props.resetIndicators}
+                    findIndicator={this.props.findIndicator}
+                    calculateAllChartIndicators={this.props.calculateAllChartIndicators}
                 />
             }
             else if (popup.type === 'welcome-demo')
@@ -261,6 +266,13 @@ class Popup extends Component
             {
                 return <NotAvailable
                     getPopup={this.props.getPopup}
+                />
+            }
+            else if (popup.type === 'coming-soon')
+            {
+                return <ComingSoon
+                    getPopup={this.props.getPopup}
+                    close={this.close}
                 />
             }
             else if (popup.type === 'beta-unavailable')
@@ -367,6 +379,15 @@ class Popup extends Component
                 return <EmailSubscribeComplete
                     close={this.close}
                     getPopup={this.props.getPopup}
+                />
+            }
+            else if (popup.type === 'account-logged-out')
+            {
+                return <AccountLoggedOut
+                    close={this.close}
+                    getPopup={this.props.getPopup}
+                    getHeaders={this.props.getHeaders}
+                    getStrategyId={this.props.getStrategyId}
                 />
             }
             // else if (popup.type === 'chart-indicators')
@@ -643,6 +664,18 @@ class Popup extends Component
         hovered[idx] = false;
         this.setState({ hovered });
         this.props.setHovered('popup', hovered.some(x => {return x}));
+    }
+
+    isBlockAppOnly = () =>
+    {
+        if (this.props.getPopup() && this.props.getPopup().blockAppOnly)
+        {
+            return ' blockAppOnly';
+        }
+        else
+        {
+            return '';
+        }
     }
 
 }

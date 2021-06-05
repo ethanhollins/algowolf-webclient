@@ -5,6 +5,7 @@ import moment from "moment-timezone";
 import StatTable from './StatTable';
 import HeaderBlock from './HeaderBlock';
 import BtnBlock from './BtnBlock';
+import BarGraph from './BarGraph';
 
 class ResultsPage extends Component
 {
@@ -119,6 +120,31 @@ class ResultsPage extends Component
                         y_values={y_values}
                     />;
                 }
+                else if ('data' in item.properties && item.type === 'bar')
+                {
+                    let y_values = [];
+                    let labels = [];
+                    for (let i of item.properties.data.x)
+                    {
+                        if ('report' in i)
+                        {
+                            await this.retrieveReport(i.report.name);
+                            const values = this.processReport(i.type, i.report);
+                            y_values.push(values);
+                        }
+                        if ('label' in i)
+                        {
+                            labels.push(i.label);
+                        }
+                    }
+
+                    elem = <BarGraph 
+                        title={item.properties.title}
+                        description={item.properties.description}
+                        y_values={y_values}
+                        labels={labels}
+                    />;
+                }
                 else if ('data' in item.properties && item.type === 'stat-large')
                 {
                     let value;
@@ -126,7 +152,6 @@ class ResultsPage extends Component
                     {
                         await this.retrieveReport(item.properties.data.report.name);
                         value = this.processReport(item.properties.type, item.properties.data.report);
-                        console.log(value);
                     }
 
                     elem = <StatLarge 
@@ -149,7 +174,6 @@ class ResultsPage extends Component
                             })
                         }
                     }
-                    console.log(datasets);
 
                     elem = <StatTable 
                         datasets={datasets}
@@ -236,7 +260,6 @@ class ResultsPage extends Component
         if (!(name in reports))
         {
             const report = await this.props.retrieveReport(name);
-            console.log(report);
     
             reports[name] = report;
             this.setState({ reports });
@@ -283,7 +306,7 @@ class ResultsPage extends Component
         return result;
     }
 
-    processCompoundedCommisionAggregate(x, props)
+    processCompoundedCommissionAggregate(x, props)
     {
         const r_profit = x[0];
         const lotsizes = x[1];
@@ -475,11 +498,11 @@ class ResultsPage extends Component
         return Math.round((gross_profit/Math.abs(gross_loss))*100)/100;
     }
 
-    processCommisionTotal(x, props)
+    processCommissionTotal(x, props)
     {
         x = x[0];
         const bank = 10000;
-        const comm_price = 7.0;
+        const comm_price = 4.0;
 
         let comm_total = 0;
         for (let i of x)
@@ -551,10 +574,9 @@ class ResultsPage extends Component
         {
             return this.processCompoundedAggregate;
         }
-        else if (x === 'compounded-commision-aggregate')
+        else if (x === 'compounded-commission-aggregate')
         {
-            console.log('?');
-            return this.processCompoundedCommisionAggregate;
+            return this.processCompoundedCommissionAggregate;
         }
         else if (x === 'date')
         {
@@ -658,10 +680,10 @@ class ResultsPage extends Component
                 let result = data_type_processor[0](data_cols, formatting);
                 return this.processProfitFactor([result]).toFixed(2);
             }
-            else if (type === 'commision-total')
+            else if (type === 'commission-total')
             {
                 let result = data_type_processor[0](data_cols, formatting);
-                return this.processCommisionTotal([result]).toFixed(2);
+                return this.processCommissionTotal([result]).toFixed(2);
             }
             else if (type === 'compounded-total')
             {
@@ -669,10 +691,10 @@ class ResultsPage extends Component
                 result = this.processCompoundedAggregate([result]);
                 return result[result.length-1].toFixed(2);
             }
-            else if (type === 'compounded-commision-total')
+            else if (type === 'compounded-commission-total')
             {
                 // let result = data_type_processor(data_cols, formatting);
-                let result = this.processCompoundedCommisionAggregate(data_cols, formatting);
+                let result = this.processCompoundedCommissionAggregate(data_cols, formatting);
                 return result[result.length-1].toFixed(2);
             }
             else if (type === 'sqn')
@@ -696,7 +718,6 @@ class ResultsPage extends Component
             else if (type === 'weeks-total')
             {
                 let result = data_type_processor[0](data_cols, formatting);
-                console.log(result);
                 result = this.processDaysTotal([result]);
                 return (result / 7).toFixed(1);
             }

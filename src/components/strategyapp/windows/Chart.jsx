@@ -803,7 +803,7 @@ class Chart extends Component
                 <FontAwesomeIcon icon={faUndo} />
                 Reset
             </div>
-            <div className='context-menu item disabled' onClick={this.onContextMenuItem.bind(this)} name={'settings'}>
+            <div className='context-menu item' onClick={this.onContextMenuItem.bind(this)} name={'settings'}>
                 <FontAwesomeIcon icon={faCog} />
                 Settings
             </div>
@@ -836,37 +836,37 @@ class Chart extends Component
         e.preventDefault();
 
         this.props.getContextMenu().style.display = 'none';
-        // let popup;
-        // if (this.props.isDemo)
-        // {
-        //     popup = {
-        //         type: 'not-available',
-        //         size: {
-        //             width: 30,
-        //             height: 30
-        //         }
-        //     }
-        // }
-        // else 
-        // {
-        //     const name = e.target.getAttribute('name');
+        let popup;
+        if (this.props.isDemo)
+        {
+            popup = {
+                type: 'not-available',
+                size: {
+                    pixelWidth: 600,
+                    pixelHeight: 300
+                }
+            }
+        }
+        else 
+        {
+            const name = e.target.getAttribute('name');
             
-        //     if (name === 'settings')
-        //     {
-        //         popup = {
-        //             type: 'chart-settings',
-        //             size: {
-        //                 width: 60,
-        //                 height: 75
-        //             },
-        //             opened: 'general',
-        //             properties: {
-        //                 item_id: this.getItemId()
-        //             }
-        //         }
-        //     }
-        // }
-        // this.props.setPopup(popup);
+            if (name === 'settings')
+            {
+                popup = {
+                    type: 'chart-settings',
+                    size: {
+                        width: 60,
+                        height: 75
+                    },
+                    opened: 'general',
+                    properties: {
+                        item_id: this.getItemId()
+                    }
+                }
+            }
+        }
+        this.props.setPopup(popup);
     }
 
     clampScale = (x) =>
@@ -1041,7 +1041,8 @@ class Chart extends Component
                                         price = price.toFixed(ind.precision);
                                     }
     
-                                    const color = overlay.appearance.colors[x][y];
+                                    // const color = overlay.appearance.colors[x][y];
+                                    const color = Object.values(overlay.appearance.colors)[y].value;
                                     
                                     item = (
                                         <span 
@@ -1213,24 +1214,25 @@ class Chart extends Component
     {
         const idx = parseInt(e.target.getAttribute('name'));
 
-        // const popup = {
-        //     type: 'indicator-settings',
-        //     size: {
-        //         width: 20,
-        //         height: 40
-        //     },
-        //     opened: 'properties',
-        //     properties: {
-        //         indicator: this.getOverlayIndicator(idx)
-        //     }
-        // }
         const popup = {
-            type: 'not-available',
+            type: 'indicator-settings',
             size: {
-                width: 30,
-                height: 30
+                pixelWidth: 480,
+                pixelHeight: 350
+            },
+            opened: 'properties',
+            properties: {
+                chart: this.getChart(),
+                indicator: this.getOverlayIndicator(idx)
             }
         }
+        // const popup = {
+        //     type: 'not-available',
+        //     size: {
+        //         pixelWidth: 600,
+        //         pixelHeight: 300
+        //     }
+        // }
         this.props.setPopup(popup);
     }
 
@@ -1245,6 +1247,7 @@ class Chart extends Component
                 height: 40
             },
             properties: {
+                chart: this.getChart(),
                 indicator: this.getStudyIndicator(idx)
             }
         }
@@ -1842,19 +1845,22 @@ class Chart extends Component
                 { x: 0, y: y }, pos, seg_size, scale
             ).y;
 
-            ctx.strokeStyle = `rgb(240, 240, 240)`;
-            ctx.lineWidth = 0.9;
+            if (this.getHorzGridLinesEnabled())
+            {
+                ctx.strokeStyle = this.getHorzGridLinesColor();
+                ctx.lineWidth = 0.9;
 
-            ctx.beginPath();
-            ctx.moveTo(
-                0, Math.round(screen_y * window.devicePixelRatio)
-                
-            ); 
-            ctx.lineTo(
-                Math.round(seg_size.width * window.devicePixelRatio),
-                Math.round(screen_y * window.devicePixelRatio)
-            );
-            ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(
+                    0, Math.round(screen_y * window.devicePixelRatio)
+                    
+                ); 
+                ctx.lineTo(
+                    Math.round(seg_size.width * window.devicePixelRatio),
+                    Math.round(screen_y * window.devicePixelRatio)
+                );
+                ctx.stroke();
+            }
 
             data.push(y);
             y -= intervals.y;
@@ -1913,18 +1919,21 @@ class Chart extends Component
                     { x: i+0.5, y: 0 }, pos, seg_size, scale
                 ).x;
 
-                ctx.strokeStyle = `rgb(240, 240, 240)`;
-                ctx.lineWidth = 0.9;
-
-                ctx.beginPath();
-                ctx.moveTo(
-                    Math.round(screen_x * window.devicePixelRatio), 0
-                ); 
-                ctx.lineTo(
-                    Math.round(screen_x * window.devicePixelRatio),
-                    Math.round(seg_size.height * window.devicePixelRatio)
-                );
-                ctx.stroke();
+                if (this.getVertGridLinesEnabled())
+                {
+                    ctx.strokeStyle = this.getVertGridLinesColor();
+                    ctx.lineWidth = 0.9;
+    
+                    ctx.beginPath();
+                    ctx.moveTo(
+                        Math.round(screen_x * window.devicePixelRatio), 0
+                    ); 
+                    ctx.lineTo(
+                        Math.round(screen_x * window.devicePixelRatio),
+                        Math.round(seg_size.height * window.devicePixelRatio)
+                    );
+                    ctx.stroke();
+                }
                 data.push(i);
             }
         }
@@ -2057,7 +2066,18 @@ class Chart extends Component
         const scale = this.getScale();
         const seg_size = this.getSegmentSize(0);
 
-        const trades = this.getPositions().concat(this.getOrders());
+        let trades = [];
+
+        if (this.getPositionsEnabled())
+        {
+            trades = trades.concat(this.getPositions());
+        }
+        if (this.getOrdersEnabled())
+        {
+            trades = trades.concat(this.getOrders());
+        }
+
+        // const trades = this.getPositions().concat(this.getOrders());
         for (let i = 0; i < trades.length; i++)
         {
             const c_trade = trades[i];
@@ -3750,6 +3770,16 @@ class Chart extends Component
     getCrosshairEnabled = () =>
     {
         return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].appearance['crosshair'].enabled;
+    }
+
+    getPositionsEnabled = () =>
+    {
+        return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].trading['show-positions'].enabled;
+    }
+
+    getOrdersEnabled = () =>
+    {
+        return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].trading['show-orders'].enabled;
     }
 
     getProperties = () =>

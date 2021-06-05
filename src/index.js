@@ -7,6 +7,7 @@ import './stylesheets/Post.css';
 import './stylesheets/Profile.css';
 import './stylesheets/Login.css';
 import './stylesheets/StrategyApp.css';
+import './stylesheets/Auth.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 

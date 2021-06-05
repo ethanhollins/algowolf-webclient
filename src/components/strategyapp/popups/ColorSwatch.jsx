@@ -8,7 +8,19 @@ class ColorSwatch extends React.Component {
     {
         super(props);
 
-        const hex = props.getProperty(props.category, props.sub, props.name);
+        let hex;
+        if (props.rgb)
+        {
+            hex = this.rgbToHex({ r: props.rgb[0], g: props.rgb[1], b: props.rgb[2] });
+        }
+        else if (props.hex)
+        {
+            hex = props.hex;
+        }
+        else
+        {
+            hex = props.getProperty(props.category, props.sub, props.name);
+        }
 
         let color = undefined;
         if (hex === undefined)
@@ -112,7 +124,7 @@ class ColorSwatch extends React.Component {
                     borderRadius: '3px',
                     boxShadow: '0 0 0 1px rgba(0,0,0,.1)',
                     display: 'inline-block',
-                    cursor: 'pointer',
+                    cursor: 'pointer'
                 },
                 popover: {
                     position: 'absolute',
@@ -123,14 +135,20 @@ class ColorSwatch extends React.Component {
                     top: '0px',
                     right: '0px',
                     bottom: '0px',
-                    left: '0px',
+                    left: '0px'
                 },
                 coverParent: {
                     width: '100%',
-                    height: '100%',
+                    height: '100%'
                 }
             },
         });
+
+        if (this.props.disabled)
+        {
+            styles.swatch.backgroundColor = 'rgb(240,240,240)';
+            styles.swatch.pointerEvents = 'none';
+        }
 
         if (this.isWhiteSelected())
         {

@@ -78,6 +78,8 @@ class Strategy extends Component
         this.props.setStrategyOnConnect(this.socketConnect.bind(this));
 
         this.props.setShowLoadScreen(false);
+
+        this.checkAuth();
     }
 
     componentDidUpdate()
@@ -1528,6 +1530,31 @@ class Strategy extends Component
         const account_id = account_code.split('.')[1];
 
         return await this.props.retrieveReport(this.props.id, broker_id, account_id, name);
+    }
+
+    checkAuth = () =>
+    {
+        let strategy = this.getStrategyInfo();
+        let broker_id = strategy.account.split('.')[0];
+        if (!strategy.brokers[broker_id].is_auth)
+        {
+            const popup = {
+                type: 'account-logged-out',
+                size: {
+                    pixelWidth: 400,
+                    pixelHeight: 250
+                },
+                properties: {
+                    broker: strategy.brokers[broker_id].broker,
+                    broker_id: broker_id,
+                    name: strategy.brokers[broker_id].name,
+                },
+                fade: true,
+                permanent: true,
+                blockAppOnly: true
+            };
+            this.props.setPopup(popup);
+        }
     }
 
     isLoaded = () =>

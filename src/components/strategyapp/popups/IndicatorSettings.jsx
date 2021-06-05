@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faChevronDown
 } from '@fortawesome/pro-regular-svg-icons';
+import ColorSwatch from './ColorSwatch';
 
 class IndicatorSettings extends Component
 {
@@ -14,7 +15,8 @@ class IndicatorSettings extends Component
     }
  
     state = {
-        selected_dropdown: null
+        selected_dropdown: null,
+        changed: {}
     }
 
     componentDidMount()
@@ -58,7 +60,7 @@ class IndicatorSettings extends Component
             </div>
             <div className='popup footer'>
                 <div className='popup dropdown'>
-                    <div className='popup dropdown-btn layout-dropdown' onClick={this.onDropdownClick}>
+                    <div className='popup dropdown-btn layout-dropdown disabled' onClick={this.onDropdownClick}>
                         <span>Default</span>
                         <FontAwesomeIcon icon={faChevronDown} />
                     </div>
@@ -67,8 +69,8 @@ class IndicatorSettings extends Component
                     </div>
                 </div>
                 <div className='popup accept-group'>
-                    <div onClick={this.onCancel}>Cancel</div>
-                    <div onClick={this.onApply}>Ok</div>
+                    <div onClick={this.onCancel.bind(this)}>Cancel</div>
+                    <div onClick={this.onApply.bind(this)}>Ok</div>
                 </div>
             </div>
 
@@ -89,8 +91,7 @@ class IndicatorSettings extends Component
             const key = Object.keys(this.getIndicator().properties)[i];
             const type = this.getIndicator().properties[key].type;
             const value = this.getIndicator().properties[key].value;
-            // if (type === 'number')
-            if (i === 0)
+            if (type === 'number')
             {
                 result.push(
                     <div key={key} className='popup table-row'>
@@ -102,7 +103,9 @@ class IndicatorSettings extends Component
                                 <div>
                                     <input 
                                         className={'popup small-input'} defaultValue={value}
-                                        type='number'
+                                        onChange={this.onChange.bind(this)}
+                                        type='number' name={key}
+                                        disabled
                                     />
                                 </div>
                             </div>
@@ -110,13 +113,14 @@ class IndicatorSettings extends Component
                     </div>
                 );
             }
-            // else if (type === 'dropdown')
-            else if (i === 1)
+            else if (type === 'dropdown')
             {
                 result.push(
                     <div key={key} className='popup table-row'>
                         <div className='popup table-cell'>
-                            <div className='popup left'>{key}</div>
+                            <div className='popup left'>
+                                {key}
+                            </div>
                         </div>
                         <div className='popup table-cell'>
                             <div className='popup right'>
@@ -136,6 +140,62 @@ class IndicatorSettings extends Component
                         </div>
                     </div>
                 );
+            }
+        }
+
+        return (
+            <div key='properties' className='popup table'>
+            {result}
+            </div>
+        );
+    }
+
+    getAppearanceItems()
+    {
+        let result = [];
+        for (let i=0; i < Object.keys(this.getIndicator().appearance).length; i++)
+        {
+            const key = Object.keys(this.getIndicator().appearance)[i];
+
+            if (key === 'colors')
+            {
+                for (let i in this.getIndicator().appearance[key])
+                {
+                    const name = i;
+                    const enabled = this.getIndicator().appearance[key][i].enabled;
+                    const value = this.getIndicator().appearance[key][i].value;
+
+                    result.push(
+                        <div key={i} className='popup table-row'>
+                            <div className='popup table-cell'>
+                                <div className='popup left'>
+                                    <label className='popup checkbox'>
+                                        <input 
+                                            type='checkbox' 
+                                            defaultChecked={enabled}
+                                        />
+                                        <div className='checkmark disabled'></div>
+                                    </label>
+                                    {name}
+                                </div>
+                            </div>
+                            <div className='popup table-cell'>
+                                <div className='popup right'>
+                                    <div>
+                                        <ColorSwatch 
+                                            rgb={value}
+                                            disabled={true}
+                                            // getProperty={this.getProperty}
+                                            // setProperty={this.setProperty}
+                                            // setHoverOn={this.props.setHoverOn}
+                                            // setHoverOff={this.props.setHoverOff}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
             }
         }
 
@@ -207,11 +267,6 @@ class IndicatorSettings extends Component
         }
     }
 
-    getAppearanceItems()
-    {
-
-    }
-
     getItems()
     {
         const opened = this.props.getPopup().opened;
@@ -224,6 +279,11 @@ class IndicatorSettings extends Component
         {
             return this.getAppearanceItems();
         }
+    }
+
+    getChart = () =>
+    {
+        return this.props.getPopup().properties.chart;
     }
 
     getIndicator = () =>
@@ -248,15 +308,54 @@ class IndicatorSettings extends Component
         this.props.changeCategory(name);
     }
 
+    onChange = (e) =>
+    {
+        const name = e.target.getAttribute('name');
+        let { changed } = this.state;
+
+        changed[name] = e.target.value;
+        this.setState({ changed });
+    }
+
     onCancel = () =>
     {
-
+        this.props.close();
     }
 
-    onApply = () =>
+    onApply = (e) =>
     {
+        let indicator = this.getIndicator();
+        let chart = this.getChart();
+        let current_indicator = this.props.findIndicator(
+            indicator.type, chart.broker, chart.product, 
+            chart.period, indicator.properties.Period.value
+        );
 
+        let { changed } = this.state;
+        for (let name in changed)
+        {
+            if (indicator.properties[name].type === 'number')
+            {
+                indicator.properties[name].value = parseInt(changed[name]);
+            }
+            else
+            {
+                indicator.properties[name].value = changed[name];
+            }
+        }
+
+        current_indicator.setProperties(
+            chart.broker, chart.product, chart.period, 
+            indicator.properties, indicator.appearance
+        );
+        this.props.resetIndicators(chart);
+        this.props.calculateAllChartIndicators(chart);
+
+        changed = {};
+        this.setState({ changed });
+        this.props.close();
     }
+    
 }
 
 export default IndicatorSettings;

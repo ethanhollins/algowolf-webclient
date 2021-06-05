@@ -16,6 +16,7 @@ import moment from "moment-timezone";
 import Register from './components/Register';
 import SendPasswordReset from './components/SendPasswordReset';
 import ResetPassword from './components/ResetPassword';
+import AuthLogin from './components/AuthLogin';
 
 class App extends Component 
 {
@@ -66,8 +67,16 @@ class App extends Component
                     <Route exact path="/app">
                         {this.getConditionalAppComponent()}
                     </Route>
-                    <Route path="/auth">
-                        {this.getConditionalAuthComponent()}
+                    <Route exact path="/auth/:broker/login">
+                        <AuthLogin 
+                            getHeaders={this.getHeaders}
+                            getCookies={this.getCookies}
+                        />
+                    </Route>
+                    <Route exact path="/auth/:broker">
+                        <Auth 
+                            getHeaders={this.getHeaders}
+                        />
                     </Route>
                     {/* <Route exact path="/holygrail">
                         <WelcomeDemoPageTwo
@@ -186,13 +195,6 @@ class App extends Component
                 getUserId={this.getUserId}
             />
         }
-    }
-
-    getConditionalAuthComponent()
-    {
-        return <Auth 
-            getHeaders={this.getHeaders}
-        />
     }
 
     async checkAuthorization()

@@ -65,9 +65,9 @@ class Candlesticks extends Component
             if (candle[0] > candle[3]) 
             {
                 body_color = this.getBodySettings()['short'] + parseInt(255 * opacity).toString(16);
-                // console.log(body_color);
                 outline_color = this.getOutlineSettings()['short'] + parseInt(255 * opacity).toString(16);
                 wick_color = this.getWickSettings()['short'] + parseInt(255 * opacity).toString(16);
+                
                 ctx.lineWidth = 0.5;
 
                 wick_up_size = candle[1] - candle[0];
@@ -87,6 +87,7 @@ class Candlesticks extends Component
                 body_color = this.getBodySettings()['long'] + parseInt(255 * opacity).toString(16);
                 outline_color = this.getOutlineSettings()['long'] + parseInt(255 * opacity).toString(16);
                 wick_color = this.getWickSettings()['long'] + parseInt(255 * opacity).toString(16);
+                
                 ctx.lineWidth = 0.5;
 
                 wick_up_size = candle[1] - candle[3];
@@ -109,9 +110,9 @@ class Candlesticks extends Component
             const w_width = 1.0;
             
             ctx.fillStyle = wick_color;
-            // Draw Wick Up
-            if (scale.x < 500)
+            if (scale.x < 500 && this.getWickSettings().enabled)
             {
+                // Draw Wick Up
                 const w_up_y = body_pos.y - body_size.y/2 + 1;
                 ctx.fillRect(
                     Math.floor(w_x * window.devicePixelRatio), Math.floor((w_up_y - wick_up_size.y) * window.devicePixelRatio),
@@ -129,13 +130,17 @@ class Candlesticks extends Component
             ctx.fillStyle = body_color;
             ctx.strokeStyle = outline_color;
             // Draw Body
-            ctx.fillRect(
-                Math.floor(c_x * window.devicePixelRatio), Math.floor(c_y * window.devicePixelRatio),
-                Math.floor(Math.max(body_size.x, 1) * window.devicePixelRatio),
-                Math.floor(Math.max(body_size.y, 1) * window.devicePixelRatio)
-            );
+            if (this.getBodySettings().enabled)
+            {
+                ctx.fillRect(
+                    Math.floor(c_x * window.devicePixelRatio), Math.floor(c_y * window.devicePixelRatio),
+                    Math.floor(Math.max(body_size.x, 1) * window.devicePixelRatio),
+                    Math.floor(Math.max(body_size.y, 1) * window.devicePixelRatio)
+                );
 
-            if (scale.x < 500)
+            }
+
+            if (scale.x < 500 && this.getOutlineSettings().enabled)
             {
                 ctx.strokeRect(
                     Math.floor(c_x * window.devicePixelRatio)+0.5, Math.floor(c_y * window.devicePixelRatio)-0.5,

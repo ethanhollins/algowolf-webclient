@@ -9,18 +9,18 @@ class NotAvailable extends Component
         return(
             <React.Fragment>
             
-            <div className='popup header'>
+            {/* <div className='popup header'>
                 <span>Not Available</span>
-            </div>
+            </div> */}
             <div className='popup content'>
                 <div className='popup main'>
                     <div className='popup main-list'>
                         <div className='not-available body'>
-                            <div className='not-available message'>
-                                Sorry this feature is unavailable.
-                            </div>
                             <div>
-                                <FontAwesomeIcon icon={faSadTear} className='not-available icon' />
+                                <img className='not-available icon' src={process.env.PUBLIC_URL + '/disabled_icon.jpg'} />
+                            </div>
+                            <div className='not-available message'>
+                                This feature has been disabled by the strategy owner.
                             </div>
                         </div>
                     </div>

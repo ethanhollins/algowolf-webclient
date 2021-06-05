@@ -63,10 +63,10 @@ class RequestDemoAccess extends Component
             return (
                 <div>
                     <div>
-                        <img className='beta-unavailable icon' src={process.env.PUBLIC_URL + this.props.getPopup().image} />
+                        <img className='beta-unavailable icon' src={process.env.PUBLIC_URL + '/holygrail_request_access_icon.jpg'} />
                     </div>
                     <div className='sign-up-prompt message'>
-                        <span id="sp_bold">Your request has been received.</span><br/>Please allow up to 24 hours for your request to be processed. Contact <a id="email_popup" href="mailto:admin@algowolf.com">admin@algowolf.com</a> if you're having any difficulties.
+                        <span id="sp_bold">Your request has been received.</span><br/><br/>Please allow up to 24 hours for your request to be processed. Contact <a id="email_popup" href="mailto:admin@algowolf.com">admin@algowolf.com</a> if you're having any difficulties.
                     </div>
                 </div>
 
@@ -79,7 +79,7 @@ class RequestDemoAccess extends Component
 
                 <div>
                     <div>
-                        <img className='beta-unavailable icon' src={process.env.PUBLIC_URL + this.props.getPopup().image} />
+                        <img className='beta-unavailable icon' src={process.env.PUBLIC_URL + '/holygrail_request_access_icon.jpg'} />
                     </div>
                 </div>
 

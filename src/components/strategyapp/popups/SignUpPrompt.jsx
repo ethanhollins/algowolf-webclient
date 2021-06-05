@@ -18,7 +18,7 @@ class SignUpPrompt extends Component
                         <div className='sign-up-prompt body'>
                             <div>
                                 <div>
-                                    <img className='sign-up-prompt icon' src={process.env.PUBLIC_URL + this.props.getPopup().image} />
+                                    <img className='sign-up-prompt icon' src={process.env.PUBLIC_URL + '/holygrail_request_access_icon.jpg'} />
                                 </div>
                             </div>
                             {/* <span className='sign-up-prompt message'>
@@ -26,7 +26,7 @@ class SignUpPrompt extends Component
                                 Contact us at <a id="email_link" href="mailto:admin@algowolf.com">admin@algowolf.com</a> to find out more about live trading with your broker and general info.
                             </span> */}
                             <span className='sign-up-prompt message'>
-                            As a subscriber to Scott Phillips trading course you have been granted exclusive use of the<br/><span id="sp_bold">Prison Paycheck Algorithmic Demo & Training Platform</span> (aka Holy Grail).<br/><span id="sp_bold">Login/Sign Up</span> to request access.
+                            As a subscriber to Scott Phillips trading course <br/>you have been granted exclusive use of the<br/><span id="sp_bold">Prison Paycheck Algorithmic Demo & Training Platform</span> (aka Holy Grail).<br/><br/><span id="sp_bold">Login/Sign Up</span> to request access.
                             </span>
                             <div className='sign-up-prompt column'>
                                 <div className="login field">

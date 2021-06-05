@@ -1,0 +1,245 @@
+.auth {
+    margin: 10px;
+    font-style: italic;
+}
+
+.auth-login.background {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100vh;
+    background-color: #eaedf1;
+}
+
+.auth-login.body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    width: 375px;
+    padding-bottom: 30px;
+    border-radius: 4px;
+    background-color: #FFF;
+    box-shadow: 0 0 7px rgba(0,0,0,.15);
+}
+
+.auth-login.logo.oanda {
+    margin-top: 20px;
+    margin-bottom: 15px;
+    width: 275px;
+    height: auto;
+    outline: none;
+}
+
+.auth-login.body.ib {
+    height: 170px;
+}
+
+.auth-login.logo.ib {
+    margin-top: 30px;
+    margin-bottom: 15px;
+    width: 275px;
+    height: auto;
+    outline: none;
+}
+
+.auth-login.logo.fxcm {
+    margin-top: 30px;
+    margin-bottom: 20px;
+    width: 275px;
+    height: auto;
+    outline: none;
+}
+
+.auth-login.logo.spotware {
+    margin-top: 30px;
+    margin-bottom: 15px;
+    width: 275px;
+    height: auto;
+    outline: none;
+}
+.auth-login.logo.holygrail {
+    width: 150px;
+    padding: 20px;
+}
+
+.auth-login > a:focus-visible {
+    outline: none;
+}
+
+.auth-login.account-type {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 250px;
+    height: 50px;
+    margin-bottom: 20px;
+    /* border: 1px solid rgb(200,200,200); */
+    border-radius: 4px;
+}
+
+.auth-login.account-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 35px;
+    border-radius: 2px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    color: #2980b9;
+    border: 1px solid #2980b9;
+    font-size: 1.0em;
+    font-weight: 400;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.auth-login.account-button.selected {
+    color: #fff;
+    background-color: #2980b9;
+}
+
+.auth-login.account-button:hover {
+    color: #fff;
+    background-color: #2980b9;
+    transition: all 0.5s ease;
+}
+
+.auth-login.field-header {
+    width: 275px;
+    padding-left: 15px;
+    margin-bottom: 5px;
+    font-size: 1.1em;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+}
+
+.auth-login.field {
+    width: 245px;
+    height: 50px;
+    border: 1px solid rgb(220,220,220);
+    border-radius: 2px;
+    font-size: 0.9em;
+    outline: none;
+    padding: 0 15px 0 15px;
+    margin-bottom: 10px;
+}
+
+.auth-login.field:hover {
+    border-color: rgb(120,120,120);
+}
+
+.auth-login.field:focus {
+    border-color: rgb(120,120,120);
+}
+
+.auth-login.info {
+    width: 325px;
+    padding: 10px;
+    font-size: 0.9em;
+}
+
+.auth-login.info a {
+    color: #000;
+}
+
+.auth-login.info a:visited {
+    color: #000;
+}
+
+.auth-login.info strong {
+    font-weight: 700;
+}
+
+.auth-login.info li {
+    margin-bottom: 5px;
+}
+
+.auth-login.submit-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 275px;
+    height: 50px;
+    border-radius: 2px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    color: #2980b9;
+    border: 1px solid #2980b9;
+    font-size: 1.3em;
+    font-weight: 400;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.auth-login.submit-button.fxcm {
+    margin-top: 20px;
+}
+
+.auth-login.submit-button.ib {
+    margin-top: 15px;
+}
+
+.auth-login.submit-button:hover {
+    color: #fff;
+    background-color: #2980b9;
+    transition: all 0.5s ease;
+}
+
+.auth-login.message {
+    font-size: 1.1em;
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+.dot-flashing {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #2980b9;
+    color: #2980b9;
+    animation: dotFlashing 1s infinite linear alternate;
+    animation-delay: .5s;
+    margin-top: 5px;
+}
+  
+.dot-flashing::before, .dot-flashing::after {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    top: 0;
+}
+  
+.dot-flashing::before {
+    left: -15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #2980b9;
+    color: #2980b9;
+    animation: dotFlashing 1s infinite alternate;
+    animation-delay: 0s;
+}
+  
+.dot-flashing::after {
+    left: 15px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #2980b9;
+    color: #2980b9;
+    animation: dotFlashing 1s infinite alternate;
+    animation-delay: 1s;
+}
+  
+@keyframes dotFlashing {
+    0% {
+        background-color: #2980b9;
+    }
+    50%, 100% {
+        background-color: #297fb93b;
+    }
+}
