@@ -202,7 +202,7 @@ class AuthLogin extends Component
         const { REACT_APP_IB_REDIRECT_BASE } = process.env;
         const port = params.get('uid');
         const token = params.get('token');
-        const url = `${REACT_APP_IB_REDIRECT_BASE}:${port}/?token=${token}`;
+        const url = `${REACT_APP_IB_REDIRECT_BASE}/?port=${port}&token=${token}`;
         console.log(url);
 
         window.open(url);
