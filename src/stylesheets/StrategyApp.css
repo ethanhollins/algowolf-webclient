@@ -2771,6 +2771,12 @@
     width: 275px;
 }
 
+.account-logged-out.icon.dukascopy {
+    color: #ff8103;
+    margin-bottom: 30px;
+    width: 275px;
+}
+
 .account-logged-out.button {
     display: flex;
     align-items: center;

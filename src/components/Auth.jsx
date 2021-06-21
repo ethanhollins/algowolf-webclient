@@ -128,9 +128,9 @@ class Auth extends Component
         {
             return (
                 <div className='auth-login body oanda'>
-                    <a href='#' target="_blank">
+                    <div>
                         <img class='auth-login logo oanda' src={process.env.PUBLIC_URL + '/oanda_logo_large.png'} />
-                    </a>
+                    </div>
                     <div className='auth-login message'>Connecting your broker...</div>
                     <div class="dot-flashing"></div>
                 </div>
@@ -140,9 +140,9 @@ class Auth extends Component
         {
             return (
                 <div className='auth-login body ib'>
-                    <a href='#' target="_blank">
+                    <div>
                         <img class='auth-login logo ib' src={process.env.PUBLIC_URL + '/interactive_brokers_logo_large.png'} />
-                    </a>
+                    </div>
                     <div className='auth-login message'>Connecting your broker...</div>
                     <div class="dot-flashing"></div>
                 </div>
@@ -152,9 +152,9 @@ class Auth extends Component
         {
             return (
                 <div className='auth-login body fxcm'>
-                    <a href='#' target="_blank">
+                    <div>
                         <img class='auth-login logo fxcm' src={process.env.PUBLIC_URL + '/fxcm_logo_large.png'} />
-                    </a>
+                    </div>
                     <div className='auth-login message'>Connecting your broker...</div>
                     <div class="dot-flashing"></div>
                 </div>
@@ -164,9 +164,9 @@ class Auth extends Component
         {
             return (
                 <div className='auth-login body spotware'>
-                    <a href='#' target="_blank">
+                    <div>
                         <img class='auth-login logo spotware' src={process.env.PUBLIC_URL + '/ctrader_logo_large.png'} />
-                    </a>
+                    </div>
                     <div className='auth-login message'>Connecting your broker...</div>
                     <div class="dot-flashing"></div>
                 </div>
@@ -176,10 +176,22 @@ class Auth extends Component
         {
             return (
                 <div className='auth-login body holygrail'>
-                    <a href='#' target="_blank">
+                    <div>
                         <img class='auth-login logo holygrail' src={process.env.PUBLIC_URL + '/holygrail_icon.jpg'} />
-                    </a>
+                    </div>
                     <div className='auth-login message'>Redirecting you to Holy Grail...</div>
+                    <div class="dot-flashing"></div>
+                </div>
+            );
+        }
+        else if (provider === 'dukascopy')
+        {
+            return (
+                <div className='auth-login body dukascopy'>
+                    <div>
+                        <img class='auth-login logo dukascopy' src={process.env.PUBLIC_URL + '/dukascopy_logo_large.png'} />
+                    </div>
+                    <div className='auth-login message'>Connecting your broker...</div>
                     <div class="dot-flashing"></div>
                 </div>
             );

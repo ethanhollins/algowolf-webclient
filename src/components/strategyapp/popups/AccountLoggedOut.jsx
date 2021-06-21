@@ -42,6 +42,10 @@ class AccountLoggedOut extends Component
         {
             return <img className='account-logged-out icon ib' src={process.env.PUBLIC_URL + '/interactive_brokers_logo_large.png'} />;
         }
+        else if (broker === 'dukascopy')
+        {
+            return <img className='account-logged-out icon dukascopy' src={process.env.PUBLIC_URL + '/dukascopy_logo_large.png'} />;
+        }
         else if ([
             'spotware', 'icmarkets', 'fxpro', 'pepperstone', 
             'axiory', 'fondex', 'octafx', 'scandinavian_capital_markets',

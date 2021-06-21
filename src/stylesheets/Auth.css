@@ -59,6 +59,15 @@
     height: auto;
     outline: none;
 }
+
+.auth-login.logo.dukascopy {
+    margin-top: 30px;
+    margin-bottom: 20px;
+    width: 275px;
+    height: auto;
+    outline: none;
+}
+
 .auth-login.logo.holygrail {
     width: 150px;
     padding: 20px;
@@ -118,7 +127,7 @@
 
 .auth-login.field {
     width: 245px;
-    height: 50px;
+    height: 42px;
     border: 1px solid rgb(220,220,220);
     border-radius: 2px;
     font-size: 0.9em;
@@ -192,6 +201,77 @@
     font-size: 1.1em;
     margin-bottom: 20px;
     font-style: italic;
+}
+
+.auth-login.captcha-img {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 240px;
+    height: 124px;
+    margin-bottom: 10px;
+    font-size: 1.15em;
+    font-weight: 500;
+    font-family: Poppins, sans-serif;
+}
+
+.auth-login.error {
+    color: #fff !important;
+    background-color: #e74c3c;
+    width: 245px;
+    padding: 5px 15px;
+    margin-bottom: 10px;
+    text-align: center;
+    font-weight: 500;
+    border-radius: 3px;
+}
+
+.auth-login.captcha-parent {
+    position: relative;
+}
+
+.auth-login.captcha-reload {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 94px;
+    left: 6px;
+    width: 70px;
+    height: 25px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.auth-login.captcha-reload-icon {
+    width: 20px;
+    color: #3498db;
+}
+
+.auth-login.captcha-reload:hover .captcha-reload-icon {
+    color: #2980b9;
+}
+
+.auth-login.captcha-info {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 94px;
+    left: 164px;
+    width: 70px;
+    height: 25px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.auth-login.captcha-info-icon {
+    height: 22px;
+    color: #3498db;
+}
+
+.auth-login.captcha-info:hover .captcha-info-icon {
+    color: #2980b9;
 }
 
 .dot-flashing {
