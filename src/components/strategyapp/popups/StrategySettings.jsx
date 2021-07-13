@@ -3,10 +3,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
     faChevronRight
 } from '@fortawesome/pro-regular-svg-icons';
-import { 
-    faChartBar, faChartLine, faDollarSign
-} from '@fortawesome/pro-light-svg-icons';
-import ColorSwatch from './ColorSwatch';
 
 class StrategySettings extends Component
 {

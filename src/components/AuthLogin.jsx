@@ -18,7 +18,7 @@ class AuthLogin extends Component
     state = {
         sio: null,
         is_login_pressed: false,
-        access_token: '',
+        key: '',
         username: '',
         password: '',
         captcha: '',
@@ -134,21 +134,42 @@ class AuthLogin extends Component
                         <img className='auth-login logo oanda' src={process.env.PUBLIC_URL + '/oanda_logo_large.png'} />
                     </div>
                     <div className='auth-login account-type'>
-                        <div className='auth-login account-button'>Live</div>
-                        <div className='auth-login account-button selected'>Demo</div>
+                        <div 
+                            className={'auth-login account-button' + this.isAccountTypeSelected(false)}
+                            onClick={this.setIsDemo.bind(this)}
+                            name='live'
+                        >
+                            Live
+                        </div>
+                        <div 
+                            className={'auth-login account-button' + this.isAccountTypeSelected(true)}
+                            onClick={this.setIsDemo.bind(this)}
+                            name='demo'
+                        >
+                            Demo
+                        </div>
                     </div>
+                    <div ref={this.setErrorRef} className="auth-login error" style={{display: this.isErrorMsg()}}>{err_msg}</div>
                     <div className='auth-login field-header'>Access Token</div>
-                    <input className='auth-login field' placeholder='Enter Access Token' />
+                    <input 
+                        className='auth-login field' placeholder='Enter Access Token' name='key' 
+                        onChange={this.onFieldChange.bind(this)}
+                    />
                     <div className='auth-login info'>
                         <span>Instructions to find your access token, or <a href="https://www.oanda.com/demo-account/tpa/personal_token" target="_blank">Click Here</a></span>
                         <ol>
                             <li>Log into your Oanda account <a href="https://www.oanda.com/account/login" target="_blank">here</a>.</li>
-                            <li>Scroll down to <strong>My Services</strong> and navigate to <strong>Manage API Acess</strong>.</li>
+                            <li>Scroll down to <strong>My Services</strong> and navigate to <strong>Manage API Access</strong>.</li>
                             <li>Click on the <strong>Generate</strong> button.</li>
                             <li>Copy the token and paste it into the above text box.</li>
                         </ol>
                     </div>
-                    <div className='auth-login submit-button'>Connect to Oanda</div>
+                    <div 
+                        className='auth-login submit-button'
+                        onClick={this.completeLogin.bind(this)}
+                    >
+                        Connect to Oanda
+                    </div>
                 </div>
             );
         }
@@ -236,7 +257,19 @@ class AuthLogin extends Component
         const paths = this.props.location.pathname.split('/');
         const provider = paths[paths.length-2];
 
-        if (provider === 'dukascopy')
+        if (provider === 'oanda')
+        {
+            return (
+                <div className='auth-login body oanda'>
+                    <div>
+                        <img className='auth-login logo oanda' src={process.env.PUBLIC_URL + '/oanda_logo_large.png'} />
+                    </div>
+                    <div className='auth-login message'>Connecting your broker...</div>
+                    <div className="dot-flashing"></div>
+                </div>
+            );
+        }
+        else if (provider === 'dukascopy')
         {
             return (
                 <div className='auth-login body dukascopy'>
@@ -308,7 +341,7 @@ class AuthLogin extends Component
     {
         const value = e.target.value;
         const name = e.target.getAttribute('name');
-        let { username, password, captcha } = this.state;
+        let { username, password, captcha, key } = this.state;
 
         if (name === 'username')
         {
@@ -318,12 +351,16 @@ class AuthLogin extends Component
         {
             password = value;
         }
+        else if (name === 'key')
+        {
+            key = value;
+        }
         else if (name === 'captcha')
         {
             captcha = value;
         }
 
-        this.setState({ username, password, captcha });
+        this.setState({ username, password, captcha, key });
     }
 
     onLoginPressed = (e) =>
@@ -347,6 +384,8 @@ class AuthLogin extends Component
         window.open(url);
     }
 
+
+
     getDukascopyCaptchaElem = () =>
     {
         const { is_demo, captcha_b64 } = this.state;
@@ -367,9 +406,9 @@ class AuthLogin extends Component
                     <div className='auth-login captcha-reload' onClick={this.reloadCaptcha.bind(this)}>
                         <FontAwesomeIcon className='auth-login captcha-reload-icon' icon={faRedo} />
                     </div>
-                    <div className='auth-login captcha-info'>
+                    <a className='auth-login captcha-info' href="https://www.dukascopy.com/wiki/en/getting-started/login/pin-code" target="_blank">
                         <FontAwesomeIcon className='auth-login captcha-info-icon' icon={faInfoCircle} />
-                    </div>
+                    </a>
 
                     </React.Fragment>
                 );
@@ -434,7 +473,7 @@ class AuthLogin extends Component
     async completeLogin()
     {
         const { REACT_APP_API_URL } = process.env;
-        let { username, password, is_demo, captcha, captcha_b64, err_msg } = this.state;
+        let { username, password, key, is_demo, captcha, captcha_b64, err_msg } = this.state;
         let { complete_login } = this.state;
 
         const paths = this.props.location.pathname.split('/');
@@ -478,10 +517,45 @@ class AuthLogin extends Component
 
             complete_login = false;
             captcha_b64 = null;
-            err_msg = 'Login Failed.'
+            err_msg = 'Login Failed.';
             this.setState({ complete_login, captcha_b64, err_msg });
             
             this.retrieveDukascopyCaptcha();
+        }
+        else if (provider === 'oanda')
+        {
+            complete_login = true;
+            this.setState({ complete_login });
+
+            const reqOptions = {
+                method: 'POST',
+                headers: this.props.getHeaders(),
+                credentials: 'include',
+                body: JSON.stringify({
+                    broker: provider, broker_id, broker_id,
+                    name: "My Broker", key: key, is_demo: is_demo
+                })
+            }
+    
+            console.log({
+                broker: provider, broker_id, broker_id,
+                name: "My Broker", key: key, is_demo: is_demo
+            });
+
+            const res = await fetch(
+                `${REACT_APP_API_URL}/broker`,
+                reqOptions
+            );
+
+            if (res.status === 200)
+            {
+                window.location = '/app';
+                return;
+            }
+
+            complete_login = false;
+            err_msg = 'Login Failed.';
+            this.setState({ complete_login, err_msg });
         }
     }
 

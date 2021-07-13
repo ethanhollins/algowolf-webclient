@@ -389,7 +389,17 @@ class StrategyToolbar extends Component
 
         if (is_running === null || !is_loaded || this.props.isDemo)
         {
-            return <React.Fragment />;
+            return (
+                <div className='toolbox item'>
+                    <div 
+                        ref={this.setActivationElem} className='toolbox item row btn disabled'
+                        title='Not available.'
+                    >
+                        <FontAwesomeIcon className='toolbox icon disabled' icon={faPlay} />
+                        <span className='toolbox label'>Start</span>
+                    </div>
+                </div>
+            );
         }
         else if (!this.props.hasBetaAccess())
         {

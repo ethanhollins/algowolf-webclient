@@ -623,24 +623,24 @@ class WindowWrapper extends Component
         const is_top = this.props.isTopWindow(
             this.getStrategyId(), this.getItemId(), mouse_pos
         )
-        if (!this.getMaximised() && !this.props.getPopup())
-        {
-            let { hovered } = this.state;
-            let isChanged = false;
+        // if (!this.getMaximised() && !this.props.getPopup())
+        // {
+        //     let { hovered } = this.state;
+        //     let isChanged = false;
     
-            isChanged = isChanged || this.isResizeMouseLocation(mouse_pos, is_top, hovered);
-            isChanged = isChanged || this.isMoveMouseLocation(mouse_pos, is_top, hovered);
+        //     isChanged = isChanged || this.isResizeMouseLocation(mouse_pos, is_top, hovered);
+        //     isChanged = isChanged || this.isMoveMouseLocation(mouse_pos, is_top, hovered);
     
-            if (isChanged)
-            {
-                this.handleCursor(hovered);
-            }
+        //     if (isChanged)
+        //     {
+        //         this.handleCursor(hovered);
+        //     }
     
-            // this.handleKeys(e);
+        //     // this.handleKeys(e);
     
-            this.moveWindow(e);
-            this.resizeWindow(e);
-        }
+        //     this.moveWindow(e);
+        //     this.resizeWindow(e);
+        // }
 
         this.showWindowBtns(is_top);
     }

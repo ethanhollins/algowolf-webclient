@@ -28,6 +28,8 @@ import Notice from './popups/Notice';
 import ControlPanelUpdateMessage from './popups/ControlPanelUpdateMessage';
 import ComingSoon from './popups/ComingSoon';
 import AccountLoggedOut from './popups/AccountLoggedOut';
+import SelectStrategy from './popups/SelectStrategy';
+import GettingStarted from './popups/GettingStarted';
 
 class Popup extends Component
 {
@@ -216,6 +218,24 @@ class Popup extends Component
                     setHoverOff={this.setHoverOff}
                 />
             }
+            else if (popup.type === 'select-strategy')
+            {
+                return <SelectStrategy 
+                    getPopup={this.props.getPopup}
+                    setPopup={this.props.setPopup}
+                    onChangeCategory={this.onChangeCategory}
+                    changeCategory={this.changeCategory}
+                    getWindowInfo={this.props.getWindowInfo}
+                    getStrategyId={this.props.getStrategyId}
+                    getStrategyInfo={this.props.getStrategyInfo}
+                    getAllStrategyInfo={this.props.getAllStrategyInfo}
+                    updateStrategyInfo={this.props.updateStrategyInfo}
+                    retrieveStrategyDetails={this.props.retrieveStrategyDetails}
+                    getHeaders={this.props.getHeaders}
+                    getAccountMetadata={this.props.getAccountMetadata}
+                    updateAccountMetadata={this.props.updateAccountMetadata}
+                />
+            }
             else if (popup.type === 'chart-settings')
             {
                 return <ChartSettings 
@@ -259,6 +279,12 @@ class Popup extends Component
             else if (popup.type === 'welcome-live')
             {
                 return <WelcomeLive
+                    getPopup={this.props.getPopup}
+                />
+            }
+            else if (popup.type === 'getting-started')
+            {
+                return <GettingStarted
                     getPopup={this.props.getPopup}
                 />
             }

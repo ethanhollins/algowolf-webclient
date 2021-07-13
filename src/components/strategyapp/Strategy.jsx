@@ -672,7 +672,16 @@ class Strategy extends Component
             for (let j = 0; j < strategy.brokers[broker_id].positions.length; j++)
             {
                 if (strategy.brokers[broker_id].positions[j].order_id === position.order_id)
-                    strategy.brokers[broker_id].positions.splice(j, 1);
+                {
+                    if (position.lotsize >= strategy.brokers[broker_id].positions[j].lotsize)
+                    {
+                        strategy.brokers[broker_id].positions.splice(j, 1);
+                    }
+                    else
+                    {
+                        strategy.brokers[broker_id].positions[j].lotsize -= position.lotsize;
+                    }
+                }
             }
             this.props.updateStrategyInfo();
         }

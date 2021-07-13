@@ -31,7 +31,8 @@ class AreYouSure extends Component
 
     onYes()
     {
-        this.props.getPopup().func();
+        const args = this.props.getPopup().args;
+        this.props.getPopup().func(args);
         this.props.close();
         // console.log(this.props.getPopup());
     }

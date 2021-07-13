@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 import moment from "moment-timezone";
 import _ from 'underscore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowAltCircleUp } from '@fortawesome/pro-regular-svg-icons';
+import { faArrowAltCircleUp, faHistory } from '@fortawesome/pro-regular-svg-icons';
 import { faTimes, faPlus, faMinus, faAngleRight, faAngleLeft } from '@fortawesome/pro-light-svg-icons';
 import Strategy from './strategyapp/Strategy';
 import StrategyToolbar from './strategyapp/StrategyToolbar';
@@ -75,6 +75,7 @@ class StrategyApp extends Component
         this.reconnectCharts = this.reconnectCharts.bind(this);
         this.retrieveAllBrokers = this.retrieveAllBrokers.bind(this);
         this.retrieveStrategies = this.retrieveStrategies.bind(this);
+        this.retrieveStrategyDetails = this.retrieveStrategyDetails.bind(this);
         this.retrieveAccountInfo = this.retrieveAccountInfo.bind(this);
         this.retrieveReport = this.retrieveReport.bind(this);
         this.retrieveBacktestReport = this.retrieveBacktestReport.bind(this);
@@ -85,6 +86,7 @@ class StrategyApp extends Component
         this.subscribeEmail = this.subscribeEmail.bind(this);
         this.handleSocket = this.handleSocket.bind(this);
         this.updateCurrentAccount = this.updateCurrentAccount.bind(this);
+        this.updateAccountMetadata = this.updateAccountMetadata.bind(this);
 
         this.setAppContainerRef = elem => {
             this.appContainer = elem;
@@ -129,8 +131,16 @@ class StrategyApp extends Component
         const account = await this.retrieveGuiInfo();
         sio = this.handleSocket();
         this.setState({ sio });
-        const strategyInfo = await this.retrieveStrategies(account.metadata.open_strategies, account);
+        let strategyInfo = await this.retrieveStrategies(account.metadata.open_strategies, account);
+        for (let i in strategyInfo)
+        {
+            if (i in account.strategies)
+            {
+                strategyInfo[i].name = account.strategies[i].name;
+            }
+        }
 
+        console.log(strategyInfo);
         this.setState({ account, strategyInfo });
     
         setTimeout(() => {
@@ -202,6 +212,16 @@ class StrategyApp extends Component
             this.props.visitorCounter();
         }
 
+        const popup = {
+            type: 'getting-started',
+            size: {
+                pixelWidth: 740,
+                pixelHeight: 600
+            },
+            fade: true
+        };
+        this.setPopup(popup);
+
         this.is_loaded = true;
     }
 
@@ -261,7 +281,7 @@ class StrategyApp extends Component
                     <div className='tab body' onDragStart={this.onDragStart}>
                         <div>
                             {this.generateStrategyTabs()}
-                            <div className='tab item add' onClick={this.onNotAvailableItem}>
+                            <div className='tab item add' onClick={this.onSelectStrategy}>
                                 <FontAwesomeIcon className='tab btn' icon={faPlus} />
                             </div>
                         </div>
@@ -294,6 +314,7 @@ class StrategyApp extends Component
                         retrieveStrategies={this.retrieveStrategies}
                         getAllStrategyInfo={this.getAllStrategyInfo}
                         updateStrategyInfo={this.updateStrategyInfo}
+                        retrieveStrategyDetails={this.retrieveStrategyDetails}
                         setHovered={this.setHovered}
                         subscribeEmail={this.subscribeEmail}
                         onFirstVisit={this.onFirstVisit}
@@ -302,6 +323,8 @@ class StrategyApp extends Component
                         findIndicator={this.findIndicator}
                         calculateAllChartIndicators={this.calculateAllChartIndicators}
                         addToSave={this.addToSave}
+                        getAccountMetadata={this.getAccountMetadata}
+                        updateAccountMetadata={this.updateAccountMetadata}
                     />
                     
                     
@@ -501,14 +524,21 @@ class StrategyApp extends Component
                     close_btn_class = " light"
                 }
 
+                let icon;
+                if (i.includes('/backtest/'))
+                {
+                    icon = <FontAwesomeIcon className='tab btn-icon' icon={faHistory} />;
+                }
+
                 tabs.push(
                     <div 
                         key={i} className={className} name={i} 
                         onClick={this.setOpenStrategy.bind(this)}
                         style={{ backgroundColor: background_color, borderBottomColor: background_color, color: text_color }}
                     >
+                        {icon}
                         <span>{s.name}</span>
-                        <FontAwesomeIcon className={'tab btn' + close_btn_class} icon={faTimes} onClick={this.onNotAvailableItem} />
+                        <FontAwesomeIcon className={'tab btn' + close_btn_class} icon={faTimes} name={i} onClick={this.onCloseTab} />
                     </div>
                 );      
             }
@@ -1204,6 +1234,32 @@ class StrategyApp extends Component
         return strategyInfo;
     }
 
+    async retrieveStrategyDetails()
+    {
+        const { REACT_APP_API_URL } = process.env;
+
+        /** Retrieve strategy info */
+        const reqOptions = {
+            method: 'GET',
+            headers: this.props.getHeaders(),
+            credentials: 'include'
+        }
+
+        const res = await fetch(
+            `${REACT_APP_API_URL}/v1/strategy/details`,
+            reqOptions
+        );
+
+        if (res.status === 200)
+        {
+            return await res.json();
+        }
+        else if (res.status === 403)
+        {
+            window.location = '/logout';
+        }
+    }
+
     async retrieveAccountInfo(strategy_id, broker_id, account_id)
     {
         const { REACT_APP_API_URL } = process.env;
@@ -1317,6 +1373,37 @@ class StrategyApp extends Component
         else if (res.status === 403)
         {
             window.location = '/logout';
+        }
+    }
+
+    async updateAccountMetadata(metadata)
+    {
+        const { REACT_APP_API_URL } = process.env;
+        const reqOptions = {
+            method: 'POST',
+            headers: this.props.getHeaders(),
+            credentials: 'include',
+            body: JSON.stringify({
+                metadata: metadata
+            })
+        }
+
+        let res = await fetch(
+            `${REACT_APP_API_URL}/v1/account`,
+            reqOptions
+        );
+
+        if (res.status === 200)
+        {
+            return true;
+        }
+        else if (res.status === 403)
+        {
+            window.location = '/logout';
+        }
+        else
+        {
+            return false;
         }
     }
 
@@ -2198,6 +2285,17 @@ class StrategyApp extends Component
     {
         return this.appContainer;
     }
+    
+    getAccountMetadata = () =>
+    {
+        let { account } = this.state;
+        if ('metadata' in account)
+        {
+            return account.metadata;
+        }
+        
+        return undefined;
+    }
 
     getCurrentStrategy = () =>
     {
@@ -2419,6 +2517,8 @@ class StrategyApp extends Component
             {
                 account.metadata.current_strategy = strategy_id;
                 this.setState({ account });
+
+                this.updateAccountMetadata(account.metadata);
             }
         }
     }
@@ -2856,6 +2956,52 @@ class StrategyApp extends Component
         handleSaveResult(result);
     }
 
+    onCloseTab = (e) =>
+    {
+        const strategy_id = e.target.getAttribute('name');
+        const popup = {
+            type: 'are-you-sure',
+            size: {
+                pixelWidth: 420,
+                pixelHeight: 220
+            },
+            message: "Are you sure you want to close this tab?",
+            func: this.performCloseTab.bind(this),
+            args: [strategy_id]
+        }
+        this.setPopup(popup);
+    }
+
+    performCloseTab = (args) =>
+    {
+        const strategy_id = args[0];
+
+        let { account } = this.state;
+        if (account.metadata.open_strategies.includes(strategy_id))
+        {
+            const idx = account.metadata.open_strategies.indexOf(strategy_id);
+            account.metadata.open_strategies.splice(idx, 1);
+        }
+        
+        if (account.metadata.current_strategy === strategy_id)
+        {
+            if (account.metadata.open_strategies.length > 0)
+            {
+                account.metadata.current_strategy = account.metadata.open_strategies[0];
+            }
+            else
+            {
+                account.metadata.current_strategy = null;
+            }
+        }
+
+        // console.log(account.metadata);
+
+        // this.setState({ account });
+        this.updateAccountMetadata(account.metadata);
+        window.location.reload();
+    }
+
     onNotAvailableItem = (e) =>
     {
         const popup = {
@@ -2863,6 +3009,18 @@ class StrategyApp extends Component
             size: {
                 pixelWidth: 600,
                 pixelHeight: 760
+            }
+        }
+        this.setPopup(popup);
+    }
+
+    onSelectStrategy = (e) =>
+    {
+        const popup = {
+            type: 'select-strategy',
+            size: {
+                pixelWidth: 500,
+                pixelHeight: 550
             }
         }
         this.setPopup(popup);
@@ -3092,7 +3250,7 @@ class StrategyApp extends Component
         }
         else if (broker === 'oanda')
         {
-            return Math.round(size / 100000 * 100000) / 100000;
+            return Math.round(size * 100000) / 100000;
         }
         else
         {
