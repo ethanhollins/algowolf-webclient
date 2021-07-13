@@ -8,12 +8,12 @@ ENV PATH /app/node_modules/.bin:$PATH
 COPY package.json ./
 COPY package-lock.json ./
 
+# add app
+COPY . ./
+
 RUN npm config set "@fortawesome:registry" https://npm.fontawesome.com/
 RUN npm config set "//npm.fontawesome.com/:_authToken" 743E6677-8D1F-452F-B620-C719403539E7
 RUN npm ci --silent
-
-# add app
-COPY . ./
 
 RUN npm run build
 
