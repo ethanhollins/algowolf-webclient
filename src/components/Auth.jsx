@@ -26,6 +26,7 @@ class Auth extends Component
         const provider = paths[paths.length-1];
 
         const queryString = this.props.location.search;
+
         const { REACT_APP_API_URL } = process.env;
         let { message } = this.state;
 
@@ -49,16 +50,16 @@ class Auth extends Component
             if (res.status === 200)
             {
                 const broker_id = data.broker_id;
-                window.location = `/app?brokerSuccess=Successfully added broker to your account%2E&broker=${broker_id}`;
+                window.location = `/app?broker=${broker_id}`;
             }
             else if (res.status === 400)
             {
                 const msg = data.message;
-                window.location = `/app?brokerError=${encodeURIComponent(msg)}`
+                window.location = `/app`
             }
             else
             {
-                window.location = `/app?brokerError=Failed to add broker%2E`
+                window.location = `/app`
             }            
         }
         else if (provider === 'holygrail')

@@ -61,7 +61,7 @@ class AccountLoggedOut extends Component
         const broker = this.props.getPopup().properties.broker;
         const broker_id = this.props.getPopup().properties.broker_id;
         const name = this.props.getPopup().properties.name;
-        const { REACT_APP_API_URL, REACT_APP_IB_REDIRECT_BASE } = process.env;
+        const { REACT_APP_API_URL, REACT_APP_IB_REDIRECT_BASE, REACT_APP_SPOTWARE_CLIENT_ID, REACT_APP_SPOTWARE_REDIRECT } = process.env;
 
         if (broker === 'ib')
         {
@@ -87,6 +87,27 @@ class AccountLoggedOut extends Component
             {
 
             }
+        }
+        else if ([
+            'spotware', 'icmarkets', 'fxpro', 'pepperstone', 
+            'axiory', 'fondex', 'octafx', 'scandinavian_capital_markets',
+            'skilling', 'omf', 'tradeview'
+        ].includes(broker))
+        {
+            const reqOptions = {
+                method: 'POST',
+                headers: this.props.getHeaders(),
+                credentials: 'include'
+            }
+
+            const res = await fetch(
+                `${REACT_APP_API_URL}/v1/brokers/replace/spotware/${broker_id}`,
+                reqOptions
+            );
+
+            // Call spotware OAuth
+            const url = `https://connect.spotware.com/apps/auth?client_id=${REACT_APP_SPOTWARE_CLIENT_ID}&redirect_uri=${REACT_APP_SPOTWARE_REDIRECT}&scope=trading`;
+            window.location.href = url;
         }
     }
 }

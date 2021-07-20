@@ -497,22 +497,21 @@ class BrokerSettings extends Component
             <div className='popup column'>
                 <div id='popup_broker_selector'>
                     <div 
+                        className={'popup broker disabled' + this.isItemSelected('fxopen', broker_info.broker)}
+                        onClick={this.redirectBroker.bind(this)}
+                        name='fxopen'
+                    >
+                        <img className='popup broker-img' src={process.env.PUBLIC_URL + '/fxopen_logo.png'} />
+                        <div className='popup broker-text'>FX Open</div>
+                        <div className='popup broker-description'>Coming Soon</div>
+                    </div>
+                    <div 
                         className={'popup broker' + this.isItemSelected('dukascopy', broker_info.broker)}
                         onClick={this.redirectBroker.bind(this)}
                         name='dukascopy'
                     >
                         <img className='popup broker-img' src={process.env.PUBLIC_URL + '/dukascopy_logo.png'} />
                         <div className='popup broker-text'>Dukascopy</div>
-                        <div className='popup broker-description'>Low Commissions</div>
-                    </div>
-                    <div 
-                        className={'popup broker' + this.isItemSelected('ib', broker_info.broker)}
-                        onClick={this.redirectBroker.bind(this)}
-                        name='ib'
-                    >
-                        <img className='popup broker-img' src={process.env.PUBLIC_URL + '/interactive_brokers_logo.png'} />
-                        <div className='popup broker-text'>Interactive Brokers</div>
-                        <div className='popup broker-description'>Coming Soon</div>
                     </div>
                     <div 
                         className={'popup broker' + this.isItemSelected('oanda', broker_info.broker)}
@@ -521,7 +520,6 @@ class BrokerSettings extends Component
                     >
                         <ReactSVG className='popup broker-svg' src={process.env.PUBLIC_URL + '/oanda_logo.svg'} />
                         <div className='popup broker-text'>Oanda</div>
-                        <div className='popup broker-description'>Coming Soon</div>
                     </div>
                     <div 
                         className={'popup broker disabled' + this.isItemSelected('fxcm', broker_info.broker)}
@@ -935,6 +933,18 @@ class BrokerSettings extends Component
                 </div>
             );
         }
+        else if (broker_name === 'fxopen')
+        {
+            return (
+                <div 
+                    className='popup broker disabled selected'
+                    name='fxopen'
+                >
+                    <img className='popup broker-img' src={process.env.PUBLIC_URL + '/fxopen_logo.png'} />
+                    <div className='popup broker-text'>FX Open</div>
+                </div>
+            );
+        }
     }
 
     getBrokerImage(broker_info)
@@ -954,6 +964,10 @@ class BrokerSettings extends Component
         else if (broker_info.broker === 'dukascopy')
         {
             return <img className='popup category-left-logo' src={process.env.PUBLIC_URL + '/dukascopy_logo.png'} />;
+        }
+        else if (broker_info.broker === 'fxopen')
+        {
+            return <img className='popup category-left-logo' src={process.env.PUBLIC_URL + '/fxopen_logo.png'} />;
         }
         else if ([
             'spotware', 'icmarkets', 'fxpro', 'pepperstone', 

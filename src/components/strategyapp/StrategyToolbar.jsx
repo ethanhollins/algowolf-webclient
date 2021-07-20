@@ -557,7 +557,7 @@ class StrategyToolbar extends Component
                         <span className='toolbox label collapse'>Help</span>
                     </div>
                 </div>
-                <a 
+                {/* <a 
                     className='toolbox item' 
                     href='/holygrail/demo'
                     // onClick={this.onLiveHelpItem.bind(this)}
@@ -567,7 +567,7 @@ class StrategyToolbar extends Component
                         <FontAwesomeIcon className='toolbox icon red_btn' icon={faArrowAltCircleRight} />
                         <span className='toolbox label'>Goto Demo</span>
                     </div>
-                </a>
+                </a> */}
 
                 </React.Fragment>
             );
@@ -804,10 +804,10 @@ class StrategyToolbar extends Component
     onLiveHelpItem = (e) =>
     {
         const popup = {
-            type: 'welcome-live',
+            type: 'getting-started',
             size: {
-                width: 40,
-                height: 70
+                pixelWidth: 740,
+                pixelHeight: 600
             },
             fade: true
         }

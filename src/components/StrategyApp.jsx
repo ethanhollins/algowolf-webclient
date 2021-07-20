@@ -140,75 +140,74 @@ class StrategyApp extends Component
             }
         }
 
-        console.log(strategyInfo);
         this.setState({ account, strategyInfo });
     
-        setTimeout(() => {
-            this.addNotification();
-            this.addNotification();
-        }, 10*1000);
+        // setTimeout(() => {
+        //     this.addNotification();
+        //     this.addNotification();
+        // }, 10*1000);
 
         // Retrieve user specific strategy informations
         if (this.props.isDemo)
         {
-            const user_id = await this.props.checkAuthorization();
-            if (!user_id)
-            {
-                const popup = {
-                    type: 'sign-up-prompt',
-                    size: {
-                        pixelWidth: 550,
-                        pixelHeight: 520
-                    },
-                    image: '/request_access_prison_paycheck.png',
-                    fade: true,
-                    permanent: true
-                };
-                this.setPopup(popup);
-            }
-            else
-            {
-                const user_data = await this.retrieveHolyGrailUser();
-                if (Object.keys(user_data).length > 0)
-                {
-                    if (!user_data.approved)
-                    {
-                        const popup = {
-                            type: 'request-demo-access',
-                            size: {
-                                pixelWidth: 550,
-                                pixelHeight: 340
-                            },
-                            image: '/request_access_prison_paycheck.png',
-                            fade: true,
-                            permanent: true,
-                            properties: {
-                                user_data: user_data,
-                                hasRequested: true
-                            }
-                        };
-                        this.setPopup(popup);
-                    }
-                }
-                else
-                {
-                    const popup = {
-                        type: 'request-demo-access',
-                        size: {
-                            pixelWidth: 550,
-                            pixelHeight: 340
-                        },
-                        image: '/request_access_prison_paycheck.png',
-                        fade: true,
-                        permanent: true,
-                        properties: {
-                            user_data: {},
-                            hasRequested: false
-                        }
-                    };
-                    this.setPopup(popup);
-                }
-            }
+            // const user_id = await this.props.checkAuthorization();
+            // if (!user_id)
+            // {
+            //     const popup = {
+            //         type: 'sign-up-prompt',
+            //         size: {
+            //             pixelWidth: 550,
+            //             pixelHeight: 520
+            //         },
+            //         image: '/request_access_prison_paycheck.png',
+            //         fade: true,
+            //         permanent: true
+            //     };
+            //     this.setPopup(popup);
+            // }
+            // else
+            // {
+            //     const user_data = await this.retrieveHolyGrailUser();
+            //     if (Object.keys(user_data).length > 0)
+            //     {
+            //         if (!user_data.approved)
+            //         {
+            //             const popup = {
+            //                 type: 'request-demo-access',
+            //                 size: {
+            //                     pixelWidth: 550,
+            //                     pixelHeight: 340
+            //                 },
+            //                 image: '/request_access_prison_paycheck.png',
+            //                 fade: true,
+            //                 permanent: true,
+            //                 properties: {
+            //                     user_data: user_data,
+            //                     hasRequested: true
+            //                 }
+            //             };
+            //             this.setPopup(popup);
+            //         }
+            //     }
+            //     else
+            //     {
+            //         const popup = {
+            //             type: 'request-demo-access',
+            //             size: {
+            //                 pixelWidth: 550,
+            //                 pixelHeight: 340
+            //             },
+            //             image: '/request_access_prison_paycheck.png',
+            //             fade: true,
+            //             permanent: true,
+            //             properties: {
+            //                 user_data: {},
+            //                 hasRequested: false
+            //             }
+            //         };
+            //         this.setPopup(popup);
+            //     }
+            // }
             this.props.visitorCounter();
         }
 
@@ -3228,34 +3227,37 @@ class StrategyApp extends Component
 
     convertOutgoingPositionSize = (broker, size) =>
     {
-        if (broker === 'spotware')
-        {
-            return parseInt(size * 10000000);
-        }
-        else if (broker === 'oanda')
-        {
-            return parseInt(size * 1000000);
-        }
-        else
-        {
-            return size;
-        }
+        // if (broker === 'spotware')
+        // {
+        //     return parseInt(size * 10000000);
+        // }
+        // else if (broker === 'oanda')
+        // {
+        //     return parseInt(size * 1000000);
+        // }
+        // else
+        // {
+        //     return size;
+        // }
+        return size;
     }
 
     convertIncomingPositionSize = (broker, size) =>
     {
-        if (broker === 'spotware')
-        {
-            return Math.round(size / 10000000 * 100) / 100;
-        }
-        else if (broker === 'oanda')
-        {
-            return Math.round(size * 100000) / 100000;
-        }
-        else
-        {
-            return Math.round(size * 100) / 100;
-        }
+        // if (broker === 'spotware')
+        // {
+        //     return Math.round(size / 10000000 * 100) / 100;
+        // }
+        // if (broker === 'oanda')
+        // {
+        //     return Math.round(size * 100000) / 100000;
+        // }
+        // else
+        // {
+        //     return Math.round(size * 10000) / 10000;
+        // }
+        return Math.round(size * 10000) / 10000;
+
     }
 
     hasBetaAccess = () =>
