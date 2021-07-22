@@ -2076,16 +2076,18 @@ class Chart extends Component
         {
             trades = trades.concat(this.getOrders());
         }
-
         // const trades = this.getPositions().concat(this.getOrders());
         for (let i = 0; i < trades.length; i++)
         {
             const c_trade = trades[i];
             if (!(c_trade.product === this.getProduct())) continue;
             // Get Position
-            const x = this.getPosFromTimestamp(c_trade.open_time);
+            let x = this.getPosFromTimestamp(c_trade.open_time);
             // Skip if x doesn't exist
-            if (x === undefined) continue;
+            if (x === undefined) 
+            {
+                x = -1;
+            }
 
             const entry_pos = camera.convertWorldPosToScreenPos(
                 { x: x+0.5, y: c_trade.entry_price }, pos, seg_size, scale
@@ -2148,28 +2150,48 @@ class Chart extends Component
             ctx.fillStyle = '#FFF';
             ctx.strokeStyle = color;
 
-            // Dashed line
-            ctx.beginPath();
-            ctx.moveTo(0, Math.round(entry_pos.y * window.devicePixelRatio));
-            ctx.lineTo(
-                Math.round(entry_pos.x * window.devicePixelRatio), 
-                Math.round(entry_pos.y * window.devicePixelRatio)
-            );
-            ctx.setLineDash([8, 5]);
-            ctx.stroke();
+            if (x !== -1)
+            {
+                // Dashed line
+                ctx.beginPath();
+                ctx.moveTo(0, Math.round(entry_pos.y * window.devicePixelRatio));
+                ctx.lineTo(
+                    Math.round(entry_pos.x * window.devicePixelRatio), 
+                    Math.round(entry_pos.y * window.devicePixelRatio)
+                );
+                ctx.setLineDash([8, 5]);
+                ctx.stroke();
 
-            // Solid line
-            ctx.beginPath();
-            ctx.moveTo(
-                Math.round(entry_pos.x * window.devicePixelRatio), 
-                Math.round(entry_pos.y * window.devicePixelRatio)
-            );
-            ctx.lineTo(
-                Math.round(seg_size.width * window.devicePixelRatio), 
-                Math.round(entry_pos.y * window.devicePixelRatio)
-            );
-            ctx.setLineDash([0, 0]);
-            ctx.stroke();
+                // Solid line
+                ctx.beginPath();
+                ctx.moveTo(
+                    Math.round(entry_pos.x * window.devicePixelRatio), 
+                    Math.round(entry_pos.y * window.devicePixelRatio)
+                );
+                ctx.lineTo(
+                    Math.round(seg_size.width * window.devicePixelRatio), 
+                    Math.round(entry_pos.y * window.devicePixelRatio)
+                );
+                ctx.setLineDash([0, 0]);
+                ctx.stroke();
+            }
+            else
+            {
+                // Solid line
+                ctx.beginPath();
+                ctx.moveTo(
+                    0, 
+                    Math.round(entry_pos.y * window.devicePixelRatio)
+                );
+                ctx.lineTo(
+                    Math.round(seg_size.width * window.devicePixelRatio), 
+                    Math.round(entry_pos.y * window.devicePixelRatio)
+                );
+                ctx.setLineDash([0, 0]);
+                ctx.stroke();
+            }
+
+            
 
             const trade_icon_size = 8;
             const trade_label_height = 21;
@@ -2204,17 +2226,20 @@ class Chart extends Component
                     trade_label_width = trade_label_inside_off*2 + Math.floor(text_width);
                 }
 
-                // Fill Rect
-                ctx.fillRect(
-                    Math.floor((entry_pos.x - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
-                    Math.floor((entry_pos.y - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
-                    trade_icon_size, trade_icon_size,
-                );
-                ctx.strokeRect(
-                    Math.floor((entry_pos.x - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
-                    Math.floor((entry_pos.y - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
-                    trade_icon_size, trade_icon_size,
-                );
+                if (x !== -1)
+                {
+                    // Fill Rect
+                    ctx.fillRect(
+                        Math.floor((entry_pos.x - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
+                        Math.floor((entry_pos.y - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
+                        trade_icon_size, trade_icon_size,
+                    );
+                    ctx.strokeRect(
+                        Math.floor((entry_pos.x - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
+                        Math.floor((entry_pos.y - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
+                        trade_icon_size, trade_icon_size,
+                    );
+                }
 
                 // Fill Rect
                 ctx.fillRect(
@@ -2282,18 +2307,21 @@ class Chart extends Component
                     trade_label_width = trade_label_inside_off*2 + Math.floor(text_width);
                 }
 
-                // Fill Rect
-                ctx.fillRect(
-                    Math.floor((entry_pos.x - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
-                    Math.floor((entry_pos.y - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
-                    trade_icon_size, trade_icon_size,
-                );
-                ctx.strokeRect(
-                    Math.floor((entry_pos.x - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
-                    Math.floor((entry_pos.y - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
-                    Math.round(trade_icon_size * window.devicePixelRatio), 
-                    Math.round(trade_icon_size * window.devicePixelRatio),
-                );
+                if (x !== -1)
+                {
+                    // Fill Rect
+                    ctx.fillRect(
+                        Math.floor((entry_pos.x - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
+                        Math.floor((entry_pos.y - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
+                        trade_icon_size, trade_icon_size,
+                    );
+                    ctx.strokeRect(
+                        Math.floor((entry_pos.x - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
+                        Math.floor((entry_pos.y - trade_icon_size/2) * window.devicePixelRatio)+0.5, 
+                        Math.round(trade_icon_size * window.devicePixelRatio), 
+                        Math.round(trade_icon_size * window.devicePixelRatio),
+                    );
+                }
 
                 // Fill Rect
                 ctx.fillRect(
@@ -2359,14 +2387,17 @@ class Chart extends Component
                     trade_label_width = trade_label_inside_off*2 + Math.floor(text_width);
                 }
 
-                // Fill Circle
-                ctx.beginPath();
-                ctx.arc(
-                    Math.floor(entry_pos.x * window.devicePixelRatio)+0.5, Math.floor(entry_pos.y * window.devicePixelRatio)+0.5, 
-                    Math.round((trade_icon_size/2) * window.devicePixelRatio), 0, 2 * Math.PI
-                );
-                ctx.fill();
-                ctx.stroke();
+                if (x !== -1)
+                {
+                    // Fill Circle
+                    ctx.beginPath();
+                    ctx.arc(
+                        Math.floor(entry_pos.x * window.devicePixelRatio)+0.5, Math.floor(entry_pos.y * window.devicePixelRatio)+0.5, 
+                        Math.round((trade_icon_size/2) * window.devicePixelRatio), 0, 2 * Math.PI
+                    );
+                    ctx.fill();
+                    ctx.stroke();
+                }
 
                 // Fill Rect
                 ctx.fillRect(

@@ -31,12 +31,25 @@ class Login extends Component
 
     async componentDidMount()
     {
-        let { loginCheck } = this.state;
         const user_id = await this.props.checkAuthorization();
         if (user_id === null)
         {
-            loginCheck = true;
-            this.setState({ loginCheck });
+            const { REACT_APP_FRONT_BASE_URL } = process.env;
+            let query_string = this.props.queryString;
+
+            if (query_string)
+            {
+                window.location.href = REACT_APP_FRONT_BASE_URL + this.props.url + query_string;
+            }
+            else
+            {
+                query_string = "?redirect=" + encodeURIComponent(window.location.href)
+                window.location.href = REACT_APP_FRONT_BASE_URL + this.props.url + query_string;
+            }
+        }
+        else
+        {
+            window.location = '/app';
         }
     }
 

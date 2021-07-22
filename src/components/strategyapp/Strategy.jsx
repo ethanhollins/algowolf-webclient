@@ -1490,7 +1490,7 @@ class Strategy extends Component
 
     async retrieveAccountInfo(account_code, override)
     {
-        let { loaded, transactions, balances } = this.state;
+        let { loaded, transactions, balances, positions, orders } = this.state;
 
         if (!loaded.includes(account_code) || override)
         {
@@ -1499,6 +1499,8 @@ class Strategy extends Component
             const account_id = account_code.split('.')[1];
             const account_info = await this.props.retrieveAccountInfo(this.props.id, broker_id, account_id);
     
+            console.log(strategy);
+
             // Set Account Info
             if (account_info.transactions !== undefined)
             {
@@ -1513,6 +1515,10 @@ class Strategy extends Component
             }
 
             balances[account_code] = strategy.brokers[broker_id].accounts[account_id].balance;
+            // positions = strategy.brokers[broker_id].positions;
+            // orders = strategy.brokers[broker_id].orders;
+            // console.log(positions);
+            // console.log(orders);
             // if (account_info.drawings !== undefined)
             //     this.setDrawings(account_code, account_info.drawings);
             // if (account_info.logs !== undefined)
@@ -1527,7 +1533,7 @@ class Strategy extends Component
                 this.setCurrentLocalVariablesPreset();
     
             loaded.push(account_code);
-            this.setState({ loaded, transactions, balances });
+            this.setState({ loaded, transactions, balances, positions, orders });
             this.handleTransactions(null, true);
         }
     }

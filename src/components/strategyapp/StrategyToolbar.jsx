@@ -550,24 +550,12 @@ class StrategyToolbar extends Component
                 <div 
                     className='toolbox item' 
                     onClick={this.onLiveHelpItem.bind(this)}
-                    // onClick={this.onNotAvailableItem}
                 >
                     <div className='toolbox item row btn'>
                         <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faQuestionCircle} />
                         <span className='toolbox label collapse'>Help</span>
                     </div>
                 </div>
-                {/* <a 
-                    className='toolbox item' 
-                    href='/holygrail/demo'
-                    // onClick={this.onLiveHelpItem.bind(this)}
-                    // onClick={this.onNotAvailableItem}
-                >
-                    <div className='toolbox item row btn'>
-                        <FontAwesomeIcon className='toolbox icon red_btn' icon={faArrowAltCircleRight} />
-                        <span className='toolbox label'>Goto Demo</span>
-                    </div>
-                </a> */}
 
                 </React.Fragment>
             );
@@ -576,8 +564,6 @@ class StrategyToolbar extends Component
 
     generateDemoToolbarBtns = () =>
     {
-        const { REACT_APP_FRONT_BASE_URL } = process.env;
-        
         if (this.props.isDemo)
         {
             return (
@@ -587,36 +573,12 @@ class StrategyToolbar extends Component
                 <div 
                     className='toolbox item' 
                     onClick={this.onDemoHelpItem.bind(this)}
-                    // onClick={this.onNotAvailableItem}
                 >
                     <div className='toolbox item row btn'>
                         <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faQuestionCircle} />
                         <span className='toolbox label collapse'>Help</span>
                     </div>
                 </div>
-                {/* <a 
-                    href={REACT_APP_FRONT_BASE_URL + '/holygrail/faq'}
-                    className='toolbox item' 
-                    target="_blank"
-                    // onClick={this.onNotAvailableItem}
-                >
-                    <div ref={this.setBacktestElem} className='toolbox item row btn'>
-                        <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faInfoCircle} />
-                        <span className='toolbox label'>FAQ</span>
-                    </div>
-                </a> */}
-                <div className='toolbox separator' />
-                <a 
-                    href={REACT_APP_FRONT_BASE_URL + '/automated-trading'}
-                    className='toolbox item' 
-                    target="_blank"
-                    // onClick={this.onNotAvailableItem}
-                >
-                    <div className='toolbox item row btn'>
-                        <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faRobot} />
-                        <span className='toolbox label'>Automated Trading</span>
-                    </div>
-                </a>
 
                 </React.Fragment>
             );

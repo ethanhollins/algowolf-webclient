@@ -210,6 +210,10 @@ class StrategyApp extends Component
             // }
             this.props.visitorCounter();
         }
+        else if (!user_id)
+        {
+            window.location = '/login';
+        }
 
         const popup = {
             type: 'getting-started',

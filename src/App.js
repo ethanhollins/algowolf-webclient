@@ -17,6 +17,7 @@ import Register from './components/Register';
 import SendPasswordReset from './components/SendPasswordReset';
 import ResetPassword from './components/ResetPassword';
 import AuthLogin from './components/AuthLogin';
+import UrlRedirect from './components/UrlRedirect';
 
 class App extends Component 
 {
@@ -35,7 +36,10 @@ class App extends Component
         this.firstVisitorCounter = this.firstVisitorCounter.bind(this);
     }
 
-    render() {
+    render() 
+    {
+        const queryString = window.location.search;
+
         return (
             <Router component={App}>
                 <Switch>
@@ -43,29 +47,35 @@ class App extends Component
                         <Redirect to="/login"/>
                     </Route>
                     <Route exact path="/register">
-                        <Register 
-                            getCookies={this.getCookies}
-                            setUserId={this.setUserId}
+                        <UrlRedirect
+                            url={"/register"}
+                            queryString={"?"}
                         />
                     </Route>
                     <Route exact path="/account-settings">
-                        <AccountSettings 
-                            checkAuthorization={this.checkAuthorization}
-                            getHeaders={this.getHeaders}
+                        <UrlRedirect
+                            url={"/account-settings"}
+                            queryString={queryString}
                         />
                     </Route>
                     <Route exact path="/login">
                         {this.getConditionalLoginComponent()}
                     </Route>
                     <Route exact path="/logout">
-                        <Logout 
-                            getURI={this.getURI}
-                            getCookies={this.getCookies}
-                            setUserId={this.setUserId}
+                        <UrlRedirect
+                            url={"/logout"}
+                            queryString={"?"}
                         />
                     </Route>
                     <Route exact path="/app">
-                        {this.getConditionalAppComponent()}
+                        {/* {this.getConditionalAppComponent()} */}
+                        <StrategyApp
+                            getURI={this.getURI}
+                            getCookies={this.getCookies}
+                            getHeaders={this.getHeaders}
+                            getUserId={this.getUserId}
+                            checkAuthorization={this.checkAuthorization}
+                        />
                     </Route>
                     <Route exact path="/auth/:broker/login">
                         <AuthLogin 
@@ -128,26 +138,26 @@ class App extends Component
 
         if (this.state.user_id !== null)
         {
-            let redirect;
-            if (params.get('redirect'))
-            {
-                redirect = decodeURIComponent(params.get('redirect'));
-            }
+            // let redirect;
+            // if (params.get('redirect'))
+            // {
+            //     redirect = decodeURIComponent(params.get('redirect'));
+            // }
             
-            params.delete('redirect');
-            if (redirect)
-            {
-                return <Redirect to={`/${redirect}?${params.toString()}`}/>;
-            }
+            // params.delete('redirect');
             // if (redirect)
             // {
-            //     console.log()
-            //     return <Redirect to={`/auth/${redirect}?${params.toString()}`}/>;
+            //     return <Redirect to={`/${redirect}?${params.toString()}`}/>;
             // }
-            else
-            {
-                return <Redirect to={"/app?"+params.toString()}/>;
-            }
+            // // if (redirect)
+            // // {
+            // //     console.log()
+            // //     return <Redirect to={`/auth/${redirect}?${params.toString()}`}/>;
+            // // }
+            // else
+            // {
+            // }
+            return <Redirect to={"/app?"+params.toString()}/>;
         }
         else
         {
@@ -157,6 +167,8 @@ class App extends Component
                 getUserId={this.getUserId}
                 setUserId={this.setUserId}
                 checkAuthorization={this.checkAuthorization}
+                url={"/login"}
+                queryString={queryString}
             />;
         }
     }
