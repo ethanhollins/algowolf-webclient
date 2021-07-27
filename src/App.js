@@ -227,11 +227,12 @@ class App extends Component
             };
     
             const res = await fetch(`${REACT_APP_API_URL}/authorize`, requestOptions);
-            
+            console.log(res.status);
             if (res.status === 200)
             {
                 // Redirect to App
                 const data = await res.json();
+                console.log(data);
                 user_id = data.user_id;
             }
             else

@@ -122,6 +122,7 @@ class StrategyApp extends Component
         let { checkLogin } = this.state;
         
         const user_id = await this.props.checkAuthorization();
+        console.log(user_id);
         checkLogin = true;
         this.setState({ user_id, checkLogin });
 
@@ -212,7 +213,8 @@ class StrategyApp extends Component
         }
         else if (!user_id)
         {
-            window.location = '/login';
+            console.log('GO BACK')
+            // window.location = '/login';
         }
 
         const popup = {
