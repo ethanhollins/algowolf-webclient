@@ -111,10 +111,40 @@ class ChartSettings extends Component
         const settings = this.getChartSettings().general;
 
         let timezone_elems = [];
-        for (let tz in this.props.getTimezones())
+        const timezones = this.props.getTimezones();
+        for (let tz of timezones)
         {
+            let location = tz.split('/');
+            if (location.length === 2)
+            {
+                location = location[1];
+            }
+            else
+            {
+                location = location[0];
+            }
+
+            let offset = parseInt(moment().tz(tz).utcOffset()/60);
+            if (offset > 0)
+            {
+                offset = "UTC+" + offset;
+            }
+            else if (offset < 0)
+            {
+                offset = "UTC-" + Math.abs(offset);
+            }
+            else
+            {
+                offset = "UTC";
+            }
+
             timezone_elems.push(
-                <div key={tz} className='popup dropdown-item' name={'timezone value'} value={tz}>{tz}</div>
+                <div 
+                    key={tz} className='popup dropdown-item' 
+                    name={'timezone value'} value={tz}
+                >
+                    ({offset}) {location.replaceAll('_', ' ')}
+                </div>
             )
         }
 
@@ -588,16 +618,19 @@ class ChartSettings extends Component
             const btn = parent.childNodes[0];
             const options = parent.childNodes[1];
             const container_size = this.props.getContainerSize();
+            const popup_elem = this.props.getPopupElem();
+            const TOOLBAR_SIZE = 60;
 
             const DROPDOWN_ITEM_HEIGHT = 37;
             const options_top = parent.offsetTop + 35;
-            const options_height = (options.childNodes.length+1) * DROPDOWN_ITEM_HEIGHT;
+            const options_height = (options.childNodes.length) * DROPDOWN_ITEM_HEIGHT;
 
             btn.className = btn.className + ' selected';
             options.style.display = 'block';
             options.style.width = (parent.clientWidth) + 'px';
+            options.style.height = (Math.min(container_size.height, options_height)) + 'px';
 
-            options.style.top = Math.min(options_top, container_size.height - options_height - DROPDOWN_ITEM_HEIGHT) + 'px';
+            options.style.top = Math.max(popup_elem.clientHeight - container_size.height + TOOLBAR_SIZE, Math.min(options_top, container_size.height - options_height - DROPDOWN_ITEM_HEIGHT)) + 'px';
 
             selected_dropdown = parent;
             this.setState({ selected_dropdown });

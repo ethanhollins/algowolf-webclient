@@ -1365,6 +1365,11 @@ class Strategy extends Component
         let current_account = this.getCurrentAccount();
         let strategy = this.getStrategyInfo();
 
+        if (!strategy.account)
+        {
+            strategy.account = strategy.strategy_id + ".papertrader";
+        }
+
         let broker_id = strategy.account.split('.')[0];
         let account_id = strategy.account.split('.')[1];
         if (

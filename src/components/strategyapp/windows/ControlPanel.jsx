@@ -16,6 +16,13 @@ class ControlPanel extends Component
         this.addInputRef = elem => {
             this.inputs.push(elem);
         }
+        this.dropdowns = {};
+        this.addDropdownSelectorRef = elem => {
+            if (elem)
+            {
+                this.dropdowns[elem.getAttribute("name")] = elem;
+            }
+        }
     }
     
     state = {
@@ -154,26 +161,35 @@ class ControlPanel extends Component
         {
             if (maximum_bank)
             {
-                value = Math.min(fixed_bank, maximum_bank);
+                value = Math.min(fixed_bank, maximum_bank, account_balance);
             }
             else
             {
-                value = fixed_bank;
+                value = Math.min(fixed_bank, account_balance);
             }
         }
         else
         {
             if (maximum_bank)
             {
-                value = Math.min(account_balance + external_bank, maximum_bank)
+                value = Math.min(account_balance, maximum_bank)
             }
             else
             {
-                value = account_balance + external_bank;
+                value = account_balance;
             }
         }
 
         return value;
+    }
+
+    getEffectiveBank()
+    {
+        const total_bank = this.getTotalBank();
+        const risk_perc = this.getVariableValue('Risk (%)');
+        
+
+        return total_bank * risk_perc;
     }
 
     initCustomVariables()
@@ -313,7 +329,6 @@ class ControlPanel extends Component
 
             changed[name]['value'] = value;
         }
-
         this.setState({ changed });
     }
 
@@ -445,7 +460,7 @@ class ControlPanel extends Component
                 }
                 if (item.properties.currency)
                 {
-                    icon = <span className={'control-panel icon' + icon_ext}>USD</span>;
+                    icon = <span className={'control-panel icon left' + icon_ext}>USD</span>;
                 }
 
                 if (item.type === 'header')
@@ -458,7 +473,7 @@ class ControlPanel extends Component
                 }
                 else if (item.type === 'balance')
                 {
-                    icon = <span className={'control-panel icon' + icon_ext}>USD</span>;
+                    icon = <span className={'control-panel icon left' + icon_ext}>USD</span>;
                     elem = (
                         <div key={current_account + name} className='control-panel row'>
                             <div className='control-panel item left'>
@@ -475,7 +490,7 @@ class ControlPanel extends Component
                                 {icon}
                                 <input 
                                     ref={this.addInputRef}
-                                    className={'control-panel field' + field_ext} 
+                                    className={'control-panel field right' + field_ext} 
                                     name={name} type='number' value={this.props.getBalance(current_account)}
                                     readOnly
                                 />
@@ -485,11 +500,11 @@ class ControlPanel extends Component
                 }
                 else if (item.type === 'custom')
                 {
-                    if (name === 'Total Bank')
+                    if (name === 'Total Bank' || name === 'Usable Bank')
                     {
-                        const total_bank = Math.min(this.getTotalBank(), max);
+                        const total_bank = this.getTotalBank();
 
-                        icon = <span className={'control-panel icon' + icon_ext}>USD</span>;
+                        icon = <span className={'control-panel icon left' + icon_ext}>USD</span>;
                         elem = (
                             <div key={current_account + name} className='control-panel row'>
                                 <div className='control-panel item left'>
@@ -506,13 +521,123 @@ class ControlPanel extends Component
                                     {icon}
                                     <input 
                                         ref={this.addInputRef}
-                                        className={'control-panel field' + field_ext} 
+                                        className={'control-panel field right' + field_ext} 
                                         name={name} type='number' value={total_bank}
                                         min={min} max={max}
                                         readOnly
                                     />
                                 </div>
                             </div>
+                        );
+                    }
+                    else if (name === 'Effective Bank')
+                    {
+                        const effective_bank = this.getEffectiveBank();
+                        const maximum_bank = this.getVariableValue('Maximum Bank');
+
+                        let err_msg;
+                        let err_class = "";
+                        if (effective_bank > maximum_bank)
+                        {
+                            err_msg = (
+                                <div className='control-panel row'>
+                                    <div className='control-panel item err-msg'>
+                                        Effective Bank [<em>Usable Bank x Risk (%)</em>] <strong>exceeds</strong> <em>Maximum Bank</em>
+                                    </div>
+                                </div>
+                            )
+                            err_class = " error";
+                        }
+
+                        icon = <span className={'control-panel icon left' + icon_ext + err_class}>USD</span>;
+                        elem = (
+                            <React.Fragment key={current_account + name}>
+                            <div className='control-panel row'>
+                                <div className='control-panel item left'>
+                                    <div className='control-panel item-main'>
+                                        <span className='control-panel item-title'>{name}</span>
+                                        { 
+                                            item.properties.description 
+                                            ? <span className='control-panel item-description'>{item.properties.description}</span> 
+                                            : <React.Fragment/> 
+                                        }
+                                    </div>
+                                </div>
+                                <div className='control-panel item right'>
+                                    {icon}
+                                    <input 
+                                        ref={this.addInputRef}
+                                        className={'control-panel field right' + field_ext + err_class} 
+                                        name={name} type='number' value={effective_bank}
+                                        min={min} max={max}
+                                        readOnly
+                                    />
+                                </div>
+                            </div>
+                            {err_msg}
+                            </React.Fragment>
+                        );
+                    }
+                    else if (name === 'Leverage')
+                    {
+                        elem = (
+                            <React.Fragment key={current_account + name}>
+                            <div className='control-panel row'>
+                                <div className='control-panel item left'>
+                                    <div className='control-panel item-main'>
+                                        <span className='control-panel item-title'>{name}</span>
+                                        { 
+                                            item.properties.description 
+                                            ? <span className='control-panel item-description'>{item.properties.description}</span> 
+                                            : <React.Fragment/> 
+                                        }
+                                    </div>
+                                </div>
+                                <div className='control-panel item right'>
+                                    <input 
+                                        ref={this.addInputRef}
+                                        className={'control-panel field left' + field_ext} 
+                                        name={name} type='text' value={value}
+                                        readOnly
+                                    />
+                                    <span name={"dropdown_" + name} className={'control-panel icon right btn' + icon_ext} onClick={this.onDropdownClick.bind(this)}>
+                                        <FontAwesomeIcon className='control-panel dropdown-icon-right' icon={faChevronDown} />
+                                    </span>
+                                    <div 
+                                        ref={this.addDropdownSelectorRef} 
+                                        name={"dropdown_" + name} 
+                                        className='control-panel dropdown-selector'
+                                        style={{display: "none"}}
+                                        onClick={this.onDropdownSelectorClick.bind(this)}
+                                    >
+                                        <div>1:500</div>
+                                        <div>1:400</div>
+                                        <div>1:300</div>
+                                        <div>1:200</div>
+                                        <div>1:100</div>
+                                        <div>1:75</div>
+                                        <div>1:50</div>
+                                        <div>1:30</div>
+                                        <div>1:20</div>
+                                        <div>1:10</div>
+                                        <div>1:5</div>
+                                        <div>1:2</div>
+                                        <div>1:1</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className='control-panel row'>
+                                <div className='control-panel item left'>
+                                    <div className='control-panel item-main'>
+                                        <span className='control-panel item-title'>Maximum Risk (%)</span>
+                                        <span className='control-panel item-description'>The maximum Risk % you can take on your broker.</span>
+                                    </div>
+                                </div>
+                                <div className='control-panel item right'>
+                                    <span className='control-panel item-value'>{this.getLevarageCalc(value)}%</span>
+                                </div>
+                            </div>
+                            </React.Fragment>
                         );
                     }
                     else
@@ -536,7 +661,7 @@ class ControlPanel extends Component
                     {
                         type = 'number';
                         step = '.01';
-                        icon = <span className={'control-panel icon' + icon_ext}>%</span>;
+                        icon = <span className={'control-panel icon left' + icon_ext}>%</span>;
                     }
                     else if (item.type === 'cash')
                     {
@@ -592,10 +717,11 @@ class ControlPanel extends Component
                                 {icon}
                                 <input 
                                     ref={this.addInputRef}
-                                    className={'control-panel field' + field_ext} name={name}
+                                    className={'control-panel field right' + field_ext} name={name}
                                     type={type} value={value}
                                     step={step} min={min} max={max}
                                     onChange={this.onVariableChange.bind(this)}
+                                    readOnly={item.properties.readOnly}
                                 />
                                 {enabled_elem}
                             </div>
@@ -645,6 +771,52 @@ class ControlPanel extends Component
         }
         return result;
     }
+
+    closeDropdown(name)
+    {
+        if (name in this.dropdowns)
+        {
+            if (this.dropdowns[name].style.display === "none")
+            {
+                this.dropdowns[name].style.display = "block";
+            }
+            else
+            {
+                this.dropdowns[name].style.display = "none";
+            }
+        }
+    }
+
+    onDropdownClick(e)
+    {
+        const name = e.target.getAttribute("name");
+
+        this.closeDropdown(name);
+    }
+
+    onDropdownSelectorClick(e)
+    {
+        const name = e.target.parentNode.getAttribute("name");
+        const value = e.target.innerText;
+        if (name.includes("Leverage"))
+        {
+            this.setVariableChange("Leverage", value);
+        }
+
+        this.closeDropdown(name);
+    }
+
+    getLevarageCalc = (leverage) =>
+    {
+        const leverage_parts = leverage.split(":");
+
+        const bank_size = 10000;
+        const max_lotsize = 2.5;
+
+        const max_risk = ((parseFloat(leverage_parts[1]) * bank_size) / 100000) / max_lotsize;
+        return (max_risk - 0.05).toFixed(2);
+    }
+    
 }
 
 export default ControlPanel;

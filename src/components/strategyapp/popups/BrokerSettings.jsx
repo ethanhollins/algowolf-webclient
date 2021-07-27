@@ -280,9 +280,14 @@ class BrokerSettings extends Component
 
             let strategy = this.props.getStrategyInfo(this.props.getStrategyId());
             const current_broker_id = strategy.account.split('.')[0];
+            console.log("Delete-----");
+            console.log(current_broker_id);
+            console.log(broker_id);
             if (current_broker_id === broker_id)
             {
+                console.log("Do This:");
                 strategy.account = this.props.getStrategyId() + '.papertrader';
+                console.log(strategy.account);
                 this.props.updateStrategyInfo();
             }
         }
@@ -506,14 +511,6 @@ class BrokerSettings extends Component
                         <div className='popup broker-description'>Coming Soon</div>
                     </div>
                     <div 
-                        className={'popup broker' + this.isItemSelected('dukascopy', broker_info.broker)}
-                        onClick={this.redirectBroker.bind(this)}
-                        name='dukascopy'
-                    >
-                        <img className='popup broker-img' src={process.env.PUBLIC_URL + '/dukascopy_logo.png'} />
-                        <div className='popup broker-text'>Dukascopy</div>
-                    </div>
-                    <div 
                         className={'popup broker' + this.isItemSelected('oanda', broker_info.broker)}
                         onClick={this.redirectBroker.bind(this)}
                         name='oanda'
@@ -530,10 +527,6 @@ class BrokerSettings extends Component
                         <div className='popup broker-text'>FXCM</div>
                         <div className='popup broker-description'>Coming Soon</div>
                     </div>
-                </div>
-            </div>
-            <div className='popup column'>
-                <div id='popup_broker_selector'>
                     <div 
                         className={'popup broker' + this.isItemSelected('spotware', broker_info.broker)}
                         onClick={this.redirectBroker.bind(this)}
@@ -543,6 +536,10 @@ class BrokerSettings extends Component
                         <div className='popup broker-text'>cTrader</div>
                         <div className='popup broker-description'>Multiple Brokers</div>
                     </div>
+                </div>
+            </div>
+            <div className='popup column'>
+                <div id='popup_broker_selector'>
                     <div 
                         className={'popup broker' + this.isItemSelected('icmarkets', broker_info.broker)}
                         onClick={this.redirectBroker.bind(this)}
@@ -567,10 +564,6 @@ class BrokerSettings extends Component
                         <img className='popup broker-img' src={process.env.PUBLIC_URL + '/pepperstone_logo.png'} />
                         <div className='popup broker-text'>Pepperstone</div>
                     </div>
-                </div>
-            </div>
-            <div className='popup column'>
-                <div id='popup_broker_selector'>
                     <div 
                         className={'popup broker' + this.isItemSelected('axiory', broker_info.broker)}
                         onClick={this.redirectBroker.bind(this)}
@@ -579,6 +572,10 @@ class BrokerSettings extends Component
                         <img className='popup broker-img' src={process.env.PUBLIC_URL + '/axiory_logo.png'} />
                         <div className='popup broker-text'>Axiory Global</div>
                     </div>
+                </div>
+            </div>
+            <div className='popup column'>
+                <div id='popup_broker_selector'>
                     <div 
                         className={'popup broker' + this.isItemSelected('fondex', broker_info.broker)}
                         onClick={this.redirectBroker.bind(this)}
@@ -603,10 +600,6 @@ class BrokerSettings extends Component
                         <img className='popup broker-img' src={process.env.PUBLIC_URL + '/scandinavian_capital_market_logo.png'} />
                         <div className='popup broker-text'>Scandinavian Capital Markets</div>
                     </div>
-                </div>
-            </div>
-            <div className='popup column'>
-                <div id='popup_broker_selector'>
                     <div 
                         className={'popup broker' + this.isItemSelected('skilling', broker_info.broker)}
                         onClick={this.redirectBroker.bind(this)}
@@ -615,6 +608,10 @@ class BrokerSettings extends Component
                         <img className='popup broker-img' src={process.env.PUBLIC_URL + '/skilling_logo.png'} />
                         <div className='popup broker-text'>Skilling</div>
                     </div>
+                </div>
+            </div>
+            <div className='popup column'>
+                <div id='popup_broker_selector'>
                     <div 
                         className={'popup broker' + this.isItemSelected('omf', broker_info.broker)}
                         onClick={this.redirectBroker.bind(this)}

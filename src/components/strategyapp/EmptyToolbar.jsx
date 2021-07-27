@@ -1,18 +1,9 @@
 import React, { Component } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-    faCircle, faInfo
-} from '@fortawesome/pro-solid-svg-icons';
-import { 
-    faBars,  faChartLine, faChartPie, faPlay, faStop,
-    faLightbulb, faCode, faHistory, faChevronRight, faChevronDown, 
-    faTools, faExpandArrowsAlt, faLink, faExpandAlt
+    faBars, faChevronRight, faArrowAltCircleRight, faHome
 } from '@fortawesome/pro-regular-svg-icons';
-import { 
-    faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
-    faFileInvoice, faChartBar, faTicketAlt, faLayerGroup, faUser,
-    faSignOut
-} from '@fortawesome/pro-light-svg-icons';
+import { faSignOut } from '@fortawesome/pro-light-svg-icons';
 
 class StrategyToolbar extends Component
 {
@@ -51,6 +42,14 @@ class StrategyToolbar extends Component
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
                             <div className='dropdown-separator'></div>
+                            <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='my-dashboard'>
+                                <span className='toolbox left'>My Dashboard</span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faArrowAltCircleRight} className='toolbox right-icon medium' /></span>
+                            </div>
+                            <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='home'>
+                                <span className='toolbox left'>Home</span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faHome} className='toolbox right-icon medium' /></span>
+                            </div>
                             <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='logout'>
                                 <span className='toolbox left'>Logout</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faSignOut} className='toolbox right-icon' /></span>
@@ -116,6 +115,15 @@ class StrategyToolbar extends Component
                 }
             }
             this.props.setPopup(popup);
+        }
+        else if (name === 'my-dashboard')
+        {
+            window.location = '/app';
+        }
+        else if (name === 'home')
+        {
+            const { REACT_APP_FRONT_BASE_URL } = process.env;
+            window.location.href = REACT_APP_FRONT_BASE_URL;
         }
         else if (name === 'logout')
         {

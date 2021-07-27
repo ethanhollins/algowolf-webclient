@@ -1080,7 +1080,7 @@ class Chart extends Component
                                         name={i} onClick={this.onOverlaySettings} 
                                     />
                                     <FontAwesomeIcon 
-                                        className='chart ind-icon' icon={faTimes} 
+                                        className='chart ind-icon' icon={faTimes} onClick={this.props.notAvailable}
                                     />
                                 </div>
                             </div>
@@ -1117,7 +1117,7 @@ class Chart extends Component
                                         price = price.toFixed(ind.precision);
                                     }
 
-                                    const color = study.appearance.colors[x][y];
+                                    const color = Object.values(study.appearance.colors)[y].value;
                                     
                                     item = (
                                         <span 
@@ -1146,8 +1146,13 @@ class Chart extends Component
                             <div className='chart values type'>{name}</div>
                             {value_elems}
                             <div className='chart ind-settings'>
-                                <FontAwesomeIcon className='chart ind-icon' icon={faCog} />
-                                <FontAwesomeIcon className='chart ind-icon' icon={faTimes} />
+                                <FontAwesomeIcon 
+                                    className='chart ind-icon' icon={faCog} 
+                                    name={i} onClick={this.onStudySettings}
+                                />
+                                <FontAwesomeIcon 
+                                    className='chart ind-icon' icon={faTimes} onClick={this.props.notAvailable}
+                                />
                             </div>
                         </div>
                     );
@@ -1246,6 +1251,7 @@ class Chart extends Component
                 width: 20,
                 height: 40
             },
+            opened: 'properties',
             properties: {
                 chart: this.getChart(),
                 indicator: this.getStudyIndicator(idx)
@@ -3730,7 +3736,7 @@ class Chart extends Component
     
     getTimezone = () =>
     {
-        return this.props.getTimezones()[this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].general['timezone'].value];
+        return this.getSettings()['chart-settings'].layouts[this.getChartSettingsLayout()].general['timezone'].value;
     }
 
     getDateFormat = () =>

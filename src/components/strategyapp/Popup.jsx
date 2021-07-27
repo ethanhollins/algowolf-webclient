@@ -252,6 +252,7 @@ class Popup extends Component
                     setHoverOff={this.setHoverOff}
                     getTimezones={this.props.getTimezones}
                     addToSave={this.props.addToSave}
+                    getPopupElem={this.getPopupElem}
                 />
             }
             else if (popup.type === 'indicator-settings')
@@ -661,7 +662,7 @@ class Popup extends Component
 
     }
 
-    getPopupElem()
+    getPopupElem = () =>
     {
         return this.popupBody;
     }

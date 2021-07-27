@@ -262,7 +262,7 @@ class Study extends Component
                 for (let y = 0; y < ind_values[i][0].length; y++)
                 {
                     let c_x = -1;
-                    const color = appearance.colors[i][y];
+                    const color = Object.values(appearance.colors)[y].value;
                     let is_future = false;
 
                     ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, 1.0)`;

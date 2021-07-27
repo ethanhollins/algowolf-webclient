@@ -164,7 +164,6 @@ class IndicatorSettings extends Component
                     const name = i;
                     const enabled = this.getIndicator().appearance[key][i].enabled;
                     const value = this.getIndicator().appearance[key][i].value;
-
                     result.push(
                         <div key={i} className='popup table-row'>
                             <div className='popup table-cell'>

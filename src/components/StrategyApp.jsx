@@ -2880,6 +2880,7 @@ class StrategyApp extends Component
             if (!s_id.includes('/backtest/'))
             {
                 to_update[s_id].account = this.getCurrentAccount(s_id);
+                to_update[s_id].settings = this.getStrategyInfo(s_id).settings;
             }
 
             for (let i of toSave[s_id])
@@ -3102,11 +3103,81 @@ class StrategyApp extends Component
 
     getTimezones()
     {
-        return {
-            'UTC': 'UTC',
-            'UTC-5': 'America/New_York',
-            'UTC+11': 'Australia/Melbourne',
-        }
+        return [
+            'UTC',
+            'Pacific/Honolulu',
+            'America/Juneau',
+            'America/Los_Angeles',
+            'America/Phoenix',
+            'America/Vancouver',
+            'America/Denver',
+            'America/Bogota',
+            'America/Chicago',
+            'America/Lima',
+            'America/Mexico_City',
+            'America/Caracas',
+            'America/New_York',
+            'America/Santiago',
+            'America/Toronto',
+            'America/Buenos_Aires',
+            'America/Sao_Paulo',
+            'Atlantic/Reykjavik',
+            'Europe/Dublin',
+            'Africa/Lagos',
+            'Europe/Lisbon',
+            'Europe/London',
+            'Europe/Amsterdam',
+            'Europe/Belgrade',
+            'Europe/Berlin',
+            'Europe/Brussels',
+            'Africa/Cairo',
+            'Europe/Copenhagen',
+            'Africa/Johannesburg',
+            'Europe/Luxembourg',
+            'Europe/Madrid',
+            'Europe/Malta',
+            'Europe/Oslo',
+            'Europe/Paris',
+            'Europe/Rome',
+            'Europe/Stockholm',
+            'Europe/Warsaw',
+            'Europe/Zurich',
+            'Europe/Athens',
+            'Asia/Bahrain',
+            'Europe/Helsinki',
+            'Europe/Istanbul',
+            'Asia/Jerusalem',
+            'Asia/Kuwait',
+            'Europe/Moscow',
+            'Asia/Qatar',
+            'Europe/Riga',
+            'Asia/Riyadh',
+            'Europe/Tallinn',
+            'Europe/Vilnius',
+            'Asia/Dubai',
+            'Asia/Muscat',
+            'Asia/Tehran',
+            'Asia/Ashkhabad',
+            'Asia/Kolkata',
+            'Asia/Almaty',
+            'Asia/Bangkok',
+            'Asia/Ho_Chi_Minh',
+            'Asia/Jakarta',
+            'Asia/Chongqing',
+            'Asia/Hong_Kong',
+            'Australia/Perth',
+            'Asia/Shanghai',
+            'Asia/Singapore',
+            'Asia/Taipei',
+            'Asia/Seoul',
+            'Asia/Tokyo',
+            'Australia/Adelaide',
+            'Australia/Brisbane',
+            'Australia/Sydney',
+            'Pacific/Norfolk',
+            'Pacific/Auckland',
+            'Pacific/Chatham'
+        ]
     }
 
     getWeekendDates(ts)
