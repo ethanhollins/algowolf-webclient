@@ -32,25 +32,26 @@ class Login extends Component
     async componentDidMount()
     {
         const user_id = await this.props.checkAuthorization();
-        if (user_id === null)
-        {
-            const { REACT_APP_FRONT_BASE_URL } = process.env;
-            let query_string = this.props.queryString;
+        console.log(user_id);
+        // if (user_id === null)
+        // {
+        //     const { REACT_APP_FRONT_BASE_URL } = process.env;
+        //     let query_string = this.props.queryString;
 
-            if (query_string)
-            {
-                window.location.href = REACT_APP_FRONT_BASE_URL + this.props.url + query_string;
-            }
-            else
-            {
-                query_string = "?redirect=" + encodeURIComponent(window.location.href)
-                window.location.href = REACT_APP_FRONT_BASE_URL + this.props.url + query_string;
-            }
-        }
-        else
-        {
-            window.location = '/app';
-        }
+        //     if (query_string)
+        //     {
+        //         window.location.href = REACT_APP_FRONT_BASE_URL + this.props.url + query_string;
+        //     }
+        //     else
+        //     {
+        //         query_string = "?redirect=" + encodeURIComponent(window.location.href)
+        //         window.location.href = REACT_APP_FRONT_BASE_URL + this.props.url + query_string;
+        //     }
+        // }
+        // else
+        // {
+        //     window.location = '/app';
+        // }
     }
 
     render()
