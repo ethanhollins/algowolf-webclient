@@ -62,9 +62,13 @@ class App extends Component
                         {this.getConditionalLoginComponent()}
                     </Route>
                     <Route exact path="/logout">
-                        <UrlRedirect
+                        {/* <UrlRedirect
                             url={"/logout"}
                             queryString={"?"}
+                        /> */}
+                        <Logout
+                            getCookies={this.getCookies}
+                            setUserId={this.setUserId}
                         />
                     </Route>
                     <Route exact path="/app">

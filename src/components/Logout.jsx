@@ -24,7 +24,7 @@ class Logout extends Component
         const { REACT_APP_FRONT_BASE_URL } = process.env;
         this.props.getCookies().remove('Authorization');
         this.props.setUserId(null);
-        
+
         const query_string = new URLSearchParams(window.location.search);
         if (query_string.get("redirect"))
         {
