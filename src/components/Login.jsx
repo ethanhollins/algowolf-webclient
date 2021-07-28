@@ -31,27 +31,42 @@ class Login extends Component
 
     async componentDidMount()
     {
+        const query_string = new URLSearchParams(window.location.search);
+        if (query_string.get("set_token"))
+        {
+            this.props.getCookies().set('Authorization', query_string.get("set_token"), {
+                path: '/'
+            });
+
+            if (query_string.get("redirect"))
+            {
+                window.location.href = query_string.get("redirect");
+                return;
+            }
+        }
+
         const user_id = await this.props.checkAuthorization();
         console.log(user_id);
-        // if (user_id === null)
-        // {
-        //     const { REACT_APP_FRONT_BASE_URL } = process.env;
-        //     let query_string = this.props.queryString;
 
-        //     if (query_string)
-        //     {
-        //         window.location.href = REACT_APP_FRONT_BASE_URL + this.props.url + query_string;
-        //     }
-        //     else
-        //     {
-        //         query_string = "?redirect=" + encodeURIComponent(window.location.href)
-        //         window.location.href = REACT_APP_FRONT_BASE_URL + this.props.url + query_string;
-        //     }
-        // }
-        // else
-        // {
-        //     window.location = '/app';
-        // }
+        if (user_id === null)
+        {
+            const { REACT_APP_FRONT_BASE_URL } = process.env;
+            let query_string = this.props.queryString;
+
+            if (query_string)
+            {
+                window.location.href = REACT_APP_FRONT_BASE_URL + this.props.url + query_string;
+            }
+            else
+            {
+                query_string = "?redirect=" + encodeURIComponent(window.location.href)
+                window.location.href = REACT_APP_FRONT_BASE_URL + this.props.url + query_string;
+            }
+        }
+        else
+        {
+            window.location = '/app';
+        }
     }
 
     render()
