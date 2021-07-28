@@ -21,26 +21,20 @@ class Logout extends Component
 
     async handleLogout()
     {
-        // const reqOptions = {
-        //     method: 'POST',
-        //     credentials: 'include'
-        // }
-        // let res = await fetch(
-        //     `${this.props.getURI()}/logout`,
-        //     reqOptions
-        // );
-        
-        // const status = res.status;
-        // res = await res.json(); 
-
-        // if (status === 200)
-        // {
-        //     this.props.setUserId(null);
-        // }
-
+        const { REACT_APP_FRONT_BASE_URL } = process.env;
         this.props.getCookies().remove('Authorization');
         this.props.setUserId(null);
-        this.props.history.push('/login');
+        
+        const query_string = new URLSearchParams(window.location.search);
+        if (query_string.get("redirect"))
+        {
+            window.location.href = query_string.get("redirect");
+        }
+        else
+        {
+            window.location.href = REACT_APP_FRONT_BASE_URL + "/logout";
+        }
+        
     }
 }
 
