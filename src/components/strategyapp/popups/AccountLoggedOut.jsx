@@ -109,6 +109,21 @@ class AccountLoggedOut extends Component
             const url = `https://connect.spotware.com/apps/auth?client_id=${REACT_APP_SPOTWARE_CLIENT_ID}&redirect_uri=${REACT_APP_SPOTWARE_REDIRECT}&scope=trading`;
             window.location.href = url;
         }
+        else if (broker === 'oanda')
+        {
+            const reqOptions = {
+                method: 'POST',
+                headers: this.props.getHeaders(),
+                credentials: 'include'
+            }
+
+            const res = await fetch(
+                `${REACT_APP_API_URL}/v1/brokers/replace/oanda/${broker_id}`,
+                reqOptions
+            );
+
+            window.location = `/auth/oanda/login?bid=${broker_id}&sid=${this.props.getStrategyId()}`;
+        }
     }
 }
 

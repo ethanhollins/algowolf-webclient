@@ -63,7 +63,7 @@ class ControlPanel extends Component
                 />
                 <input 
                     id='update_btn' 
-                    className={'control-panel button' + this.isDisabled()}
+                    className={'control-panel button' + this.isUpdateDisabled()}
                     type="button" value="Update" 
                     onClick={this.update.bind(this)}
                 />
@@ -83,6 +83,44 @@ class ControlPanel extends Component
         else
         {
             return '';
+        }
+    }
+
+
+    isUpdateDisabled()
+    {
+        const { changed } = this.state;
+        const effective_bank = this.getEffectiveBank();
+        const maximum_bank = this.getVariableValue('Maximum Bank');        
+        const risk = this.getVariableValue('Risk (%)');
+
+        let leverage_val;
+        if ('Leverage' in changed && 'value' in changed['Leverage'])
+        {
+            leverage_val = changed['Leverage'].value;
+        }
+        else
+        {
+            leverage_val = this.getVariableValue('Leverage');
+        }
+        
+        if (!effective_bank || !maximum_bank || !risk || !leverage_val)
+        {
+            return ' disabled';
+        }
+        else
+        {
+            const leverage = this.getLevarageCalc(leverage_val);
+            const is_update_enabled = effective_bank <= maximum_bank && risk <= leverage;
+    
+            if (!is_update_enabled || this.isDisabled())
+            {
+                return ' disabled';
+            }
+            else
+            {
+                return '';
+            }
         }
     }
 
@@ -369,52 +407,58 @@ class ControlPanel extends Component
 
     reset()
     {
-        let { changed } = this.state;
-        changed = {};
-        this.setState({ changed });
+        if (!this.isDisabled())
+        {
+            let { changed } = this.state;
+            changed = {};
+            this.setState({ changed });
+        }
     }
 
     update()
     {
-        let { changed } = this.state;
-        const global_preset = this.props.getCurrentGlobalVariablesPreset();
-        const global_variables = this.props.getGlobalInputVariables()[global_preset];
-        const local_preset = this.props.getCurrentLocalVariablesPreset();
-        const local_variables = this.props.getLocalInputVariables()[local_preset];
-
-        for (let name in changed)
+        if (!this.isUpdateDisabled())
         {
-            if (name in local_variables)
+            let { changed } = this.state;
+            const global_preset = this.props.getCurrentGlobalVariablesPreset();
+            const global_variables = this.props.getGlobalInputVariables()[global_preset];
+            const local_preset = this.props.getCurrentLocalVariablesPreset();
+            const local_variables = this.props.getLocalInputVariables()[local_preset];
+
+            for (let name in changed)
             {
-                if ('value' in changed[name])
+                if (name in local_variables)
                 {
-                    local_variables[name].value = changed[name].value;
+                    if ('value' in changed[name])
+                    {
+                        local_variables[name].value = changed[name].value;
+                    }
+                    if ('enabled' in changed[name])
+                    {
+                        local_variables[name].properties.enabled = changed[name].enabled;
+                    }
                 }
-                if ('enabled' in changed[name])
+                else if (name in global_variables)
                 {
-                    local_variables[name].properties.enabled = changed[name].enabled;
+                    if ('value' in changed[name])
+                    {
+                        global_variables[name].value = changed[name].value;
+                    }
+                    if ('enabled' in changed[name])
+                    {
+                        global_variables[name].properties.enabled = changed[name].enabled;
+                    }
                 }
             }
-            else if (name in global_variables)
-            {
-                if ('value' in changed[name])
-                {
-                    global_variables[name].value = changed[name].value;
-                }
-                if ('enabled' in changed[name])
-                {
-                    global_variables[name].properties.enabled = changed[name].enabled;
-                }
-            }
+
+            this.props.updateInputVariables(
+                { [local_preset]: local_variables }, 
+                { [global_preset]: global_variables }
+            );
+
+            changed = {};
+            this.setState({ changed });
         }
-
-        this.props.updateInputVariables(
-            { [local_preset]: local_variables }, 
-            { [global_preset]: global_variables }
-        );
-
-        changed = {};
-        this.setState({ changed });
     }
 
     getItems = () =>
