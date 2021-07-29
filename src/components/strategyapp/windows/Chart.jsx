@@ -1165,7 +1165,7 @@ class Chart extends Component
                         <div className='chart ohlc-group'>
                             <div className='chart product-btn' onClick={this.props.notAvailable}>
                                 {this.getProduct().replace('_', '')}
-                                <span className='chart broker'>{this.getBroker().toUpperCase()}</span>
+                                {/* <span className='chart broker'>{this.getBroker().toUpperCase()}</span> */}
                             </div>
                             <div className='chart period-btn' onClick={this.props.notAvailable}>{this.getDisplayPeriod()}</div>
                             <div>
