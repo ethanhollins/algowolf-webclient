@@ -1118,7 +1118,7 @@ class StrategyApp extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/tos`,
+            `${REACT_APP_API_URL}/v1/tos`,
             reqOptions
         );
             
@@ -1148,7 +1148,7 @@ class StrategyApp extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/tos`,
+            `${REACT_APP_API_URL}/v1/tos`,
             reqOptions
         );
             
