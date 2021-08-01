@@ -132,15 +132,11 @@ class Popup extends Component
 
     close = () =>
     {
-        // if (this.props.getPopup() !== undefined && this.props.getPopup().type === 'welcome-demo')
+        // if (!(this.props.getPopup() && this.props.getPopup().permanent))
         // {
-        //     this.props.onFirstVisit();
-        // }
-        if (!(this.props.getPopup() && this.props.getPopup().permanent))
-        {
             this.props.setPopup(null);
             this.props.setHovered('popup', false);
-        }
+        // }
     }
 
     generateCloseIcon()

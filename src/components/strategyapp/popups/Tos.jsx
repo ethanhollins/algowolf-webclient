@@ -25,9 +25,9 @@ class Tos extends Component
 
     async onAccept()
     {
-        this.props.close();
         await this.props.updateTos();
-
+        
+        this.props.close();
         // const popup = {
         //     type: 'getting-started',
         //     size: {
