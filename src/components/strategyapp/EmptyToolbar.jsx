@@ -33,9 +33,11 @@ class StrategyToolbar extends Component
                                 <span className='toolbox left'>My Brokers</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
-                            <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='strategies'>
+                            <div 
+                                className='dropdown-item disabled' name='strategies'
+                            >
                                 <span className='toolbox left'>My Strategies</span>
-                                <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
+                                <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon disabled' /></span>
                             </div>
                             <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='account'>
                                 <span className='toolbox left'>Account Settings</span>
@@ -107,14 +109,7 @@ class StrategyToolbar extends Component
         }
         else if (name === 'account')
         {
-            const popup = {
-                type: 'account-settings',
-                size: {
-                    width: 60,
-                    height: 75
-                }
-            }
-            this.props.setPopup(popup);
+            this.props.history.push('/account-settings');
         }
         else if (name === 'my-dashboard')
         {
