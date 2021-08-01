@@ -25,6 +25,7 @@ class Tos extends Component
 
     async onAccept()
     {
+        this.props.close();
         await this.props.updateTos();
 
         // const popup = {
@@ -36,7 +37,6 @@ class Tos extends Component
         //     fade: true
         // };
         // this.props.setPopup(popup);
-        this.props.close();
     }
 }
 
