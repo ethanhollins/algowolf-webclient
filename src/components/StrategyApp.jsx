@@ -87,6 +87,8 @@ class StrategyApp extends Component
         this.handleSocket = this.handleSocket.bind(this);
         this.updateCurrentAccount = this.updateCurrentAccount.bind(this);
         this.updateAccountMetadata = this.updateAccountMetadata.bind(this);
+        this.checkTos = this.checkTos.bind(this);
+        this.updateTos = this.updateTos.bind(this);
 
         this.setAppContainerRef = elem => {
             this.appContainer = elem;
@@ -122,7 +124,6 @@ class StrategyApp extends Component
         let { checkLogin } = this.state;
         
         const user_id = await this.props.checkAuthorization();
-        console.log(user_id);
         checkLogin = true;
         this.setState({ user_id, checkLogin });
 
@@ -151,81 +152,41 @@ class StrategyApp extends Component
         // Retrieve user specific strategy informations
         if (this.props.isDemo)
         {
-            // const user_id = await this.props.checkAuthorization();
-            // if (!user_id)
-            // {
-            //     const popup = {
-            //         type: 'sign-up-prompt',
-            //         size: {
-            //             pixelWidth: 550,
-            //             pixelHeight: 520
-            //         },
-            //         image: '/request_access_prison_paycheck.png',
-            //         fade: true,
-            //         permanent: true
-            //     };
-            //     this.setPopup(popup);
-            // }
-            // else
-            // {
-            //     const user_data = await this.retrieveHolyGrailUser();
-            //     if (Object.keys(user_data).length > 0)
-            //     {
-            //         if (!user_data.approved)
-            //         {
-            //             const popup = {
-            //                 type: 'request-demo-access',
-            //                 size: {
-            //                     pixelWidth: 550,
-            //                     pixelHeight: 340
-            //                 },
-            //                 image: '/request_access_prison_paycheck.png',
-            //                 fade: true,
-            //                 permanent: true,
-            //                 properties: {
-            //                     user_data: user_data,
-            //                     hasRequested: true
-            //                 }
-            //             };
-            //             this.setPopup(popup);
-            //         }
-            //     }
-            //     else
-            //     {
-            //         const popup = {
-            //             type: 'request-demo-access',
-            //             size: {
-            //                 pixelWidth: 550,
-            //                 pixelHeight: 340
-            //             },
-            //             image: '/request_access_prison_paycheck.png',
-            //             fade: true,
-            //             permanent: true,
-            //             properties: {
-            //                 user_data: {},
-            //                 hasRequested: false
-            //             }
-            //         };
-            //         this.setPopup(popup);
-            //     }
-            // }
             this.props.visitorCounter();
         }
         else if (!user_id)
         {
-            console.log('GO BACK')
-            // window.location = '/login';
+            window.location = '/login';
         }
 
-        const popup = {
-            type: 'getting-started',
-            size: {
-                pixelWidth: 740,
-                pixelHeight: 600
-            },
-            fade: true
-        };
-        this.setPopup(popup);
+        const isTos = await this.checkTos();
+        if (!isTos)
+        {
+            const tos_popup = {
+                type: 'tos',
+                size: {
+                    pixelWidth: 500,
+                    pixelHeight: 225
+                },
+                fade: true,
+                permanent: true
+            };
+            this.setPopup(tos_popup);
+        }
+        else
+        {
+            // const popup = {
+            //     type: 'getting-started',
+            //     size: {
+            //         pixelWidth: 740,
+            //         pixelHeight: 600
+            //     },
+            //     fade: true
+            // };
+            // this.setPopup(popup);
+        }
+
+        
 
         this.is_loaded = true;
     }
@@ -330,6 +291,7 @@ class StrategyApp extends Component
                         addToSave={this.addToSave}
                         getAccountMetadata={this.getAccountMetadata}
                         updateAccountMetadata={this.updateAccountMetadata}
+                        updateTos={this.updateTos}
                     />
                     
                     
@@ -1143,6 +1105,61 @@ class StrategyApp extends Component
         });
 
         return socket;
+    }
+
+    async checkTos()
+    {
+        const { REACT_APP_API_URL } = process.env;
+
+        const reqOptions = {
+            method: 'GET',
+            headers: this.props.getHeaders(),
+            credentials: 'include'
+        }
+
+        const res = await fetch(
+            `${REACT_APP_API_URL}/tos`,
+            reqOptions
+        );
+            
+        if (res.status === 200)
+        {
+            return true;
+        }
+        else if (res.status === 403)
+        {
+            window.location = '/logout';
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+
+    async updateTos()
+    {
+        const { REACT_APP_API_URL } = process.env;
+
+        const reqOptions = {
+            method: 'PUT',
+            headers: this.props.getHeaders(),
+            credentials: 'include'
+        }
+
+        const res = await fetch(
+            `${REACT_APP_API_URL}/tos`,
+            reqOptions
+        );
+            
+        if (res.status === 200)
+        {
+            return true;
+        }
+        else if (res.status === 403)
+        {
+            window.location = '/logout';
+        }
     }
 
     async retrieveGuiInfo()
@@ -3001,9 +3018,6 @@ class StrategyApp extends Component
             }
         }
 
-        // console.log(account.metadata);
-
-        // this.setState({ account });
         this.updateAccountMetadata(account.metadata);
         window.location.reload();
     }

@@ -549,12 +549,12 @@ class StrategyToolbar extends Component
                 <div className='toolbox separator' />
                 <div 
                     className='toolbox item' 
-                    onClick={this.onLiveHelpItem.bind(this)}
+                    // onClick={this.onLiveHelpItem.bind(this)}
                 >
-                    <div className='toolbox item row btn'>
+                    <a href={REACT_APP_FRONT_BASE_URL + "/getting-started"} target="_blank" className='toolbox item row btn'>
                         <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faQuestionCircle} />
                         <span className='toolbox label collapse'>Help</span>
-                    </div>
+                    </a>
                 </div>
 
                 </React.Fragment>

@@ -30,6 +30,7 @@ import ComingSoon from './popups/ComingSoon';
 import AccountLoggedOut from './popups/AccountLoggedOut';
 import SelectStrategy from './popups/SelectStrategy';
 import GettingStarted from './popups/GettingStarted';
+import Tos from './popups/Tos';
 
 class Popup extends Component
 {
@@ -415,6 +416,15 @@ class Popup extends Component
                     getPopup={this.props.getPopup}
                     getHeaders={this.props.getHeaders}
                     getStrategyId={this.props.getStrategyId}
+                />
+            }
+            else if (popup.type === 'tos')
+            {
+                return <Tos
+                    getPopup={this.props.getPopup}
+                    setPopup={this.props.setPopup}
+                    updateTos={this.props.updateTos}
+                    close={this.close}
                 />
             }
             // else if (popup.type === 'chart-indicators')

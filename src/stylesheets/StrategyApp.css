@@ -1735,6 +1735,28 @@
     vertical-align: middle;
 }
 
+.popup.tos.main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 30px;
+    font-weight: 500;
+}
+
+.popup.tos.accept-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 2px;
+}
+
+.popup.tos.accept-btn:hover {
+    background-color: #2980b9;
+}
+
 /* .popup.table-cell > div {
     display: flex;
     align-items: center;
