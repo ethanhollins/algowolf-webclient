@@ -153,6 +153,20 @@ class StrategyApp extends Component
         if (this.props.isDemo)
         {
             this.props.visitorCounter();
+
+            if (!user_id)
+            {
+                const sign_up_popup = {
+                    type: 'sign-up-prompt',
+                    size: {
+                        pixelWidth: 500,
+                        pixelHeight: 500
+                    },
+                    fade: true,
+                    permanent: true
+                };
+                this.setPopup(sign_up_popup);
+            }
         }
         else if (!user_id)
         {
