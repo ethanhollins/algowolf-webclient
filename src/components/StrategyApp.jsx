@@ -455,10 +455,10 @@ class StrategyApp extends Component
                         <div className={arrow_right_class} onClick={this.pageRight.bind(this)}>
                             <FontAwesomeIcon className='page icon-inner' icon={faAngleRight} />
                         </div>
-                        <div className='page icon' onClick={this.deletePageConfirmation.bind(this)}>
+                        <div className='page icon disabled'> {/* onClick={this.deletePageConfirmation.bind(this)} */}
                             <FontAwesomeIcon className='page icon-inner' icon={faMinus} />
                         </div>
-                        <div className={add_page_class} onClick={this.addPage.bind(this)}>
+                        <div className={add_page_class + " disabled"}> {/* onClick={this.addPage.bind(this)} */}
                             <FontAwesomeIcon className='page icon-inner' icon={faPlus} />
                         </div>
                     </div>
