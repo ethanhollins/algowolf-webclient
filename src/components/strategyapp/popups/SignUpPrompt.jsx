@@ -26,7 +26,7 @@ class SignUpPrompt extends Component
                                 Contact us at <a id="email_link" href="mailto:admin@algowolf.com">admin@algowolf.com</a> to find out more about live trading with your broker and general info.
                             </span> */}
                             <span className='sign-up-prompt message'>
-                            As a subscriber to Scott Phillips trading course <br/>you have been granted exclusive use of the<br/><span id="sp_bold">Prison Paycheck Algorithmic Demo & Training Platform</span> (aka Holy Grail).<br/><br/><span id="sp_bold">Login/Sign Up</span> to request access.
+                            As a subscriber to Scott Phillips trading course <br/>you have been granted exclusive use of the<br/><span id="sp_bold">Prison Paycheck Algorithmic Demo & Training Platform</span> (aka Holy Grail).
                             </span>
                             <div className='sign-up-prompt column'>
                                 <div className="login field">
@@ -38,7 +38,7 @@ class SignUpPrompt extends Component
                                     OR
                                 </div>
                                 <div className='sign-up-prompt message'>
-                                    <a href='/login?redirect=holygrail%2Fdemo'>Sign in with an existing account</a>
+                                    <a href={this.getDemoUrl()}>Sign in with an existing account</a>
                                 </div>
                             </div>
                         </div>
@@ -50,9 +50,15 @@ class SignUpPrompt extends Component
         );
     }
 
+    getDemoUrl = () =>
+    {
+        const { REACT_APP_FRONT_BASE_URL, REACT_APP_APP_BASE_URL } = process.env;
+        return REACT_APP_FRONT_BASE_URL + "/login?redirect=" + encodeURIComponent(REACT_APP_APP_BASE_URL + "/holygrail/demo");
+    }
+
     onSignUp(e)
     {
-        this.props.history.push('/register?redirect=holygrail%2Fdemo');
+        window.location.href = this.getDemoUrl();
     }
 
 }
