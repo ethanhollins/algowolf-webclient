@@ -38,7 +38,7 @@ class SignUpPrompt extends Component
                                     OR
                                 </div>
                                 <div className='sign-up-prompt message'>
-                                    <a href={this.getDemoUrl()}>Sign in with an existing account</a>
+                                    <a href={this.getDemoLoginUrl()}>Sign in with an existing account</a>
                                 </div>
                             </div>
                         </div>
@@ -50,7 +50,13 @@ class SignUpPrompt extends Component
         );
     }
 
-    getDemoUrl = () =>
+    getDemoRegisterUrl = () =>
+    {
+        const { REACT_APP_FRONT_BASE_URL, REACT_APP_APP_BASE_URL } = process.env;
+        return REACT_APP_FRONT_BASE_URL + "/register?redirect=" + encodeURIComponent(REACT_APP_APP_BASE_URL + "/holygrail/demo");
+    }
+
+    getDemoLoginUrl = () =>
     {
         const { REACT_APP_FRONT_BASE_URL, REACT_APP_APP_BASE_URL } = process.env;
         return REACT_APP_FRONT_BASE_URL + "/login?redirect=" + encodeURIComponent(REACT_APP_APP_BASE_URL + "/holygrail/demo");
@@ -58,7 +64,7 @@ class SignUpPrompt extends Component
 
     onSignUp(e)
     {
-        window.location.href = this.getDemoUrl();
+        window.location.href = this.getDemoRegisterUrl();
     }
 
 }

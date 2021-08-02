@@ -159,7 +159,7 @@ class StrategyApp extends Component
                 const sign_up_popup = {
                     type: 'sign-up-prompt',
                     size: {
-                        pixelWidth: 600,
+                        pixelWidth: 550,
                         pixelHeight: 475
                     },
                     fade: true,
