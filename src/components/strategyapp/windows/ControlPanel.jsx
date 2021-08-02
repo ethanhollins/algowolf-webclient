@@ -790,7 +790,7 @@ class ControlPanel extends Component
             result.push(
                 <React.Fragment key={current_account + local_preset + '-local'}>
                 <div className='control-panel scope-body'>
-                    <div className='control-panel scope-header'>Account</div>
+                    <div><span className='control-panel scope-header'>Account</span> <span className="control-panel scope-account">({current_account.split('.')[1]})</span></div>
                     {/* <div className='control-panel scope-dropdown'>
                         {local_preset}<FontAwesomeIcon className='control-panel scope-dropdown-icon' icon={faChevronDown} />
                     </div> */}

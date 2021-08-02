@@ -2352,6 +2352,10 @@
     text-decoration: underline #f39c12;
 }
 
+.control-panel.scope-account {
+    font-size: 0.8em;
+}
+
 .control-panel.body {
     padding: 2px;
 }
