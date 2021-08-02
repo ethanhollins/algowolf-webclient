@@ -1504,7 +1504,6 @@ class Strategy extends Component
             const account_id = account_code.split('.')[1];
             const account_info = await this.props.retrieveAccountInfo(this.props.id, broker_id, account_id);
             
-            console.log(account_info);
             // Set Account Info
             if (account_info.transactions !== undefined)
             {

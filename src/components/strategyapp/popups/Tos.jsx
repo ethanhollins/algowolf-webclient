@@ -14,7 +14,7 @@ class Tos extends Component
             </div>
             <div className='popup content'>
                 <div className='popup tos main'>
-                    <div>By continuing, you acknowledge you have read and agree to the <a href={REACT_APP_FRONT_BASE_URL + "/tos"} target="_blank">Terms of Use</a> as well as <a href={REACT_APP_FRONT_BASE_URL + "/privacy-policy"} target="_blank">Privacy Policy</a> and <a href={REACT_APP_FRONT_BASE_URL + "/cookies-policy"} target="_blank">Cookies Policy</a></div>
+                    <div>By continuing, you acknowledge you have read and agree to the <a href={REACT_APP_FRONT_BASE_URL + "/tos"} target="_blank">Terms of Use</a> as well as <a href={REACT_APP_FRONT_BASE_URL + "/risk-disclosure"} target="_blank">Risk Disclosure</a>, <a href={REACT_APP_FRONT_BASE_URL + "/privacy-policy"} target="_blank">Privacy Policy</a>, <a href={REACT_APP_FRONT_BASE_URL + "/cookies-policy"} target="_blank">Cookies Policy</a></div>
                     <div className='popup tos accept-btn' onClick={this.onAccept.bind(this)}>Accept & Continue</div>
                 </div>
             </div>
