@@ -674,7 +674,7 @@ class ControlPanel extends Component
                                 <div className='control-panel item left'>
                                     <div className='control-panel item-main'>
                                         <span className='control-panel item-title'>Maximum Risk (%)</span>
-                                        <span className='control-panel item-description'>The maximum Risk % you can take on your broker.</span>
+                                        <span className='control-panel item-description'>The maximum Risk % your leverage allows.</span>
                                     </div>
                                 </div>
                                 <div className='control-panel item right'>
