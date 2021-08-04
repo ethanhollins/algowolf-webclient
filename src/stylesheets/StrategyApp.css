@@ -229,11 +229,26 @@
 }
 
 .toolbox.dropdown-header {
-    margin: 10px 10px 0px 10px;
-    border-bottom: 1px solid rgb(200,200,200);
+    display: flex;
+    align-items: center;
+    /* justify-content: center; */
+    padding: 10px 10px 10px 10px;
+    border-top: 1px solid rgb(230,230,230);
     text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.1em;
     font-weight: 500;
     /* font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif; */
+}
+
+.toolbox.dropdown-header:first-child {
+    border: none;
+}
+
+.toolbox.dropdown-header-logo {
+    width: 26px;
+    height: 26px;
+    margin-right: 10px;
 }
 
 .toolbox.item {
@@ -362,6 +377,7 @@
     cursor: context-menu;
     overflow: hidden;
     width: 200px;
+    max-width: 200px;
     top: 30px;
     border: 1px solid rgb(220,220,220);
     border-radius: 1px;
@@ -383,8 +399,11 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 7px 10px 7px 10px;
+    padding: 8px 20px 8px 20px;
     font-size: 0.9em;
+    /* font-family: Poppins, sans-serif; */
+    font-weight: 500;
+    color: rgb(180,180,180);
 }
 
 .toolbox.dropdown > .dropdown-item > * {
@@ -393,12 +412,13 @@
 
 .toolbox.dropdown > .dropdown-item:not(.disabled):hover {
     background-color: #fff5e9;
-    color: #ff8103;
+    color: rgb(50,50,50) !important;
     cursor: pointer;
 }
 
 .toolbox.dropdown-item.selected {
     background-color: #fff5e9;
+    color: rgb(50,50,50) !important;
     /* color: #ff8103; */
 }
 
@@ -3818,6 +3838,11 @@
 #no_strategy_msg {
     width: 30px;
     height: 30px;
+}
+
+#account_icon {
+    width: 18px;
+    height: 18px;
 }
 
 /* .window-scrollbar > *::-webkit-scrollbar {

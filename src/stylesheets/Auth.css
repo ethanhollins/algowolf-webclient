@@ -32,6 +32,50 @@
     outline: none;
 }
 
+.auth-login.logo.fxopen {
+    margin-top: 20px;
+    margin-bottom: 15px;
+    width: 275px;
+    height: auto;
+    outline: none;
+}
+
+
+.auth-login.body.fxopen {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 710px;
+}
+
+.auth-login.body.fxopen > div {
+    display: flex;
+    flex-direction: column;
+}
+
+.auth-login.fxopen.info-parent {
+    padding-left: 20px;
+}
+
+.auth-login.fxopen .info-header {
+    text-align: center;
+    font-size: 1.1em;
+    font-weight: 600;
+    font-family: Poppins, sans-serif;
+}
+
+.auth-login.fxopen .info-sub-header {
+    font-size: 0.9em;
+    font-weight: 500;
+    font-family: Poppins, sans-serif;
+}
+
+.auth-login.fxopen .info {
+    padding: 0;
+    padding-top: 40px;
+}
+
 .auth-login.body.ib {
     height: 170px;
 }

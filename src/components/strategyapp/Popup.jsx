@@ -132,11 +132,17 @@ class Popup extends Component
 
     close = () =>
     {
-        // if (!(this.props.getPopup() && this.props.getPopup().permanent))
-        // {
+        if (!(this.props.getPopup() && this.props.getPopup().permanent))
+        {
             this.props.setPopup(null);
             this.props.setHovered('popup', false);
-        // }
+        }
+    }
+
+    forceClose = () =>
+    {
+        this.props.setPopup(null);
+        this.props.setHovered('popup', false);
     }
 
     generateCloseIcon()
@@ -421,6 +427,7 @@ class Popup extends Component
                     setPopup={this.props.setPopup}
                     updateTos={this.props.updateTos}
                     close={this.close}
+                    forceClose={this.forceClose}
                 />
             }
             // else if (popup.type === 'chart-indicators')

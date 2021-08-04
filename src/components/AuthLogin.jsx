@@ -19,6 +19,8 @@ class AuthLogin extends Component
         sio: null,
         is_login_pressed: false,
         key: '',
+        web_api_id: '',
+        web_api_secret: '',
         username: '',
         password: '',
         captcha: '',
@@ -122,7 +124,7 @@ class AuthLogin extends Component
 
     getLoginGUI()
     {
-        const { err_msg } = this.state;
+        const { err_msg, is_demo } = this.state;
         const paths = this.props.location.pathname.split('/');
         const provider = paths[paths.length-2];
 
@@ -250,6 +252,84 @@ class AuthLogin extends Component
                 </div>
             );
         }
+        else if (provider === 'fxopen')
+        {
+            return (
+                <div className='auth-login body fxopen'>
+                    <div>
+                        <div>
+                            <img className='auth-login logo fxopen' src={process.env.PUBLIC_URL + '/fxopen_logo_large.png'} />
+                        </div>
+                        <div className='auth-login account-type'>
+                            <div 
+                                className={'auth-login account-button' + this.isAccountTypeSelected(false)}
+                                onClick={this.setIsDemo.bind(this)}
+                                name='live'
+                            >
+                                Live
+                            </div>
+                            <div 
+                                className={'auth-login account-button' + this.isAccountTypeSelected(true)}
+                                onClick={this.setIsDemo.bind(this)}
+                                name='demo'
+                            >
+                                Demo
+                            </div>
+                        </div>
+                        <div ref={this.setErrorRef} className="auth-login error" style={{display: this.isErrorMsg()}}>{err_msg}</div>
+                        <div className='auth-login field-header'>Your API Details</div>
+                        <input 
+                            className='auth-login field' placeholder='Enter WebAPI Id' name='web_api_id' 
+                            onChange={this.onFieldChange.bind(this)}
+                        />
+                        {/* <div className='auth-login field-header'>Web Api Key</div> */}
+                        <input 
+                            className='auth-login field' placeholder='Enter WebAPI Key' name='key' 
+                            onChange={this.onFieldChange.bind(this)}
+                        />
+                        {/* <div className='auth-login field-header'>Web Api Secret</div> */}
+                        <input 
+                            className='auth-login field' placeholder='Enter WebAPI Secret' name='web_api_secret' 
+                            onChange={this.onFieldChange.bind(this)}
+                        />
+                        <div 
+                            className='auth-login submit-button'
+                            onClick={this.completeLogin.bind(this)}
+                        >
+                            Connect to FX Open
+                        </div>
+                    </div>
+                    <div className='auth-login fxopen info-parent'>
+                        <div className='auth-login info'>
+                            { is_demo ? 
+                                <React.Fragment>
+                                <div className='auth-login info-header'>Instructions to find your API details for Demo Accounts</div>
+                                <ol>
+                                    <li>Register an FX Open <strong>demo</strong> account <a href="https://demo.forex.game/registration?marginTradingTab=True" target="_blank">here</a>.</li>
+                                    <li>Select <strong>Gross</strong> type and enter your details, then, enable <strong>Web Api Enabled</strong> option. On registration your details will be displayed.</li>
+                                    <li>Use their <strong>Copy to Clipboard</strong> button to <strong>store this information and paste in a text file</strong>.<br/><strong>Note:</strong> You can only save this information once.</li>
+                                    <li>Copy your <strong>WebAPI Id</strong>, <strong>WebAPI Key</strong> and <strong>WebAPI Secret</strong> into the text boxes on the left.</li>
+                                </ol>
+                                </React.Fragment>
+                                : <React.Fragment>
+                                <div className='auth-login info-header'>Instructions to find your API details for Live Accounts</div>
+                                <ol>
+                                    <li>On your FX Open dashboard, under <strong>Add Account</strong> select <strong>TickTrader - ECN GROSS (TickTrader)</strong> and <strong>store your account details in a text file</strong>.</li>
+                                    <li>Click on the <strong>red icon</strong> next to your new TickTrader account number on the left panel.</li>
+                                    <li>Once loaded, click on the <strong>settings cog</strong> on the top right and select <strong>Edit User Account</strong>.</li>
+                                    <li>Enable <strong>WebAPI Enabled</strong> and click <strong>Save</strong>.</li>
+                                    <li>Click <strong>Next</strong>, select <strong>Create new WebAPI Token</strong>, then, <strong>Copy to Clipboard</strong> and store this information in a text file.<br/><strong>Note:</strong> You can only save this information once.</li>
+                                    <li>Copy your <strong>WebAPI Id</strong>, <strong>WebAPI Key</strong> and <strong>WebAPI Secret</strong> into the text boxes on the left.</li>
+                                </ol>
+                                <div className='auth-login info-sub-header'><strong>Note:</strong> Australian TickTrader accounts are currently unavailable.</div>
+                                </React.Fragment>
+                            }
+                        </div>
+                    </div>
+                    
+                </div>
+            );
+        }
     }
 
     getCompleteLoginGUI()
@@ -263,6 +343,18 @@ class AuthLogin extends Component
                 <div className='auth-login body oanda'>
                     <div>
                         <img className='auth-login logo oanda' src={process.env.PUBLIC_URL + '/oanda_logo_large.png'} />
+                    </div>
+                    <div className='auth-login message'>Connecting your broker...</div>
+                    <div className="dot-flashing"></div>
+                </div>
+            );
+        }
+        else if (provider === 'fxopen')
+        {
+            return (
+                <div className='auth-login body fxopen'>
+                    <div>
+                        <img className='auth-login logo fxopen' src={process.env.PUBLIC_URL + '/fxopen_logo_large.png'} />
                     </div>
                     <div className='auth-login message'>Connecting your broker...</div>
                     <div className="dot-flashing"></div>
@@ -341,7 +433,7 @@ class AuthLogin extends Component
     {
         const value = e.target.value;
         const name = e.target.getAttribute('name');
-        let { username, password, captcha, key } = this.state;
+        let { username, password, captcha, key, web_api_id, web_api_secret } = this.state;
 
         if (name === 'username')
         {
@@ -359,8 +451,16 @@ class AuthLogin extends Component
         {
             captcha = value;
         }
+        else if (name === 'web_api_id')
+        {
+            web_api_id = value;
+        }
+        else if (name === 'web_api_secret')
+        {
+            web_api_secret = value;
+        }
 
-        this.setState({ username, password, captcha, key });
+        this.setState({ username, password, captcha, key, web_api_id, web_api_secret });
     }
 
     onLoginPressed = (e) =>
@@ -473,7 +573,7 @@ class AuthLogin extends Component
     async completeLogin()
     {
         const { REACT_APP_API_URL } = process.env;
-        let { username, password, key, is_demo, captcha, captcha_b64, err_msg } = this.state;
+        let { username, password, key, web_api_id, web_api_secret, is_demo, captcha, captcha_b64, err_msg } = this.state;
         let { complete_login } = this.state;
 
         const paths = this.props.location.pathname.split('/');
@@ -533,14 +633,40 @@ class AuthLogin extends Component
                 credentials: 'include',
                 body: JSON.stringify({
                     broker: provider, broker_id, broker_id,
-                    name: "My Broker", key: key, is_demo: is_demo
+                    name: "My Broker", key: key, key: key, key: key, is_demo: is_demo
                 })
             }
-    
-            console.log({
-                broker: provider, broker_id, broker_id,
-                name: "My Broker", key: key, is_demo: is_demo
-            });
+
+            const res = await fetch(
+                `${REACT_APP_API_URL}/broker`,
+                reqOptions
+            );
+
+            if (res.status === 200)
+            {
+                window.location = '/app';
+                return;
+            }
+
+            complete_login = false;
+            err_msg = 'Login Failed.';
+            this.setState({ complete_login, err_msg });
+        }
+        else if (provider === 'fxopen')
+        {
+            complete_login = true;
+            this.setState({ complete_login });
+
+            const reqOptions = {
+                method: 'POST',
+                headers: this.props.getHeaders(),
+                credentials: 'include',
+                body: JSON.stringify({
+                    broker: provider, broker_id, broker_id,
+                    name: "My Broker", key: key, web_api_id: web_api_id, 
+                    web_api_secret: web_api_secret, is_demo: is_demo
+                })
+            }
 
             const res = await fetch(
                 `${REACT_APP_API_URL}/broker`,

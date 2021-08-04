@@ -27,7 +27,7 @@ class Tos extends Component
     {
         await this.props.updateTos();
         
-        this.props.close();
+        this.props.forceClose();
         // const popup = {
         //     type: 'getting-started',
         //     size: {

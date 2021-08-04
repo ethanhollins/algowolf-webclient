@@ -120,7 +120,6 @@ class StrategyToolbar extends Component
                     </div>
                     {this.generateTitle()}
                     <div ref={this.setAccountsElem} className='toolbox item row'>
-                        <FontAwesomeIcon className='toolbox icon small black' icon={faUser} />
                         {this.generateAccounts()}
                     </div>
                     <div className='toolbox item row status right-space'>
@@ -297,15 +296,41 @@ class StrategyToolbar extends Component
             let account_elems = [];
             let class_name;
             let current_display_name;
+            let broker_toolbar_img;
             for (let broker_id of brokers)
             {
                 const broker_name = strategy.brokers[broker_id].name;
+                const broker_brand = strategy.brokers[broker_id].broker;
                 const accounts = strategy.brokers[broker_id].accounts;
 
+                let broker_toolbar_img_temp;
                 if (broker_name !== null)
                 {
+                    let broker_img;
+                    if (broker_brand === "oanda")
+                    {
+                        broker_img = <img className="toolbox dropdown-header-logo" src={"oanda_logo.svg"} />;
+                        broker_toolbar_img_temp = <img id="account_icon" className="toolbox icon small" src={"oanda_logo.svg"} />;
+                    }
+                    else if (broker_brand === "fxopen")
+                    {
+                        broker_img = <img className="toolbox dropdown-header-logo" src={"fxopen_logo_small.png"} />;
+                        broker_toolbar_img_temp = <img id="account_icon" className="toolbox icon small" src={"fxopen_logo_small.png"} />;
+                    }
+                    else if (broker_brand === "spotware")
+                    {
+                        broker_img = <img className="toolbox dropdown-header-logo" src={"ctrader_logo_small.png"} />;
+                        broker_toolbar_img_temp = <img id="account_icon" className="toolbox icon small" src={"ctrader_logo_small.png"} />;
+                    }
+                    else
+                    {
+                        broker_img = <img className="toolbox dropdown-header-logo" src={"wolf-logo.svg"} />;
+                        broker_toolbar_img_temp = <FontAwesomeIcon className='toolbox icon small black' icon={faUser} />;
+                    }
+
                     account_elems.push(
                         <div key={broker_id} className='toolbox dropdown-header'>
+                            {broker_img}
                             {broker_name}
                         </div>
                     );
@@ -328,11 +353,11 @@ class StrategyToolbar extends Component
                     let display_name;
                     if (nickname)
                     {
-                        display_name = `${nickname} (${account_id})`;
+                        display_name = `${nickname} (${this.getAccountDisplayName(account_id)})`;
                     }
                     else
                     {
-                        display_name = `${account_id}`;
+                        display_name = `${this.getAccountDisplayName(account_id)}`;
                     }
 
                     const account_code = broker_id + '.' + acc;
@@ -340,6 +365,7 @@ class StrategyToolbar extends Component
                     {
                         class_name = 'toolbox dropdown-item selected';
                         current_display_name = display_name;
+                        broker_toolbar_img = broker_toolbar_img_temp;
                     }
                     else
                     {
@@ -356,7 +382,8 @@ class StrategyToolbar extends Component
 
             return (
                 <React.Fragment>
-    
+                
+                {broker_toolbar_img}
                 <div 
                     className='toolbox label right-space'
                     id="current_account"

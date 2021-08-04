@@ -503,7 +503,7 @@ class BrokerSettings extends Component
                 <div id='popup_broker_selector'>
                     <div 
                         className={'popup broker disabled' + this.isItemSelected('fxopen', broker_info.broker)}
-                        onClick={this.redirectBroker.bind(this)}
+                        // onClick={this.redirectBroker.bind(this)}
                         name='fxopen'
                     >
                         <img className='popup broker-img' src={process.env.PUBLIC_URL + '/fxopen_logo.png'} />
@@ -805,6 +805,10 @@ class BrokerSettings extends Component
         else if (broker === 'oanda')
         {
             window.location = `/auth/oanda/login?bid=${broker_id}&sid=${this.props.getStrategyId()}`;
+        }
+        else if (broker === 'fxopen')
+        {
+            window.location = `/auth/fxopen/login?bid=${broker_id}&sid=${this.props.getStrategyId()}`;
         }
         else if ([
             'spotware', 'icmarkets', 'fxpro', 'pepperstone', 
