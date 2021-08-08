@@ -258,7 +258,7 @@ class SpreadSheet extends Component
         if (Object.keys(data).length > 0)
         {
             const num_cols = Object.keys(data).length+1;
-            const num_rows = Object.keys(data[Object.keys(data)[0]]).length+1;
+            const num_rows = Object.keys(data[Object.keys(data)[0]]).length;
 
             const format = this.props.format;
     
@@ -266,13 +266,13 @@ class SpreadSheet extends Component
             let old_exit = 0;
     
             let result = [];
-            for (let i = 0; i < num_rows; i++)
+            for (let i = num_rows-1; i >= -1; i--)
             {
                 let row_result = [];
                 for (let j = 0; j < num_cols; j++)
                 {
                     // TEMP
-                    if (i === num_rows-1)
+                    if (i === -1)
                     {
                         if (j === 0)
                         {

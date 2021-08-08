@@ -166,6 +166,16 @@
     transition: background-color 0s linear;
 }
 
+.tab.item.tab-link {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+
+a.tab.item {
+    text-decoration: none;
+}
+
 .tab.btn {
     width: 15px;
     height: 15px;

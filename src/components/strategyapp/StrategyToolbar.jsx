@@ -309,22 +309,22 @@ class StrategyToolbar extends Component
                     let broker_img;
                     if (broker_brand === "oanda")
                     {
-                        broker_img = <img className="toolbox dropdown-header-logo" src={"oanda_logo.svg"} />;
-                        broker_toolbar_img_temp = <img id="account_icon" className="toolbox icon small" src={"oanda_logo.svg"} />;
+                        broker_img = <img className="toolbox dropdown-header-logo" src={process.env.PUBLIC_URL + "/oanda_logo.svg"} />;
+                        broker_toolbar_img_temp = <img id="account_icon" className="toolbox icon small" src={process.env.PUBLIC_URL + "/oanda_logo.svg"} />;
                     }
                     else if (broker_brand === "fxopen")
                     {
-                        broker_img = <img className="toolbox dropdown-header-logo" src={"fxopen_logo_small.png"} />;
-                        broker_toolbar_img_temp = <img id="account_icon" className="toolbox icon small" src={"fxopen_logo_small.png"} />;
+                        broker_img = <img className="toolbox dropdown-header-logo" src={process.env.PUBLIC_URL + "/fxopen_logo_small.png"} />;
+                        broker_toolbar_img_temp = <img id="account_icon" className="toolbox icon small" src={process.env.PUBLIC_URL + "/fxopen_logo_small.png"} />;
                     }
                     else if (broker_brand === "spotware")
                     {
-                        broker_img = <img className="toolbox dropdown-header-logo" src={"ctrader_logo_small.png"} />;
-                        broker_toolbar_img_temp = <img id="account_icon" className="toolbox icon small" src={"ctrader_logo_small.png"} />;
+                        broker_img = <img className="toolbox dropdown-header-logo" src={process.env.PUBLIC_URL + "/ctrader_logo_small.png"} />;
+                        broker_toolbar_img_temp = <img id="account_icon" className="toolbox icon small" src={process.env.PUBLIC_URL + "/ctrader_logo_small.png"} />;
                     }
                     else
                     {
-                        broker_img = <img className="toolbox dropdown-header-logo" src={"wolf-logo.svg"} />;
+                        broker_img = <img className="toolbox dropdown-header-logo" src={process.env.PUBLIC_URL + "/wolf-logo.svg"} />;
                         broker_toolbar_img_temp = <FontAwesomeIcon className='toolbox icon small black' icon={faUser} />;
                     }
 
@@ -536,7 +536,20 @@ class StrategyToolbar extends Component
 
     generateTitle = () =>
     {
-        if (this.props.isDemo)
+        if (this.props.isHGPro)
+        {
+            return (
+                <div 
+                    className='toolbox item' 
+                    // onClick={this.onNotAvailableItem}
+                >
+                    <div className='toolbox item row'>
+                        <span className='toolbox title-red'>HG Pro</span>
+                    </div>
+                </div>
+            );
+        }
+        else if (this.props.isDemo)
         {
             return (
                 <div 
@@ -591,7 +604,7 @@ class StrategyToolbar extends Component
 
     generateDemoToolbarBtns = () =>
     {
-        if (this.props.isDemo)
+        if (this.props.isDemo && !this.props.isHGPro)
         {
             return (
                 <React.Fragment>
@@ -1031,7 +1044,6 @@ class StrategyToolbar extends Component
     {
         let strategy = this.props.getStrategyInfo(this.props.getCurrentStrategy());
         let broker_id = strategy.account.split('.')[0];
-        console.log(strategy);
         if (!strategy.brokers[broker_id].is_auth)
         {
             const popup = {

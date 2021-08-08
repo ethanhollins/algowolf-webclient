@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 import moment from "moment-timezone";
 import _ from 'underscore';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowAltCircleUp, faHistory } from '@fortawesome/pro-regular-svg-icons';
+import { faArrowAltCircleUp, faHistory, faExternalLinkAlt } from '@fortawesome/pro-regular-svg-icons';
 import { faTimes, faPlus, faMinus, faAngleRight, faAngleLeft } from '@fortawesome/pro-light-svg-icons';
 import Strategy from './strategyapp/Strategy';
 import StrategyToolbar from './strategyapp/StrategyToolbar';
@@ -473,6 +473,7 @@ class StrategyApp extends Component
     generateStrategyTabs = () =>
     {
         const { account, strategyInfo } = this.state;
+        const { REACT_APP_FRONT_BASE_URL } = process.env;
         let tabs = [];
         if (account.metadata && Object.keys(strategyInfo).length > 0)
         {
@@ -522,6 +523,20 @@ class StrategyApp extends Component
                         <FontAwesomeIcon className={'tab btn' + close_btn_class} icon={faTimes} name={i} onClick={this.onCloseTab} />
                     </div>
                 );      
+            }
+
+            if (this.props.isDemo && !this.props.isHGPro)
+            {
+                tabs.push(
+                    <a 
+                        key="HG Pro" className="tab item tab-link" target="_blank"
+                        style={{ backgroundColor: "#e74c3c", borderBottomColor: "#e74c3c", color: "#ffffff" }}
+                        href={REACT_APP_FRONT_BASE_URL + "/hgpro"}
+                    >
+                        <FontAwesomeIcon style={{ color: "#ffffff" }} className='tab btn-icon' icon={faExternalLinkAlt} />
+                        <span>NEW HG PRO</span>
+                    </a>
+                )
             }
         }
 
@@ -730,6 +745,7 @@ class StrategyApp extends Component
                     ref={this.setToolbarRef}
                     history={this.props.history}
                     isDemo={this.props.isDemo}
+                    isHGPro={this.props.isHGPro}
                     hasBetaAccess={this.hasBetaAccess}
                     getCurrentStrategy={this.getCurrentStrategy}
                     updateStrategyInfo={this.updateStrategyInfo}
@@ -2996,17 +3012,31 @@ class StrategyApp extends Component
     onCloseTab = (e) =>
     {
         const strategy_id = e.target.getAttribute('name');
-        const popup = {
-            type: 'are-you-sure',
-            size: {
-                pixelWidth: 420,
-                pixelHeight: 220
-            },
-            message: "Are you sure you want to close this tab?",
-            func: this.performCloseTab.bind(this),
-            args: [strategy_id]
+        if (!this.props.isDemo)
+        {
+            const popup = {
+                type: 'are-you-sure',
+                size: {
+                    pixelWidth: 420,
+                    pixelHeight: 220
+                },
+                message: "Are you sure you want to close this tab?",
+                func: this.performCloseTab.bind(this),
+                args: [strategy_id]
+            }
+            this.setPopup(popup);
         }
-        this.setPopup(popup);
+        else
+        {
+            const popup = {
+                type: 'not-available',
+                size: {
+                    pixelWidth: 600,
+                    pixelHeight: 300
+                }
+            }
+            this.setPopup(popup);
+        }
     }
 
     performCloseTab = (args) =>
