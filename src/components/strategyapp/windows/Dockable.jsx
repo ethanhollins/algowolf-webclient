@@ -197,7 +197,15 @@ class Dockable extends Component
             }
             else if (w.type === 'report')
             {
-                const name = w.properties.name;
+                let name;
+                if (w.properties.title)
+                {
+                    name = w.properties.title;
+                }
+                else
+                {
+                    name = w.properties.name;
+                }
                 elem = (
                     <div key={w.id} ref={this.addTabElem} className={class_name} name={w.id} onClick={this.onTabClick.bind(this)}>
     

@@ -252,27 +252,42 @@ class SpreadSheet extends Component
         this.props.setChartPositionsByTimestamp(time.unix());
     }
 
+    calculateCol(data, col_name)
+    {
+        const num_rows = Object.keys(data[Object.keys(data)[0]]).length;
+        let result = 0;
+        if (col_name in data)
+        {
+            for (let i = 0; i < num_rows; i++)
+            {
+                result += parseFloat(data[col_name][i]);
+            }
+        }
+        return result;
+    }
+
     // TEMP
     generateRowsDemo(data)
     {
         if (Object.keys(data).length > 0)
         {
             const num_cols = Object.keys(data).length+1;
-            const num_rows = Object.keys(data[Object.keys(data)[0]]).length;
+            const num_rows = Object.keys(data[Object.keys(data)[0]]).length+1;
 
             const format = this.props.format;
     
-            let r_profit = 0;
-            let old_exit = 0;
+            let r_profit = this.calculateCol(data, "R Profit");
+            let old_exit = this.calculateCol(data, "Old Exit Alg");
+            let slippage = this.calculateCol(data, "Slippage");
     
             let result = [];
-            for (let i = num_rows-1; i >= -1; i--)
+            for (let i = num_rows-1; i >= 0; i--)
             {
                 let row_result = [];
                 for (let j = 0; j < num_cols; j++)
                 {
                     // TEMP
-                    if (i === -1)
+                    if (i === num_rows-1)
                     {
                         if (j === 0)
                         {
@@ -293,6 +308,12 @@ class SpreadSheet extends Component
                             {
                                 row_result.push(
                                     <div key={j} className='spreadsheet cell item'><div><strong>{old_exit.toFixed(2)}</strong></div></div>
+                                );
+                            }
+                            else if (col_name === "Slippage")
+                            {
+                                row_result.push(
+                                    <div key={j} className='spreadsheet cell item'><div><strong>{slippage.toFixed(2)}</strong></div></div>
                                 );
                             }
                             else
@@ -317,14 +338,14 @@ class SpreadSheet extends Component
                             let cell = data[col_name][i];
                             
                             // TEMP
-                            if (col_name === 'R Profit')
-                            {
-                                r_profit += parseFloat(cell);
-                            }
-                            else if (col_name === 'Old Exit Alg')
-                            {
-                                old_exit += parseFloat(cell);
-                            }
+                            // if (col_name === 'R Profit')
+                            // {
+                            //     r_profit += parseFloat(cell);
+                            // }
+                            // else if (col_name === 'Old Exit Alg')
+                            // {
+                            //     old_exit += parseFloat(cell);
+                            // }
     
                             if (cell === null)
                             {
