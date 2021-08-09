@@ -150,22 +150,25 @@ class StrategyApp extends Component
         // }, 10*1000);
 
         // Retrieve user specific strategy informations
-        if (this.props.isDemo && !this.props.isHGPro)
+        if (this.props.isDemo)
         {
-            this.props.visitorCounter();
-
-            if (!user_id)
+            if (!this.props.isHGPro)
             {
-                const sign_up_popup = {
-                    type: 'sign-up-prompt',
-                    size: {
-                        pixelWidth: 550,
-                        pixelHeight: 475
-                    },
-                    fade: true,
-                    permanent: true
-                };
-                this.setPopup(sign_up_popup);
+                this.props.visitorCounter();
+    
+                if (!user_id)
+                {
+                    const sign_up_popup = {
+                        type: 'sign-up-prompt',
+                        size: {
+                            pixelWidth: 550,
+                            pixelHeight: 475
+                        },
+                        fade: true,
+                        permanent: true
+                    };
+                    this.setPopup(sign_up_popup);
+                }
             }
         }
         else if (!user_id)
