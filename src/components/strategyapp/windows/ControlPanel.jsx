@@ -273,9 +273,10 @@ class ControlPanel extends Component
         }
         else if (name && 'properties' in input_variables[name] && input_variables[name].properties.custom === 'risk_cash')
         {
-            const perc_elem = this.getInputElem('Risk (%)');
-            const cash_elem = this.getInputElem('Risk ($)');
-            value = Math.max(Math.min(Math.round(bank * 0.02 * 100)/100, value), 0);
+            const max_perc = input_variables['Risk (%)'].properties.max;
+            // const perc_elem = this.getInputElem('Risk (%)');
+            // const cash_elem = this.getInputElem('Risk ($)');
+            value = Math.max(Math.min(Math.round(bank * (max_perc/100) * 100)/100, value), 0);
             const new_perc_value = Math.round((value / bank) * 100 * 100)/100;
             this.setVariableChange('Risk (%)', new_perc_value);
             this.setVariableChange('Risk ($)', value);
