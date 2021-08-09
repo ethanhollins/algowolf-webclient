@@ -150,7 +150,7 @@ class StrategyApp extends Component
         // }, 10*1000);
 
         // Retrieve user specific strategy informations
-        if (this.props.isDemo)
+        if (this.props.isDemo && !this.props.isHGPro)
         {
             this.props.visitorCounter();
 
