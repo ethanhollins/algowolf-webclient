@@ -144,12 +144,13 @@ class StrategyApp extends Component
 
         this.setState({ account, strategyInfo });
     
-        // setTimeout(() => {
-        //     this.addNotification();
-        //     this.addNotification();
-        // }, 10*1000);
+        setTimeout(() => {
+            this.addNotification();
+            this.addNotification();
+        }, 10*1000);
 
         // Retrieve user specific strategy informations
+        this.props.countPageVisit(window.location.pathname);
         if (this.props.isDemo)
         {
             if (!this.props.isHGPro)
@@ -169,6 +170,10 @@ class StrategyApp extends Component
                     };
                     this.setPopup(sign_up_popup);
                 }
+            }
+            else
+            {
+
             }
         }
         else if (!user_id)
@@ -3071,11 +3076,18 @@ class StrategyApp extends Component
 
     onNotAvailableItem = (e) =>
     {
+        // const popup = {
+        //     type: 'coming-soon',
+        //     size: {
+        //         pixelWidth: 600,
+        //         pixelHeight: 760
+        //     }
+        // }
         const popup = {
-            type: 'coming-soon',
+            type: 'not-available',
             size: {
                 pixelWidth: 600,
-                pixelHeight: 760
+                pixelHeight: 300
             }
         }
         this.setPopup(popup);

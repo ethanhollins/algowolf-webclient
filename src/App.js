@@ -34,6 +34,7 @@ class App extends Component
         this.demoAuthorization = this.demoAuthorization.bind(this);
         this.visitorCounter = this.visitorCounter.bind(this);
         this.firstVisitorCounter = this.firstVisitorCounter.bind(this);
+        this.countPageVisit = this.countPageVisit.bind(this);
     }
 
     render() 
@@ -79,6 +80,7 @@ class App extends Component
                             getHeaders={this.getHeaders}
                             getUserId={this.getUserId}
                             checkAuthorization={this.checkAuthorization}
+                            countPageVisit={this.countPageVisit}
                         />
                     </Route>
                     <Route exact path="/auth/:broker/login">
@@ -108,6 +110,7 @@ class App extends Component
                             checkAuthorization={this.checkAuthorization}
                             visitorCounter={this.visitorCounter}
                             firstVisitorCounter={this.firstVisitorCounter}
+                            countPageVisit={this.countPageVisit}
                         />
                     </Route>
                     <Route exact path="/hgpro/results">
@@ -122,6 +125,7 @@ class App extends Component
                             checkAuthorization={this.checkAuthorization}
                             visitorCounter={this.visitorCounter}
                             firstVisitorCounter={this.firstVisitorCounter}
+                            countPageVisit={this.countPageVisit}
                         />
                     </Route>
                     {/* <Route exact path="/holygrail/invite">
@@ -309,6 +313,30 @@ class App extends Component
         }
     }
 
+    async countPageVisit(page)
+    {
+        const { REACT_APP_API_URL } = process.env;
+        const auth_token = this.getCookies().get('Authorization');
+
+        if (auth_token !== undefined)
+        {
+            var requestOptions = {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    Accept: '*/*',
+                    Authorization: 'Bearer ' + auth_token
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    page: page
+                })
+            };
+    
+            fetch(`${REACT_APP_API_URL}/v1/analytics/page`, requestOptions);
+        }
+    }
+
     getURI = () =>
     {
         return URI;
@@ -333,8 +361,8 @@ class App extends Component
         return {
             "Content-Type": "application/json",
             Accept: '*/*',
-            Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZW1vIiwiaWF0IjoxNjA4NDM1NTg3fQ.gwJRakOUz1uWBpD8_VOphebSwyPUm_t9D4vJOB5b2Kg'
-            // Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZW1vIiwiaWF0IjoxNjE2NTY1MjA0fQ.EuggHOjFvpkNJOTTO3t6KU5wnHnHTsntMoLvbYiRZDg'
+            // Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZW1vIiwiaWF0IjoxNjA4NDM1NTg3fQ.gwJRakOUz1uWBpD8_VOphebSwyPUm_t9D4vJOB5b2Kg'
+            Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZW1vIiwiaWF0IjoxNjE2NTY1MjA0fQ.EuggHOjFvpkNJOTTO3t6KU5wnHnHTsntMoLvbYiRZDg'
         };
     }
 
@@ -343,8 +371,8 @@ class App extends Component
         return {
             "Content-Type": "application/json",
             Accept: '*/*',
-            Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoZ3BybyIsImlhdCI6MTYyODQyMTc4Nn0.1hx5QV3nX0tyvl4mHlY2jCiJNGfjmeuKpRzAcMxQP-s'
-            // Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoZ3BybyIsImlhdCI6MTYyODMxNDc2My4wNDM4MX0.AGq3zg94oSrR3uaHuvrMWRJjMmpovgVKpLBzqm6u0xA'
+            // Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoZ3BybyIsImlhdCI6MTYyODQyMTc4Nn0.1hx5QV3nX0tyvl4mHlY2jCiJNGfjmeuKpRzAcMxQP-s'
+            Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoZ3BybyIsImlhdCI6MTYyODMxNDc2My4wNDM4MX0.AGq3zg94oSrR3uaHuvrMWRJjMmpovgVKpLBzqm6u0xA'
         };
     }
 

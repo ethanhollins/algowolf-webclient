@@ -146,11 +146,18 @@ class SelectStrategy extends Component
 
     onCreateNewStrategy(e)
     {
+        // const popup = {
+        //     type: 'coming-soon',
+        //     size: {
+        //         pixelWidth: 600,
+        //         pixelHeight: 760
+        //     }
+        // }
         const popup = {
-            type: 'coming-soon',
+            type: 'not-available',
             size: {
                 pixelWidth: 600,
-                pixelHeight: 760
+                pixelHeight: 300
             }
         }
         this.props.setPopup(popup);
