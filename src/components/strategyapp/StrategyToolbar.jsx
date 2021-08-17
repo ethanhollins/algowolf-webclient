@@ -92,13 +92,13 @@ class StrategyToolbar extends Component
                                 <span className='toolbox left'>My Brokers</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
-                            <div 
+                            {/* <div 
                                 className='dropdown-item disabled' name='strategies'
                                 // onClick={this.onMenuDropdownItem} 
                             >
                                 <span className='toolbox left'>My Strategies</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon disabled' /></span>
-                            </div>
+                            </div> */}
                             <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='account'>
                                 <span className='toolbox left'>Account Settings</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>

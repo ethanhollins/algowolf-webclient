@@ -846,14 +846,14 @@ a.tab.item {
     user-select: none;
 }
 
-.window.message > div {
+.window.message > div:nth-child(2) {
     display: flex;
     align-items: center;
 }
 
 .window.message-icon {
-    width: 1.5em;
-    height: 1.5em;
+    width: 1.0em;
+    height: 1.0em;
     margin-left: 10px;
 }
 
@@ -3846,8 +3846,8 @@ a.tab.item {
 }
 
 #no_strategy_msg {
-    width: 30px;
-    height: 30px;
+    width: 25px;
+    height: 25px;
 }
 
 #account_icon {

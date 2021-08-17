@@ -1017,20 +1017,24 @@ class Strategy extends Component
     {
         let { info } = this.state;
 
-        if (!(data.product in info))
+        if (!(account_id in info))
         {
-            info[data.product] = {};
+            info[account_id] = {};
         }
-        if (!(data.period in info[data.product]))
+        if (!(data.product in info[account_id]))
         {
-            info[data.product][data.period] = {};
+            info[account_id][data.product] = {};
         }
-        if (!(String(data.timestamp) in info[data.product][data.period]))
+        if (!(data.period in info[account_id][data.product]))
         {
-            info[data.product][data.period][String(data.timestamp)] = [];
+            info[account_id][data.product][data.period] = {};
+        }
+        if (!(String(data.timestamp) in info[account_id][data.product][data.period]))
+        {
+            info[account_id][data.product][data.period][String(data.timestamp)] = [];
         }
 
-        info[data.product][data.period][String(data.timestamp)].push(data.item);
+        info[account_id][data.product][data.period][String(data.timestamp)].push(data.item);
         this.setState({ info });
     }
 
@@ -1240,14 +1244,17 @@ class Strategy extends Component
         return {};
     }
 
-    getInfo = (product, period) =>
+    getInfo = (account_id, product, period) =>
     {
         const { info } = this.state;
-        if (product in info)
+        if (account_id in info)
         {
-            if (period in info[product])
+            if (product in info[account_id])
             {
-                return info[product][period];
+                if (period in info[account_id][product])
+                {
+                    return info[account_id][product][period];
+                }
             }
         }
         return {};

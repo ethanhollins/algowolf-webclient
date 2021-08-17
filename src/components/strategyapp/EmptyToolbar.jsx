@@ -29,16 +29,16 @@ class StrategyToolbar extends Component
                             <FontAwesomeIcon className='toolbox standalone-icon' icon={faBars} />
                         </div>
                         <div ref={this.setMenuDropdown} className='toolbox dropdown' style={{display: 'none'}}>
-                            <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='brokers'>
+                            {/* <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='brokers'>
                                 <span className='toolbox left'>My Brokers</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
-                            </div>
-                            <div 
+                            </div> */}
+                            {/* <div 
                                 className='dropdown-item disabled' name='strategies'
                             >
                                 <span className='toolbox left'>My Strategies</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon disabled' /></span>
-                            </div>
+                            </div> */}
                             <div className='dropdown-item' onClick={this.onMenuDropdownItem} name='account'>
                                 <span className='toolbox left'>Account Settings</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>

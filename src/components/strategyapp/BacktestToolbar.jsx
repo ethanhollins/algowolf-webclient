@@ -89,10 +89,10 @@ class BacktestToolbar extends Component
                                 <span className='toolbox left'>My Brokers</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
                             </div>
-                            <div className='dropdown-item' onClick={onMenuDropdownItem} name='strategies'>
+                            {/* <div className='dropdown-item' onClick={onMenuDropdownItem} name='strategies'>
                                 <span className='toolbox left'>My Strategies</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>
-                            </div>
+                            </div> */}
                             <div className='dropdown-item' onClick={onMenuDropdownItem} name='account'>
                                 <span className='toolbox left'>Account Settings</span>
                                 <span className='toolbox right'><FontAwesomeIcon icon={faChevronRight} className='toolbox right-icon' /></span>

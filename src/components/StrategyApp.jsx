@@ -144,10 +144,10 @@ class StrategyApp extends Component
 
         this.setState({ account, strategyInfo });
     
-        setTimeout(() => {
-            this.addNotification();
-            this.addNotification();
-        }, 10*1000);
+        // setTimeout(() => {
+        //     this.addNotification();
+        //     this.addNotification();
+        // }, 10*1000);
 
         // Retrieve user specific strategy informations
         this.props.countPageVisit(window.location.pathname);
@@ -562,9 +562,9 @@ class StrategyApp extends Component
             {
                 return (
                     <div className='window message'>
-                        <div>You have no strategies open!</div>
+                        <div>You have no <strong>Code</strong> open!</div>
                         <div>
-                            <div>Try opening/creating a strategy</div>
+                            <div>Try Opening/Creating a <strong>Notebook</strong>/<strong>Script</strong></div>
                             <FontAwesomeIcon className='window message-icon' id="no_strategy_msg" icon={faPlus} />
                         </div>
                     </div>

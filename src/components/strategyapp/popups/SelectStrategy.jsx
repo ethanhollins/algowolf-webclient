@@ -33,17 +33,17 @@ class SelectStrategy extends Component
             <React.Fragment>
             
             <div className='popup header'>
-                <span>Open Strategy...</span>
+                <span>Open Notebook/Script...</span>
             </div>
             <div className='popup content'>
                 <div className='popup main'>
                     <div className='popup select-strategy main-list'>
                         <div className='popup select-strategy main-header'>
-                            <span>My Strategies</span>
+                            <span>My Code</span>
                         </div>
                         {unopened_strategies}
                         <div className='popup select-strategy sub-header'>
-                            <span>Opened Strategies</span>
+                            <span>Opened Code</span>
                         </div>
                         {this.getOpenedStrategies()}
                     </div>
@@ -51,7 +51,7 @@ class SelectStrategy extends Component
             </div>
             <div className='popup select-strategy footer'>
                 <div className='popup select-strategy footer-btn' onClick={this.onCreateNewStrategy.bind(this)}>
-                    <span>Create New Strategy</span>
+                    <span>Create New Notebook/Script</span>
                     <FontAwesomeIcon icon={faPlus} className='popup category-icon' />
                 </div>
             </div>
@@ -91,7 +91,7 @@ class SelectStrategy extends Component
             result.push(
                 <div key="create-new-strategy" className={'popup select-strategy category-btn'} onClick={this.onCreateNewStrategy.bind(this)}>
                     <div className='popup select-strategy category-left'>
-                        <span className='popup select-strategy category-left-name'>Create New Strategy</span>
+                        <span className='popup select-strategy category-left-name'>Create New Notebook/Script</span>
                     </div>
                     <div className='popup select-strategy category-right'><FontAwesomeIcon icon={faPlus} className='popup category-icon'/></div>
                 </div>
@@ -158,7 +158,8 @@ class SelectStrategy extends Component
             size: {
                 pixelWidth: 600,
                 pixelHeight: 300
-            }
+            },
+            message: "This feature has been disabled."
         }
         this.props.setPopup(popup);
     }

@@ -20,7 +20,7 @@ class NotAvailable extends Component
                                 <img className='not-available icon' src={process.env.PUBLIC_URL + '/disabled_icon.jpg'} />
                             </div>
                             <div className='not-available message'>
-                                This feature has been disabled by the strategy owner.
+                                {this.getMessage()}
                             </div>
                         </div>
                     </div>
@@ -29,6 +29,18 @@ class NotAvailable extends Component
 
             </React.Fragment>
         );
+    }
+
+    getMessage = () =>
+    {
+        if (this.props.getPopup().message)
+        {
+            return this.props.getPopup().message;
+        }
+        else
+        {
+            return "This feature has been disabled by the strategy owner."
+        }
     }
 }
 

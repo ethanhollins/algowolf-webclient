@@ -149,8 +149,9 @@ class Info extends Component
 
                     </React.Fragment>
                 );
-                    
-                const info = this.props.getInfo(product, period);
+                
+                const current_account = this.props.getCurrentAccount();
+                const info = this.props.getInfo(current_account, product, period);
                 const key = String(prices.timestamp);
                 // Check for info at timestamp
                 if (key in info)
