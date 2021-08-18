@@ -361,8 +361,8 @@ class App extends Component
         return {
             "Content-Type": "application/json",
             Accept: '*/*',
-            // Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZW1vIiwiaWF0IjoxNjA4NDM1NTg3fQ.gwJRakOUz1uWBpD8_VOphebSwyPUm_t9D4vJOB5b2Kg'
-            Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZW1vIiwiaWF0IjoxNjE2NTY1MjA0fQ.EuggHOjFvpkNJOTTO3t6KU5wnHnHTsntMoLvbYiRZDg'
+            Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZW1vIiwiaWF0IjoxNjA4NDM1NTg3fQ.gwJRakOUz1uWBpD8_VOphebSwyPUm_t9D4vJOB5b2Kg'
+            // Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkZW1vIiwiaWF0IjoxNjE2NTY1MjA0fQ.EuggHOjFvpkNJOTTO3t6KU5wnHnHTsntMoLvbYiRZDg'
         };
     }
 
@@ -371,8 +371,8 @@ class App extends Component
         return {
             "Content-Type": "application/json",
             Accept: '*/*',
-            // Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoZ3BybyIsImlhdCI6MTYyODQyMTc4Nn0.1hx5QV3nX0tyvl4mHlY2jCiJNGfjmeuKpRzAcMxQP-s'
-            Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoZ3BybyIsImlhdCI6MTYyODMxNDc2My4wNDM4MX0.AGq3zg94oSrR3uaHuvrMWRJjMmpovgVKpLBzqm6u0xA'
+            Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoZ3BybyIsImlhdCI6MTYyODQyMTc4Nn0.1hx5QV3nX0tyvl4mHlY2jCiJNGfjmeuKpRzAcMxQP-s'
+            // Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoZ3BybyIsImlhdCI6MTYyODMxNDc2My4wNDM4MX0.AGq3zg94oSrR3uaHuvrMWRJjMmpovgVKpLBzqm6u0xA'
         };
     }
 
