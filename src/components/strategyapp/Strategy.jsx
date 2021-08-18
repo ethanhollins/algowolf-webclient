@@ -978,7 +978,12 @@ class Strategy extends Component
     {
         let { info } = this.state;
         // Get all products between both objects
-        let products = Object.keys(info).concat(Object.keys(data));
+        if (!(account_id in info))
+        {
+            info[account_id] = {};
+        }
+
+        let products = Object.keys(info[account_id]).concat(Object.keys(data));
         products = products.filter((item, pos) => products.indexOf(item) === pos);
         for (let product of products)
         {
@@ -992,22 +997,22 @@ class Strategy extends Component
                 data_product = {};
             }
 
-            if (!(product in info))
+            if (!(product in info[account_id]))
             {
-                info[product] = {}
+                info[account_id][product] = {}
             }
 
             // Get all periods between both objects
-            let periods = Object.keys(info[product]).concat(Object.keys(data_product));
+            let periods = Object.keys(info[account_id][product]).concat(Object.keys(data_product));
             periods = periods.filter((item, pos) => periods.indexOf(item) === pos);
             for (let period of periods)
             {
-                if (!(period in info[product]))
+                if (!(period in info[account_id][product]))
                 {
-                    info[product][period] = {};
+                    info[account_id][product][period] = {};
                 }
 
-                info[product][period] = Object.assign({}, info[product][period], data_product[period]);
+                info[account_id][product][period] = Object.assign({}, info[account_id][product][period], data_product[period]);
             }
         }
         this.setState({ info });
