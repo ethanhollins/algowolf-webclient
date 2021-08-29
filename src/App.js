@@ -22,7 +22,8 @@ import UrlRedirect from './components/UrlRedirect';
 class App extends Component 
 {
     state ={
-        user_id: null
+        user_id: null,
+        server: null
     }
 
     constructor(props)
@@ -79,6 +80,8 @@ class App extends Component
                             getCookies={this.getCookies}
                             getHeaders={this.getHeaders}
                             getUserId={this.getUserId}
+                            getServerUrl={this.getServerUrl}
+                            getServerStreamUrl={this.getServerStreamUrl}
                             checkAuthorization={this.checkAuthorization}
                             countPageVisit={this.countPageVisit}
                         />
@@ -87,11 +90,13 @@ class App extends Component
                         <AuthLogin 
                             getHeaders={this.getHeaders}
                             getCookies={this.getCookies}
+                            getServerUrl={this.getServerUrl}
                         />
                     </Route>
                     <Route exact path="/auth/:broker">
                         <Auth 
                             getHeaders={this.getHeaders}
+                            getServerUrl={this.getServerUrl}
                         />
                     </Route>
                     {/* <Route exact path="/holygrail">
@@ -235,6 +240,7 @@ class App extends Component
         const { REACT_APP_API_URL } = process.env;
         const auth_token = this.getCookies().get('Authorization');
         let user_id = null;
+        let server = null;
         if (auth_token !== undefined)
         {
             var requestOptions = {
@@ -253,18 +259,21 @@ class App extends Component
                 // Redirect to App
                 const data = await res.json();
                 user_id = data.user_id;
+                server = data.server;
             }
             else
             {
                 user_id = null;
+                server = null;
             }
         }
         else
         {
             user_id = null;
+            server = null;
         }
 
-        this.setUserId(user_id);
+        this.setUser(user_id, server);
         return user_id;
     }
 
@@ -376,6 +385,11 @@ class App extends Component
         };
     }
 
+    setUser = (user_id, server) =>
+    {
+        this.setState({ user_id, server });
+    }
+
     getUserId = () =>
     {
         return this.state.user_id;
@@ -385,7 +399,53 @@ class App extends Component
     {
         this.setState({ user_id });
     }
+
+    getServer = () =>
+    {
+        return this.state.server;
+    }
+
+    setServer = (server) =>
+    {
+        this.setState({ server });
+    }
     
+    getServerUrl = () =>
+    {
+        const { REACT_APP_API_ONE_URL, REACT_APP_API_TWO_URL } = process.env;
+        const { server } = this.state;
+        if (server === 0)
+        {
+            return REACT_APP_API_ONE_URL;
+        }
+        else if (server === 1)
+        {
+            return REACT_APP_API_TWO_URL;
+        }
+        else
+        {
+            return REACT_APP_API_ONE_URL;
+        }
+    }
+
+    getServerStreamUrl = () =>
+    {
+        const { REACT_APP_STREAM_ONE_URL, REACT_APP_STREAM_TWO_URL } = process.env;
+        const { server } = this.state;
+        if (server === 0)
+        {
+            return REACT_APP_STREAM_ONE_URL;
+        }
+        else if (server === 1)
+        {
+            return REACT_APP_STREAM_TWO_URL;
+        }
+        else
+        {
+            return REACT_APP_STREAM_ONE_URL;
+        }
+    }
+
 }
 
 const URI = '/api';

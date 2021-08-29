@@ -113,7 +113,8 @@ class BrokerSettings extends Component
     {
         let { modes, brokers } = this.state;
         const broker_id = this.props.getPopup().opened;
-        const { REACT_APP_API_URL, REACT_APP_SPOTWARE_REDIRECT, REACT_APP_SPOTWARE_CLIENT_ID, REACT_APP_IB_REDIRECT_BASE } = process.env;
+        const API_URL = this.props.getServerUrl();
+        const { REACT_APP_SPOTWARE_REDIRECT, REACT_APP_SPOTWARE_CLIENT_ID, REACT_APP_IB_REDIRECT_BASE } = process.env;
 
         if ([
             'spotware', 'icmarkets', 'fxpro', 'pepperstone', 
@@ -140,7 +141,7 @@ class BrokerSettings extends Component
             console.log(Object.assign({}, { broker_id: broker_id }, brokers[broker_id]))
     
             let res = await fetch(
-                `${REACT_APP_API_URL}/broker`,
+                `${API_URL}/broker`,
                 reqOptions
             );
 
@@ -153,7 +154,7 @@ class BrokerSettings extends Component
                 }
 
                 res = await fetch(
-                    `${REACT_APP_API_URL}/v1/ib/auth/${broker_id}`,
+                    `${API_URL}/v1/ib/auth/${broker_id}`,
                     reqOptions
                 );
 
@@ -192,7 +193,7 @@ class BrokerSettings extends Component
             }
     
             const res = await fetch(
-                `${REACT_APP_API_URL}/broker`,
+                `${API_URL}/broker`,
                 reqOptions
             );
     
@@ -218,7 +219,7 @@ class BrokerSettings extends Component
         const broker_id = this.props.getPopup().opened;
 
         // Call Api Connect EPT
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
         const reqOptions = {
             method: 'PUT',
             headers: this.props.getHeaders(),
@@ -229,7 +230,7 @@ class BrokerSettings extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/broker`,
+            `${API_URL}/broker`,
             reqOptions
         );
 
@@ -256,7 +257,8 @@ class BrokerSettings extends Component
     {
         let { modes, brokers } = this.state;
         const broker_id = this.props.getPopup().opened;
-        const { REACT_APP_API_URL, REACT_APP_SPOTWARE_REDIRECT } = process.env;
+        const API_URL = this.props.getServerUrl();
+        const { REACT_APP_SPOTWARE_REDIRECT } = process.env;
 
         // Call Api Connect EPT
         const reqOptions = {
@@ -266,7 +268,7 @@ class BrokerSettings extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/broker/${broker_id}`,
+            `${API_URL}/broker/${broker_id}`,
             reqOptions
         );
 
@@ -730,7 +732,8 @@ class BrokerSettings extends Component
         const broker = e.target.getAttribute('name');
         const broker_id = this.props.getPopup().opened;
         let { brokers } = this.state;
-        const { REACT_APP_API_URL, REACT_APP_SPOTWARE_REDIRECT, REACT_APP_SPOTWARE_CLIENT_ID, REACT_APP_IB_REDIRECT_BASE } = process.env;
+        const API_URL = this.props.getServerUrl();
+        const { REACT_APP_SPOTWARE_REDIRECT, REACT_APP_SPOTWARE_CLIENT_ID, REACT_APP_IB_REDIRECT_BASE } = process.env;
 
         if (broker === 'ib')
         {
@@ -747,7 +750,7 @@ class BrokerSettings extends Component
             console.log({ broker_id: broker_id, name: brokers[broker_id].name, broker: broker })
     
             let res = await fetch(
-                `${REACT_APP_API_URL}/broker`,
+                `${API_URL}/broker`,
                 reqOptions
             );
 
@@ -760,7 +763,7 @@ class BrokerSettings extends Component
                 }
 
                 res = await fetch(
-                    `${REACT_APP_API_URL}/v1/ib/auth/${broker_id}`,
+                    `${API_URL}/v1/ib/auth/${broker_id}`,
                     reqOptions
                 );
 
@@ -796,7 +799,7 @@ class BrokerSettings extends Component
             console.log({ broker_id: broker_id, name: brokers[broker_id].name, broker: broker });
     
             let res = await fetch(
-                `${REACT_APP_API_URL}/broker`,
+                `${API_URL}/broker`,
                 reqOptions
             );
 

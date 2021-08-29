@@ -27,7 +27,7 @@ class Auth extends Component
 
         const queryString = this.props.location.search;
 
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
         let { message } = this.state;
 
         if (provider === 'spotware')
@@ -42,7 +42,7 @@ class Auth extends Component
             }
 
             const res = await fetch(
-                `${REACT_APP_API_URL}/auth/spotware` + queryString,
+                `${API_URL}/auth/spotware` + queryString,
                 reqOptions
             )
             const data = await res.json();
@@ -74,7 +74,7 @@ class Auth extends Component
             }
 
             await fetch(
-                `${REACT_APP_API_URL}/v1/holygrail/auth/token` + queryString,
+                `${API_URL}/v1/holygrail/auth/token` + queryString,
                 reqOptions
             )
 
@@ -95,7 +95,7 @@ class Auth extends Component
             }
 
             await fetch(
-                `${REACT_APP_API_URL}/v1/ib/auth/confirmed`,
+                `${API_URL}/v1/ib/auth/confirmed`,
                 reqOptions
             )
 

@@ -163,7 +163,7 @@ class AccountSettings extends Component
 
     async retrieveAccountInfo()
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
 
         const reqOptions = {
             method: 'GET',
@@ -172,7 +172,7 @@ class AccountSettings extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/v1/account`,
+            `${API_URL}/v1/account`,
             reqOptions
         );
             
@@ -188,7 +188,7 @@ class AccountSettings extends Component
 
     async updateAccountInfo(update)
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
 
         const reqOptions = {
             method: 'POST',
@@ -198,7 +198,7 @@ class AccountSettings extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/v1/account`,
+            `${API_URL}/v1/account`,
             reqOptions
         );
             
@@ -214,7 +214,7 @@ class AccountSettings extends Component
 
     async deleteAccount()
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
 
         const reqOptions = {
             method: 'DELETE',
@@ -223,7 +223,7 @@ class AccountSettings extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/v1/account`,
+            `${API_URL}/v1/account`,
             reqOptions
         );
             
@@ -235,7 +235,7 @@ class AccountSettings extends Component
 
     async checkPassword(password)
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
 
         const reqOptions = {
             method: 'POST',
@@ -248,7 +248,7 @@ class AccountSettings extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/login`,
+            `${API_URL}/login`,
             reqOptions
         );
             

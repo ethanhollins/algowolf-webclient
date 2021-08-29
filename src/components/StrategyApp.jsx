@@ -314,6 +314,7 @@ class StrategyApp extends Component
                         getAccountMetadata={this.getAccountMetadata}
                         updateAccountMetadata={this.updateAccountMetadata}
                         updateTos={this.updateTos}
+                        getServerUrl={this.props.getServerUrl}
                     />
                     
                     
@@ -673,6 +674,7 @@ class StrategyApp extends Component
                         getTimezones={this.getTimezones}
                         convertIncomingPositionSize={this.convertIncomingPositionSize}
                         setStrategyOnConnect={this.setStrategyOnConnect}
+                        getServerStreamUrl={this.getServerStreamUrl}
                         // Window Funcs
                         closeWindow={this.closeWindow}
                         windowExists={this.windowExists}
@@ -1147,7 +1149,7 @@ class StrategyApp extends Component
 
     async checkTos()
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
 
         const reqOptions = {
             method: 'GET',
@@ -1156,7 +1158,7 @@ class StrategyApp extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/v1/tos`,
+            `${API_URL}/v1/tos`,
             reqOptions
         );
             
@@ -1177,7 +1179,7 @@ class StrategyApp extends Component
 
     async updateTos()
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
 
         const reqOptions = {
             method: 'PUT',
@@ -1186,7 +1188,7 @@ class StrategyApp extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/v1/tos`,
+            `${API_URL}/v1/tos`,
             reqOptions
         );
             
@@ -1202,7 +1204,7 @@ class StrategyApp extends Component
 
     async retrieveGuiInfo()
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
 
         const reqOptions = {
             method: 'GET',
@@ -1211,7 +1213,7 @@ class StrategyApp extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/v1/account`,
+            `${API_URL}/v1/account`,
             reqOptions
         );
             
@@ -1227,7 +1229,7 @@ class StrategyApp extends Component
 
     async retrieveAllBrokers()
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
         const reqOptions = {
             method: 'GET',
             headers: this.props.getHeaders(),
@@ -1235,7 +1237,7 @@ class StrategyApp extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/broker`,
+            `${API_URL}/broker`,
             reqOptions
         )
 
@@ -1251,7 +1253,7 @@ class StrategyApp extends Component
 
     async retrieveStrategies(strategy_ids, account)
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
         let { strategyInfo } = this.state;
 
         if (!account)
@@ -1269,7 +1271,7 @@ class StrategyApp extends Component
         for (let i = 0; i < strategy_ids.length; i++)
         {
             const res = await fetch(
-                `${REACT_APP_API_URL}/v1/strategy/${strategy_ids[i]}`,
+                `${API_URL}/v1/strategy/${strategy_ids[i]}`,
                 reqOptions
             );
 
@@ -1296,7 +1298,7 @@ class StrategyApp extends Component
 
     async retrieveStrategyDetails()
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
 
         /** Retrieve strategy info */
         const reqOptions = {
@@ -1306,7 +1308,7 @@ class StrategyApp extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/v1/strategy/details`,
+            `${API_URL}/v1/strategy/details`,
             reqOptions
         );
 
@@ -1322,7 +1324,7 @@ class StrategyApp extends Component
 
     async retrieveAccountInfo(strategy_id, broker_id, account_id)
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
 
         /** Retrieve strategy info */
         const reqOptions = {
@@ -1332,7 +1334,7 @@ class StrategyApp extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/${broker_id}/${account_id}`,
+            `${API_URL}/v1/strategy/${strategy_id}/${broker_id}/${account_id}`,
             reqOptions
         )
         
@@ -1348,7 +1350,7 @@ class StrategyApp extends Component
 
     async retrieveReport(strategy_id, broker_id, account_id, name)
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
 
         /** Retrieve strategy info */
         const reqOptions = {
@@ -1358,7 +1360,7 @@ class StrategyApp extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/${broker_id}/${account_id}/reports/${name}`,
+            `${API_URL}/v1/strategy/${strategy_id}/${broker_id}/${account_id}/reports/${name}`,
             reqOptions
         );
         if (res.status === 200)
@@ -1383,7 +1385,7 @@ class StrategyApp extends Component
 
     async retrieveBacktestReport(strategy_id, backtest_id, name)
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
 
         /** Retrieve strategy info */
         const reqOptions = {
@@ -1393,7 +1395,7 @@ class StrategyApp extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/backtest/${backtest_id}/reports/${name}`,
+            `${API_URL}/v1/strategy/${strategy_id}/backtest/${backtest_id}/reports/${name}`,
             reqOptions
         );
 
@@ -1413,7 +1415,7 @@ class StrategyApp extends Component
 
     async retrieveTransactions(strategy_id)
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
         /** Retrieve strategy info */
         const reqOptions = {
             method: 'GET',
@@ -1422,7 +1424,7 @@ class StrategyApp extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/transactions`,
+            `${API_URL}/v1/strategy/${strategy_id}/transactions`,
             reqOptions
         );
 
@@ -1438,7 +1440,7 @@ class StrategyApp extends Component
 
     async updateAccountMetadata(metadata)
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
         const reqOptions = {
             method: 'POST',
             headers: this.props.getHeaders(),
@@ -1449,7 +1451,7 @@ class StrategyApp extends Component
         }
 
         let res = await fetch(
-            `${REACT_APP_API_URL}/v1/account`,
+            `${API_URL}/v1/account`,
             reqOptions
         );
 
@@ -1479,7 +1481,7 @@ class StrategyApp extends Component
 
     async updateStrategyInputVariables(strategy_id, input_variables)
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
         /** Retrieve strategy info */
         const reqOptions = {
             method: 'POST',
@@ -1489,7 +1491,7 @@ class StrategyApp extends Component
         }
 
         let res = await fetch(
-            `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/variables`,
+            `${API_URL}/v1/strategy/${strategy_id}/variables`,
             reqOptions
         );
 
@@ -1536,7 +1538,7 @@ class StrategyApp extends Component
 
     async updateAccountInputVariables(strategy_id, broker_id, account_id, input_variables)
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
         /** Retrieve strategy info */
         const reqOptions = {
             method: 'POST',
@@ -1546,7 +1548,7 @@ class StrategyApp extends Component
         }
 
         let res = await fetch(
-            `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/variables/${broker_id}/${account_id}`,
+            `${API_URL}/v1/strategy/${strategy_id}/variables/${broker_id}/${account_id}`,
             reqOptions
         );
 
@@ -1564,7 +1566,7 @@ class StrategyApp extends Component
 
     async subscribeEmail(name, email)
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
         /** Retrieve strategy info */
         const reqOptions = {
             method: 'POST',
@@ -1577,7 +1579,7 @@ class StrategyApp extends Component
         }
 
         let res = await fetch(
-            `${REACT_APP_API_URL}/v1/analytics/subscribe`,
+            `${API_URL}/v1/analytics/subscribe`,
             reqOptions
         );
 
@@ -2277,7 +2279,7 @@ class StrategyApp extends Component
 
     async requestStrategyStatusUpdate(strategy_id, broker_id, body, new_status)
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
         const reqOptions = {
             method: 'POST',
             headers: this.props.getHeaders(),
@@ -2286,7 +2288,7 @@ class StrategyApp extends Component
         }
 
         let res = await fetch(
-            `${REACT_APP_API_URL}/v1/strategy/${strategy_id}/${new_status}/${broker_id}`,
+            `${API_URL}/v1/strategy/${strategy_id}/${new_status}/${broker_id}`,
             reqOptions
         );
 
@@ -2322,7 +2324,7 @@ class StrategyApp extends Component
 
     async retrieveHolyGrailUser()
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
 
         var requestOptions = {
             method: 'GET',
@@ -2330,7 +2332,7 @@ class StrategyApp extends Component
             credentials: 'include'
         };
 
-        const res = await fetch(`${REACT_APP_API_URL}/v1/holygrail/${this.props.getUserId()}`, requestOptions);
+        const res = await fetch(`${API_URL}/v1/holygrail/${this.props.getUserId()}`, requestOptions);
 
         if (res.status === 200)
         {
@@ -2900,7 +2902,7 @@ class StrategyApp extends Component
 
     async updateCurrentAccount(strategy_id, account_code)
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
         var requestOptions = {
             method: 'PUT',
             credentials: 'include',
@@ -2910,7 +2912,7 @@ class StrategyApp extends Component
             })
         };
 
-        const res = await fetch(`${REACT_APP_API_URL}/v1/strategy/${strategy_id}/current_account`, requestOptions);
+        const res = await fetch(`${API_URL}/v1/strategy/${strategy_id}/current_account`, requestOptions);
 
         if (res.status === 200)
         {
@@ -2924,7 +2926,7 @@ class StrategyApp extends Component
 
     async save(toSave, handleSaveResult)
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
         let s_id = undefined;
         let to_update = {};
         let to_delete = {};
@@ -2965,7 +2967,7 @@ class StrategyApp extends Component
         for (s_id in to_update)
         {
             requestOptions.body = JSON.stringify(to_update[s_id]);
-            const res = await fetch(`${REACT_APP_API_URL}/v1/strategy/${s_id}/gui`, requestOptions);
+            const res = await fetch(`${API_URL}/v1/strategy/${s_id}/gui`, requestOptions);
             const status = res.status;
 
             if (status === 403)
@@ -2994,7 +2996,7 @@ class StrategyApp extends Component
         for (s_id in to_delete)
         {
             requestOptions.body = JSON.stringify(to_delete[s_id]);
-            const res = await fetch(`${REACT_APP_API_URL}/v1/strategy/${s_id}/gui`, requestOptions);
+            const res = await fetch(`${API_URL}/v1/strategy/${s_id}/gui`, requestOptions);
             const status = res.status;
 
             if (status === 403)

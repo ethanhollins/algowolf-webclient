@@ -61,7 +61,8 @@ class AccountLoggedOut extends Component
         const broker = this.props.getPopup().properties.broker;
         const broker_id = this.props.getPopup().properties.broker_id;
         const name = this.props.getPopup().properties.name;
-        const { REACT_APP_API_URL, REACT_APP_IB_REDIRECT_BASE, REACT_APP_SPOTWARE_CLIENT_ID, REACT_APP_SPOTWARE_REDIRECT } = process.env;
+        const API_URL = this.props.getServerUrl();
+        const { REACT_APP_IB_REDIRECT_BASE, REACT_APP_SPOTWARE_CLIENT_ID, REACT_APP_SPOTWARE_REDIRECT } = process.env;
 
         if (broker === 'ib')
         {
@@ -72,7 +73,7 @@ class AccountLoggedOut extends Component
             }
 
             const res = await fetch(
-                `${REACT_APP_API_URL}/v1/ib/auth/${broker_id}`,
+                `${API_URL}/v1/ib/auth/${broker_id}`,
                 reqOptions
             );
 
@@ -101,7 +102,7 @@ class AccountLoggedOut extends Component
             }
 
             const res = await fetch(
-                `${REACT_APP_API_URL}/v1/brokers/replace/spotware/${broker_id}`,
+                `${API_URL}/v1/brokers/replace/spotware/${broker_id}`,
                 reqOptions
             );
 
@@ -118,7 +119,7 @@ class AccountLoggedOut extends Component
             }
 
             const res = await fetch(
-                `${REACT_APP_API_URL}/v1/brokers/replace/oanda/${broker_id}`,
+                `${API_URL}/v1/brokers/replace/oanda/${broker_id}`,
                 reqOptions
             );
 

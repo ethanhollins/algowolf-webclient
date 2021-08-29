@@ -204,6 +204,7 @@ class Popup extends Component
                     updateStrategyInfo={this.props.updateStrategyInfo}
                     setHoverOn={this.setHoverOn}
                     setHoverOff={this.setHoverOff}
+                    getServerUrl={this.props.getServerUrl}
                 />
             }
             else if (popup.type === 'strategy-settings')
@@ -418,6 +419,7 @@ class Popup extends Component
                     getPopup={this.props.getPopup}
                     getHeaders={this.props.getHeaders}
                     getStrategyId={this.props.getStrategyId}
+                    getServerUrl={this.props.getServerUrl}
                 />
             }
             else if (popup.type === 'tos')

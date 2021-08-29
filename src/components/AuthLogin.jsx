@@ -540,7 +540,7 @@ class AuthLogin extends Component
 
     async retrieveDukascopyCaptcha()
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
         const queryString = this.props.location.search;
         const params = new URLSearchParams(queryString);
         const broker_id = params.get('bid');
@@ -553,7 +553,7 @@ class AuthLogin extends Component
         }
 
         const res = await fetch(
-            `${REACT_APP_API_URL}/v1/dukascopy/auth/captcha/${broker_id}`,
+            `${API_URL}/v1/dukascopy/auth/captcha/${broker_id}`,
             reqOptions
         );
 
@@ -572,7 +572,7 @@ class AuthLogin extends Component
 
     async completeLogin()
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
         let { username, password, key, web_api_id, web_api_secret, is_demo, captcha, captcha_b64, err_msg } = this.state;
         let { complete_login } = this.state;
 
@@ -598,7 +598,7 @@ class AuthLogin extends Component
             }
     
             const res = await fetch(
-                `${REACT_APP_API_URL}/v1/dukascopy/auth/complete/${broker_id}`,
+                `${API_URL}/v1/dukascopy/auth/complete/${broker_id}`,
                 reqOptions
             );
     
@@ -638,7 +638,7 @@ class AuthLogin extends Component
             }
 
             const res = await fetch(
-                `${REACT_APP_API_URL}/broker`,
+                `${API_URL}/broker`,
                 reqOptions
             );
 
@@ -669,7 +669,7 @@ class AuthLogin extends Component
             }
 
             const res = await fetch(
-                `${REACT_APP_API_URL}/broker`,
+                `${API_URL}/broker`,
                 reqOptions
             );
 
