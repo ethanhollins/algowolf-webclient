@@ -422,10 +422,6 @@ class App extends Component
         {
             return REACT_APP_API_TWO_URL;
         }
-        else
-        {
-            return REACT_APP_API_ONE_URL;
-        }
     }
 
     getServerStreamUrl = () =>
@@ -439,10 +435,6 @@ class App extends Component
         else if (server === 1)
         {
             return REACT_APP_STREAM_TWO_URL;
-        }
-        else
-        {
-            return REACT_APP_STREAM_ONE_URL;
         }
     }
 
