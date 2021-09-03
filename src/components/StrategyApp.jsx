@@ -1118,8 +1118,9 @@ class StrategyApp extends Component
 
     handleSocket()
     {
-        const { REACT_APP_STREAM_URL } = process.env;
-        const endpoint = `${REACT_APP_STREAM_URL}/user`
+        const STREAM_URL = this.props.getServerStreamUrl();
+        console.log("CONNECTING TO: " + STREAM_URL);
+        const endpoint = `${STREAM_URL}/user`
         const socket = io(endpoint, {
             reconnection: false,
             transportOptions: {
@@ -1588,7 +1589,7 @@ class StrategyApp extends Component
 
     async retrieveChartData(broker, product, period, from, to, tz)
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
         const reqOptions = {
             method: 'GET',
             headers: this.props.getHeaders(),
@@ -1601,7 +1602,7 @@ class StrategyApp extends Component
         {   
             if (to !== undefined)
             {
-                const uri = `${REACT_APP_API_URL}/v1/prices/${broker}/\
+                const uri = `${API_URL}/v1/prices/${broker}/\
                 ${product}/${period}\
                 ?from=${from.format('YYYY-MM-DDTHH:mm:ss')}Z\
                 &to=${to.format('YYYY-MM-DDTHH:mm:ss')}Z\
@@ -1615,7 +1616,7 @@ class StrategyApp extends Component
             }
             else
             {
-                const uri = `${REACT_APP_API_URL}/v1/prices/${broker}/\
+                const uri = `${API_URL}/v1/prices/${broker}/\
                 ${product}/${period}\
                 ?from=${from.format('YYYY-MM-DDTHH:mm:ss')}Z\
                 &count=${NUM_LOAD_BARS}&tz=${tz}`.replace(/\s/g, '');
@@ -1630,7 +1631,7 @@ class StrategyApp extends Component
         }
         else
         {
-            const uri = `${REACT_APP_API_URL}/v1/prices/${broker}/\
+            const uri = `${API_URL}/v1/prices/${broker}/\
                 ${product}/${period}\
                 ?count=${NUM_LOAD_BARS}`.replace(/\s/g, '');
             return await fetch(uri, reqOptions)
@@ -1776,7 +1777,7 @@ class StrategyApp extends Component
 
     async loadChart(broker_id, broker, product)
     {
-        const { REACT_APP_API_URL } = process.env;
+        const API_URL = this.props.getServerUrl();
         const reqOptions = {
             method: 'POST',
             headers: this.props.getHeaders(),
@@ -1787,7 +1788,7 @@ class StrategyApp extends Component
             })
         }
 
-        const endpoint = `${REACT_APP_API_URL}/v1/strategy/${broker_id}/charts`;
+        const endpoint = `${API_URL}/v1/strategy/${broker_id}/charts`;
         let res = await fetch(endpoint, reqOptions)
         
         if (res.status === 200)
