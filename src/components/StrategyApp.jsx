@@ -1119,7 +1119,6 @@ class StrategyApp extends Component
     handleSocket()
     {
         const STREAM_URL = this.props.getServerStreamUrl();
-        console.log("CONNECTING TO: " + STREAM_URL);
         const endpoint = `${STREAM_URL}/user`
         const socket = io(endpoint, {
             reconnection: false,

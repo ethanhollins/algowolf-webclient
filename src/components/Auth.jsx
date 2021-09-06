@@ -17,6 +17,7 @@ class Auth extends Component
 
     async componentDidMount()
     {
+        await this.props.checkAuthorization();
         await this.handleAuth();
     }
 
@@ -28,6 +29,7 @@ class Auth extends Component
         const queryString = this.props.location.search;
 
         const API_URL = this.props.getServerUrl();
+        console.log(API_URL);
         let { message } = this.state;
 
         if (provider === 'spotware')
@@ -110,7 +112,6 @@ class Auth extends Component
 
     render()
     {
-        console.log('??');
         return (
             <div className='auth-login background'>
                 {this.getLoadingGUI()}
@@ -130,10 +131,10 @@ class Auth extends Component
             return (
                 <div className='auth-login body oanda'>
                     <div>
-                        <img class='auth-login logo oanda' src={process.env.PUBLIC_URL + '/oanda_logo_large.png'} />
+                        <img className='auth-login logo oanda' src={process.env.PUBLIC_URL + '/oanda_logo_large.png'} />
                     </div>
                     <div className='auth-login message'>Connecting your broker...</div>
-                    <div class="dot-flashing"></div>
+                    <div className="dot-flashing"></div>
                 </div>
             );
         }
@@ -142,10 +143,10 @@ class Auth extends Component
             return (
                 <div className='auth-login body ib'>
                     <div>
-                        <img class='auth-login logo ib' src={process.env.PUBLIC_URL + '/interactive_brokers_logo_large.png'} />
+                        <img className='auth-login logo ib' src={process.env.PUBLIC_URL + '/interactive_brokers_logo_large.png'} />
                     </div>
                     <div className='auth-login message'>Connecting your broker...</div>
-                    <div class="dot-flashing"></div>
+                    <div className="dot-flashing"></div>
                 </div>
             );
         }
@@ -154,10 +155,10 @@ class Auth extends Component
             return (
                 <div className='auth-login body fxcm'>
                     <div>
-                        <img class='auth-login logo fxcm' src={process.env.PUBLIC_URL + '/fxcm_logo_large.png'} />
+                        <img className='auth-login logo fxcm' src={process.env.PUBLIC_URL + '/fxcm_logo_large.png'} />
                     </div>
                     <div className='auth-login message'>Connecting your broker...</div>
-                    <div class="dot-flashing"></div>
+                    <div className="dot-flashing"></div>
                 </div>
             );
         }
@@ -166,10 +167,10 @@ class Auth extends Component
             return (
                 <div className='auth-login body spotware'>
                     <div>
-                        <img class='auth-login logo spotware' src={process.env.PUBLIC_URL + '/ctrader_logo_large.png'} />
+                        <img className='auth-login logo spotware' src={process.env.PUBLIC_URL + '/ctrader_logo_large.png'} />
                     </div>
                     <div className='auth-login message'>Connecting your broker...</div>
-                    <div class="dot-flashing"></div>
+                    <div className="dot-flashing"></div>
                 </div>
             );
         }
@@ -178,10 +179,10 @@ class Auth extends Component
             return (
                 <div className='auth-login body holygrail'>
                     <div>
-                        <img class='auth-login logo holygrail' src={process.env.PUBLIC_URL + '/holygrail_icon.jpg'} />
+                        <img className='auth-login logo holygrail' src={process.env.PUBLIC_URL + '/holygrail_icon.jpg'} />
                     </div>
                     <div className='auth-login message'>Redirecting you to Holy Grail...</div>
-                    <div class="dot-flashing"></div>
+                    <div className="dot-flashing"></div>
                 </div>
             );
         }
@@ -190,10 +191,10 @@ class Auth extends Component
             return (
                 <div className='auth-login body dukascopy'>
                     <div>
-                        <img class='auth-login logo dukascopy' src={process.env.PUBLIC_URL + '/dukascopy_logo_large.png'} />
+                        <img className='auth-login logo dukascopy' src={process.env.PUBLIC_URL + '/dukascopy_logo_large.png'} />
                     </div>
                     <div className='auth-login message'>Connecting your broker...</div>
-                    <div class="dot-flashing"></div>
+                    <div className="dot-flashing"></div>
                 </div>
             );
         }

@@ -91,12 +91,14 @@ class App extends Component
                             getHeaders={this.getHeaders}
                             getCookies={this.getCookies}
                             getServerUrl={this.getServerUrl}
+                            checkAuthorization={this.checkAuthorization}
                         />
                     </Route>
                     <Route exact path="/auth/:broker">
                         <Auth 
                             getHeaders={this.getHeaders}
                             getServerUrl={this.getServerUrl}
+                            checkAuthorization={this.checkAuthorization}
                         />
                     </Route>
                     {/* <Route exact path="/holygrail">
