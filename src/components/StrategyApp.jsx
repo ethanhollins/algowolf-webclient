@@ -124,6 +124,12 @@ class StrategyApp extends Component
         let { checkLogin } = this.state;
         
         const user_id = await this.props.checkAuthorization();
+        const { REACT_APP_FRONT_BASE_URL } = process.env;
+        if (!user_id && this.props.isHGPro)
+        {
+            window.location.href = REACT_APP_FRONT_BASE_URL + "/login?redirect=" + encodeURIComponent(window.location.href);
+        }
+
         checkLogin = true;
         this.setState({ user_id, checkLogin });
 
@@ -150,7 +156,6 @@ class StrategyApp extends Component
         // }, 10*1000);
 
         // Retrieve user specific strategy informations
-        this.props.countPageVisit(window.location.pathname);
         if (this.props.isDemo)
         {
             if (!this.props.isHGPro)
@@ -171,15 +176,12 @@ class StrategyApp extends Component
                     this.setPopup(sign_up_popup);
                 }
             }
-            else
-            {
-
-            }
         }
         else if (!user_id)
         {
             window.location = '/login';
         }
+        this.props.countPageVisit(window.location.pathname);
 
         const isTos = await this.checkTos();
         if (!isTos)

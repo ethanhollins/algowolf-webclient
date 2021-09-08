@@ -242,6 +242,10 @@ class WindowWrapper extends Component
                 isLoaded={this.props.isLoaded}
             />;
         }
+        else if (this.state.info.type === 'link')
+        {
+            window.location = this.state.info.url;
+        }
 
         return <React.Fragment/>;
     }
