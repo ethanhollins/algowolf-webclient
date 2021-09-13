@@ -504,13 +504,13 @@ class BrokerSettings extends Component
             <div className='popup column'>
                 <div id='popup_broker_selector'>
                     <div 
-                        className={'popup broker disabled' + this.isItemSelected('fxopen', broker_info.broker)}
-                        // onClick={this.redirectBroker.bind(this)}
+                        className={'popup broker' + this.isItemSelected('fxopen', broker_info.broker)}
+                        onClick={this.redirectBroker.bind(this)}
                         name='fxopen'
                     >
                         <img className='popup broker-img' src={process.env.PUBLIC_URL + '/fxopen_logo.png'} />
                         <div className='popup broker-text'>FX Open</div>
-                        <div className='popup broker-description'>Coming Soon</div>
+                        {/* <div className='popup broker-description'>Coming Soon</div> */}
                     </div>
                     <div 
                         className={'popup broker' + this.isItemSelected('oanda', broker_info.broker)}

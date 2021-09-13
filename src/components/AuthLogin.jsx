@@ -321,7 +321,7 @@ class AuthLogin extends Component
                                     <li>Click <strong>Next</strong>, select <strong>Create new WebAPI Token</strong>, then, <strong>Copy to Clipboard</strong> and store this information in a text file.<br/><strong>Note:</strong> You can only save this information once.</li>
                                     <li>Copy your <strong>WebAPI Id</strong>, <strong>WebAPI Key</strong> and <strong>WebAPI Secret</strong> into the text boxes on the left.</li>
                                 </ol>
-                                <div className='auth-login info-sub-header'><strong>Note:</strong> Australian TickTrader accounts are currently unavailable.</div>
+                                <div className='auth-login info-sub-header'><strong>Note:</strong> Australian TickTrader accounts are currently unavailable. According to FX Open Australian clients may setup a UK account.</div>
                                 </React.Fragment>
                             }
                         </div>
