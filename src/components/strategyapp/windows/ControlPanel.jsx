@@ -54,6 +54,7 @@ class ControlPanel extends Component
                 </div>
                 
             </div>
+            <div className='control-panel warning-msg'>Your strategy MUST be RESTARTED for changes to take effect.</div>
             <div className='control-panel button-group'>
                 <input 
                     id='reset_btn' 
@@ -508,6 +509,8 @@ class ControlPanel extends Component
                     icon = <span className={'control-panel icon left' + icon_ext}>USD</span>;
                 }
 
+                let readOnly = item.properties.readOnly;
+                
                 if (item.type === 'header')
                 {
                     elem = (
@@ -728,7 +731,10 @@ class ControlPanel extends Component
                     if (enabled !== undefined)
                     {
                         if (!enabled)
+                        {
                             field_ext += " disabled";
+                            readOnly = true;
+                        }
 
                         enabled_elem = (
                             <div>
@@ -766,7 +772,7 @@ class ControlPanel extends Component
                                     type={type} value={value}
                                     step={step} min={min} max={max}
                                     onChange={this.onVariableChange.bind(this)}
-                                    readOnly={item.properties.readOnly}
+                                    readOnly={readOnly}
                                 />
                                 {enabled_elem}
                             </div>

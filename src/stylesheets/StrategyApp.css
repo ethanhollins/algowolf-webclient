@@ -2348,7 +2348,7 @@ a.tab.item {
 
 .control-panel.background {
     width: 100%;
-    height: calc(100% - (27px + 30px));
+    height: calc(100% - (27px + 30px + 41px));
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -2560,6 +2560,21 @@ a.tab.item {
     align-items: center;
     justify-content: space-around;
     height: 29px;
+}
+
+.control-panel.warning-msg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    font-size: 0.8em;
+    font-family: Poppins, sans-serif;
+    font-weight: 600;
+    text-align: center;
+    color: #F00;
+    border-top: 1px solid rgb(220,220,220);
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
 
 .control-panel.button {
