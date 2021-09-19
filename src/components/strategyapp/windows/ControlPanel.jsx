@@ -54,7 +54,7 @@ class ControlPanel extends Component
                 </div>
                 
             </div>
-            <div className='control-panel warning-msg'>Your strategy MUST be RESTARTED for changes to take effect.</div>
+            <div className='control-panel warning-msg'>Click UPDATE and RESTART strategy for changes to take effect.</div>
             <div className='control-panel button-group'>
                 <input 
                     id='reset_btn' 

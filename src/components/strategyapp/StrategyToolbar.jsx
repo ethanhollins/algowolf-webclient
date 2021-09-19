@@ -591,7 +591,7 @@ class StrategyToolbar extends Component
                     className='toolbox item' 
                     // onClick={this.onLiveHelpItem.bind(this)}
                 >
-                    <a href={REACT_APP_FRONT_BASE_URL + "/getting-started"} target="_blank" className='toolbox item row btn'>
+                    <a href={REACT_APP_FRONT_BASE_URL + "/hgpro/getting-started"} target="_blank" className='toolbox item row btn'>
                         <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faQuestionCircle} />
                         <span className='toolbox label collapse'>Help</span>
                     </a>

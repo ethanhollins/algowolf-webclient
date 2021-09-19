@@ -682,6 +682,7 @@ a.tab.item {
     margin-right: 5px;
     margin-left: 5px;
     cursor: pointer;
+    text-decoration: none;
 }
 
 .page.item > * {

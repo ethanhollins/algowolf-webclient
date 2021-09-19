@@ -412,6 +412,7 @@ class StrategyApp extends Component
                 let page_items = [];
                 for (let i = 0; i < strategy.pages.length; i++)
                 {
+                    const page_link = this.getPageLink(strategy, i);
                     let name = strategy.pages[i];
 
                     let item_class = 'page item-inner';
@@ -419,21 +420,44 @@ class StrategyApp extends Component
                     {
                         item_class += ' selected';
                     }
-                    page_items.push(
-                        <div 
-                            key={i}
-                            className='page item'
-                            style={{
-                                width: `calc(${width}% - 10px)`
-                            }}
-                            name={i}
-                            onClick={this.gotoPage.bind(this)}
-                        >
-                            <div className={item_class}>
-                            <div className='page item-name'>{name}</div>
+                    if (page_link)
+                    {
+                        page_items.push(
+                            <a 
+                                key={i}
+                                className='page item'
+                                style={{
+                                    width: `calc(${width}% - 10px)`
+                                }}
+                                name={i}
+                                // onClick={this.gotoPage.bind(this)}
+                                href={page_link}
+                                target="_blank"
+                            >
+                                <div className={item_class}>
+                                <div className='page item-name'>{name}</div>
+                                </div>
+                            </a>
+                        );
+                    }
+                    else
+                    {
+                        page_items.push(
+                            <div 
+                                key={i}
+                                className='page item'
+                                style={{
+                                    width: `calc(${width}% - 10px)`
+                                }}
+                                name={i}
+                                onClick={this.gotoPage.bind(this)}
+                            >
+                                <div className={item_class}>
+                                <div className='page item-name'>{name}</div>
+                                </div>
                             </div>
-                        </div>
-                    );
+                        );
+                    }
                 }
 
                 let arrow_left_class = 'page icon';
@@ -3438,6 +3462,22 @@ class StrategyApp extends Component
     useBlackText(rgb)
     {
         return rgb.r*0.299 + rgb.g*0.587 + rgb.b*0.114 > 186;
+    }
+
+    getPageLink(strategy, page)
+    {
+        for (let w of strategy.windows)
+        {
+            if (w.page === page)
+            {
+                if (w.type === "link")
+                {
+                    return w.url;
+                }
+            }
+        }
+
+        return null;
     }
 
 }
