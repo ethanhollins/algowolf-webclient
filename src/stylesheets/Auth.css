@@ -49,9 +49,14 @@
     width: 710px;
 }
 
-.auth-login.body.fxopen > div {
+/* .auth-login.body.fxopen > div {
     display: flex;
     flex-direction: column;
+} */
+
+.auth-login.body.complete {
+    flex-direction: column;
+    width: 375px;
 }
 
 .auth-login.fxopen.info-parent {

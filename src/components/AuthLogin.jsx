@@ -306,8 +306,13 @@ class AuthLogin extends Component
                                 <div className='auth-login info-header'>Instructions to find your API details for Demo Accounts</div>
                                 <ol>
                                     <li>Register an FX Open <strong>demo</strong> account <a href="https://demo.forex.game/registration?marginTradingTab=True" target="_blank">here</a>.</li>
-                                    <li>Select <strong>Gross</strong> type and enter your details, then, enable <strong>Web Api Enabled</strong> option. On registration your details will be displayed.</li>
+                                    <li>Select <strong>Gross</strong> type and enter your details</li>
+                                    {/* , then, enable <strong>Web Api Enabled</strong> option. On registration your details will be displayed.</li> */}
                                     <li>Use their <strong>Copy to Clipboard</strong> button to <strong>store this information and paste in a text file</strong>.<br/><strong>Note:</strong> You can only save this information once.</li>
+                                    {/* <li>Copy your <strong>WebAPI Id</strong>, <strong>WebAPI Key</strong> and <strong>WebAPI Secret</strong> into the text boxes on the left.</li> */}
+                                    <li>Once logged in, click on the <strong>settings cog</strong> on the top right and select <strong>Edit User Account</strong>.</li>
+                                    <li>Enable <strong>WebAPI Enabled</strong> and click <strong>Save</strong>.</li>
+                                    <li>Click <strong>Next</strong>, select <strong>Create new WebAPI Token</strong>, then, <strong>Copy to Clipboard</strong> and store this information in a text file.<br/><strong>Note:</strong> You can only save this information once.</li>
                                     <li>Copy your <strong>WebAPI Id</strong>, <strong>WebAPI Key</strong> and <strong>WebAPI Secret</strong> into the text boxes on the left.</li>
                                 </ol>
                                 </React.Fragment>
@@ -352,7 +357,7 @@ class AuthLogin extends Component
         else if (provider === 'fxopen')
         {
             return (
-                <div className='auth-login body fxopen'>
+                <div className='auth-login body fxopen complete'>
                     <div>
                         <img className='auth-login logo fxopen' src={process.env.PUBLIC_URL + '/fxopen_logo_large.png'} />
                     </div>
