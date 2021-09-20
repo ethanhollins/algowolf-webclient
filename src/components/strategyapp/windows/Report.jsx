@@ -45,6 +45,7 @@ class Report extends Component
                 getWindowScreenPos={this.props.getWindowScreenPos}
                 getHeader={this.props.getHeader}
                 setChartPositionsByTimestamp={this.props.setChartPositionsByTimestamp}
+                getStrategyInfo={this.props.getStrategyInfo}
             />
         );
     }

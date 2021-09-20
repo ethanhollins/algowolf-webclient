@@ -153,6 +153,10 @@ class SpreadSheet extends Component
    
     generateRows(data)
     {
+        const strategy_info = this.props.getStrategyInfo(this.props.strategy_id);
+        const settings = strategy_info.settings;
+        const timezone = settings['chart-settings'].layouts[settings['chart-settings'].current].general['timezone'].value;
+
         if (Object.keys(data).length > 0)
         {
             const num_cols = Object.keys(data).length+1;
@@ -199,7 +203,7 @@ class SpreadSheet extends Component
                                                     className='spreadsheet cell item link'
                                                     onClick={this.onTime.bind(this)}
                                                 >
-                                                    <div>{time.tz('America/New_York').format(format[col_name].format)}</div>
+                                                    <div>{time.tz(timezone).format(format[col_name].format)}</div>
                                                 </div>
                                             );
                                         }
@@ -269,6 +273,10 @@ class SpreadSheet extends Component
     // TEMP
     generateRowsDemo(data)
     {
+        const strategy_info = this.props.getStrategyInfo(this.props.strategy_id);
+        const settings = strategy_info.settings;
+        const timezone = settings['chart-settings'].layouts[settings['chart-settings'].current].general['timezone'].value;
+        
         if (Object.keys(data).length > 0)
         {
             const num_cols = Object.keys(data).length+1;
@@ -369,7 +377,7 @@ class SpreadSheet extends Component
                                                         className='spreadsheet cell item link'
                                                         onClick={this.onTime.bind(this)}
                                                     >
-                                                        <div>{time.tz('America/New_York').format(format[col_name].format)}</div>
+                                                        <div>{time.tz(timezone).format(format[col_name].format)}</div>
                                                     </div>
                                                 );
                                             }

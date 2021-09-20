@@ -239,6 +239,7 @@ class WindowWrapper extends Component
                 getBalance={this.props.getBalance}
                 getBanner={this.props.getBanner}
                 setBanner={this.props.setBanner}
+                getStrategyInfo={this.props.getStrategyInfo}
                 isLoaded={this.props.isLoaded}
             />;
         }

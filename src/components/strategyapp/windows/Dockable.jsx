@@ -491,6 +491,7 @@ class Dockable extends Component
                 getTopOffset={this.props.getTopOffset}
                 getWindowScreenPos={this.props.getWindowScreenPos}
                 setChartPositionsByTimestamp={this.props.setChartPositionsByTimestamp}
+                getStrategyInfo={this.props.getStrategyInfo}
             />
         }
         else if (type === 'positions')
