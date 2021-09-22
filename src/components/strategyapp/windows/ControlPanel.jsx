@@ -88,6 +88,25 @@ class ControlPanel extends Component
     }
 
 
+    isLeverageRequirementsMet()
+    {
+        const { changed } = this.state;
+        const risk = this.getVariableValue('Risk (%)');
+        let leverage_val;
+        if ('Leverage' in changed && 'value' in changed['Leverage'])
+        {
+            leverage_val = changed['Leverage'].value;
+        }
+        else
+        {
+            leverage_val = this.getVariableValue('Leverage');
+        }
+
+        const leverage = this.getLevarageCalc(leverage_val);
+        return risk <= leverage;
+    }
+
+
     isUpdateDisabled()
     {
         const { changed } = this.state;
@@ -369,6 +388,7 @@ class ControlPanel extends Component
 
             changed[name]['value'] = value;
         }
+        console.log(changed);
         this.setState({ changed });
     }
 
@@ -628,6 +648,12 @@ class ControlPanel extends Component
                     }
                     else if (name === 'Leverage')
                     {
+                        let error_msg = <React.Fragment/>
+                        if (!this.isLeverageRequirementsMet())
+                        {
+                            error_msg = <p className='control-panel error-msg'>Please change your Risk to meet Maximum Risk requirements.</p>
+                        }
+
                         elem = (
                             <React.Fragment key={current_account + name}>
                             <div className='control-panel row'>
@@ -674,6 +700,7 @@ class ControlPanel extends Component
                                     </div>
                                 </div>
                             </div>
+                            {error_msg}
                             <div className='control-panel row'>
                                 <div className='control-panel item left'>
                                     <div className='control-panel item-main'>

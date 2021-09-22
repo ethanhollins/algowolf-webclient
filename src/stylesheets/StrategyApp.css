@@ -2563,6 +2563,13 @@ a.tab.item {
     height: 29px;
 }
 
+.control-panel.error-msg {
+    font-size: 0.9em;
+    font-weight: 500;
+    text-align: center;
+    color: #F00;
+}
+
 .control-panel.warning-msg {
     display: flex;
     align-items: center;
