@@ -428,20 +428,6 @@ class StrategyToolbar extends Component
                 </div>
             );
         }
-        else if (!this.props.hasBetaAccess())
-        {
-            return (
-                <div className='toolbox item'>
-                    <div 
-                        ref={this.setActivationElem} className='toolbox item row btn disabled'
-                        title='Beta access required to run script.'
-                    >
-                        <FontAwesomeIcon className='toolbox icon disabled' icon={faPlay} />
-                        <span className='toolbox label'>Start</span>
-                    </div>
-                </div>
-            );
-        }
         else if (is_running)
         {
             return (
