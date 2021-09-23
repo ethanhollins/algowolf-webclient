@@ -450,7 +450,7 @@ class StrategyToolbar extends Component
                     <div className='toolbox item'>
                         <div 
                             ref={this.setActivationElem} className='toolbox item row btn disabled'
-                            title='Start script.'
+                            title='Script loading...'
                         >
                             <FontAwesomeIcon className='toolbox icon disabled' icon={faPlay} />
                             <span className='toolbox label'>Start</span>
@@ -464,7 +464,7 @@ class StrategyToolbar extends Component
                     <div className='toolbox item' onClick={this.onScriptSwitch}>
                         <div 
                             ref={this.setActivationElem} className='toolbox item row btn'
-                            title='Script loading...'
+                            title='Start script.'
                         >
                             <FontAwesomeIcon id='play_status' className='toolbox icon' icon={faPlay} />
                             <span className='toolbox label'>Start</span>
@@ -616,7 +616,7 @@ class StrategyToolbar extends Component
         let current_account = this.getCurrentAccount();
         const is_loaded = this.props.getStrategyComponent().isLoaded();
         
-        if (this.props.hasBetaAccess() && is_loaded && current_account !== undefined)
+        if (is_loaded && current_account !== undefined)
         {
             const broker_id = current_account.split('.')[0];
             const account_id = current_account.split('.')[1];
