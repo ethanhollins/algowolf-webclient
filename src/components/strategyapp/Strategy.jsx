@@ -199,6 +199,7 @@ class Strategy extends Component
                             setPopup={this.props.setPopup}
                             getPopup={this.props.getPopup}
                             convertIncomingPositionSize={this.props.convertIncomingPositionSize}
+                            getStrategyDbInfo={this.props.getStrategyDbInfo}
                             // Window Funcs
                             closeWindow={this.props.closeWindow}
                             windowExists={this.props.windowExists}
@@ -517,7 +518,7 @@ class Strategy extends Component
                 const account_id = data.account_code.split('.')[1];
 
                 strategy.brokers[broker_id].accounts[account_id]['strategy_status'] = true;
-                this.props.setStatusMsg(null);
+                this.props.setStatusMsg(null, data.account_code);
                 this.props.updateStrategyInfo();
             }
         }
@@ -530,7 +531,7 @@ class Strategy extends Component
                 const account_id = data.account_code.split('.')[1];
 
                 strategy.brokers[broker_id].accounts[account_id]['strategy_status'] = false;
-                this.props.setStatusMsg(null);
+                this.props.setStatusMsg(null, data.account_code);
                 this.props.updateStrategyInfo();
             }
         }

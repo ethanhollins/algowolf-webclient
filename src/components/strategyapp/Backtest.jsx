@@ -163,6 +163,7 @@ class Backtest extends Component
                             getPopup={this.props.getPopup}
                             convertIncomingPositionSize={this.props.convertIncomingPositionSize}
                             isLoaded={this.isLoaded}
+                            getStrategyDbInfo={this.props.getStrategyDbInfo}
                             // Window Funcs
                             closeWindow={this.props.closeWindow}
                             windowExists={this.props.windowExists}

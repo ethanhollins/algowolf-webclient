@@ -89,6 +89,7 @@ class StrategyApp extends Component
         this.updateAccountMetadata = this.updateAccountMetadata.bind(this);
         this.checkTos = this.checkTos.bind(this);
         this.updateTos = this.updateTos.bind(this);
+        this.getStrategyDbInfo = this.getStrategyDbInfo.bind(this);
 
         this.setAppContainerRef = elem => {
             this.appContainer = elem;
@@ -627,6 +628,7 @@ class StrategyApp extends Component
                         setShowLoadScreen={this.setShowLoadScreen}
                         getTimezones={this.getTimezones}
                         convertIncomingPositionSize={this.convertIncomingPositionSize}
+                        getStrategyDbInfo={this.getStrategyDbInfo}
                         // Window Funcs
                         closeWindow={this.closeWindow}
                         windowExists={this.windowExists}
@@ -701,6 +703,7 @@ class StrategyApp extends Component
                         convertIncomingPositionSize={this.convertIncomingPositionSize}
                         setStrategyOnConnect={this.setStrategyOnConnect}
                         getServerStreamUrl={this.getServerStreamUrl}
+                        getStrategyDbInfo={this.getStrategyDbInfo}
                         // Window Funcs
                         closeWindow={this.closeWindow}
                         windowExists={this.windowExists}
@@ -1702,6 +1705,34 @@ class StrategyApp extends Component
         }
     }
 
+    async getStrategyDbInfo(strategy_id, broker_id, account_id)
+    {
+        const API_URL = this.props.getServerUrl();
+        /** Retrieve strategy info */
+        const reqOptions = {
+            method: 'GET',
+            headers: this.props.getHeaders(),
+            credentials: 'include'
+        }
+
+        let res = await fetch(
+            `${API_URL}/v1/strategy/${strategy_id}/info/${broker_id}/${account_id}`,
+            reqOptions
+        );
+
+        let data;
+        if (res.status === 200)
+        {
+            data = await res.json();
+        }
+        else if (res.status === 403)
+        {
+            window.location = '/logout';
+        }
+
+        return data;
+    }
+
     addChart = (broker, product, period, ohlc_data) =>
     {
         let { charts } = this.state;
@@ -2303,7 +2334,7 @@ class StrategyApp extends Component
     //     );
     // }
 
-    async requestStrategyStatusUpdate(strategy_id, broker_id, body, new_status)
+    async requestStrategyStatusUpdate(strategy_id, broker_id, account_id, body, new_status)
     {
         const API_URL = this.props.getServerUrl();
         const reqOptions = {
@@ -2332,17 +2363,35 @@ class StrategyApp extends Component
         {
             window.location = '/logout';
         }
-        else
+        else if (res.status === 400)
         {
-            this.toolbar.setStatusMsg(null);
+            this.toolbar.setStatusMsg(null, [broker_id, account_id].join('.'));
+
+            res = await res.json();
 
             const popup = {
                 type: 'start-failed',
                 size: {
-                    pixelWidth: 550,
-                    pixelHeight: 300
+                    pixelWidth: 450,
+                    pixelHeight: 250
                 },
-                image: '/start_failed.png'
+                image: '/start_failed.png',
+                account_limit: res.account_limit
+            };
+            this.setPopup(popup);
+        }
+        else
+        {
+            this.toolbar.setStatusMsg(null, [broker_id, account_id].join('.'));
+
+            const popup = {
+                type: 'start-failed',
+                size: {
+                    pixelWidth: 450,
+                    pixelHeight: 250
+                },
+                image: '/start_failed.png',
+                account_limit: null
             };
             this.setPopup(popup);
         }
@@ -2432,7 +2481,7 @@ class StrategyApp extends Component
         const { account } = this.state;
         const strategy_id = account.metadata.current_strategy;
         await this.requestStrategyStatusUpdate(
-            strategy_id, broker_id, 
+            strategy_id, broker_id, account_id,
             { 
                 accounts: [account_id],
                 input_variables: input_variables
@@ -2454,21 +2503,21 @@ class StrategyApp extends Component
             window.location = '/logout';
         }
 
-        this.toolbar.setStatusMsg('Stopping strategy...');
+        this.toolbar.setStatusMsg('Stopping strategy...', [broker_id, account_id].join('.'));
 
         const { account } = this.state;
         const strategy_id = account.metadata.current_strategy;
         await this.requestStrategyStatusUpdate(
-            strategy_id, broker_id, 
+            strategy_id, broker_id, account_id,
             { accounts: [account_id] }, 
             'stop'
         );
-        this.toolbar.setStatusMsg(null);
+        this.toolbar.setStatusMsg(null, [broker_id, account_id].join('.'));
     }
 
-    setStatusMsg = (msg) =>
+    setStatusMsg = (msg, account_code) =>
     {
-        this.toolbar.setStatusMsg(msg);
+        this.toolbar.setStatusMsg(msg, account_code);
     }
 
     getWindowInfo = (strategy_id, item_id) =>

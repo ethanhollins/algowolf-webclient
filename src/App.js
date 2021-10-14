@@ -420,6 +420,7 @@ class App extends Component
     {
         const { REACT_APP_API_ONE_URL, REACT_APP_API_TWO_URL } = process.env;
         const { server } = this.state;
+        
         if (server === 0)
         {
             return REACT_APP_API_ONE_URL;

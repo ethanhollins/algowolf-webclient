@@ -470,6 +470,7 @@ class Dockable extends Component
                 updateInputVariables={this.props.updateInputVariables}
                 getCurrentAccount={this.props.getCurrentAccount}
                 getBalance={this.props.getBalance}
+                getStrategyDbInfo={this.props.getStrategyDbInfo}
                 isLoaded={this.props.isLoaded}
             />
         }

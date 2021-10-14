@@ -9,14 +9,15 @@ class StartFailed extends Component
             <React.Fragment>
             
             <div className='popup header'>
-                <span>Strategy Already Running</span>
+                <span>Account Limit Exceeded</span>
             </div>
             <div className='popup content'>
                 <div className='popup main'>
                     <div className='popup main-list'>
                         <div className='not-available body'>
                             <div className='start-failed message'>
-                                You can only run this strategy on one account. Please stop all running accounts before starting the script.
+                                You can only <strong>Start</strong> on {this.props.getPopup().account_limit} account(s) at a time.
+                                Please <strong>Stop</strong> a running account before starting a new one.
                             </div>
                             <div className='info close-btn' onClick={this.props.close}>
                                 OK

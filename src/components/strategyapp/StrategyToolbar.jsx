@@ -75,7 +75,7 @@ class StrategyToolbar extends Component
     }
 
     state = {
-        statusMsg: null
+        statusMsg: {}
     }
 
     render()
@@ -444,7 +444,7 @@ class StrategyToolbar extends Component
         }
         else
         {
-            if (statusMsg !== null)
+            if (statusMsg[current_account])
             {
                 return (
                     <div className='toolbox item'>
@@ -481,13 +481,13 @@ class StrategyToolbar extends Component
         let current_account = this.getCurrentAccount();
         const is_running = this.getScriptStatus(current_account);
 
-        if (statusMsg !== null)
+        if (statusMsg[current_account])
         {
             return (
                 <React.Fragment>
 
                 <FontAwesomeIcon id='info_status' className='toolbox icon' icon={faInfo} />
-                <span id='info_status' className='toolbox label'>{statusMsg}</span>
+                <span id='info_status' className='toolbox label'>{statusMsg[current_account]}</span>
 
                 </React.Fragment>
             );
@@ -629,7 +629,7 @@ class StrategyToolbar extends Component
             else
             {
                 const input_variables = this.props.getStrategyComponent().getAllCurrentInputVariables();
-                this.setStatusMsg('Initializing script...');
+                this.setStatusMsg('Initializing script...', current_account);
                 this.props.startScript(broker_id, account_id, input_variables);
             }
         }
@@ -1021,8 +1021,10 @@ class StrategyToolbar extends Component
         }
     }
 
-    setStatusMsg = (statusMsg) =>
+    setStatusMsg = (msg, account_code) =>
     {
+        const { statusMsg } = this.state;
+        statusMsg[account_code] = msg;
         this.setState({ statusMsg });
     }
 

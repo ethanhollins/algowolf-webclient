@@ -23,11 +23,32 @@ class ControlPanel extends Component
                 this.dropdowns[elem.getAttribute("name")] = elem;
             }
         }
+
+        this.getStrategyInfo = this.getStrategyInfo.bind(this);
     }
     
     state = {
         changed: {},
-        is_loaded: false
+        is_loaded: false,
+        is_info_loaded: false,
+        bank_limit: null,
+        used_bank: 0
+    }
+
+    async componentDidMount()
+    {
+        const strategy_info = await this.getStrategyInfo();
+        let { is_info_loaded, bank_limit, used_bank } = this.state;
+        if ("bank_limit" in strategy_info)
+        {
+            bank_limit = strategy_info["bank_limit"];
+        }
+        if ("used_bank" in strategy_info)
+        {
+            used_bank = strategy_info["used_bank"];
+        }
+        is_info_loaded = true;
+        this.setState({ is_info_loaded, bank_limit, used_bank });
     }
 
     componentDidUpdate()
@@ -44,15 +65,21 @@ class ControlPanel extends Component
 
     render()
     {
-        
+        const { is_info_loaded } = this.state;
+        const is_loaded = this.props.isLoaded();
+
         return (
             <React.Fragment>
 
             <div className='control-panel background'>
-                <div ref={this.setControlPanelBody} className='control-panel body'>
-                    {this.getItems()}
-                </div>
-                
+                { 
+                    is_loaded && is_info_loaded ?
+                    <div ref={this.setControlPanelBody} className='control-panel body'>
+                        {this.getItems()}
+                    </div> :
+                    <div className='control-panel loading'>Loading...</div>
+                    
+                }
             </div>
             <div className='control-panel warning-msg'>Click UPDATE and RESTART strategy for changes to take effect.</div>
             <div className='control-panel button-group'>
@@ -109,10 +136,15 @@ class ControlPanel extends Component
 
     isUpdateDisabled()
     {
-        const { changed } = this.state;
+        const { changed, bank_limit, used_bank } = this.state;
         const effective_bank = this.getEffectiveBank();
-        const maximum_bank = this.getVariableValue('Maximum Bank');        
+        let maximum_bank = this.getVariableValue('Maximum Bank');
         const risk = this.getVariableValue('Risk (%)');
+
+        if (!maximum_bank)
+        {
+            maximum_bank = this.getVariableValue('Allocated Bank');
+        }
 
         let leverage_val;
         if ('Leverage' in changed && 'value' in changed['Leverage'])
@@ -131,8 +163,13 @@ class ControlPanel extends Component
         else
         {
             const leverage = this.getLevarageCalc(leverage_val);
-            const is_update_enabled = effective_bank <= maximum_bank && risk <= leverage;
+            let is_update_enabled = effective_bank <= maximum_bank && risk <= leverage;
     
+            if (bank_limit && used_bank + maximum_bank > bank_limit)
+            {
+                is_update_enabled = false;
+            }
+
             if (!is_update_enabled || this.isDisabled())
             {
                 return ' disabled';
@@ -210,9 +247,14 @@ class ControlPanel extends Component
     {
         const current_account = this.props.getCurrentAccount();
         const account_balance = this.props.getBalance(current_account);
-        const maximum_bank = this.getVariableValue('Maximum Bank');
         const external_bank = this.getVariableValue('External Bank');
         const fixed_bank = this.getVariableValue('Fixed Bank');
+        let maximum_bank = this.getVariableValue('Maximum Bank');
+
+        if (!maximum_bank)
+        {
+            maximum_bank = this.getVariableValue('Allocated Bank');
+        }
 
         let value;
         if (fixed_bank)
@@ -388,7 +430,6 @@ class ControlPanel extends Component
 
             changed[name]['value'] = value;
         }
-        console.log(changed);
         this.setState({ changed });
     }
 
@@ -485,7 +526,7 @@ class ControlPanel extends Component
 
     getItems = () =>
     {
-        const { changed } = this.state;
+        const { changed, is_info_loaded } = this.state;
 
         const input_variables = this.getInputVariables();
         const current_account = this.props.getCurrentAccount();
@@ -495,7 +536,7 @@ class ControlPanel extends Component
 
         let local_items = [];
         let global_items = [];
-        if (input_variables !== undefined && is_loaded)
+        if (input_variables !== undefined && is_loaded && is_info_loaded)
         {
             let elem;
             for (let name in input_variables)
@@ -601,7 +642,11 @@ class ControlPanel extends Component
                     else if (name === 'Effective Bank')
                     {
                         const effective_bank = this.getEffectiveBank();
-                        const maximum_bank = this.getVariableValue('Maximum Bank');
+                        let maximum_bank = this.getVariableValue('Maximum Bank');
+                        if (!maximum_bank)
+                        {
+                            maximum_bank = this.getVariableValue('Allocated Bank');
+                        }
 
                         let err_msg;
                         let err_class = "";
@@ -722,6 +767,23 @@ class ControlPanel extends Component
                 }
                 else
                 {
+                    const { bank_limit, used_bank } = this.state;
+                        
+                    let limit_class = "";
+                    let remaining_bank = null;
+                    if (name === "Allocated Bank")
+                    {
+                        const allocated_bank = this.getVariableValue('Allocated Bank');
+                        if (item.properties.bank_limit && bank_limit)
+                        {
+                            if (used_bank + allocated_bank > bank_limit)
+                            {
+                                limit_class = " error";
+                            }
+                            remaining_bank = (bank_limit - used_bank).toString();
+                        }
+                    }
+
                     if (item.type === 'integer')
                     {
                         type = 'number';
@@ -779,6 +841,7 @@ class ControlPanel extends Component
                     }
 
                     elem = (
+                        <React.Fragment>
                         <div key={current_account + name} className='control-panel row'>
                             <div className='control-panel item left'>
                                 <div className='control-panel item-main'>
@@ -795,15 +858,26 @@ class ControlPanel extends Component
                                 {icon}
                                 <input 
                                     ref={this.addInputRef}
-                                    className={'control-panel field right' + field_ext} name={name}
+                                    className={'control-panel field right' + field_ext + limit_class} name={name}
                                     type={type} value={value}
                                     step={step} min={min} max={max}
                                     onChange={this.onVariableChange.bind(this)}
                                     readOnly={readOnly}
                                 />
                                 {enabled_elem}
+                                
                             </div>
                         </div>
+                        {
+                            remaining_bank ? 
+                            <div className='control-panel row'>
+                                <div className='control-panel item message'>
+                                    Available for Allocation: {remaining_bank}
+                                </div>
+                            </div> :
+                            <React.Fragment/>
+                        }
+                        </React.Fragment>
                     );
                 }
                 if (item.scope === 'local')
@@ -893,6 +967,14 @@ class ControlPanel extends Component
 
         const max_risk = ((parseFloat(leverage_parts[1]) * bank_size) / 100000) / max_lotsize;
         return (max_risk - 0.05).toFixed(2);
+    }
+
+    async getStrategyInfo()
+    {
+        const current_account = this.props.getCurrentAccount();
+        const broker_id = current_account.split('.')[0];
+        const account_id = current_account.split('.')[1];
+        return await this.props.getStrategyDbInfo(this.props.strategy_id, broker_id, account_id)
     }
     
 }

@@ -241,6 +241,7 @@ class WindowWrapper extends Component
                 setBanner={this.props.setBanner}
                 getStrategyInfo={this.props.getStrategyInfo}
                 isLoaded={this.props.isLoaded}
+                getStrategyDbInfo={this.props.getStrategyDbInfo}
             />;
         }
         // else if (this.state.info.type === 'link')

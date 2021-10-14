@@ -2391,6 +2391,16 @@ a.tab.item {
     padding: 2px;
 }
 
+.control-panel.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-family: Poppins, sans-serif;
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
 .control-panel.item {
     position: relative;
     color: rgb(40,40,40);
@@ -2673,6 +2683,13 @@ a.tab.item {
     font-size: 1em;
     text-align: right;
     padding-right: 5px;
+}
+
+.control-panel.item.message {
+    font-size: 0.9em;
+    font-weight: 600;
+    font-family: Poppins, sans-serif;
+    color: #27ae60;
 }
 
 #update_btn {
