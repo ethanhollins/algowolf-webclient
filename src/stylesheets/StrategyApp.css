@@ -3759,6 +3759,90 @@ a.tab.item {
     margin-right: 20px;
 }
 
+.messageboard.body {
+    overflow-x: hidden;
+}
+
+.messageboard.table {
+    width: 550px;
+}
+
+.messageboard.table tr > td {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgb(240,240,240);
+    padding: 10px 10px;
+    font-family: Poppins, sans-serif;
+    cursor: pointer;
+}
+
+.messageboard.table tr > td > * {
+    pointer-events: none;
+}
+
+.messageboard.table tr > td:hover {
+    background-color: rgb(240,240,240);
+}
+
+.messageboard.table-title {
+    flex: 0 0 400px;
+    font-size: 1em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.messageboard.unread {
+    font-weight: 600;
+}
+
+.messageboard.table-date {
+    flex: 0 0 130px;
+    font-size: 0.9em;
+    text-align: right;
+}
+
+.messageboard.close-icon-parent {
+    display: flex;
+    align-items: center;
+    padding: 10px 5px;
+    margin-top: 5px;
+    cursor: pointer;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+}
+
+.messageboard.close-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.messageboard.close-text {
+    margin-left: 2px;
+    font-size: 1em;
+    font-weight: 600;
+}
+
+.messageboard.message-title {
+    font-size: 1.5em;
+    padding: 10px 10px 2px 10px;
+}
+
+.messageboard.message-date {
+    color: rgb(80,80,80);
+    font-size: 0.9em;
+    padding: 0 10px;
+}
+
+.messageboard.message-body {
+    padding: 20px 10px;
+}
+
+.messageboard.message-body p {
+    margin: 10px 0;
+}
+
 #entry_line {
     width: 35px;
     margin-top: 4px;

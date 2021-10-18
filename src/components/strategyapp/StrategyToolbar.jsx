@@ -7,7 +7,8 @@ import {
     faBars,  faChartLine, faChartPie, faPlay, faStop,
     faLightbulb, faCode, faHistory, faChevronRight, faChevronDown, 
     faTools, faExpandArrowsAlt, faLink, faExpandAlt, faQuestionCircle,
-    faInfoCircle, faRobot, faArrowAltCircleRight, faHome, faSignOut
+    faInfoCircle, faRobot, faArrowAltCircleRight, faHome, faSignOut,
+    faEnvelope
 } from '@fortawesome/pro-regular-svg-icons';
 import { 
     faPlus, faSort, faReceipt, faSlidersVSquare, faCode as faCodeLight,
@@ -575,6 +576,15 @@ class StrategyToolbar extends Component
                 <div className='toolbox separator' />
                 <div 
                     className='toolbox item' 
+                    onClick={this.onMessageBoard.bind(this)}
+                >
+                    <div className='toolbox item row btn'>
+                        <FontAwesomeIcon className='toolbox icon steal-blue_btn' icon={faEnvelope} />
+                        <span className='toolbox label collapse'>Message Board</span>
+                    </div>
+                </div>
+                <div 
+                    className='toolbox item' 
                     // onClick={this.onLiveHelpItem.bind(this)}
                 >
                     <a href={REACT_APP_FRONT_BASE_URL + "/hgpro/getting-started"} target="_blank" className='toolbox item row btn'>
@@ -582,7 +592,7 @@ class StrategyToolbar extends Component
                         <span className='toolbox label collapse'>Help</span>
                     </a>
                 </div>
-
+                
                 </React.Fragment>
             );
         }
@@ -799,6 +809,19 @@ class StrategyToolbar extends Component
             },
             fade: true
         }
+        this.props.setPopup(popup);
+    }
+
+    onMessageBoard = (e) =>
+    {
+        const popup = {
+            type: 'message-board',
+            size: {
+                pixelWidth: 550,
+                pixelHeight: 475
+            },
+            fade: true,
+        };
         this.props.setPopup(popup);
     }
 

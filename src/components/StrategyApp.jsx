@@ -200,18 +200,16 @@ class StrategyApp extends Component
         }
         else
         {
-            // const popup = {
-            //     type: 'getting-started',
-            //     size: {
-            //         pixelWidth: 740,
-            //         pixelHeight: 600
-            //     },
-            //     fade: true
-            // };
-            // this.setPopup(popup);
+            const message_board_popup = {
+                type: 'message-board',
+                size: {
+                    pixelWidth: 550,
+                    pixelHeight: 475
+                },
+                fade: true,
+            };
+            this.setPopup(message_board_popup);
         }
-
-        
 
         this.is_loaded = true;
     }

@@ -31,6 +31,7 @@ import AccountLoggedOut from './popups/AccountLoggedOut';
 import SelectStrategy from './popups/SelectStrategy';
 import GettingStarted from './popups/GettingStarted';
 import Tos from './popups/Tos';
+import MessageBoard from './popups/MessageBoard';
 
 class Popup extends Component
 {
@@ -273,6 +274,16 @@ class Popup extends Component
                     resetIndicators={this.props.resetIndicators}
                     findIndicator={this.props.findIndicator}
                     calculateAllChartIndicators={this.props.calculateAllChartIndicators}
+                />
+            }
+            else if (popup.type === 'message-board')
+            {
+                return <MessageBoard
+                    getPopup={this.props.getPopup}
+                    getServerUrl={this.props.getServerUrl}
+                    getHeaders={this.props.getHeaders}
+                    getStrategyId={this.props.getStrategyId}
+                    getStrategyInfo={this.props.getStrategyInfo}
                 />
             }
             else if (popup.type === 'welcome-demo')
