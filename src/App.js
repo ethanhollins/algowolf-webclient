@@ -418,7 +418,7 @@ class App extends Component
     
     getServerUrl = () =>
     {
-        const { REACT_APP_API_ONE_URL, REACT_APP_API_TWO_URL } = process.env;
+        const { REACT_APP_API_ONE_URL, REACT_APP_API_TWO_URL, REACT_APP_API_THREE_URL } = process.env;
         const { server } = this.state;
         
         if (server === 0)
@@ -429,6 +429,10 @@ class App extends Component
         {
             return REACT_APP_API_TWO_URL;
         }
+        else if (server === 2)
+        {
+            return REACT_APP_API_THREE_URL;
+        }
         else
         {
             return REACT_APP_API_ONE_URL;
@@ -437,7 +441,7 @@ class App extends Component
 
     getServerStreamUrl = () =>
     {
-        const { REACT_APP_STREAM_ONE_URL, REACT_APP_STREAM_TWO_URL } = process.env;
+        const { REACT_APP_STREAM_ONE_URL, REACT_APP_STREAM_TWO_URL, REACT_APP_STREAM_THREE_URL } = process.env;
         const { server } = this.state;
         if (server === 0)
         {
@@ -446,6 +450,10 @@ class App extends Component
         else if (server === 1)
         {
             return REACT_APP_STREAM_TWO_URL;
+        }
+        else if (server === 2)
+        {
+            return REACT_APP_STREAM_THREE_URL;
         }
         else
         {
