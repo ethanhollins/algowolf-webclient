@@ -198,7 +198,7 @@ class StrategyApp extends Component
             };
             this.setPopup(tos_popup);
         }
-        else
+        else if (!this.props.isDemo)
         {
             const message_board_popup = {
                 type: 'message-board',
