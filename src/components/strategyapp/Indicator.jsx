@@ -180,18 +180,19 @@ class donch extends Indicator
         // Validation Check
         if (i < this.min_bars || ohlc[i].every((x) => x === null))
         {
-            return [null, null]
+            return [null, null, null]
         }
 
-        let high_low = [0,0]
+        let result = [0,0,0]
         for (let j = 0; j < this.period; j++)
         {
-            if (high_low[0] === 0 || ohlc[i-j-1][1] > high_low[0])
-                high_low[0] = ohlc[i-j-1][1]
-            if (high_low[1] === 0 || ohlc[i-j-1][2] < high_low[1])
-                high_low[1] = ohlc[i-j-1][2]
+            if (result[1] === 0 || ohlc[i-j-1][1] > result[1])
+                result[1] = ohlc[i-j-1][1]
+            if (result[2] === 0 || ohlc[i-j-1][2] < result[2])
+                result[2] = ohlc[i-j-1][2]
+            result[0] = (result[1] + result[2]) / 2
         }
-        return high_low;
+        return result;
     }
 }
 
@@ -665,7 +666,7 @@ class macd extends Indicator
         this.chart_period = chart_period;
         this.properties = properties;
         this.appearance = appearance;
-        this.period = properties.Period.value;
+        // this.period = properties.Period.value;
         this.fast_period = properties['Fast Period'].value;
         this.slow_period = properties['Slow Period'].value;
         this.signal_period = properties['Signal Period'].value;
@@ -776,7 +777,7 @@ class macd extends Indicator
         this.chart_period = chart_period;
         this.properties = properties;
         this.appearance = appearance;
-        this.period = properties.Period.value;
+        // this.period = properties.Period.value;
         this.fast_period = properties['Fast Period'].value;
         this.slow_period = properties['Slow Period'].value;
         this.signal_period = properties['Signal Period'].value;

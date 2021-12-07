@@ -81,10 +81,6 @@
     padding-top: 40px;
 }
 
-.auth-login.body.ib {
-    height: 170px;
-}
-
 .auth-login.logo.ib {
     margin-top: 30px;
     margin-bottom: 15px;
@@ -92,6 +88,10 @@
     height: auto;
     outline: none;
 }
+
+.auth-login.body.ib > .password {
+    margin-bottom: 25px;
+} 
 
 .auth-login.logo.fxcm {
     margin-top: 30px;

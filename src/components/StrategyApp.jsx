@@ -2189,7 +2189,7 @@ class StrategyApp extends Component
         return chart;
     }
 
-    findIndicator = (type, broker, product, chart_period, period) =>
+    findIndicator = (type, broker, product, chart_period, id) =>
     {
         const { indicators } = this.state;
         for (let ind of indicators)
@@ -2198,8 +2198,9 @@ class StrategyApp extends Component
                 ind.type === type && 
                 ind.broker === broker &&
                 ind.product === product && 
-                ind.chart_period === chart_period && 
-                ind.period === period
+                ind.chart_period === chart_period &&
+                ind.properties.id === id
+                // ind.period === period
             )
             {
                 return ind;
@@ -2217,7 +2218,7 @@ class StrategyApp extends Component
         return ind;
     }
 
-    findBacktestIndicator = (backtest_id, type, broker, product, chart_period, period) =>
+    findBacktestIndicator = (backtest_id, type, broker, product, chart_period, id) =>
     {
         const { backtest_indicators } = this.state;
         if (backtest_id in backtest_indicators)
@@ -2229,7 +2230,8 @@ class StrategyApp extends Component
                     ind.broker === broker &&
                     ind.product === product && 
                     ind.chart_period === chart_period &&
-                    ind.period === period
+                    ind.properties.id === id
+                    // ind.period === period
                 )
                 {
                     return ind;

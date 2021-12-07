@@ -4251,7 +4251,9 @@ class Chart extends Component
     {
         const chart = this.getChart();
         let ind = this.props.findIndicator(
-            ind_props.type, chart.broker, chart.product, chart.period, ind_props.properties.Period.value
+            ind_props.type, chart.broker, chart.product, chart.period, 
+            // ind_props.properties.Period.value
+            ind_props.properties.id
         );
         if (ind === undefined)
         {

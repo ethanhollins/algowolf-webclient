@@ -182,7 +182,23 @@ class AuthLogin extends Component
                     <div>
                         <img className='auth-login logo ib' src={process.env.PUBLIC_URL + '/interactive_brokers_logo_large.png'} />
                     </div>
-                    {this.getConditionalIbGui()}
+                    <div ref={this.setErrorRef} className="auth-login error" style={{display: this.isErrorMsg()}}>{err_msg}</div>
+                    <div className='auth-login field-header'>Username</div>
+                    <input 
+                        className='auth-login field' placeholder='Enter Username' name='username' 
+                        onChange={this.onFieldChange.bind(this)}
+                    />
+                    <div className='auth-login field-header'>Password</div>
+                    <input 
+                        className='auth-login field password' placeholder='Enter Password' name='password' 
+                        type='password' onChange={this.onFieldChange.bind(this)}
+                    />
+                    <div 
+                        className='auth-login submit-button'
+                        onClick={this.completeLogin.bind(this)}
+                    >
+                        Connect to IB
+                    </div>
                 </div>
             );
         }
@@ -378,30 +394,16 @@ class AuthLogin extends Component
                 </div>
             );
         }
-    }
-
-    getConditionalIbGui = () =>
-    {
-        const { is_login_pressed } = this.state;
-        if (is_login_pressed)
+        else if (provider === 'ib')
         {
             return (
-                <React.Fragment>
-    
-                <div className='auth-login message'>Waiting for login completion...</div>
-                <div className="dot-flashing"></div>
-    
-                </React.Fragment>
-            );
-        }
-        else
-        {
-            return (
-                <React.Fragment>
-    
-                <div className='auth-login submit-button ib' onClick={this.onLoginPressed.bind(this)}>Login</div>
-    
-                </React.Fragment>
+                <div className='auth-login body ib'>
+                    <div>
+                        <img className='auth-login logo ib' src={process.env.PUBLIC_URL + '/interactive_brokers_logo_large.png'} />
+                    </div>
+                    <div className='auth-login message'>Connecting your broker...</div>
+                    <div className="dot-flashing"></div>
+                </div>
             );
         }
     }
@@ -670,6 +672,36 @@ class AuthLogin extends Component
                     broker: provider, broker_id, broker_id,
                     name: "My Broker", key: key, web_api_id: web_api_id, 
                     web_api_secret: web_api_secret, is_demo: is_demo
+                })
+            }
+
+            const res = await fetch(
+                `${API_URL}/broker`,
+                reqOptions
+            );
+
+            if (res.status === 200)
+            {
+                window.location = '/app';
+                return;
+            }
+
+            complete_login = false;
+            err_msg = 'Login Failed.';
+            this.setState({ complete_login, err_msg });
+        }
+        else if (provider === 'ib')
+        {
+            complete_login = true;
+            this.setState({ complete_login });
+
+            const reqOptions = {
+                method: 'POST',
+                headers: this.props.getHeaders(),
+                credentials: 'include',
+                body: JSON.stringify({
+                    broker: provider, broker_id, broker_id,
+                    name: "My Broker", username: username, password: password
                 })
             }
 
